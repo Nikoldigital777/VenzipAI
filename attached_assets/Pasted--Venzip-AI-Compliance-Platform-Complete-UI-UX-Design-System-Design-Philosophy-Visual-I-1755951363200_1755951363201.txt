@@ -1,0 +1,1869 @@
+# Venzip AI Compliance Platform - Complete UI/UX Design System
+
+## 🎨 **Design Philosophy & Visual Identity**
+
+### **Brand Personality**
+- **Trustworthy & Professional**: Deep blues and greens conveying security and compliance
+- **Modern & Intelligent**: AI-powered with subtle futuristic elements
+- **Approachable**: Clean, uncluttered interface that doesn't intimidate non-technical users
+- **Dynamic**: Animated elements that feel alive and responsive
+
+### **Color Palette** (Updated with Venzip Brand Colors)
+```css
+/* Venzip Brand Colors */
+--venzip-primary: #4ECDC4;          /* Main teal from logo */
+--venzip-primary-dark: #3DB5AC;      /* Darker teal */
+--venzip-primary-light: #7FE3DB;     /* Lighter teal */
+--venzip-secondary: #44D9E8;         /* Complementary cyan */
+--venzip-accent: #52E5A3;            /* Fresh mint accent */
+
+/* Status Colors - Vibrant & High Contrast */
+--success-green: #00D9AA;            /* Vibrant success */
+--warning-orange: #FF8C42;           /* Warm orange */
+--danger-coral: #FF6B6B;             /* Friendly error red */
+--info-blue: #4DABF7;                /* Clear info blue */
+
+/* Glassmorphism & Modern Effects */
+--glass-bg: rgba(78, 205, 196, 0.1);           /* Venzip teal glass */
+--glass-border: rgba(78, 205, 196, 0.2);       /* Venzip teal border */
+--backdrop-blur: blur(20px);
+--gradient-primary: linear-gradient(135deg, #4ECDC4 0%, #44D9E8 50%, #52E5A3 100%);
+--gradient-success: linear-gradient(135deg, #00D9AA 0%, #52E5A3 100%);
+--gradient-warning: linear-gradient(135deg, #FF8C42 0%, #FFB347 100%);
+--gradient-danger: linear-gradient(135deg, #FF6B6B 0%, #FF8E92 100%);
+
+/* Neutral Scale - Warmer tones to complement teal */
+--gray-50: #F8FFFE;
+--gray-100: #F1F9F8;
+--gray-200: #E6F4F3;
+--gray-300: #D1E9E7;
+--gray-400: #9BCAC6;
+--gray-500: #6B8E8A;
+--gray-600: #4A6B67;
+--gray-700: #334D4A;
+--gray-800: #1F3330;
+--gray-900: #0D1A18;
+
+/* Dark Mode Variants */
+--dark-bg: #0D1A18;
+--dark-surface: #1F3330;
+--dark-border: rgba(78, 205, 196, 0.15);
+```
+
+### **Typography System**
+```css
+/* Font Stack */
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+/* Type Scale */
+--text-xs: 0.75rem;    /* 12px */
+--text-sm: 0.875rem;   /* 14px */
+--text-base: 1rem;     /* 16px */
+--text-lg: 1.125rem;   /* 18px */
+--text-xl: 1.25rem;    /* 20px */
+--text-2xl: 1.5rem;    /* 24px */
+--text-3xl: 1.875rem;  /* 30px */
+--text-4xl: 2.25rem;   /* 36px */
+```
+
+---
+
+## 🚀 **Navigation & Header System**
+
+### **Top Navigation Header**
+```jsx
+<header className="sticky top-0 z-50 glass-morphism border-b border-glass-border">
+  {/* Glassmorphism background with backdrop blur */}
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-between h-16">
+      
+      {/* Logo & Brand */}
+      <div className="flex items-center space-x-4">
+        <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center shadow-lg">
+          {/* Venzip Logo - Y checkmark shape */}
+          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" 
+                  transform="rotate(-15 12 12)" strokeWidth="2" stroke="currentColor" fill="none"/>
+          </svg>
+        </div>
+        <h1 className="text-xl font-bold text-gray-900">Venzip</h1>
+      </div>
+
+      {/* Main Navigation */}
+      <nav className="hidden md:flex items-center space-x-8">
+        <NavLink href="/dashboard" icon={BarChart3} label="Dashboard" />
+        <NavLink href="/tasks" icon={CheckSquare} label="Tasks" />
+        <NavLink href="/documents" icon={FileText} label="Evidence" />
+        <NavLink href="/risks" icon={AlertTriangle} label="Risks" />
+        <NavLink href="/learning" icon={BookOpen} label="Learning" />
+      </nav>
+
+      {/* Right Actions */}
+      <div className="flex items-center space-x-4">
+        {/* AI Assistant Toggle - Enhanced with Venzip colors */}
+        <Button 
+          variant="ghost" 
+          className="relative hover:bg-venzip-primary/10 hover:text-venzip-primary transition-all duration-200"
+          onClick={toggleAIAssistant}
+        >
+          <Bot className="w-5 h-5" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-primary rounded-full animate-pulse shadow-lg" />
+        </Button>
+
+        {/* Notifications - Vibrant styling */}
+        <Button variant="ghost" className="relative hover:bg-venzip-primary/10 hover:text-venzip-primary transition-all duration-200">
+          <Bell className="w-5 h-5" />
+          {hasNotifications && (
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-danger rounded-full animate-pulse shadow-lg" />
+          )}
+        </Button>
+
+        {/* User Profile Dropdown */}
+        <UserProfileDropdown />
+      </div>
+    </div>
+  </div>
+</header>
+```
+
+**Animation Details:**
+- **Glass morphism effect** with backdrop blur on scroll
+- **Subtle scale animations** on navigation hover (transform: scale(1.05))
+- **Smooth color transitions** for active states (300ms ease-in-out)
+- **Floating notification badges** with pulse animation
+
+---
+
+## 📋 **1. Onboarding Flow Design**
+
+### **Welcome Screen** (Updated with Vibrant Venzip Colors)
+```jsx
+<div className="min-h-screen bg-gradient-to-br from-venzip-primary/10 via-venzip-secondary/5 to-venzip-accent/10 flex items-center justify-center">
+  <div className="glass-card max-w-2xl mx-auto p-8 text-center shadow-2xl">
+    {/* Animated Venzip Logo */}
+    <div className="w-20 h-20 mx-auto mb-6 bg-gradient-primary rounded-full flex items-center justify-center animate-float shadow-xl">
+      <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" 
+              transform="rotate(-15 12 12)" strokeWidth="2" stroke="currentColor" fill="none"/>
+      </svg>
+    </div>
+    
+    {/* Hero Text with Venzip Gradient */}
+    <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      Welcome to <span className="bg-gradient-primary bg-clip-text text-transparent">Venzip</span>
+    </h1>
+    <p className="text-lg text-gray-600 mb-8">
+      Let's get your compliance journey started in just 3 simple steps
+    </p>
+
+    {/* Progress Indicator with Venzip Colors */}
+    <div className="flex items-center justify-center space-x-4 mb-8">
+      <StepIndicator step={1} active label="Frameworks" />
+      <StepConnector />
+      <StepIndicator step={2} label="Company" />
+      <StepConnector />
+      <StepIndicator step={3} label="Setup" />
+    </div>
+    
+    <Button 
+      size="lg" 
+      className="bg-gradient-primary hover:shadow-xl hover:scale-105 transition-all duration-300 text-white font-semibold px-8 py-4 rounded-xl"
+    >
+      Get Started
+      <ArrowRight className="ml-2 w-5 h-5" />
+    </Button>
+  </div>
+</div>
+```
+
+### **Framework Selection Interface**
+```jsx
+<div className="max-w-4xl mx-auto p-8">
+  <div className="text-center mb-12">
+    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+      Choose Your Compliance Frameworks
+    </h2>
+    <p className="text-gray-600">
+      Select the standards you need to comply with. You can always add more later.
+    </p>
+  </div>
+
+  {/* Framework Cards Grid */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+    <FrameworkCard
+      title="SOC 2"
+      description="Security and availability controls for service organizations"
+      icon={<Shield className="w-8 h-8 text-venzip-primary" />}
+      gradient="from-venzip-primary to-venzip-primary-dark"
+      selected={selectedFrameworks.includes('soc2')}
+      onSelect={() => toggleFramework('soc2')}
+      complexity="Medium"
+      timeEstimate="3-6 months"
+    />
+    
+    <FrameworkCard
+      title="ISO 27001"
+      description="International standard for information security management"
+      icon={<Globe className="w-8 h-8 text-venzip-accent" />}
+      gradient="from-venzip-accent to-success-green"
+      selected={selectedFrameworks.includes('iso27001')}
+      onSelect={() => toggleFramework('iso27001')}
+      complexity="High"
+      timeEstimate="6-12 months"
+    />
+
+    <FrameworkCard
+      title="HIPAA"
+      description="Healthcare data protection and privacy requirements"
+      icon={<Heart className="w-8 h-8 text-danger-coral" />}
+      gradient="from-danger-coral to-warning-orange"
+      selected={selectedFrameworks.includes('hipaa')}
+      onSelect={() => toggleFramework('hipaa')}
+      complexity="Medium"
+      timeEstimate="2-4 months"
+    />
+
+    <FrameworkCard
+      title="GDPR"
+      description="EU data protection and privacy regulation"
+      icon={<Users className="w-8 h-8 text-venzip-secondary" />}
+      gradient="from-venzip-secondary to-info-blue"
+      selected={selectedFrameworks.includes('gdpr')}
+      onSelect={() => toggleFramework('gdpr')}
+      complexity="High"
+      timeEstimate="4-8 months"
+    />
+  </div>
+
+  {/* Selection Summary */}
+  {selectedFrameworks.length > 0 && (
+    <div className="glass-card p-6 mb-8 animate-slide-up">
+      <h3 className="text-lg font-semibold mb-4">Selected Frameworks ({selectedFrameworks.length})</h3>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {selectedFrameworks.map(framework => (
+          <Badge key={framework} variant="primary" className="animate-scale-in">
+            {framework.toUpperCase()}
+            <X className="ml-2 w-4 h-4 cursor-pointer" onClick={() => toggleFramework(framework)} />
+          </Badge>
+        ))}
+      </div>
+      <div className="text-sm text-gray-600">
+        Estimated completion time: {calculateTotalTime(selectedFrameworks)}
+      </div>
+    </div>
+  )}
+</div>
+```
+
+**Framework Card Component:**
+```jsx
+const FrameworkCard = ({ title, description, icon, gradient, selected, onSelect, complexity, timeEstimate }) => (
+  <div 
+    className={`
+      relative overflow-hidden rounded-xl border-2 transition-all duration-300 cursor-pointer
+      hover:scale-105 hover:shadow-xl
+      ${selected 
+        ? 'border-venzip-primary bg-gradient-to-br from-venzip-primary/5 to-venzip-accent/5 shadow-xl ring-2 ring-venzip-primary/20' 
+        : 'border-gray-200 bg-white hover:border-venzip-primary/50 hover:shadow-lg'
+      }
+    `}
+    onClick={onSelect}
+  >
+    {/* Gradient Background Overlay - Updated with Venzip colors */}
+    <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${gradient} opacity-10 rounded-bl-full`} />
+    
+    <div className="p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          {icon}
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+            <div className="flex items-center space-x-2 mt-1">
+              <Badge variant="outline" size="sm" className="border-venzip-primary/30 text-venzip-primary-dark">{complexity}</Badge>
+              <span className="text-xs text-gray-500">{timeEstimate}</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Selection Checkbox - Enhanced with Venzip colors */}
+        <div className={`
+          w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200
+          ${selected ? 'bg-gradient-primary border-venzip-primary shadow-lg' : 'border-gray-300 hover:border-venzip-primary'}
+        `}>
+          {selected && <Check className="w-4 h-4 text-white" />}
+        </div>
+      </div>
+      
+      <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
+    </div>
+    
+    {/* Selection Glow Effect - Updated with Venzip colors */}
+    {selected && (
+      <div className="absolute inset-0 bg-gradient-primary opacity-5 animate-pulse rounded-xl" />
+    )}
+  </div>
+);
+```
+
+### **Company Profile Setup**
+```jsx
+<div className="max-w-2xl mx-auto p-8">
+  <div className="text-center mb-8">
+    <h2 className="text-3xl font-bold text-gray-900 mb-4">Tell Us About Your Company</h2>
+    <p className="text-gray-600">This helps us customize your compliance journey</p>
+  </div>
+
+  <form className="space-y-8">
+    {/* Company Name */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-700">Company Name</label>
+      <Input 
+        type="text" 
+        placeholder="Enter your company name"
+        className="w-full h-12 border-2 focus:border-blue-500 transition-colors duration-200"
+      />
+    </div>
+
+    {/* Industry Selection */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-700">Industry</label>
+      <Select>
+        <option value="">Select your industry</option>
+        <option value="fintech">Financial Technology</option>
+        <option value="healthcare">Healthcare</option>
+        <option value="saas">Software as a Service</option>
+        <option value="ecommerce">E-commerce</option>
+        <option value="consulting">Consulting</option>
+        <option value="other">Other</option>
+      </Select>
+    </div>
+
+    {/* Company Size */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-700">Company Size</label>
+      <div className="grid grid-cols-2 gap-4">
+        <SizeCard size="1-10" label="Startup" selected={companySize === '1-10'} />
+        <SizeCard size="11-50" label="Small Business" selected={companySize === '11-50'} />
+        <SizeCard size="51-200" label="Mid-sized" selected={companySize === '51-200'} />
+        <SizeCard size="200+" label="Enterprise" selected={companySize === '200+'} />
+      </div>
+    </div>
+
+    {/* Current Compliance Status */}
+    <div className="space-y-4">
+      <label className="text-sm font-medium text-gray-700">Current Compliance Status</label>
+      <div className="space-y-3">
+        <RadioOption 
+          value="none" 
+          label="Just getting started" 
+          description="No formal compliance program in place"
+        />
+        <RadioOption 
+          value="basic" 
+          label="Basic policies in place" 
+          description="Some documentation but not comprehensive"
+        />
+        <RadioOption 
+          value="advanced" 
+          label="Advanced compliance program" 
+          description="Existing compliance team and processes"
+        />
+      </div>
+    </div>
+  </form>
+</div>
+```
+
+---
+
+## 🏠 **2. Dashboard UI Design**
+
+### **Main Dashboard Layout**
+```jsx
+<div className="min-h-screen bg-gray-50">
+  {/* Header */}
+  <DashboardHeader />
+  
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {/* Welcome Banner with Animation - Updated with Venzip colors */}
+    <div className="glass-card p-6 mb-8 bg-gradient-primary text-white relative overflow-hidden shadow-xl">
+      <div className="relative z-10">
+        <h1 className="text-2xl font-bold mb-2">Good morning, Sarah! 👋</h1>
+        <p className="text-white/90">You're making great progress on your compliance journey</p>
+      </div>
+      {/* Floating Geometric Shapes - Enhanced */}
+      <div className="absolute top-4 right-4 w-16 h-16 bg-white/10 rounded-full animate-float-slow shadow-lg" />
+      <div className="absolute bottom-4 right-12 w-8 h-8 bg-white/20 rounded-lg rotate-45 animate-float-reverse shadow-lg" />
+      <div className="absolute top-8 right-24 w-4 h-4 bg-venzip-accent/30 rounded-full animate-bounce-slow" />
+    </div>
+
+    {/* Key Metrics Row - Updated with vibrant colors */}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <MetricCard
+        title="Overall Progress"
+        value="68%"
+        change="+12%"
+        changeType="positive"
+        icon={<TrendingUp className="w-6 h-6 text-venzip-accent" />}
+        gradient="from-venzip-accent to-success-green"
+        glowColor="venzip-accent"
+      />
+      <MetricCard
+        title="Active Tasks"
+        value="23"
+        change="-5"
+        changeType="positive"
+        icon={<CheckSquare className="w-6 h-6 text-venzip-primary" />}
+        gradient="from-venzip-primary to-venzip-secondary"
+        glowColor="venzip-primary"
+      />
+      <MetricCard
+        title="Risk Score"
+        value="Medium"
+        change="Improving"
+        changeType="positive"
+        icon={<Shield className="w-6 h-6 text-warning-orange" />}
+        gradient="from-warning-orange to-warning-orange/80"
+        glowColor="warning-orange"
+      />
+      <MetricCard
+        title="Next Deadline"
+        value="12 days"
+        change="SOC 2 Audit"
+        changeType="neutral"
+        icon={<Calendar className="w-6 h-6 text-info-blue" />}
+        gradient="from-info-blue to-venzip-secondary"
+        glowColor="info-blue"
+      />
+    </div>
+
+    {/* Main Content Grid */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Left Column - Framework Progress */}
+      <div className="lg:col-span-2 space-y-6">
+        <FrameworkProgressSection />
+        <RecentActivitySection />
+      </div>
+      
+      {/* Right Column - Tasks & AI */}
+      <div className="space-y-6">
+        <UpcomingTasksSection />
+        <RiskHeatmapSection />
+        <AIInsightsSection />
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+### **Framework Progress Section**
+```jsx
+const FrameworkProgressSection = () => (
+  <div className="glass-card p-6">
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-xl font-semibold text-gray-900">Compliance Progress</h2>
+      <Button variant="outline" size="sm">
+        View All
+        <ChevronRight className="ml-2 w-4 h-4" />
+      </Button>
+    </div>
+
+    <div className="space-y-6">
+      <FrameworkProgressBar
+        framework="SOC 2"
+        progress={75}
+        color="venzip-primary"
+        tasks={{ completed: 18, total: 24 }}
+        status="On Track"
+        deadline="March 15, 2025"
+        icon={<Shield className="w-5 h-5 text-venzip-primary" />}
+      />
+      
+      <FrameworkProgressBar
+        framework="GDPR"
+        progress={45}
+        color="venzip-secondary"
+        tasks={{ completed: 12, total: 27 }}
+        status="Needs Attention"
+        deadline="April 20, 2025"
+        icon={<Users className="w-5 h-5 text-venzip-secondary" />}
+      />
+      
+      <FrameworkProgressBar
+        framework="ISO 27001"
+        progress={30}
+        color="venzip-accent"
+        tasks={{ completed: 8, total: 32 }}
+        status="In Progress"
+        deadline="June 10, 2025"
+        icon={<Globe className="w-5 h-5 text-venzip-accent" />}
+      />
+    </div>
+  </div>
+);
+
+const FrameworkProgressBar = ({ framework, progress, color, tasks, status, deadline, icon }) => (
+  <div className="p-4 border border-gray-200 rounded-lg hover:shadow-lg hover:scale-[1.02] transition-all duration-300 bg-gradient-to-r from-white to-gray-50">
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center space-x-3">
+        <div className={`w-10 h-10 rounded-lg bg-${color}/10 flex items-center justify-center shadow-sm`}>
+          {icon}
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900">{framework}</h3>
+          <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <span>{tasks.completed}/{tasks.total} tasks</span>
+            <span>•</span>
+            <span>Due {deadline}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="text-right">
+        <div className="text-2xl font-bold text-gray-900">{progress}%</div>
+        <StatusBadge status={status} />
+      </div>
+    </div>
+    
+    {/* Animated Progress Bar with Venzip styling */}
+    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+      <div 
+        className={`h-3 rounded-full bg-gradient-to-r from-${color} to-${color}-dark transition-all duration-1000 ease-out shadow-sm relative overflow-hidden`}
+        style={{ width: `${progress}%` }}
+      >
+        {/* Shimmer effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+      </div>
+    </div>
+  </div>
+);
+
+### **AI Assistant Widget - Enhanced with Venzip Colors**
+```jsx
+const AIAssistantWidget = ({ isOpen, onToggle, onClose }) => (
+  <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${isOpen ? 'w-96' : 'w-auto'}`}>
+    {/* Chat Window with Venzip styling */}
+    {isOpen && (
+      <div className="glass-card mb-4 max-h-96 flex flex-col shadow-2xl border border-venzip-primary/20">
+        {/* Header with Venzip branding */}
+        <div className="flex items-center justify-between p-4 border-b border-venzip-primary/20 bg-gradient-to-r from-venzip-primary/5 to-venzip-accent/5">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center shadow-lg">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900">Claude Assistant</h4>
+              <div className="flex items-center space-x-1 text-xs text-venzip-accent">
+                <div className="w-2 h-2 bg-venzip-accent rounded-full animate-pulse"></div>
+                <span>Online & Ready</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" onClick={clearChat} className="hover:bg-venzip-primary/10">
+              <RefreshCw className="w-4 h-4 text-venzip-primary" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onClose} className="hover:bg-danger-coral/10">
+              <X className="w-4 h-4 text-danger-coral" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Messages Container with custom scrollbar */}
+        <div className="flex-1 p-4 space-y-4 max-h-64 overflow-y-auto custom-scrollbar">
+          {messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))}
+          
+          {isTyping && (
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-venzip-primary/10 rounded-full flex items-center justify-center">
+                <Bot className="w-4 h-4 text-venzip-primary" />
+              </div>
+              <div className="bg-venzip-primary/10 rounded-2xl px-4 py-2">
+                <TypingIndicator />
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Quick Actions with Venzip styling */}
+        <div className="px-4 pb-2">
+          <div className="flex flex-wrap gap-2">
+            <QuickActionChip 
+              text="What's left to be compliant?" 
+              onClick={() => sendQuickMessage("What's left to be compliant?")}
+            />
+            <QuickActionChip 
+              text="Show my risk score" 
+              onClick={() => sendQuickMessage("Show my current risk score")}
+            />
+            <QuickActionChip 
+              text="Next deadline" 
+              onClick={() => sendQuickMessage("When is my next compliance deadline?")}
+            />
+          </div>
+        </div>
+        
+        {/* Input Area with Venzip accents */}
+        <div className="p-4 border-t border-venzip-primary/20 bg-gray-50/50">
+          <div className="flex items-end space-x-3">
+            <div className="flex-1">
+              <textarea
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me about compliance..."
+                className="w-full resize-none border border-venzip-primary/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-venzip-primary focus:ring-2 focus:ring-venzip-primary/20 transition-all duration-200"
+                rows={2}
+              />
+            </div>
+            <Button 
+              onClick={sendMessage}
+              disabled={!inputMessage.trim() || isTyping}
+              className="bg-gradient-primary hover:shadow-lg transition-all duration-200"
+              size="sm"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+    
+    {/* Toggle Button with enhanced Venzip styling */}
+    <Button
+      onClick={onToggle}
+      className={`
+        w-14 h-14 rounded-full shadow-xl transition-all duration-300 border-2
+        ${isOpen 
+          ? 'bg-gray-500 hover:bg-gray-600 border-gray-400' 
+          : 'bg-gradient-primary hover:scale-110 hover:shadow-2xl border-venzip-primary/20'
+        }
+      `}
+    >
+      {isOpen ? <X className="w-6 h-6 text-white" /> : <Bot className="w-6 h-6 text-white" />}
+      
+      {/* Enhanced notification dot */}
+      {hasNewSuggestions && !isOpen && (
+        <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-danger rounded-full animate-pulse shadow-lg flex items-center justify-center">
+          <span className="w-2 h-2 bg-white rounded-full"></span>
+        </div>
+      )}
+    </Button>
+  </div>
+);
+
+const QuickActionChip = ({ text, onClick }) => (
+  <button
+    onClick={onClick}
+    className="px-3 py-1 text-xs bg-venzip-primary/10 text-venzip-primary-dark rounded-full border border-venzip-primary/30 hover:bg-venzip-primary/20 hover:shadow-md transition-all duration-200"
+  >
+    {text}
+  </button>
+);
+
+const TypingIndicator = () => (
+  <div className="flex space-x-1">
+    <div className="w-2 h-2 bg-venzip-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+    <div className="w-2 h-2 bg-venzip-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+    <div className="w-2 h-2 bg-venzip-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+  </div>
+);
+```
+
+### **Enhanced CSS Animations with Venzip Colors**
+```css
+/* Venzip-specific glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(78, 205, 196, 0.1);
+  box-shadow: 0 8px 32px rgba(78, 205, 196, 0.1);
+}
+
+.glass-morphism {
+  background: rgba(78, 205, 196, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(78, 205, 196, 0.1);
+}
+
+/* Venzip gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, #4ECDC4 0%, #44D9E8 50%, #52E5A3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced animations with Venzip flair */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(78, 205, 196, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.4);
+  }
+}
+
+@keyframes venzip-float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg);
+    filter: drop-shadow(0 4px 8px rgba(78, 205, 196, 0.1));
+  }
+  50% { 
+    transform: translateY(-10px) rotate(2deg);
+    filter: drop-shadow(0 8px 16px rgba(78, 205, 196, 0.2));
+  }
+}
+
+/* Custom scrollbar with Venzip colors */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(78, 205, 196, 0.1);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4ECDC4, #52E5A3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #3DB5AC, #00D9AA);
+}
+
+/* Venzip-specific utility classes */
+.animate-venzip-float { animation: venzip-float 4s ease-in-out infinite; }
+.animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 2s infinite; }
+
+/* Button press effect with Venzip colors */
+.button-press:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+  transition: all 0.1s ease-in-out;
+}
+
+/* Card hover effects */
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(78, 205, 196, 0.1);
+}
+
+/* Status badges with Venzip colors */
+.status-success {
+  background: linear-gradient(135deg, #52E5A3, #00D9AA);
+  color: white;
+  box-shadow: 0 2px 8px rgba(82, 229, 163, 0.3);
+}
+
+.status-warning {
+  background: linear-gradient(135deg, #FF8C42, #FFB347);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 140, 66, 0.3);
+}
+
+.status-danger {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E92);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.status-info {
+  background: linear-gradient(135deg, #4ECDC4, #44D9E8);
+  color: white;
+  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+}
+
+/* Loading states with Venzip branding */
+.skeleton {
+  background: linear-gradient(90deg, 
+    rgba(78, 205, 196, 0.1) 25%, 
+    rgba(78, 205, 196, 0.2) 50%, 
+    rgba(78, 205, 196, 0.1) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Framework-specific color variations */
+.framework-soc2 { 
+  border-color: #4ECDC4; 
+  background: linear-gradient(135deg, rgba(78, 205, 196, 0.05), rgba(78, 205, 196, 0.1));
+}
+
+.framework-gdpr { 
+  border-color: #44D9E8; 
+  background: linear-gradient(135deg, rgba(68, 217, 232, 0.05), rgba(68, 217, 232, 0.1));
+}
+
+.framework-iso27001 { 
+  border-color: #52E5A3; 
+  background: linear-gradient(135deg, rgba(82, 229, 163, 0.05), rgba(82, 229, 163, 0.1));
+}
+
+.framework-hipaa { 
+  border-color: #FF6B6B; 
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.05), rgba(255, 107, 107, 0.1));
+}
+
+/* Responsive enhancements */
+@media (max-width: 768px) {
+  .mobile-venzip {
+    background: linear-gradient(135deg, 
+      rgba(78, 205, 196, 0.02), 
+      rgba(82, 229, 163, 0.02));
+  }
+  
+  .mobile-nav-item:active {
+    background: rgba(78, 205, 196, 0.1);
+    transform: scale(0.95);
+  }
+}
+
+/* Dark mode variants */
+@media (prefers-color-scheme: dark) {
+  .glass-card {
+    background: rgba(15, 26, 24, 0.8);
+    border: 1px solid rgba(78, 205, 196, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .text-gradient {
+    background: linear-gradient(135deg, #7FE3DB 0%, #52E5A3 50%, #4ECDC4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+```md transition-shadow duration-200">
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center space-x-3">
+        <div className={`w-10 h-10 rounded-lg bg-${color}-100 flex items-center justify-center`}>
+          {icon}
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900">{framework}</h3>
+          <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <span>{tasks.completed}/{tasks.total} tasks</span>
+            <span>•</span>
+            <span>Due {deadline}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="text-right">
+        <div className="text-2xl font-bold text-gray-900">{progress}%</div>
+        <StatusBadge status={status} />
+      </div>
+    </div>
+    
+    {/* Animated Progress Bar */}
+    <div className="w-full bg-gray-200 rounded-full h-2">
+      <div 
+        className={`h-2 rounded-full bg-gradient-to-r from-${color}-500 to-${color}-600 transition-all duration-1000 ease-out`}
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+  </div>
+);
+```
+
+### **Risk Heatmap Component**
+```jsx
+const RiskHeatmapSection = () => (
+  <div className="glass-card p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-lg font-semibold text-gray-900">Risk Heatmap</h3>
+      <Button variant="ghost" size="sm">
+        <MoreHorizontal className="w-4 h-4" />
+      </Button>
+    </div>
+    
+    <div className="grid grid-cols-4 gap-2 mb-4">
+      {riskAreas.map((area, index) => (
+        <RiskCell
+          key={index}
+          area={area.name}
+          riskLevel={area.level}
+          onClick={() => openRiskDetails(area)}
+        />
+      ))}
+    </div>
+    
+    <div className="flex items-center justify-between text-xs text-gray-500">
+      <span>Low Risk</span>
+      <div className="flex space-x-1">
+        <div className="w-3 h-3 bg-green-200 rounded" />
+        <div className="w-3 h-3 bg-yellow-200 rounded" />
+        <div className="w-3 h-3 bg-orange-200 rounded" />
+        <div className="w-3 h-3 bg-red-200 rounded" />
+      </div>
+      <span>High Risk</span>
+    </div>
+  </div>
+);
+
+const RiskCell = ({ area, riskLevel, onClick }) => {
+  const getRiskColor = (level) => {
+    switch(level) {
+      case 'low': return 'bg-green-200 hover:bg-green-300';
+      case 'medium': return 'bg-yellow-200 hover:bg-yellow-300';
+      case 'high': return 'bg-orange-200 hover:bg-orange-300';
+      case 'critical': return 'bg-red-200 hover:bg-red-300';
+      default: return 'bg-gray-200 hover:bg-gray-300';
+    }
+  };
+
+  return (
+    <div 
+      className={`
+        aspect-square rounded-lg cursor-pointer transition-all duration-200 
+        ${getRiskColor(riskLevel)} 
+        hover:scale-105 hover:shadow-lg
+        flex items-center justify-center text-xs font-medium
+      `}
+      onClick={onClick}
+      title={`${area} - ${riskLevel} risk`}
+    >
+      <div className="text-center">
+        <div className="truncate text-gray-700">{area}</div>
+      </div>
+    </div>
+  );
+};
+```
+
+---
+
+## ✅ **3. Task Management System Design**
+
+### **Task List Interface**
+```jsx
+<div className="max-w-6xl mx-auto p-6">
+  {/* Task Header with Actions */}
+  <div className="flex items-center justify-between mb-6">
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900">Compliance Tasks</h1>
+      <p className="text-gray-600">23 active tasks • 18 completed this month</p>
+    </div>
+    
+    <div className="flex items-center space-x-4">
+      <TaskFilters />
+      <Button className="bg-gradient-primary">
+        <Plus className="w-4 h-4 mr-2" />
+        Add Task
+      </Button>
+    </div>
+  </div>
+
+  {/* Quick Stats */}
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <TaskStatCard title="Due Today" count={3} color="red" urgent />
+    <TaskStatCard title="This Week" count={8} color="amber" />
+    <TaskStatCard title="In Progress" count={12} color="blue" />
+    <TaskStatCard title="Completed" count={45} color="green" />
+  </div>
+
+  {/* Task Filters & Search */}
+  <div className="glass-card p-4 mb-6">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+      <SearchInput placeholder="Search tasks..." />
+      <FrameworkFilter />
+      <PriorityFilter />
+      <StatusFilter />
+      <DateRangeFilter />
+    </div>
+  </div>
+
+  {/* Task List */}
+  <div className="space-y-4">
+    {filteredTasks.map((task) => (
+      <TaskCard 
+        key={task.id}
+        task={task}
+        onComplete={completeTask}
+        onEdit={editTask}
+        onDelete={deleteTask}
+      />
+    ))}
+  </div>
+</div>
+```
+
+### **Task Card Component**
+```jsx
+const TaskCard = ({ task, onComplete, onEdit, onDelete }) => (
+  <div className={`
+    glass-card p-6 transition-all duration-200 hover:shadow-lg border-l-4
+    ${getPriorityBorder(task.priority)}
+    ${task.status === 'completed' ? 'opacity-75' : ''}
+  `}>
+    <div className="flex items-start justify-between">
+      <div className="flex items-start space-x-4 flex-1">
+        {/* Completion Checkbox */}
+        <div className="flex items-center pt-1">
+          <input
+            type="checkbox"
+            checked={task.status === 'completed'}
+            onChange={() => onComplete(task.id)}
+            className="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500"
+          />
+        </div>
+        
+        <div className="flex-1">
+          <div className="flex items-center space-x-3 mb-2">
+            <h3 className={`font-semibold ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+              {task.title}
+            </h3>
+            <FrameworkBadge framework={task.framework} />
+            <PriorityBadge priority={task.priority} />
+          </div>
+          
+          <p className="text-gray-600 text-sm mb-3">{task.description}</p>
+          
+          <div className="flex items-center space-x-6 text-sm text-gray-500">
+            <div className="flex items-center space-x-1">
+              <Calendar className="w-4 h-4" />
+              <span>Due {formatDate(task.dueDate)}</span>
+            </div>
+            
+            <div className="flex items-center space-x-1">
+              <User className="w-4 h-4" />
+              <span>{task.assignee}</span>
+            </div>
+            
+            {task.attachments > 0 && (
+              <div className="flex items-center space-x-1">
+                <Paperclip className="w-4 h-4" />
+                <span>{task.attachments} files</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Task Actions */}
+      <div className="flex items-center space-x-2 ml-4">
+        <Button variant="ghost" size="sm" onClick={() => onEdit(task)}>
+          <Edit2 className="w-4 h-4" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => onDelete(task)}>
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+    
+    {/* Progress Bar for Multi-step Tasks */}
+    {task.subtasks && (
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+          <span>Progress</span>
+          <span>{task.completedSubtasks}/{task.subtasks} subtasks</span>
+        </div>
+        <ProgressBar 
+          progress={(task.completedSubtasks / task.subtasks) * 100} 
+          color={getPriorityColor(task.priority)}
+        />
+      </div>
+    )}
+  </div>
+);
+```
+
+### **Task Creation Modal**
+```jsx
+const TaskCreateModal = ({ isOpen, onClose, onSave }) => (
+  <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <div className="p-6">
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">Create New Task</h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Task Title</label>
+            <Input
+              type="text"
+              placeholder="Enter task title..."
+              className="w-full"
+              required
+            />
+          </div>
+          
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <textarea
+              className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none"
+              placeholder="Describe the task requirements..."
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Framework</label>
+            <Select>
+              <option value="">Select framework</option>
+              <option value="soc2">SOC 2</option>
+              <option value="gdpr">GDPR</option>
+              <option value="iso27001">ISO 27001</option>
+              <option value="hipaa">HIPAA</option>
+            </Select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+            <Select>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </Select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+            <Input type="date" className="w-full" />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Assignee</label>
+            <Select>
+              <option value="">Assign to...</option>
+              <option value="me">Me</option>
+              <option value="team">Team Member</option>
+            </Select>
+          </div>
+        </div>
+        
+        {/* AI Suggestion Box */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <Bot className="w-5 h-5 text-blue-500 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-medium text-blue-900 mb-1">AI Suggestion</h4>
+              <p className="text-sm text-blue-700">
+                Based on your selected framework, this task should include evidence collection 
+                and documentation review. Would you like me to create subtasks automatically?
+              </p>
+              <Button variant="outline" size="sm" className="mt-2 border-blue-300 text-blue-700">
+                Generate Subtasks
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-end space-x-4 pt-4">
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button type="submit" className="bg-gradient-primary">Create Task</Button>
+        </div>
+      </form>
+    </div>
+  </Modal>
+);
+```
+
+---
+
+## 📄 **4. Document Upload Interface Design**
+
+### **Upload Zone Component**
+```jsx
+const DocumentUploadInterface = () => (
+  <div className="max-w-4xl mx-auto p-6">
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Evidence & Documents</h1>
+        <p className="text-gray-600">Upload compliance documentation for AI analysis</p>
+      </div>
+      
+      <div className="flex items-center space-x-4">
+        <Button variant="outline">
+          <FolderOpen className="w-4 h-4 mr-2" />
+          Browse Library
+        </Button>
+        <Button className="bg-gradient-primary">
+          <Upload className="w-4 h-4 mr-2" />
+          Upload Documents
+        </Button>
+      </div>
+    </div>
+
+    {/* Upload Statistics */}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <StatCard title="Total Documents" value="127" icon={<FileText />} color="blue" />
+      <StatCard title="Analyzed Today" value="8" icon={<Zap />} color="green" />
+      <StatCard title="Pending Review" value="3" icon={<Clock />} color="amber" />
+      <StatCard title="Storage Used" value="2.4 GB" icon={<HardDrive />} color="purple" />
+    </div>
+
+    {/* Drag & Drop Upload Zone */}
+    <div 
+      className={`
+        relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300
+        ${isDragging 
+          ? 'border-blue-500 bg-blue-50 scale-105' 
+          : 'border-gray-300 hover:border-gray-400'
+        }
+      `}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Upload Animation */}
+      <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-full flex items-center justify-center animate-bounce-slow">
+        <Upload className="w-8 h-8 text-white" />
+      </div>
+      
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+        Drop files here or click to browse
+      </h3>
+      <p className="text-gray-600 mb-6">
+        Support for PDF, DOCX, XLSX, PNG, JPG up to 25MB each
+      </p>
+      
+      <Button size="lg" variant="outline" className="mb-4">
+        <FolderOpen className="w-5 h-5 mr-2" />
+        Choose Files
+      </Button>
+      
+      <div className="text-xs text-gray-500">
+        Files will be automatically analyzed by AI for compliance gaps
+      </div>
+      
+      {/* Upload Progress Overlay */}
+      {isUploading && (
+        <div className="absolute inset-0 bg-white/90 rounded-xl flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 mx-auto mb-4 bg-blue-500 rounded-full flex items-center justify-center animate-spin">
+              <Loader className="w-6 h-6 text-white" />
+            </div>
+            <p className="text-gray-900 font-medium">Analyzing documents...</p>
+            <p className="text-sm text-gray-600">This may take a few moments</p>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* Recent Uploads */}
+    <div className="mt-8">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Documents</h3>
+      <div className="space-y-3">
+        {recentDocuments.map((doc) => (
+          <DocumentCard key={doc.id} document={doc} />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+```
+
+### **Document Card Component**
+```jsx
+const DocumentCard = ({ document }) => (
+  <div className="glass-card p-4 hover:shadow-md transition-all duration-200">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-4">
+        {/* File Type Icon */}
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getFileTypeColor(document.type)}`}>
+          {getFileIcon(document.type)}
+        </div>
+        
+        <div className="flex-1">
+          <h4 className="font-medium text-gray-900">{document.name}</h4>
+          <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <span>{formatFileSize(document.size)}</span>
+            <span>•</span>
+            <span>Uploaded {formatDate(document.uploadedAt)}</span>
+            <span>•</span>
+            <div className="flex items-center space-x-1">
+              {document.frameworks.map(framework => (
+                <FrameworkBadge key={framework} framework={framework} size="sm" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex items-center space-x-3">
+        {/* AI Analysis Status */}
+        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${getAnalysisStatusColor(document.analysisStatus)}`}>
+          {document.analysisStatus === 'completed' && <CheckCircle className="w-4 h-4" />}
+          {document.analysisStatus === 'processing' && <Loader className="w-4 h-4 animate-spin" />}
+          {document.analysisStatus === 'error' && <AlertCircle className="w-4 h-4" />}
+          <span className="text-sm font-medium">{getAnalysisStatusLabel(document.analysisStatus)}</span>
+        </div>
+        
+        {/* Actions Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => viewDocument(document)}>
+              <Eye className="w-4 h-4 mr-2" />
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => downloadDocument(document)}>
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => reanalyzeDocument(document)}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Re-analyze
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => deleteDocument(document)} className="text-red-600">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+    
+    {/* AI Analysis Results */}
+    {document.analysisStatus === 'completed' && document.aiAnalysis && (
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="flex items-start space-x-3">
+          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <Bot className="w-4 h-4 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <h5 className="text-sm font-medium text-gray-900 mb-2">AI Analysis Results</h5>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+              <AnalysisMetric
+                label="Compliance Coverage"
+                value={`${document.aiAnalysis.coverage}%`}
+                color={document.aiAnalysis.coverage > 70 ? 'green' : 'amber'}
+              />
+              <AnalysisMetric
+                label="Requirements Met"
+                value={`${document.aiAnalysis.requirementsMet}/${document.aiAnalysis.totalRequirements}`}
+                color="blue"
+              />
+              <AnalysisMetric
+                label="Risk Level"
+                value={document.aiAnalysis.riskLevel}
+                color={getRiskLevelColor(document.aiAnalysis.riskLevel)}
+              />
+            </div>
+            
+            {document.aiAnalysis.gaps.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <h6 className="text-sm font-medium text-amber-800 mb-1">Identified Gaps</h6>
+                <ul className="text-sm text-amber-700 space-y-1">
+                  {document.aiAnalysis.gaps.map((gap, index) => (
+                    <li key={index} className="flex items-start space-x-2">
+                      <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>{gap}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {document.aiAnalysis.recommendations.length > 0 && (
+              <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <h6 className="text-sm font-medium text-blue-800 mb-1">AI Recommendations</h6>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  {document.aiAnalysis.recommendations.map((rec, index) => (
+                    <li key={index} className="flex items-start space-x-2">
+                      <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
+```
+
+---
+
+## 🎯 **5. Risk Register Interface**
+
+### **Risk Register Dashboard**
+```jsx
+const RiskRegisterInterface = () => (
+  <div className="max-w-6xl mx-auto p-6">
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Risk Register</h1>
+        <p className="text-gray-600">Monitor and manage compliance risks across your organization</p>
+      </div>
+      
+      <Button className="bg-gradient-primary">
+        <Plus className="w-4 h-4 mr-2" />
+        Add Risk
+      </Button>
+    </div>
+
+    {/* Risk Overview Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <RiskOverviewCard
+        title="Critical Risks"
+        count={2}
+        color="red"
+        icon={<AlertTriangle />}
+        trend="+1"
+      />
+      <RiskOverviewCard
+        title="High Risks"
+        count={5}
+        color="amber"
+        icon={<Shield />}
+        trend="-2"
+      />
+      <RiskOverviewCard
+        title="Total Risks"
+        count={23}
+        color="blue"
+        icon={<BarChart3 />}
+        trend="+3"
+      />
+      <RiskOverviewCard
+        title="Mitigated"
+        count={18}
+        color="green"
+        icon={<CheckCircle />}
+        trend="+5"
+      />
+    </div>
+
+    {/* Risk Matrix Visualization */}
+    <div className="glass-card p-6 mb-8">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Risk Matrix</h3>
+      <RiskMatrix risks={risks} onRiskClick={handleRiskClick} />
+    </div>
+
+    {/* Risk List */}
+    <div className="glass-card p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-gray-900">All Risks</h3>
+        <div className="flex items-center space-x-4">
+          <RiskFilters />
+          <Button variant="outline" size="sm">
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        {filteredRisks.map((risk) => (
+          <RiskCard key={risk.id} risk={risk} onEdit={editRisk} onDelete={deleteRisk} />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+```
+
+### **Risk Matrix Component**
+```jsx
+const RiskMatrix = ({ risks, onRiskClick }) => {
+  const matrixSize = 5; // 5x5 matrix
+  const probabilityLabels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
+  const impactLabels = ['Minimal', 'Minor', 'Moderate', 'Major', 'Catastrophic'];
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="grid grid-cols-6 gap-2 min-w-[600px]">
+        {/* Empty top-left cell */}
+        <div className="h-12"></div>
+        
+        {/* Impact headers */}
+        {impactLabels.map((label, index) => (
+          <div key={index} className="h-12 flex items-center justify-center text-sm font-medium text-gray-700">
+            {label}
+          </div>
+        ))}
+        
+        {/* Matrix rows */}
+        {probabilityLabels.map((probLabel, probIndex) => (
+          <React.Fragment key={probIndex}>
+            {/* Probability label */}
+            <div className="h-16 flex items-center justify-end pr-4 text-sm font-medium text-gray-700">
+              {probLabel}
+            </div>
+            
+            {/* Matrix cells */}
+            {Array.from({ length: matrixSize }).map((_, impactIndex) => {
+              const cellRisks = risks.filter(risk => 
+                risk.probability === probIndex + 1 && risk.impact === impactIndex + 1
+              );
+              const riskLevel = getRiskLevel(probIndex + 1, impactIndex + 1);
+              
+              return (
+                <MatrixCell
+                  key={`${probIndex}-${impactIndex}`}
+                  risks={cellRisks}
+                  riskLevel={riskLevel}
+                  onClick={() => onRiskClick(cellRisks)}
+                />
+              );
+            })}
+          </React.Fragment>
+        ))}
+      </div>
+      
+      {/* Legend */}
+      <div className="flex items-center justify-center space-x-6 mt-6 text-sm">
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-green-400 rounded"></div>
+          <span>Low Risk</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-yellow-400 rounded"></div>
+          <span>Medium Risk</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-orange-400 rounded"></div>
+          <span>High Risk</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-red-400 rounded"></div>
+          <span>Critical Risk</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MatrixCell = ({ risks, riskLevel, onClick }) => {
+  const getCellColor = (level) => {
+    switch(level) {
+      case 'low': return 'bg-green-200 hover:bg-green-300 border-green-300';
+      case 'medium': return 'bg-yellow-200 hover:bg-yellow-300 border-yellow-300';
+      case 'high': return 'bg-orange-200 hover:bg-orange-300 border-orange-300';
+      case 'critical': return 'bg-red-200 hover:bg-red-300 border-red-300';
+      default: return 'bg-gray-100 hover:bg-gray-200 border-gray-300';
+    }
+  };
+
+  return (
+    <div 
+      className={`
+        h-16 border-2 rounded-lg cursor-pointer transition-all duration-200
+        ${getCellColor(riskLevel)}
+        flex items-center justify-center relative
+        ${risks.length > 0 ? 'hover:scale-105' : ''}
+      `}
+      onClick={() => risks.length > 0 && onClick()}
+    >
+      {risks.length > 0 && (
+        <>
+          <div className="text-lg font-bold text-gray-800">{risks.length}</div>
+          {risks.length > 3 && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-gray-800 text-white text-xs rounded-full flex items-center justify-center">
+              +
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+```
+
+---
+
+## 📚 **6. Self-Learning Hub Design**
+
+### **Learning Hub Interface**
+```jsx
+const SelfLearningHub = () => (
+  <div className="max-w-6xl mx-auto p-6">
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Compliance Learning Hub</h1>
+        <p className="text-gray-600">Master compliance frameworks with interactive training</p>
+      </div>
+      
+      <div className="flex items-center space-x-4">
+        <Button variant="outline">
+          <BarChart3 className="w-4 h-4 mr-2" />
+          Progress Report
+        </Button>
+        <Button className="bg-gradient-primary">
+          <Play className="w-4 h-4 mr-2" />
+          Continue Learning
+        </Button>
+      </div>
+    </div>
+
+    {/* Learning Progress Overview */}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <ProgressCard
+        title="Courses Completed"
+        value="12/20"
+        percentage={60}
+        color="blue"
+        icon={<BookOpen />}
+      />
+      <ProgressCard
+        title="Hours Learned"
+        value="24.5"
+        percentage={75}
+        color="green"
+        icon={<Clock />}
+      />
+      <ProgressCard
+        title="Certifications"
+        value="3"
+        percentage={100}
+        color="purple"
+        icon={<Award />}
+      />
+      <ProgressCard
+        title="This Week"
+        value="4.2 hrs"
+        percentage={85}
+        color="amber"
+        icon={<TrendingUp />}
+      />
+    </div>
+
+    {/* Featured Course */}
+    <div className="glass-card p-6 mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200">
+      <div className="flex items-start space-x-6">
+        <div className="w-32 h-24 bg-gradient-primary rounded-lg flex items-center justify-center">
+          <Play className="w-8 h-8 text-white" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center space-x-2 mb-2">
+            <Badge variant="primary">Featured</Badge>
+            <Badge variant="outline">New</Badge>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            SOC 2 Compliance Mastery
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Comprehensive guide to SOC 2 Type II compliance, covering all trust service criteria
+            with real-world examples and implementation strategies.
+          </p>
+          <div className="flex items-center space-x-6 text-sm text-gray-500 mb-4">
+            <span className="flex items-center space-x-1">
+              <Clock className="w-4 h-4" />
+              <span>6 hours</span>
+            </span>
+            <span className="flex items-center space-x-1">
+              <Users className="w-4 h-4" />
+              <span>1,247 students</span>
+            </span>
+            <span className="flex items-center space-x-1">
+              <Star className="w-4 h-4 text-yellow-500" />
+              <span>4.8 rating</span>
+            </span>
+          </div>
+          <Button size="lg">
+            Start Learning
+            <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    {/* Learning Paths */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Framework-Based Learning */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-gray-900">By Framework</h3>
+        <div className="space-y-4">
+          <FrameworkLearningCard
+            framework="SOC 2"
+            progress={75}
+            courses={8}
+            duration="12 hours"
+            color="blue"
+            icon={<Shield />}
+          />
+          <FrameworkLearningCard
+            framework="GDPR"
+            progress={45}
+            courses={6}
+            duration="8 hours"
+            color="purple"
+            icon={<Users />}
+          />
+          <FrameworkLearningCard
+            framework="ISO 27001"
+            progress={25}
+            courses={12}
+            duration="18 hours"
+            color="green"
+            icon={<Globe />}
+          />
+          <FrameworkLearningCard
+            framework="HIPAA"
+            progress={90}
+            courses={5}
+            duration="6 hours"
+            color="red"
+            icon={<Heart />}
+          />
+        </div>
+      </div>
+
+      {/* Topics & Skills */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-gray-900">Popular Topics</h3>
+        <div className="space-y-4">
+          <TopicCard
+            title="Risk Assessment"
+            description="Learn to identify and evaluate compliance risks"
+            duration="2.5 hours"
+            difficulty="Intermediate"
+            thumbnail="/api/placeholder/80/60"
+          />
+          <TopicCard
+            title="Incident Response"
+            description="Best practices for handling security incidents"
+            duration="3 hours"
+            difficulty="Advanced"
+            thumbnail="/api/placeholder/80/60"
+          />
+          <TopicCard
+            title="Policy Development"
+            description="Creating effective compliance policies"
+            duration="1.5 hours"
+            difficulty="Beginner"
+            thumbnail="/api/placeholder/80/60"
+          />
+          <TopicCard
+            title="Vendor Management"
+            description="Third-party risk assessment strategies"
+            duration="2 hours"
+            difficulty="Intermediate"
+            thumbnail="/api/placeholder/80/60"
+          />
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+        <div className="space-y-4">
+          <ActivityCard
+            type="completed"
+            title="Data Classification Fundamentals"
+            timestamp="2 hours ago"
+            progress={100}
+          />
+          <ActivityCard
+            type="started"
+            title="Access Control Implementation"
+            timestamp="Yesterday"
+            progress={35}
+          />
+          <ActivityCard
+            type="certificate"
+            title="SOC 2 Foundations"
+            timestamp="3 days ago"
+            progress={100}
+          />
+          <ActivityCard
+            type="bookmark"
+            title="GDPR Article 32 Deep Dive"
+            timestamp="1 week ago"
+            progress={0}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+```
+
+---
+
+## 🤖 **7. Claude AI Assistant Widget**
+
+### **AI Chat Widget Design**
+```jsx
+const AIAssistantWidget = ({ isOpen, onToggle, onClose }) => (
+  <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${isOpen ? 'w-96' : 'w-auto'}`}>
+    {/* Chat Window */}
+    {isOpen && (
+      <div className="glass-card mb-4 max-h-96 flex flex-col shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900">Claude Assistant</h4>
+              <div className="flex items-center space-x-1 text-xs text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Online</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" onClick={clearChat}>
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Messages Container */}
+        <div className="flex-1 p-4 space-y-4 max-h-64 overflow-y-auto">
+          {messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))}
+          
+          {isTyping && (
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <Bot className="w-4 h-4 text-gray-500" />
+              </div>
+              <div className="bg-gray-100 rounded-2xl px-4 py-2">
+                <TypingIndicator />
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Quick Actions */}
+        <div className="px-4 pb-2">
+          <div className="flex flex-wrap gap-2">
+            <QuickActionChip 
+              text="What's left to be compliant?" 
+              onClick={() => sendQuickMessage("What's left to be compliant?")}
+            />
+            <QuickActionChip 
+              text="Show my risk score" 
+              onClick={() => sendQuickMessage("Show my current risk score")}
+            />
+            <QuickActionChip 
+              text="Next deadline" 
+              onClick={() => sendQuickMessage("When is my next compliance deadline?")}
+            />
+          </div>
+        </div
