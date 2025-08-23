@@ -40,7 +40,7 @@ export const users = pgTable("users", {
 // Company profile table
 export const companies = pgTable("companies", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id").notNull().unique().references(() => users.id),
   name: varchar("name").notNull(),
   industry: varchar("industry").notNull(),
   size: varchar("size").notNull(),
