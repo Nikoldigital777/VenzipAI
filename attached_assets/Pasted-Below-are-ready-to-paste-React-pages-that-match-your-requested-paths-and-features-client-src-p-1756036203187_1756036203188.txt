@@ -1,0 +1,716 @@
+Below are ready‑to‑paste React pages that match your requested paths and features.
+
+* `/client/src/pages/onboarding.tsx`
+
+  * Framework selection cards
+  * Company profile form
+  * Industry selection
+  * Initial setup wizard with a summary submit step
+
+* `/client/src/pages/tasks.tsx`
+
+  * Task list with filters
+  * Create/edit task forms in a modal
+  * Priority indicators
+  * Due date management
+
+Assumptions
+
+* SPA with React, TypeScript, Tailwind, Wouter, React Query.
+* API endpoints expected:
+
+  * `POST /api/onboarding` to save onboarding selections
+  * `GET /api/tasks` with query params for filters
+  * `POST /api/tasks`, `PATCH /api/tasks/:id`, `DELETE /api/tasks/:id`
+* Adjust fetch paths and field names if your backend differs.
+
+---
+
+## `/client/src/pages/onboarding.tsx`
+
+```tsx
+import React, { useMemo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+
+// Types
+type Framework = "react-vite" | "nextjs" | "remix" | "sveltekit";
+
+type Industry =
+  | "fintech"
+  | "healthcare"
+  | "cannabis"
+  | "retail"
+  | "saas"
+  | "education"
+  | "other";
+
+type CompanyProfile = {
+  companyName: string;
+  domain: string;
+  teamSize: string;
+  region: string;
+  ownerEmail: string;
+};
+
+type SetupChoices = {
+  seedSampleTasks: boolean;
+  enableCompliancePack: boolean;
+  inviteTeammatesNow: boolean;
+  connectCloudStorage: boolean;
+};
+
+const frameworks: { key: Framework; title: string; desc: string }[] = [
+  { key: "react-vite", title: "React + Vite", desc: "Fast dev, minimal runtime." },
+  { key: "nextjs", title: "Next.js", desc: "SSR/SSG and file routing." },
+  { key: "remix", title: "Remix", desc: "Nested routes and web fundamentals." },
+  { key: "sveltekit", title: "SvelteKit", desc: "Lightweight and fast DX." },
+];
+
+const industries: { key: Industry; label: string }[] = [
+  { key: "fintech", label: "Fintech" },
+  { key: "healthcare", label: "Healthcare" },
+  { key: "cannabis", label: "Cannabis" },
+  { key: "retail", label: "Retail" },
+  { key: "saas", label: "SaaS" },
+  { key: "education", label: "Education" },
+  { key: "other", label: "Other" },
+];
+
+function Card({ selected, onClick, title, desc }: {
+  selected: boolean;
+  onClick: () => void;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "w-full text-left rounded-2xl border p-4 transition shadow-sm",
+        selected ? "border-black ring-2 ring-black" : "border-gray-200 hover:shadow",
+      ].join(" ")}
+    >
+      <div className="font-semibold">{title}</div>
+      <div className="text-sm text-gray-600 mt-1">{desc}</div>
+    </button>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-lg font-semibold">{title}</h2>
+      <div>{children}</div>
+    </section>
+  );
+}
+
+export default function OnboardingPage() {
+  const [, setLocation] = useLocation();
+  const [step, setStep] = useState(0);
+
+  const [framework, setFramework] = useState<Framework | null>("react-vite");
+  const [industry, setIndustry] = useState<Industry | null>(null);
+  const [otherIndustry, setOtherIndustry] = useState("");
+  const [company, setCompany] = useState<CompanyProfile>({
+    companyName: "",
+    domain: "",
+    teamSize: "1-10",
+    region: "US",
+    ownerEmail: "",
+  });
+  const [setup, setSetup] = useState<SetupChoices>({
+    seedSampleTasks: true,
+    enableCompliancePack: true,
+    inviteTeammatesNow: false,
+    connectCloudStorage: false,
+  });
+
+  const canContinue = useMemo(() => {
+    if (step === 0) return !!framework;
+    if (step === 1)
+      return (
+        company.companyName.trim().length > 1 &&
+        company.domain.trim().length > 3 &&
+        /@/.test(company.ownerEmail)
+      );
+    if (step === 2) return !!industry || otherIndustry.trim().length > 0;
+    return true;
+  }, [step, framework, company, industry, otherIndustry]);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        framework,
+        company,
+        industry: industry === "other" ? otherIndustry : industry,
+        setup,
+      };
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed to save onboarding selections");
+      return await res.json();
+    },
+    onSuccess: () => setLocation("/dashboard"),
+  });
+
+  return (
+    <div className="max-w-3xl mx-auto p-6 space-y-8">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-bold">Welcome to Venzip</h1>
+        <p className="text-gray-600">Answer a few questions to tailor your workspace.</p>
+      </header>
+
+      <ol className="flex items-center gap-2 text-sm">
+        {["Framework", "Company", "Industry", "Setup"].map((label, i) => (
+          <li key={label} className="flex items-center gap-2">
+            <div className={[
+              "h-6 w-6 grid place-items-center rounded-full border text-xs",
+              i <= step ? "bg-black text-white border-black" : "border-gray-300 text-gray-600",
+            ].join(" ")}>{i + 1}</div>
+            <span className={i === step ? "font-medium" : "text-gray-600"}>{label}</span>
+            {i < 3 && <span className="mx-2 h-px w-8 bg-gray-200" />}
+          </li>
+        ))}
+      </ol>
+
+      {step === 0 && (
+        <Section title="Choose your primary framework">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {frameworks.map(f => (
+              <Card
+                key={f.key}
+                selected={framework === f.key}
+                onClick={() => setFramework(f.key)}
+                title={f.title}
+                desc={f.desc}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {step === 1 && (
+        <Section title="Company profile">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="space-y-1">
+              <span className="text-sm">Company name</span>
+              <input
+                className="w-full rounded-xl border p-2"
+                value={company.companyName}
+                onChange={e => setCompany({ ...company, companyName: e.target.value })}
+                placeholder="Acme Inc."
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-sm">Domain</span>
+              <input
+                className="w-full rounded-xl border p-2"
+                value={company.domain}
+                onChange={e => setCompany({ ...company, domain: e.target.value })}
+                placeholder="acme.com"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-sm">Team size</span>
+              <select
+                className="w-full rounded-xl border p-2"
+                value={company.teamSize}
+                onChange={e => setCompany({ ...company, teamSize: e.target.value })}
+              >
+                {["1-10", "11-50", "51-200", "201-1000", "1000+"]
+                  .map(x => <option key={x} value={x}>{x}</option>)}
+              </select>
+            </label>
+            <label className="space-y-1">
+              <span className="text-sm">Region</span>
+              <select
+                className="w-full rounded-xl border p-2"
+                value={company.region}
+                onChange={e => setCompany({ ...company, region: e.target.value })}
+              >
+                {["US", "CA", "EU", "UK", "APAC", "LATAM", "Other"]
+                  .map(x => <option key={x} value={x}>{x}</option>)}
+              </select>
+            </label>
+            <label className="space-y-1 sm:col-span-2">
+              <span className="text-sm">Owner email</span>
+              <input
+                type="email"
+                className="w-full rounded-xl border p-2"
+                value={company.ownerEmail}
+                onChange={e => setCompany({ ...company, ownerEmail: e.target.value })}
+                placeholder="you@acme.com"
+              />
+            </label>
+          </div>
+        </Section>
+      )}
+
+      {step === 2 && (
+        <Section title="Industry focus">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {industries.map(i => (
+              <button
+                key={i.key}
+                type="button"
+                onClick={() => setIndustry(i.key)}
+                className={[
+                  "rounded-xl border p-3 text-sm",
+                  industry === i.key ? "border-black ring-2 ring-black" : "border-gray-200 hover:shadow",
+                ].join(" ")}
+              >
+                {i.label}
+              </button>
+            ))}
+          </div>
+          {industry === "other" && (
+            <div className="mt-3">
+              <input
+                className="w-full rounded-xl border p-2"
+                placeholder="Tell us your industry"
+                value={otherIndustry}
+                onChange={e => setOtherIndustry(e.target.value)}
+              />
+            </div>
+          )}
+        </Section>
+      )}
+
+      {step === 3 && (
+        <Section title="Initial setup">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={setup.seedSampleTasks}
+                onChange={e => setSetup({ ...setup, seedSampleTasks: e.target.checked })}
+              />
+              <span>Seed sample tasks</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={setup.enableCompliancePack}
+                onChange={e => setSetup({ ...setup, enableCompliancePack: e.target.checked })}
+              />
+              <span>Enable compliance pack</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={setup.inviteTeammatesNow}
+                onChange={e => setSetup({ ...setup, inviteTeammatesNow: e.target.checked })}
+              />
+              <span>Invite teammates now</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={setup.connectCloudStorage}
+                onChange={e => setSetup({ ...setup, connectCloudStorage: e.target.checked })}
+              />
+              <span>Connect cloud storage</span>
+            </label>
+          </div>
+
+          <div className="mt-6 rounded-2xl border p-4 bg-gray-50">
+            <h3 className="font-medium">Summary</h3>
+            <ul className="mt-2 text-sm text-gray-700 space-y-1">
+              <li><b>Framework:</b> {framework}</li>
+              <li><b>Company:</b> {company.companyName} ({company.domain}), {company.teamSize}, {company.region}</li>
+              <li><b>Owner:</b> {company.ownerEmail}</li>
+              <li><b>Industry:</b> {industry === "other" ? otherIndustry : industry}</li>
+              <li><b>Setup:</b> {Object.entries(setup).filter(([,v]) => v).map(([k]) => k).join(", ") || "none"}</li>
+            </ul>
+          </div>
+        </Section>
+      )}
+
+      <footer className="flex justify-between pt-2">
+        <button
+          className="rounded-xl border px-4 py-2"
+          onClick={() => setStep(s => Math.max(0, s - 1))}
+          disabled={step === 0 || mutation.isPending}
+        >
+          Back
+        </button>
+        {step < 3 ? (
+          <button
+            className="rounded-xl bg-black text-white px-4 py-2 disabled:opacity-50"
+            onClick={() => setStep(s => s + 1)}
+            disabled={!canContinue}
+          >
+            Continue
+          </button>
+        ) : (
+          <button
+            className="rounded-xl bg-black text-white px-4 py-2 disabled:opacity-50"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Saving..." : "Finish setup"}
+          </button>
+        )}
+      </footer>
+    </div>
+  );
+}
+```
+
+---
+
+## `/client/src/pages/tasks.tsx`
+
+```tsx
+import React, { useEffect, useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+// Types
+export type Priority = "low" | "medium" | "high" | "critical";
+export type Status = "open" | "in_progress" | "done";
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  priority: Priority;
+  status: Status;
+  dueDate?: string; // ISO date yyyy-mm-dd
+  createdAt: string; // ISO
+}
+
+// Utilities
+function clsx(...xs: Array<string | false | undefined>) {
+  return xs.filter(Boolean).join(" ");
+}
+
+function PriorityBadge({ value }: { value: Priority }) {
+  const color = {
+    low: "bg-gray-200 text-gray-800",
+    medium: "bg-blue-100 text-blue-800",
+    high: "bg-amber-100 text-amber-800",
+    critical: "bg-red-100 text-red-800",
+  }[value];
+  return <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", color)}>{value}</span>;
+}
+
+function StatusBadge({ value }: { value: Status }) {
+  const color = {
+    open: "bg-gray-100 text-gray-800",
+    in_progress: "bg-violet-100 text-violet-800",
+    done: "bg-emerald-100 text-emerald-800",
+  }[value];
+  return <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", color)}>{value.replace("_", " ")}</span>;
+}
+
+// API
+async function fetchTasks(params: Record<string, string | undefined>): Promise<Task[]> {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) qs.set(k, v);
+  });
+  const res = await fetch(`/api/tasks?${qs.toString()}`);
+  if (!res.ok) throw new Error("Failed to load tasks");
+  return res.json();
+}
+
+async function createTask(input: Partial<Task>): Promise<Task> {
+  const res = await fetch(`/api/tasks`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error("Failed to create task");
+  return res.json();
+}
+
+async function updateTask(id: string, input: Partial<Task>): Promise<Task> {
+  const res = await fetch(`/api/tasks/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error("Failed to update task");
+  return res.json();
+}
+
+async function deleteTask(id: string): Promise<{ ok: true }> {
+  const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete task");
+  return res.json();
+}
+
+// Create/Edit modal component
+function TaskModal({
+  open,
+  onClose,
+  initial,
+  onSubmit,
+}: {
+  open: boolean;
+  onClose: () => void;
+  initial?: Partial<Task>;
+  onSubmit: (values: Partial<Task>) => void;
+}) {
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [priority, setPriority] = useState<Priority>((initial?.priority as Priority) ?? "medium");
+  const [status, setStatus] = useState<Status>((initial?.status as Status) ?? "open");
+  const [dueDate, setDueDate] = useState<string>(initial?.dueDate ?? "");
+
+  // sync when initial changes
+  useEffect(() => {
+    setTitle(initial?.title ?? "");
+    setDescription(initial?.description ?? "");
+    setPriority((initial?.priority as Priority) ?? "medium");
+    setStatus((initial?.status as Status) ?? "open");
+    setDueDate(initial?.dueDate ?? "");
+  }, [initial]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-lg rounded-2xl bg-white p-5 shadow-lg">
+        <h3 className="text-lg font-semibold mb-3">{initial?.id ? "Edit task" : "New task"}</h3>
+
+        <div className="grid grid-cols-1 gap-3">
+          <label className="space-y-1">
+            <span className="text-sm">Title</span>
+            <input
+              className="w-full rounded-xl border p-2"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Describe the task"
+            />
+          </label>
+          <label className="space-y-1">
+            <span className="text-sm">Description</span>
+            <textarea
+              className="w-full rounded-xl border p-2 min-h-[96px]"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Optional details"
+            />
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label className="space-y-1">
+              <span className="text-sm">Priority</span>
+              <select className="w-full rounded-xl border p-2" value={priority} onChange={e => setPriority(e.target.value as Priority)}>
+                {(["low", "medium", "high", "critical"] as Priority[]).map(p => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-1">
+              <span className="text-sm">Status</span>
+              <select className="w-full rounded-xl border p-2" value={status} onChange={e => setStatus(e.target.value as Status)}>
+                {(["open", "in_progress", "done"] as Status[]).map(s => (
+                  <option key={s} value={s}>{s.replace("_", " ")}</option>
+                ))}
+              </select>
+            </label>
+            <label className="space-y-1">
+              <span className="text-sm">Due date</span>
+              <input type="date" className="w-full rounded-xl border p-2" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-4 flex justify-end gap-2">
+          <button className="rounded-xl border px-4 py-2" onClick={onClose}>Cancel</button>
+          <button
+            className="rounded-xl bg-black text-white px-4 py-2"
+            onClick={() => {
+              if (!title.trim()) return;
+              onSubmit({ title, description, priority, status, dueDate });
+            }}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function TasksPage() {
+  const qc = useQueryClient();
+
+  // Filters
+  const [q, setQ] = useState("");
+  const [status, setStatus] = useState<Status | "">("");
+  const [priority, setPriority] = useState<Priority | "">("");
+  const [dueFrom, setDueFrom] = useState("");
+  const [dueTo, setDueTo] = useState("");
+
+  const queryKey = useMemo(() => [
+    "tasks",
+    { q, status, priority, dueFrom, dueTo },
+  ], [q, status, priority, dueFrom, dueTo]);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey,
+    queryFn: () => fetchTasks({ q, status, priority, dueFrom, dueTo }),
+  });
+
+  // Create/Edit/Delete mutations
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<Task | undefined>();
+
+  const mCreate = useMutation({
+    mutationFn: (input: Partial<Task>) => createTask(input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const mUpdate = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Partial<Task> }) => updateTask(id, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const mDelete = useMutation({
+    mutationFn: (id: string) => deleteTask(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const tasks = data ?? [];
+
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Tasks</h1>
+          <p className="text-gray-600 text-sm">Track compliance work with priorities and due dates.</p>
+        </div>
+        <button
+          className="rounded-xl bg-black text-white px-4 py-2"
+          onClick={() => { setEditing(undefined); setModalOpen(true); }}
+        >
+          New task
+        </button>
+      </header>
+
+      {/* Filters */}
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-5 gap-3">
+        <input
+          className="rounded-xl border p-2 md:col-span-2"
+          placeholder="Search title or description"
+          value={q}
+          onChange={e => setQ(e.target.value)}
+        />
+        <select className="rounded-xl border p-2" value={status} onChange={e => setStatus(e.target.value as Status | "")}
+        >
+          <option value="">All statuses</option>
+          <option value="open">Open</option>
+          <option value="in_progress">In progress</option>
+          <option value="done">Done</option>
+        </select>
+        <select className="rounded-xl border p-2" value={priority} onChange={e => setPriority(e.target.value as Priority | "")}
+        >
+          <option value="">All priorities</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+        <div className="grid grid-cols-2 gap-2">
+          <input type="date" className="rounded-xl border p-2" value={dueFrom} onChange={e => setDueFrom(e.target.value)} />
+          <input type="date" className="rounded-xl border p-2" value={dueTo} onChange={e => setDueTo(e.target.value)} />
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          className="rounded-xl border px-3 py-1.5 text-sm"
+          onClick={() => { setQ(""); setStatus(""); setPriority(""); setDueFrom(""); setDueTo(""); }}
+        >
+          Reset filters
+        </button>
+        {isLoading && <span className="text-sm text-gray-600">Loading…</span>}
+        {error && <span className="text-sm text-red-600">Failed to load</span>}
+      </div>
+
+      {/* List */}
+      <div className="mt-4 overflow-auto rounded-2xl border">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-50 text-gray-700">
+            <tr>
+              <th className="text-left p-3 font-medium">Title</th>
+              <th className="text-left p-3 font-medium">Priority</th>
+              <th className="text-left p-3 font-medium">Status</th>
+              <th className="text-left p-3 font-medium">Due</th>
+              <th className="text-right p-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-6 text-center text-gray-600">No tasks found</td>
+              </tr>
+            )}
+            {tasks.map(t => (
+              <tr key={t.id} className="border-t">
+                <td className="p-3">
+                  <div className="font-medium">{t.title}</div>
+                  {t.description && <div className="text-gray-600 text-xs mt-0.5 line-clamp-2">{t.description}</div>}
+                </td>
+                <td className="p-3"><PriorityBadge value={t.priority} /></td>
+                <td className="p-3"><StatusBadge value={t.status} /></td>
+                <td className="p-3">{t.dueDate || ""}</td>
+                <td className="p-3 text-right">
+                  <div className="inline-flex gap-2">
+                    <button
+                      className="rounded-lg border px-2 py-1"
+                      onClick={() => { setEditing(t); setModalOpen(true); }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="rounded-lg border px-2 py-1 text-red-600"
+                      onClick={() => {
+                        if (!confirm("Delete this task?")) return;
+                        mDelete.mutate(t.id);
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <TaskModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        initial={editing}
+        onSubmit={(values) => {
+          if (editing) {
+            mUpdate.mutate({ id: editing.id, input: values });
+          } else {
+            mCreate.mutate(values);
+          }
+          setModalOpen(false);
+        }}
+      />
+    </div>
+  );
+}
+```
+
+---
+
+### Notes
+
+* The tasks page reads and writes against `/api/tasks` endpoints. If those are not present yet, wire Drizzle routes that match the shapes used above.
+* The onboarding page posts a single JSON payload to `/api/onboarding`. You can handle seeding and defaults on the server.
+* Both pages are tailwind‑styled and should drop in without extra components.
