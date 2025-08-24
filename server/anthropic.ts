@@ -16,6 +16,25 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY || "",
 });
 
+// Helper function to truncate text to a reasonable size for analysis
+function truncateText(text: string, maxTokens: number = 150000): string {
+  // Rough estimate: 1 token ≈ 4 characters
+  const maxChars = maxTokens * 4;
+  
+  if (text.length <= maxChars) {
+    return text;
+  }
+  
+  // Take the beginning and end to preserve context
+  const beginningSize = Math.floor(maxChars * 0.7);
+  const endSize = Math.floor(maxChars * 0.3);
+  
+  const beginning = text.substring(0, beginningSize);
+  const ending = text.substring(text.length - endSize);
+  
+  return `${beginning}\n\n[... document truncated for analysis ...]\n\n${ending}`;
+}
+
 // Analyze compliance document
 export async function analyzeDocument(text: string, framework?: string): Promise<{
   summary: string;
@@ -23,10 +42,16 @@ export async function analyzeDocument(text: string, framework?: string): Promise
   recommendations: string[];
   risk_level: 'low' | 'medium' | 'high';
 }> {
+  // Truncate text if it's too large
+  const truncatedText = truncateText(text);
+  const wasTruncated = text !== truncatedText;
+  
   const prompt = `You are a compliance expert. Analyze the following document ${framework ? `for ${framework} compliance` : 'for compliance requirements'}.
 
+${wasTruncated ? 'Note: This document was truncated for analysis. Focus on the key compliance aspects visible.' : ''}
+
 Document content:
-${text}
+${truncatedText}
 
 Please provide:
 1. A brief summary of the document
