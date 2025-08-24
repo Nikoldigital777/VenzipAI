@@ -29,6 +29,9 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
+// Import modular route handlers
+import taskRoutes from './routes/tasks';
+
 // Helper function to generate initial compliance tasks
 function getInitialTasksForFramework(framework: string, industry: string, size: string) {
   const baseDate = new Date();
@@ -260,6 +263,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard summary endpoint
+  // Register enhanced task routes
+  app.use('/api/tasks', taskRoutes);
+
   // --- Dashboard summary (data-driven gaps from tasks + risks) ---
   app.get('/api/summary', isAuthenticated, async (req: any, res) => {
     try {
