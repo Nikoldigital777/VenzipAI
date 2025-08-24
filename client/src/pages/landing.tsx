@@ -20,7 +20,7 @@ export default function Landing() {
             <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
               <i className="fas fa-shield-alt text-white text-lg"></i>
             </div>
-            <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">Venzip</span>
+            <span className="text-2xl font-bold text-gradient-primary">Venzip</span>
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-gray-900 transition-colors">Features</button>
@@ -44,7 +44,7 @@ export default function Landing() {
             <h1 className="text-6xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
               Simplify Your
               <br />
-              <span className="bg-gradient-primary bg-clip-text text-transparent">Compliance Journey</span>
+              <span className="text-gradient-primary">Compliance Journey</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
@@ -98,7 +98,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Compliance Made <span className="bg-gradient-primary bg-clip-text text-transparent">Intelligent</span>
+              Compliance Made <span className="text-gradient-primary">Intelligent</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Our platform combines AI-powered automation with expert guidance to streamline your compliance workflows
@@ -216,7 +216,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Support for Major <span className="bg-gradient-primary bg-clip-text text-transparent">Compliance Frameworks</span>
+              Support for Major <span className="text-gradient-primary">Compliance Frameworks</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Whether you're pursuing SOC 2, ISO 27001, HIPAA, or GDPR compliance, we've got you covered
@@ -284,7 +284,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Get Compliant in <span className="bg-gradient-primary bg-clip-text text-transparent">3 Simple Steps</span>
+              Get Compliant in <span className="text-gradient-primary">3 Simple Steps</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Our streamlined process makes compliance accessible for teams of any size
@@ -340,7 +340,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Why Choose <span className="bg-gradient-primary bg-clip-text text-transparent">Venzip</span>?
+                Why Choose <span className="text-gradient-primary">Venzip</span>?
               </h2>
               <p className="text-xl text-gray-600 mb-8">
                 Transform your compliance process from a burden into a strategic advantage
