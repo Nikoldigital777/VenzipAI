@@ -1,6 +1,5 @@
 // client/src/pages/dashboard.tsx
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useSummary } from "@/hooks/useSummary";
 import ProgressRing from "@/components/progress-ring";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -14,15 +13,7 @@ type Summary = {
 };
 
 export default function Dashboard() {
-  const { data, isLoading, isError, error, refetch } = useQuery<Summary>({
-    queryKey: ["/api/summary"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/summary");
-      if (!res.ok) throw new Error("Failed to load summary");
-      return res.json();
-    },
-    refetchOnWindowFocus: false,
-  });
+  const { data, isLoading, isError, error, refetch } = useSummary();
 
   if (isLoading) {
     return (
@@ -90,7 +81,7 @@ export default function Dashboard() {
             <div className="text-sm text-gray-500">No gaps detected.</div>
           ) : (
             <ul className="space-y-3">
-              {gaps.map(g => (
+              {gaps.map((g: Gap) => (
                 <li key={g.id} className="flex items-center justify-between rounded-lg border p-4">
                   <div className="font-medium">{g.title}</div>
                   <span
@@ -117,7 +108,7 @@ export default function Dashboard() {
           <ul className="space-y-3">
             {recentActivity.length === 0 ? (
               <li className="text-sm text-gray-500">No activity yet.</li>
-            ) : recentActivity.map(a => (
+            ) : recentActivity.map((a: Activity) => (
               <li key={a.id} className="flex items-center justify-between border rounded-lg p-3">
                 <div className="text-sm">
                   <div className="font-medium">{a.action}</div>

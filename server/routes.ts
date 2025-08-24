@@ -144,7 +144,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           resourceType: d.fileName,
           createdAt: d.uploadedAt?.toISOString() || new Date().toISOString(),
         }))
-      ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 6);
+      ].sort((a, b) => {
+        const dateA = typeof a.createdAt === 'string' ? new Date(a.createdAt) : (a.createdAt || new Date());
+        const dateB = typeof b.createdAt === 'string' ? new Date(b.createdAt) : (b.createdAt || new Date());
+        return dateB.getTime() - dateA.getTime();
+      }).slice(0, 6);
 
       res.json({
         compliancePercent,

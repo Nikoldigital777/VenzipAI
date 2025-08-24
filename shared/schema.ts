@@ -9,7 +9,8 @@ import {
   integer,
   boolean,
   decimal,
-  pgEnum
+  pgEnum,
+  uuid
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -194,7 +195,7 @@ export const taskStatusEnum = pgEnum("task_status", ["todo", "in_progress", "blo
 export const taskPriorityEnum = pgEnum("task_priority", ["low", "medium", "high", "critical"]);
 
 export const complianceTasks = pgTable("compliance_tasks", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid("id").primaryKey().defaultRandom(),
   framework: varchar("framework", { length: 64 }).notNull(), // "SOC2" | "HIPAA" | ...
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
@@ -206,19 +207,6 @@ export const complianceTasks = pgTable("compliance_tasks", {
   updatedAt: timestamp("updated_at", { withTimezone: false }).defaultNow().notNull(),
 });
 
-// --- Enhanced Risks ---
+// --- Enhanced Risks (extending existing risks table) ---
 export const riskSeverityEnum = pgEnum("risk_severity", ["low", "medium", "high", "critical"]);
 export const riskProbabilityEnum = pgEnum("risk_probability", ["low", "medium", "high"]);
-
-export const complianceRisks = pgTable("compliance_risks", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  category: varchar("category", { length: 64 }).notNull(), // "operational" | "technical" | "compliance"
-  title: varchar("title", { length: 255 }).notNull(),
-  description: text("description"),
-  severity: riskSeverityEnum("severity").default("medium").notNull(),
-  probability: riskProbabilityEnum("probability").default("medium").notNull(),
-  mitigation: text("mitigation"),
-  ownerId: varchar("owner_id"),
-  createdAt: timestamp("created_at", { withTimezone: false }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: false }).defaultNow().notNull(),
-});
