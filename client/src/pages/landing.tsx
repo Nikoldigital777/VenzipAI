@@ -464,38 +464,45 @@ export default function Landing() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Transform Your Compliance?
+      <section className="py-24 px-6 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary relative overflow-hidden">
+        {/* Enhanced background effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-transparent"></div>
+        <div className="absolute top-0 left-0 w-full h-full opacity-20">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%)'
+          }}></div>
+        </div>
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <h2 className="text-5xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">
+            Ready to Transform Your <span className="text-white/90">Compliance?</span>
           </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
             Join hundreds of companies who have streamlined their compliance process with Venzip. 
             Start your journey today and achieve compliance faster than ever before.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
             <Button 
               onClick={handleLogin}
               size="lg"
-              className="bg-white text-venzip-primary hover:bg-gray-50 hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold px-8 py-4 rounded-xl text-lg"
+              className="bg-white text-venzip-primary hover:bg-gray-50 hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1 transform transition-all duration-500 font-bold px-10 py-5 rounded-2xl text-xl group relative overflow-hidden"
               data-testid="button-login-cta"
             >
-              <Rocket className="h-5 w-5 mr-2" />
-              Start Free Today
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+              <Rocket className="h-6 w-6 mr-3 relative z-10" />
+              <span className="relative z-10">Start Free Today</span>
             </Button>
             <Button 
-              variant="outline" 
               size="lg"
               onClick={() => window.open('mailto:support@venzip.com', '_blank')}
-              className="border-white text-white hover:bg-white/10 px-8 py-4 rounded-xl text-lg"
+              className="bg-gradient-to-r from-success-green to-success-green/90 text-white border-2 border-success-green hover:from-success-green/90 hover:to-success-green hover:shadow-2xl hover:shadow-success-green/20 hover:-translate-y-1 transform transition-all duration-500 font-bold px-10 py-5 rounded-2xl text-xl"
             >
-              <Mail className="h-5 w-5 mr-2" />
+              <Mail className="h-6 w-6 mr-3" />
               Contact Sales
             </Button>
           </div>
 
-          <p className="text-white/75 text-sm">
+          <p className="text-white/80 text-base font-medium">
             Sign in with your Replit account • No credit card required • Setup in under 5 minutes
           </p>
         </div>
