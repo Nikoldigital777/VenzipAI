@@ -192,12 +192,12 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
             </div>
 
             {/* Status Filter */}
-            <Select value={filters.status || ''} onValueChange={(value) => handleFilterChange('status', value)}>
+            <Select value={filters.status || 'all'} onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}>
               <SelectTrigger data-testid="select-status-filter">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="not_started">Not Started</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="under_review">Under Review</SelectItem>
@@ -207,12 +207,12 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
             </Select>
 
             {/* Priority Filter */}
-            <Select value={filters.priority || ''} onValueChange={(value) => handleFilterChange('priority', value)}>
+            <Select value={filters.priority || 'all'} onValueChange={(value) => handleFilterChange('priority', value === 'all' ? '' : value)}>
               <SelectTrigger data-testid="select-priority-filter">
                 <SelectValue placeholder="All Priorities" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Priorities</SelectItem>
+                <SelectItem value="all">All Priorities</SelectItem>
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="high">High</SelectItem>

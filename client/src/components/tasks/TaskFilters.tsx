@@ -400,12 +400,12 @@ export default function TaskFilters({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-                  <Select value={filters.status || ''} onValueChange={(value) => updateFilter('status', value)}>
+                  <Select value={filters.status || 'all'} onValueChange={(value) => updateFilter('status', value === 'all' ? undefined : value)}>
                     <SelectTrigger data-testid="select-status-filter">
                       <SelectValue placeholder="All Statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Statuses</SelectItem>
+                      <SelectItem value="all">All Statuses</SelectItem>
                       {STATUS_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           <span className="flex items-center gap-2">
@@ -420,12 +420,12 @@ export default function TaskFilters({
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Priority</label>
-                  <Select value={filters.priority || ''} onValueChange={(value) => updateFilter('priority', value)}>
+                  <Select value={filters.priority || 'all'} onValueChange={(value) => updateFilter('priority', value === 'all' ? undefined : value)}>
                     <SelectTrigger data-testid="select-priority-filter">
                       <SelectValue placeholder="All Priorities" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Priorities</SelectItem>
+                      <SelectItem value="all">All Priorities</SelectItem>
                       {PRIORITY_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           <span className="flex items-center gap-2">
@@ -443,12 +443,12 @@ export default function TaskFilters({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Category</label>
-                  <Select value={filters.category || ''} onValueChange={(value) => updateFilter('category', value)}>
+                  <Select value={filters.category || 'all'} onValueChange={(value) => updateFilter('category', value === 'all' ? undefined : value)}>
                     <SelectTrigger data-testid="select-category-filter">
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
                       {CATEGORY_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           <span className="flex items-center gap-2">
@@ -463,12 +463,12 @@ export default function TaskFilters({
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Framework</label>
-                  <Select value={filters.frameworkId || ''} onValueChange={(value) => updateFilter('frameworkId', value)}>
+                  <Select value={filters.frameworkId || 'all'} onValueChange={(value) => updateFilter('frameworkId', value === 'all' ? undefined : value)}>
                     <SelectTrigger data-testid="select-framework-filter">
                       <SelectValue placeholder="All Frameworks" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Frameworks</SelectItem>
+                      <SelectItem value="all">All Frameworks</SelectItem>
                       {frameworks.map(framework => (
                         <SelectItem key={framework.id} value={framework.id}>
                           {framework.displayName}
@@ -483,12 +483,12 @@ export default function TaskFilters({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Due Date</label>
-                  <Select value={filters.dueDateRange || ''} onValueChange={(value) => updateFilter('dueDateRange', value)}>
+                  <Select value={filters.dueDateRange || 'all'} onValueChange={(value) => updateFilter('dueDateRange', value === 'all' ? undefined : value)}>
                     <SelectTrigger data-testid="select-due-date-filter">
                       <SelectValue placeholder="All Due Dates" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Due Dates</SelectItem>
+                      <SelectItem value="all">All Due Dates</SelectItem>
                       {DUE_DATE_OPTIONS.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           <span className="flex items-center gap-2">
@@ -503,12 +503,12 @@ export default function TaskFilters({
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Assigned To</label>
-                  <Select value={filters.assignedTo || ''} onValueChange={(value) => updateFilter('assignedTo', value)}>
+                  <Select value={filters.assignedTo || 'all'} onValueChange={(value) => updateFilter('assignedTo', value === 'all' ? undefined : value)}>
                     <SelectTrigger data-testid="select-assigned-to-filter">
                       <SelectValue placeholder="All Assignees" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Assignees</SelectItem>
+                      <SelectItem value="all">All Assignees</SelectItem>
                       {users.map(user => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.firstName} {user.lastName}
