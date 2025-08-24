@@ -1,6 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Shield,
+  Rocket,
+  Play,
+  CheckCircle,
+  ShieldCheck,
+  Clock,
+  Brain,
+  ArrowRight,
+  TrendingUp,
+  AlertTriangle,
+  CheckSquare,
+  FolderOpen,
+  MessageCircle,
+  Award,
+  Globe,
+  ShieldAlert,
+  Scale,
+  DollarSign,
+  BarChart3,
+  PieChart,
+  Mail
+} from "lucide-react";
 
 export default function Landing() {
   const handleLogin = () => {
@@ -18,7 +41,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
-              <i className="fas fa-shield-alt text-white text-lg"></i>
+              <Shield className="text-white h-5 w-5" />
             </div>
             <span className="text-2xl font-bold text-gradient-primary">Venzip</span>
           </div>
@@ -60,7 +83,7 @@ export default function Landing() {
                 className="bg-gradient-primary hover:shadow-xl hover:scale-105 transition-all duration-300 text-white font-semibold px-8 py-4 rounded-xl text-lg"
                 data-testid="button-login-hero"
               >
-                <i className="fas fa-rocket mr-2"></i>
+                <Rocket className="h-5 w-5 mr-2" />
                 Start Your Compliance Journey
               </Button>
               <Button 
@@ -69,7 +92,7 @@ export default function Landing() {
                 onClick={() => scrollToSection('features')}
                 className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 rounded-xl text-lg"
               >
-                <i className="fas fa-play mr-2"></i>
+                <Play className="h-5 w-5 mr-2" />
                 See How It Works
               </Button>
             </div>
@@ -77,15 +100,15 @@ export default function Landing() {
             {/* Trust Indicators */}
             <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500">
               <div className="flex items-center space-x-2">
-                <i className="fas fa-check-circle text-success-green"></i>
+                <CheckCircle className="h-4 w-4 text-success-green" />
                 <span>Enterprise-Grade Security</span>
               </div>
               <div className="flex items-center space-x-2">
-                <i className="fas fa-shield-check text-success-green"></i>
+                <ShieldCheck className="h-4 w-4 text-success-green" />
                 <span>SOC 2 Compliant Platform</span>
               </div>
               <div className="flex items-center space-x-2">
-                <i className="fas fa-clock text-success-green"></i>
+                <Clock className="h-4 w-4 text-success-green" />
                 <span>Setup in Minutes</span>
               </div>
             </div>
@@ -110,7 +133,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift group">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-brain text-white text-2xl"></i>
+                  <Brain className="text-white h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">AI Document Analysis</h3>
                 <p className="text-gray-600 mb-4">
@@ -118,7 +141,7 @@ export default function Landing() {
                   provides recommendations, and generates improvement suggestions.
                 </p>
                 <div className="text-sm text-venzip-primary font-medium">
-                  <i className="fas fa-arrow-right mr-2"></i>Powered by Claude AI
+                  <ArrowRight className="h-4 w-4 mr-2 inline" />Powered by Claude AI
                 </div>
               </CardContent>
             </Card>
@@ -127,7 +150,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift group">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-gradient-warning rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-chart-line text-white text-2xl"></i>
+                  <TrendingUp className="text-white h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Real-time Progress Tracking</h3>
                 <p className="text-gray-600 mb-4">
@@ -135,7 +158,7 @@ export default function Landing() {
                   and visual risk heatmaps that update in real-time.
                 </p>
                 <div className="text-sm text-warning-orange font-medium">
-                  <i className="fas fa-arrow-right mr-2"></i>Live compliance metrics
+                  <ArrowRight className="h-4 w-4 mr-2 inline" />Live compliance metrics
                 </div>
               </CardContent>
             </Card>
@@ -144,7 +167,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift group">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-gradient-danger rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-shield-alt text-white text-2xl"></i>
+                  <Shield className="text-white h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Intelligent Risk Assessment</h3>
                 <p className="text-gray-600 mb-4">
@@ -152,7 +175,7 @@ export default function Landing() {
                   Get AI-generated mitigation strategies and track remediation progress.
                 </p>
                 <div className="text-sm text-danger-coral font-medium">
-                  <i className="fas fa-arrow-right mr-2"></i>Automated risk scoring
+                  <ArrowRight className="h-4 w-4 mr-2 inline" />Automated risk scoring
                 </div>
               </CardContent>
             </Card>
@@ -161,7 +184,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift group">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-gradient-success rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-tasks text-white text-2xl"></i>
+                  <CheckSquare className="text-white h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Smart Task Management</h3>
                 <p className="text-gray-600 mb-4">
@@ -169,7 +192,7 @@ export default function Landing() {
                   and team collaboration features. Never miss critical compliance activities.
                 </p>
                 <div className="text-sm text-success-green font-medium">
-                  <i className="fas fa-arrow-right mr-2"></i>Automated workflows
+                  <ArrowRight className="h-4 w-4 mr-2 inline" />Automated workflows
                 </div>
               </CardContent>
             </Card>
@@ -178,7 +201,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift group">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-venzip-accent rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-folder-open text-white text-2xl"></i>
+                  <FolderOpen className="text-white h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Evidence Library</h3>
                 <p className="text-gray-600 mb-4">
@@ -186,7 +209,7 @@ export default function Landing() {
                   version control, and audit-ready organization across all frameworks.
                 </p>
                 <div className="text-sm text-venzip-accent font-medium">
-                  <i className="fas fa-arrow-right mr-2"></i>Audit-ready organization
+                  <ArrowRight className="h-4 w-4 mr-2 inline" />Audit-ready organization
                 </div>
               </CardContent>
             </Card>
@@ -195,7 +218,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift group">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-venzip-secondary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-comments text-white text-2xl"></i>
+                  <MessageCircle className="text-white h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">24/7 AI Compliance Assistant</h3>
                 <p className="text-gray-600 mb-4">
@@ -203,7 +226,7 @@ export default function Landing() {
                   and expert recommendations through our integrated AI chat assistant.
                 </p>
                 <div className="text-sm text-venzip-secondary font-medium">
-                  <i className="fas fa-arrow-right mr-2"></i>Expert guidance on-demand
+                  <ArrowRight className="h-4 w-4 mr-2 inline" />Expert guidance on-demand
                 </div>
               </CardContent>
             </Card>
@@ -227,7 +250,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift text-center group">
               <CardContent className="p-8">
                 <div className="w-20 h-20 bg-venzip-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-certificate text-venzip-primary text-2xl"></i>
+                  <Award className="text-venzip-primary h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">SOC 2</h3>
                 <p className="text-gray-600 text-sm mb-4">
@@ -240,7 +263,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift text-center group">
               <CardContent className="p-8">
                 <div className="w-20 h-20 bg-venzip-accent/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-globe text-venzip-accent text-2xl"></i>
+                  <Globe className="text-venzip-accent h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">ISO 27001</h3>
                 <p className="text-gray-600 text-sm mb-4">
@@ -253,7 +276,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift text-center group">
               <CardContent className="p-8">
                 <div className="w-20 h-20 bg-danger-coral/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-user-shield text-danger-coral text-2xl"></i>
+                  <ShieldAlert className="text-danger-coral h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">HIPAA</h3>
                 <p className="text-gray-600 text-sm mb-4">
@@ -266,7 +289,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift text-center group">
               <CardContent className="p-8">
                 <div className="w-20 h-20 bg-venzip-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <i className="fas fa-balance-scale text-venzip-secondary text-2xl"></i>
+                  <Scale className="text-venzip-secondary h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">GDPR</h3>
                 <p className="text-gray-600 text-sm mb-4">
@@ -349,7 +372,7 @@ export default function Landing() {
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="w-8 h-8 bg-success-green/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <i className="fas fa-clock text-success-green text-sm"></i>
+                    <Clock className="text-success-green h-4 w-4" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Save 80% of Time</h4>
@@ -359,7 +382,7 @@ export default function Landing() {
 
                 <div className="flex items-start space-x-4">
                   <div className="w-8 h-8 bg-venzip-primary/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <i className="fas fa-dollar-sign text-venzip-primary text-sm"></i>
+                    <DollarSign className="text-venzip-primary h-4 w-4" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Reduce Costs by 60%</h4>
@@ -369,7 +392,7 @@ export default function Landing() {
 
                 <div className="flex items-start space-x-4">
                   <div className="w-8 h-8 bg-warning-orange/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <i className="fas fa-chart-line text-warning-orange text-sm"></i>
+                    <BarChart3 className="text-warning-orange h-4 w-4" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Increase Success Rate</h4>
@@ -379,7 +402,7 @@ export default function Landing() {
 
                 <div className="flex items-start space-x-4">
                   <div className="w-8 h-8 bg-venzip-accent/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <i className="fas fa-shield-check text-venzip-accent text-sm"></i>
+                    <ShieldCheck className="text-venzip-accent h-4 w-4" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Enterprise Security</h4>
@@ -394,7 +417,7 @@ export default function Landing() {
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
                     <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="fas fa-chart-pie text-white text-2xl"></i>
+                      <PieChart className="text-white h-8 w-8" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900">Real Results</h3>
                   </div>
@@ -442,7 +465,7 @@ export default function Landing() {
               className="bg-white text-venzip-primary hover:bg-gray-50 hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold px-8 py-4 rounded-xl text-lg"
               data-testid="button-login-cta"
             >
-              <i className="fas fa-rocket mr-2"></i>
+              <Rocket className="h-5 w-5 mr-2" />
               Start Free Today
             </Button>
             <Button 
@@ -451,7 +474,7 @@ export default function Landing() {
               onClick={() => window.open('mailto:support@venzip.com', '_blank')}
               className="border-white text-white hover:bg-white/10 px-8 py-4 rounded-xl text-lg"
             >
-              <i className="fas fa-envelope mr-2"></i>
+              <Mail className="h-5 w-5 mr-2" />
               Contact Sales
             </Button>
           </div>
