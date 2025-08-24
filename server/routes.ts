@@ -54,6 +54,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat endpoints
+  app.get('/api/chat/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = Math.max(1, Math.min(100, parseInt(String(req.query.limit ?? "20"), 10)));
+      const messages = await storage.getChatMessagesByUserId(userId, limit);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
+      res.status(500).json({ message: "Failed to fetch chat messages" });
+    }
+  });
+
+  app.post('/api/chat', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { message } = req.body;
+      
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ error: "message is required" });
+      }
+
+      // Save user message
+      const userMessage = await storage.createChatMessage({
+        userId,
+        message,
+        messageType: 'user'
+      });
+
+      // Get Claude response
+      const response = await chatWithClaude(message);
+
+      // Save assistant message
+      const assistantMessage = await storage.createChatMessage({
+        userId,
+        message: response,
+        messageType: 'assistant'
+      });
+
+      res.json({
+        id: assistantMessage.id,
+        message: assistantMessage.message,
+        messageType: assistantMessage.messageType,
+        createdAt: assistantMessage.createdAt,
+      });
+    } catch (error) {
+      console.error("Error in chat:", error);
+      res.status(500).json({ message: "Failed to process chat message" });
+    }
+  });
+
   // Initialize default frameworks
   app.post('/api/initialize', isAuthenticated, async (req: any, res) => {
     try {
