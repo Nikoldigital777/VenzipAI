@@ -36,15 +36,21 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 relative overflow-hidden">
-      {/* Animated background particles */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/30 relative overflow-hidden noise-texture">
+      {/* Animated glassmorphism background particles */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-venzip-primary/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-venzip-accent/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-success-green/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-venzip-primary/20 to-venzip-secondary/15 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-20 w-[500px] h-[500px] bg-gradient-to-br from-venzip-accent/15 to-success-green/10 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-gradient-to-br from-venzip-secondary/20 to-venzip-primary/15 rounded-full blur-3xl animate-float" style={{animationDelay: '4s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-venzip-accent/5 to-transparent rounded-full blur-3xl animate-gradient-x"></div>
       </div>
       {/* Navigation Header */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200/30 shadow-lg shadow-gray-200/20">
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-morphism-enhanced border-b border-white/30 shadow-xl"
+           style={{
+             background: 'rgba(255, 255, 255, 0.1)',
+             backdropFilter: 'blur(30px)',
+             WebkitBackdropFilter: 'blur(30px)'
+           }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <img 
@@ -69,15 +75,17 @@ export default function Landing() {
       <section className="pt-32 pb-24 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-venzip-primary/20 to-venzip-accent/20 text-venzip-primary text-sm font-semibold mb-8 border border-venzip-primary/20 backdrop-blur-sm shadow-lg">
-              <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-              AI-Powered Compliance Platform
+            <div className="inline-flex items-center px-8 py-4 rounded-full glass-card text-venzip-primary text-sm font-semibold mb-8 border border-venzip-primary/30 shadow-xl hover-glow animate-scale-in group cursor-pointer">
+              <Sparkles className="h-4 w-4 mr-2 animate-spin group-hover:animate-pulse" />
+              <span className="text-gradient-primary font-bold">AI-Powered Compliance Platform</span>
+              <div className="absolute inset-0 rounded-full bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
             </div>
             
-            <h1 className="text-6xl md:text-8xl font-extrabold text-gray-900 mb-8 leading-tight tracking-tight">
-              Simplify Your
-              <br />
-              <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-to-r from-venzip-primary via-venzip-accent to-success-green animate-gradient-x">Compliance Journey</span>
+            <h1 className="text-6xl md:text-8xl font-extrabold text-gray-900 mb-8 leading-tight tracking-tight animate-fadeInUp">
+              <span className="block">Simplify Your</span>
+              <span className="block text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x hover:scale-105 transition-transform duration-500 cursor-default">
+                Compliance Journey
+              </span>
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto font-light">
@@ -86,24 +94,24 @@ export default function Landing() {
               compliance with intelligent automation and expert insights.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
               <Button 
                 onClick={handleLogin}
                 size="lg"
-                className="bg-gradient-to-r from-venzip-primary to-venzip-accent hover:from-venzip-accent hover:to-venzip-primary text-white hover:shadow-2xl hover:shadow-venzip-primary/30 hover:-translate-y-2 transform transition-all duration-500 px-10 py-5 rounded-2xl text-xl font-bold shadow-xl group relative overflow-hidden"
+                className="bg-gradient-hero hover:scale-110 text-white hover:shadow-2xl hover:shadow-venzip-primary/40 hover:-translate-y-3 transform transition-all duration-500 px-12 py-6 rounded-2xl text-xl font-bold shadow-2xl group relative overflow-hidden animate-glow-pulse"
                 data-testid="button-login-hero"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                <Rocket className="h-6 w-6 mr-3 relative z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                <Rocket className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
                 <span className="relative z-10">Start Your Compliance Journey</span>
               </Button>
               <Button 
                 variant="outline" 
                 size="lg"
                 onClick={() => scrollToSection('features')}
-                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-venzip-primary hover:text-venzip-primary hover:shadow-xl hover:-translate-y-2 transform transition-all duration-500 px-10 py-5 rounded-2xl text-xl font-semibold backdrop-blur-sm"
+                className="glass-card border-2 border-venzip-primary/30 text-gray-700 hover:bg-venzip-primary/10 hover:border-venzip-primary hover:text-venzip-primary hover:shadow-xl hover:-translate-y-2 transform transition-all duration-500 px-10 py-5 rounded-2xl text-xl font-semibold group"
               >
-                <Play className="h-6 w-6 mr-3" />
+                <Play className="h-6 w-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
                 See How It Works
               </Button>
             </div>
@@ -128,9 +136,11 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-6 bg-gradient-to-b from-white to-gray-50/50 relative overflow-hidden">
+      <section id="features" className="py-24 px-6 bg-gradient-to-b from-white/80 to-gray-50/30 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl"></div>
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20">
             <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
@@ -143,106 +153,116 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* AI-Powered Analysis */}
-            <Card className="glass-card hover-lift group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <Card className="glass-card hover-lift group relative overflow-hidden interactive-card cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/10 to-venzip-secondary/5 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 transition-opacity duration-500"></div>
               <CardContent className="p-8 relative z-10">
-                <div className="w-20 h-20 bg-gradient-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-venzip-primary/20">
-                  <Brain className="text-white h-10 w-10" />
+                <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 shadow-xl shadow-venzip-primary/30 animate-glow-pulse">
+                  <Brain className="text-white h-10 w-10 group-hover:animate-pulse" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">AI Document Analysis</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-venzip-primary transition-colors duration-300">AI Document Analysis</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
                   Upload your policies and procedures. Our advanced AI instantly identifies compliance gaps, 
                   provides intelligent recommendations, and generates improvement suggestions.
                 </p>
-                <div className="text-sm text-venzip-primary font-semibold">
-                  <ArrowRight className="h-4 w-4 mr-2 inline" />Powered by Claude AI
+                <div className="text-sm text-venzip-primary font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
+                  <ArrowRight className="h-4 w-4 mr-2 group-hover:rotate-45 transition-transform duration-300" />
+                  <span className="text-gradient-primary">Powered by Claude AI</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Real-time Dashboard */}
-            <Card className="glass-card hover-lift group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <Card className="glass-card hover-lift group relative overflow-hidden interactive-card cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/10 to-venzip-accent/5 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
               <CardContent className="p-8 relative z-10">
-                <div className="w-20 h-20 bg-gradient-warning rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-warning-orange/20">
-                  <TrendingUp className="text-white h-10 w-10" />
+                <div className="w-20 h-20 bg-gradient-warning rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 shadow-xl shadow-warning-orange/30">
+                  <TrendingUp className="text-white h-10 w-10 group-hover:animate-bounce" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Real-time Progress Tracking</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-warning-orange transition-colors duration-300">Real-time Progress Tracking</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
                   Monitor your compliance journey with interactive dashboards, automated progress tracking, 
                   and visual risk heatmaps that update in real-time.
                 </p>
-                <div className="text-sm text-warning-orange font-semibold">
-                  <ArrowRight className="h-4 w-4 mr-2 inline" />Live compliance metrics
+                <div className="text-sm text-warning-orange font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
+                  <ArrowRight className="h-4 w-4 mr-2 group-hover:rotate-45 transition-transform duration-300" />
+                  Live compliance metrics
                 </div>
               </CardContent>
             </Card>
 
             {/* Risk Management */}
-            <Card className="glass-card hover-lift group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <Card className="glass-card hover-lift group relative overflow-hidden interactive-card cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/10 to-venzip-primary/5 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
               <CardContent className="p-8 relative z-10">
-                <div className="w-20 h-20 bg-gradient-danger rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-danger-coral/20">
-                  <ShieldAlert className="text-white h-10 w-10" />
+                <div className="w-20 h-20 bg-gradient-danger rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 shadow-xl shadow-danger-coral/30">
+                  <ShieldAlert className="text-white h-10 w-10 group-hover:animate-pulse" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Intelligent Risk Assessment</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-danger-coral transition-colors duration-300">Intelligent Risk Assessment</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
                   Automatically identify, assess, and prioritize risks across your organization. 
                   Get AI-generated mitigation strategies and track remediation progress.
                 </p>
-                <div className="text-sm text-danger-coral font-semibold">
-                  <ArrowRight className="h-4 w-4 mr-2 inline" />Automated risk scoring
+                <div className="text-sm text-danger-coral font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
+                  <ArrowRight className="h-4 w-4 mr-2 group-hover:rotate-45 transition-transform duration-300" />
+                  Automated risk scoring
                 </div>
               </CardContent>
             </Card>
 
             {/* Task Management */}
-            <Card className="glass-card hover-lift group">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-success rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <CheckSquare className="text-white h-8 w-8" />
+            <Card className="glass-card hover-lift group relative overflow-hidden interactive-card cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-success-green/10 to-venzip-accent/5 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-20 h-20 bg-gradient-success rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 shadow-xl shadow-success-green/30">
+                  <CheckSquare className="text-white h-10 w-10 group-hover:animate-bounce" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Smart Task Management</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-success-green transition-colors duration-300">Smart Task Management</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
                   Organize compliance tasks with automated prioritization, deadline tracking, 
                   and team collaboration features. Never miss critical compliance activities.
                 </p>
-                <div className="text-sm text-success-green font-medium">
-                  <ArrowRight className="h-4 w-4 mr-2 inline" />Automated workflows
+                <div className="text-sm text-success-green font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
+                  <ArrowRight className="h-4 w-4 mr-2 group-hover:rotate-45 transition-transform duration-300" />
+                  Automated workflows
                 </div>
               </CardContent>
             </Card>
 
             {/* Document Library */}
-            <Card className="glass-card hover-lift group">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-venzip-accent rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <FolderOpen className="text-white h-8 w-8" />
+            <Card className="glass-card hover-lift group relative overflow-hidden interactive-card cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-accent/10 to-venzip-primary/5 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-venzip-accent to-venzip-secondary rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 shadow-xl shadow-venzip-accent/30">
+                  <FolderOpen className="text-white h-10 w-10 group-hover:animate-pulse" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Evidence Library</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-venzip-accent transition-colors duration-300">Evidence Library</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
                   Centralize all compliance documentation with automated categorization, 
                   version control, and audit-ready organization across all frameworks.
                 </p>
-                <div className="text-sm text-venzip-accent font-medium">
-                  <ArrowRight className="h-4 w-4 mr-2 inline" />Audit-ready organization
+                <div className="text-sm text-venzip-accent font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
+                  <ArrowRight className="h-4 w-4 mr-2 group-hover:rotate-45 transition-transform duration-300" />
+                  Audit-ready organization
                 </div>
               </CardContent>
             </Card>
 
             {/* AI Chat Assistant */}
-            <Card className="glass-card hover-lift group">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-venzip-secondary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <MessageCircle className="text-white h-8 w-8" />
+            <Card className="glass-card hover-lift group relative overflow-hidden interactive-card cursor-pointer">
+              <div className="absolute inset-0 bg-gradient-to-br from-info-blue/10 to-venzip-secondary/5 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-venzip-secondary to-info-blue rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 shadow-xl shadow-venzip-secondary/30">
+                  <MessageCircle className="text-white h-10 w-10 group-hover:animate-pulse" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">24/7 AI Compliance Assistant</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-venzip-secondary transition-colors duration-300">24/7 AI Compliance Assistant</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
                   Get instant answers to compliance questions, implementation guidance, 
                   and expert recommendations through our integrated AI chat assistant.
                 </p>
-                <div className="text-sm text-venzip-secondary font-medium">
-                  <ArrowRight className="h-4 w-4 mr-2 inline" />Expert guidance on-demand
+                <div className="text-sm text-venzip-secondary font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
+                  <ArrowRight className="h-4 w-4 mr-2 group-hover:rotate-45 transition-transform duration-300" />
+                  Expert guidance on-demand
                 </div>
               </CardContent>
             </Card>
@@ -263,55 +283,59 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="glass-card hover-lift text-center group">
-              <CardContent className="p-8">
-                <div className="w-20 h-20 bg-venzip-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Award className="text-venzip-primary h-8 w-8" />
+            <Card className="glass-card hover-lift text-center group interactive-card cursor-pointer relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 animate-glow-pulse">
+                  <Award className="text-venzip-primary h-8 w-8 group-hover:animate-bounce" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">SOC 2</h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-venzip-primary transition-colors duration-300">SOC 2</h3>
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                   Service Organization Control 2 for security, availability, and confidentiality
                 </p>
-                <Badge className="bg-venzip-primary/10 text-venzip-primary">Enterprise Ready</Badge>
+                <Badge className="bg-venzip-primary/10 text-venzip-primary group-hover:bg-venzip-primary group-hover:text-white transition-all duration-300 animate-scale-in">Enterprise Ready</Badge>
               </CardContent>
             </Card>
 
-            <Card className="glass-card hover-lift text-center group">
-              <CardContent className="p-8">
-                <div className="w-20 h-20 bg-venzip-accent/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Globe className="text-venzip-accent h-8 w-8" />
+            <Card className="glass-card hover-lift text-center group interactive-card cursor-pointer relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-venzip-accent/20 to-venzip-accent/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                  <Globe className="text-venzip-accent h-8 w-8 group-hover:animate-spin" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">ISO 27001</h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-venzip-accent transition-colors duration-300">ISO 27001</h3>
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                   International standard for information security management systems
                 </p>
-                <Badge className="bg-venzip-accent/10 text-venzip-accent">Global Standard</Badge>
+                <Badge className="bg-venzip-accent/10 text-venzip-accent group-hover:bg-venzip-accent group-hover:text-white transition-all duration-300">Global Standard</Badge>
               </CardContent>
             </Card>
 
-            <Card className="glass-card hover-lift text-center group">
-              <CardContent className="p-8">
-                <div className="w-20 h-20 bg-danger-coral/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <ShieldAlert className="text-danger-coral h-8 w-8" />
+            <Card className="glass-card hover-lift text-center group interactive-card cursor-pointer relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-danger-coral/20 to-danger-coral/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                  <ShieldAlert className="text-danger-coral h-8 w-8 group-hover:animate-pulse" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">HIPAA</h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-danger-coral transition-colors duration-300">HIPAA</h3>
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                   Health Insurance Portability and Accountability Act for healthcare data
                 </p>
-                <Badge className="bg-danger-coral/10 text-danger-coral">Healthcare</Badge>
+                <Badge className="bg-danger-coral/10 text-danger-coral group-hover:bg-danger-coral group-hover:text-white transition-all duration-300">Healthcare</Badge>
               </CardContent>
             </Card>
 
-            <Card className="glass-card hover-lift text-center group">
-              <CardContent className="p-8">
-                <div className="w-20 h-20 bg-venzip-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Scale className="text-venzip-secondary h-8 w-8" />
+            <Card className="glass-card hover-lift text-center group interactive-card cursor-pointer relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-venzip-secondary/20 to-venzip-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+                  <Scale className="text-venzip-secondary h-8 w-8 group-hover:animate-bounce" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">GDPR</h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-venzip-secondary transition-colors duration-300">GDPR</h3>
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                   General Data Protection Regulation for EU data privacy compliance
                 </p>
-                <Badge className="bg-venzip-secondary/10 text-venzip-secondary">EU Privacy</Badge>
+                <Badge className="bg-venzip-secondary/10 text-venzip-secondary group-hover:bg-venzip-secondary group-hover:text-white transition-all duration-300">EU Privacy</Badge>
               </CardContent>
             </Card>
           </div>
