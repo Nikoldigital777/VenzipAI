@@ -262,7 +262,7 @@ export default function Dashboard() {
                   </Card>
                 ) : (
                   <ul className="space-y-4">
-                    {gaps.map((g: Gap, index) => (
+                    {gaps.map((g: Gap, index: number) => (
                       <li key={g.id} className="animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
                         <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
                           <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
@@ -335,7 +335,7 @@ export default function Dashboard() {
                         </CardContent>
                       </Card>
                     </li>
-                  ) : recentActivity.map((a: Activity, index) => (
+                  ) : recentActivity.map((a: Activity, index: number) => (
                     <li key={a.id} className="animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
                       <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
                         <div className="absolute inset-0 bg-gradient-to-br from-venzip-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
