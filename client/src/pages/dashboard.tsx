@@ -178,53 +178,61 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-info-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="text-sm font-medium text-gray-600 group-hover:text-info-blue transition-colors duration-300">Evidence Uploads</div>
-                    <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
-                      <Upload className="h-5 w-5 text-info-blue group-hover:animate-bounce" />
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-br from-info-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                  <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-sm font-medium text-gray-600 group-hover:text-info-blue transition-colors duration-300">Evidence Uploads</div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                        <Upload className="h-5 w-5 text-info-blue group-hover:animate-bounce" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 group-hover:text-info-blue transition-colors duration-300 relative z-10">{stats.uploads}</div>
-                  <div className="text-xs text-gray-500 mt-1 relative z-10">Documents processed</div>
-                </div>
+                    <div className="text-3xl font-bold text-gray-900 group-hover:text-info-blue transition-colors duration-300">{stats.uploads}</div>
+                    <div className="text-xs text-gray-500 mt-1">Documents processed</div>
+                  </CardContent>
+                </Card>
                 
-                <div className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-success-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="text-sm font-medium text-gray-600 group-hover:text-success-green transition-colors duration-300">AI Conversations</div>
-                    <div className="w-10 h-10 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
-                      <MessageSquare className="h-5 w-5 text-success-green group-hover:animate-bounce" />
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-br from-success-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                  <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-sm font-medium text-gray-600 group-hover:text-success-green transition-colors duration-300">AI Conversations</div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                        <MessageSquare className="h-5 w-5 text-success-green group-hover:animate-bounce" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 group-hover:text-success-green transition-colors duration-300 relative z-10">{stats.conversations}</div>
-                  <div className="text-xs text-gray-500 mt-1 relative z-10">Expert consultations</div>
-                </div>
+                    <div className="text-3xl font-bold text-gray-900 group-hover:text-success-green transition-colors duration-300">{stats.conversations}</div>
+                    <div className="text-xs text-gray-500 mt-1">Expert consultations</div>
+                  </CardContent>
+                </Card>
                 
-                <div className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="text-sm font-medium text-gray-600 group-hover:text-warning-orange transition-colors duration-300">Priority Tasks</div>
-                    <div className="w-10 h-10 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
-                      <Target className="h-5 w-5 text-warning-orange group-hover:animate-bounce" />
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                  <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-sm font-medium text-gray-600 group-hover:text-warning-orange transition-colors duration-300">Priority Tasks</div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
+                        <Target className="h-5 w-5 text-warning-orange group-hover:animate-bounce" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 group-hover:text-warning-orange transition-colors duration-300 relative z-10">{stats.tasksOpenHigh || 0}</div>
-                  <div className="text-xs text-gray-500 mt-1 relative z-10">High priority items</div>
-                </div>
+                    <div className="text-3xl font-bold text-gray-900 group-hover:text-warning-orange transition-colors duration-300">{stats.tasksOpenHigh || 0}</div>
+                    <div className="text-xs text-gray-500 mt-1">High priority items</div>
+                  </CardContent>
+                </Card>
                 
-                <div className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <div className="text-sm font-medium text-gray-600 group-hover:text-danger-coral transition-colors duration-300">Critical Risks</div>
-                    <div className="w-10 h-10 bg-gradient-to-br from-danger-coral/20 to-danger-coral/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
-                      <AlertTriangle className="h-5 w-5 text-danger-coral group-hover:animate-pulse" />
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                  <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-sm font-medium text-gray-600 group-hover:text-danger-coral transition-colors duration-300">Critical Risks</div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-danger-coral/20 to-danger-coral/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                        <AlertTriangle className="h-5 w-5 text-danger-coral group-hover:animate-pulse" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 group-hover:text-danger-coral transition-colors duration-300 relative z-10">{stats.risksHigh || 0}</div>
-                  <div className="text-xs text-gray-500 mt-1 relative z-10">Requires attention</div>
-                </div>
+                    <div className="text-3xl font-bold text-gray-900 group-hover:text-danger-coral transition-colors duration-300">{stats.risksHigh || 0}</div>
+                    <div className="text-xs text-gray-500 mt-1">Requires attention</div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
 
@@ -243,50 +251,56 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 {gaps.length === 0 ? (
-                  <div className="glass-morphism-enhanced p-8 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                      <CheckCircle className="h-8 w-8 text-success-green" />
-                    </div>
-                    <div className="text-lg font-medium text-gray-900 mb-2">No Gaps Detected</div>
-                    <div className="text-sm text-gray-600">Your compliance framework is on track!</div>
-                  </div>
+                  <Card className="glass-card border-0 shadow-lg">
+                    <CardContent className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                        <CheckCircle className="h-8 w-8 text-success-green" />
+                      </div>
+                      <div className="text-lg font-medium text-gray-900 mb-2">No Gaps Detected</div>
+                      <div className="text-sm text-gray-600">Your compliance framework is on track!</div>
+                    </CardContent>
+                  </Card>
                 ) : (
                   <ul className="space-y-4">
                     {gaps.map((g: Gap, index) => (
-                      <li key={g.id} className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
-                        <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <div className="flex items-start justify-between relative z-10">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="font-semibold text-gray-900 group-hover:text-warning-orange transition-colors duration-300">
-                                {g.title}
+                      <li key={g.id} className="animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
+                        <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                          <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                          <CardContent className="p-6 relative z-10">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="font-semibold text-gray-900 group-hover:text-warning-orange transition-colors duration-300">
+                                    {g.title}
+                                  </div>
+                                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                    {g.kind === "task" 
+                                      ? `${g.meta?.framework?.toUpperCase() || "TASK"}` 
+                                      : `${g.meta?.category?.toUpperCase() || "RISK"}`
+                                    }
+                                  </span>
+                                </div>
+                                {g.meta?.dueDate && (
+                                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
+                                    <Clock className="h-3 w-3" />
+                                    <span>Due: {new Date(g.meta.dueDate).toLocaleDateString()}</span>
+                                  </div>
+                                )}
                               </div>
-                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                {g.kind === "task" 
-                                  ? `${g.meta?.framework?.toUpperCase() || "TASK"}` 
-                                  : `${g.meta?.category?.toUpperCase() || "RISK"}`
-                                }
+                              <span
+                                className={[
+                                  "px-3 py-1.5 text-xs font-medium rounded-full capitalize transition-all duration-300 group-hover:scale-110",
+                                  g.severity === "critical" ? "bg-danger-coral/15 text-danger-coral border border-danger-coral/20" :
+                                  g.severity === "high" ? "bg-warning-orange/15 text-warning-orange border border-warning-orange/20" :
+                                  g.severity === "medium" ? "bg-venzip-primary/15 text-venzip-primary border border-venzip-primary/20" :
+                                  "bg-success-green/15 text-success-green border border-success-green/20"
+                                ].join(" ")}
+                              >
+                                {g.severity}
                               </span>
                             </div>
-                            {g.meta?.dueDate && (
-                              <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
-                                <Clock className="h-3 w-3" />
-                                <span>Due: {new Date(g.meta.dueDate).toLocaleDateString()}</span>
-                              </div>
-                            )}
-                          </div>
-                          <span
-                            className={[
-                              "px-3 py-1.5 text-xs font-medium rounded-full capitalize transition-all duration-300 group-hover:scale-110",
-                              g.severity === "critical" ? "bg-danger-coral/15 text-danger-coral border border-danger-coral/20" :
-                              g.severity === "high" ? "bg-warning-orange/15 text-warning-orange border border-warning-orange/20" :
-                              g.severity === "medium" ? "bg-venzip-primary/15 text-venzip-primary border border-venzip-primary/20" :
-                              "bg-success-green/15 text-success-green border border-success-green/20"
-                            ].join(" ")}
-                          >
-                            {g.severity}
-                          </span>
-                        </div>
+                          </CardContent>
+                        </Card>
                       </li>
                     ))}
                   </ul>
@@ -310,34 +324,42 @@ export default function Dashboard() {
               <CardContent>
                 <ul className="space-y-4">
                   {recentActivity.length === 0 ? (
-                    <li className="glass-morphism-enhanced p-6 text-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                        <Clock className="h-6 w-6 text-gray-400" />
-                      </div>
-                      <div className="text-sm text-gray-500 font-medium">No activity yet</div>
-                      <div className="text-xs text-gray-400 mt-1">Start using the platform to see updates</div>
+                    <li>
+                      <Card className="glass-card border-0 shadow-lg">
+                        <CardContent className="p-6 text-center">
+                          <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <Clock className="h-6 w-6 text-gray-400" />
+                          </div>
+                          <div className="text-sm text-gray-500 font-medium">No activity yet</div>
+                          <div className="text-xs text-gray-400 mt-1">Start using the platform to see updates</div>
+                        </CardContent>
+                      </Card>
                     </li>
                   ) : recentActivity.map((a: Activity, index) => (
-                    <li key={a.id} className="glass-morphism-enhanced p-4 group hover-lift cursor-pointer relative overflow-hidden animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
-                      <div className="absolute inset-0 bg-gradient-to-br from-venzip-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      <div className="flex items-start justify-between relative z-10">
-                        <div className="flex items-start gap-3 flex-1">
-                          <div className="w-8 h-8 bg-gradient-to-br from-venzip-secondary/20 to-venzip-secondary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                            <Activity className="h-4 w-4 text-venzip-secondary" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="font-medium text-gray-900 group-hover:text-venzip-secondary transition-colors duration-300 text-sm leading-tight">
-                              {a.action}
+                    <li key={a.id} className="animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
+                      <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                        <div className="absolute inset-0 bg-gradient-to-br from-venzip-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                        <CardContent className="p-4 relative z-10">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3 flex-1">
+                              <div className="w-8 h-8 bg-gradient-to-br from-venzip-secondary/20 to-venzip-secondary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                                <Activity className="h-4 w-4 text-venzip-secondary" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-gray-900 group-hover:text-venzip-secondary transition-colors duration-300 text-sm leading-tight">
+                                  {a.action}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1 capitalize">
+                                  {a.resourceType.replace('_', ' ')}
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-xs text-gray-500 mt-1 capitalize">
-                              {a.resourceType.replace('_', ' ')}
+                            <div className="text-xs text-gray-400 flex-shrink-0 ml-2">
+                              {new Date(a.createdAt).toLocaleDateString()}
                             </div>
                           </div>
-                        </div>
-                        <div className="text-xs text-gray-400 flex-shrink-0 ml-2">
-                          {new Date(a.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
+                        </CardContent>
+                      </Card>
                     </li>
                   ))}
                 </ul>
