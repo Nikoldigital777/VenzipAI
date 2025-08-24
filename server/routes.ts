@@ -22,7 +22,8 @@ import {
   assessRisk,
   prioritizeTasks,
   detectComplianceGaps,
-  analyzeDocumentAdvanced
+  analyzeDocumentAdvanced,
+  generateComplianceChecklist
 } from "./anthropic";
 import multer from 'multer';
 import path from 'path';
@@ -435,11 +436,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Checklist Generation Route
+  app.post('/api/ai/generate-checklist', isAuthenticated, async (req: any, res) => {
+    try {
+      const { frameworks, industry, companySize } = req.body;
+      
+      if (!frameworks || frameworks.length === 0) {
+        return res.status(400).json({ message: "Frameworks are required" });
+      }
+      
+      if (!industry || !companySize) {
+        return res.status(400).json({ message: "Industry and company size are required" });
+      }
+
+      // Generate AI-powered compliance checklist
+      const checklist = await generateComplianceChecklist(frameworks, industry, companySize);
+      
+      res.json({ checklist });
+    } catch (error) {
+      console.error("Error generating AI checklist:", error);
+      res.status(500).json({ message: "Failed to generate compliance checklist" });
+    }
+  });
+
   app.post('/api/company', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const companyData = insertCompanySchema.parse({ ...req.body, userId });
       const company = await storage.upsertCompany(companyData);
+      
+      // Store user preferences if provided
+      if (req.body.preferences) {
+        // Create a notification for user preferences setup
+        try {
+          await storage.createNotification({
+            userId,
+            title: "Notification Preferences Set",
+            message: `Your notification preferences have been configured: ${Object.entries(req.body.preferences).filter(([key, value]) => value).map(([key]) => key).join(', ')}`,
+            type: 'success',
+            priority: 'low'
+          });
+        } catch (notifError) {
+          console.log("Failed to create notification:", notifError);
+          // Continue even if notification creation fails
+        }
+      }
       
       // Initialize framework progress for selected frameworks
       if (req.body.selectedFrameworks && req.body.selectedFrameworks.length > 0) {

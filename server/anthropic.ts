@@ -577,3 +577,161 @@ Provide comprehensive analysis:
     };
   }
 }
+
+// Generate AI-powered compliance checklist
+export async function generateComplianceChecklist(
+  frameworks: string[], 
+  industry: string, 
+  companySize: string
+): Promise<any[]> {
+  try {
+    const prompt = `Generate a comprehensive, personalized compliance checklist for a company with the following characteristics:
+
+**Company Profile:**
+- Industry: ${industry}
+- Company Size: ${companySize}
+- Selected Compliance Frameworks: ${frameworks.join(', ')}
+
+**Requirements:**
+1. Create 3-5 main categories of compliance tasks
+2. For each category, provide 3-6 specific tasks
+3. Each task should have:
+   - Unique ID
+   - Clear, actionable title
+   - Detailed description
+   - Priority level (high, medium, low)
+   - Estimated hours to complete
+
+**Categories should cover:**
+- Policy Development
+- Technical Implementation
+- Documentation & Training
+- Risk Assessment & Monitoring
+- Audit Preparation
+
+**Consider the company size when estimating effort:**
+- 1-10 employees: Focus on essential, streamlined requirements
+- 11-50 employees: Balanced approach with some dedicated resources
+- 51-200 employees: More comprehensive with specialized roles
+- 201-500 employees: Advanced implementation with dedicated teams
+- 500+ employees: Enterprise-level with complex governance
+
+**Industry-specific considerations:**
+- Financial Technology: Focus on data security, financial regulations
+- Healthcare: Emphasize patient data protection, HIPAA compliance
+- SaaS: Priority on data privacy, security architecture
+- E-commerce: Consumer data protection, payment security
+- Other: General best practices with adaptable frameworks
+
+Please return a JSON array with this exact structure:
+[
+  {
+    "category": "Category Name",
+    "items": [
+      {
+        "id": "unique-id",
+        "title": "Task Title",
+        "description": "Detailed description of what needs to be done",
+        "priority": "high|medium|low",
+        "estimatedHours": number
+      }
+    ]
+  }
+]
+
+Make tasks specific, actionable, and relevant to the selected frameworks. Prioritize based on regulatory requirements and business impact.`;
+
+    const response = await anthropic.messages.create({
+      model: DEFAULT_MODEL_STR,
+      max_tokens: 4000,
+      temperature: 0.7,
+      messages: [{
+        role: "user",
+        content: prompt
+      }]
+    });
+
+    const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
+    
+    // Extract JSON from the response
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const checklist = JSON.parse(jsonMatch[0]);
+      return checklist;
+    } else {
+      // Fallback: create a basic structure if JSON parsing fails
+      return generateFallbackChecklist(frameworks, industry, companySize);
+    }
+  } catch (error) {
+    console.error('Error generating compliance checklist:', error);
+    // Return fallback checklist
+    return generateFallbackChecklist(frameworks, industry, companySize);
+  }
+}
+
+// Fallback checklist generation
+function generateFallbackChecklist(frameworks: string[], industry: string, companySize: string): any[] {
+  const baseHours = companySize.includes('1-10') ? 8 : 
+                   companySize.includes('11-50') ? 16 :
+                   companySize.includes('51-200') ? 24 : 32;
+
+  return [
+    {
+      category: "Policy Development",
+      items: [
+        {
+          id: "policy-1",
+          title: "Information Security Policy",
+          description: "Develop comprehensive information security policies covering data protection, access controls, and incident response",
+          priority: "high",
+          estimatedHours: baseHours
+        },
+        {
+          id: "policy-2", 
+          title: "Data Privacy Policy",
+          description: "Create data privacy policies compliant with applicable regulations (GDPR, CCPA, etc.)",
+          priority: "high",
+          estimatedHours: baseHours * 0.75
+        }
+      ]
+    },
+    {
+      category: "Technical Implementation",
+      items: [
+        {
+          id: "tech-1",
+          title: "Access Control Implementation",
+          description: "Implement role-based access controls and multi-factor authentication",
+          priority: "high",
+          estimatedHours: baseHours * 1.5
+        },
+        {
+          id: "tech-2",
+          title: "Security Monitoring Setup",
+          description: "Deploy security monitoring tools and establish logging procedures",
+          priority: "medium",
+          estimatedHours: baseHours * 2
+        }
+      ]
+    },
+    {
+      category: "Documentation & Training",
+      items: [
+        {
+          id: "doc-1",
+          title: "Compliance Documentation",
+          description: "Document all compliance procedures and create employee training materials",
+          priority: "medium",
+          estimatedHours: baseHours * 1.25
+        },
+        {
+          id: "doc-2",
+          title: "Staff Training Program",
+          description: "Conduct compliance and security awareness training for all employees",
+          priority: "medium",
+          estimatedHours: baseHours * 0.5
+        }
+      ]
+    }
+  ];
+}

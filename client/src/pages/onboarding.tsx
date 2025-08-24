@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CompanyData {
   name: string;
@@ -18,6 +20,25 @@ interface CompanyData {
   size: string;
   contactEmail: string;
   selectedFrameworks: string[];
+}
+
+interface UserPreferences {
+  emailNotifications: boolean;
+  taskReminders: boolean;
+  riskAlerts: boolean;
+  weeklyReports: boolean;
+  reminderFrequency: string;
+}
+
+interface AIChecklist {
+  category: string;
+  items: {
+    id: string;
+    title: string;
+    priority: 'high' | 'medium' | 'low';
+    estimatedHours: number;
+    description: string;
+  }[];
 }
 
 export default function Onboarding() {
@@ -31,6 +52,18 @@ export default function Onboarding() {
     contactEmail: "",
     selectedFrameworks: []
   });
+  
+  const [userPreferences, setUserPreferences] = useState<UserPreferences>({
+    emailNotifications: true,
+    taskReminders: true,
+    riskAlerts: true,
+    weeklyReports: true,
+    reminderFrequency: 'daily'
+  });
+  
+  const [aiChecklist, setAiChecklist] = useState<AIChecklist[]>([]);
+  const [isGeneratingChecklist, setIsGeneratingChecklist] = useState(false);
+  const [showStep3, setShowStep3] = useState(false);
 
   // Initialize frameworks
   const { data: initData } = useQuery({
@@ -42,7 +75,7 @@ export default function Onboarding() {
   });
 
   // Check for existing company profile
-  const { data: existingCompany } = useQuery({
+  const { data: existingCompany } = useQuery<CompanyData>({
     queryKey: ["/api/company"],
   });
 
@@ -62,8 +95,35 @@ export default function Onboarding() {
 
   const frameworks = initData?.frameworks || [];
 
+  const generateChecklistMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/ai/generate-checklist", {
+        frameworks: selectedFrameworks,
+        industry: companyData.industry,
+        companySize: companyData.size
+      });
+      if (!response.ok) {
+        throw new Error("Failed to generate AI checklist");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setAiChecklist(data.checklist || []);
+      setShowStep3(true);
+      setIsGeneratingChecklist(false);
+    },
+    onError: (error: Error) => {
+      setIsGeneratingChecklist(false);
+      toast({
+        title: "❌ AI Generation Failed",
+        description: error.message || "Failed to generate compliance checklist",
+        variant: "destructive",
+      });
+    },
+  });
+
   const createCompanyMutation = useMutation({
-    mutationFn: async (data: CompanyData) => {
+    mutationFn: async (data: CompanyData & { preferences: UserPreferences }) => {
       console.log("Submitting company data:", data);
       const response = await apiRequest("POST", "/api/company", data);
       if (!response.ok) {
@@ -106,10 +166,8 @@ export default function Onboarding() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate required fields
+  const handleGenerateChecklist = () => {
+    // Validate required fields before generating checklist
     if (selectedFrameworks.length === 0) {
       toast({
         title: "⚠️ Framework Selection Required",
@@ -119,19 +177,10 @@ export default function Onboarding() {
       return;
     }
 
-    if (!companyData.name.trim()) {
-      toast({
-        title: "⚠️ Company Name Required",
-        description: "Please enter your company name",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!companyData.industry) {
       toast({
         title: "⚠️ Industry Selection Required",
-        description: "Please select your company's industry",
+        description: "Please select your company's industry for personalized recommendations",
         variant: "destructive",
       });
       return;
@@ -140,7 +189,24 @@ export default function Onboarding() {
     if (!companyData.size) {
       toast({
         title: "⚠️ Company Size Required",
-        description: "Please select your company size",
+        description: "Please select your company size for tailored compliance tasks",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingChecklist(true);
+    generateChecklistMutation.mutate();
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!companyData.name.trim()) {
+      toast({
+        title: "⚠️ Company Name Required",
+        description: "Please enter your company name",
         variant: "destructive",
       });
       return;
@@ -157,12 +223,14 @@ export default function Onboarding() {
 
     console.log("Submitting onboarding data:", {
       ...companyData,
-      selectedFrameworks
+      selectedFrameworks,
+      preferences: userPreferences
     });
 
     createCompanyMutation.mutate({
       ...companyData,
-      selectedFrameworks
+      selectedFrameworks,
+      preferences: userPreferences
     });
   };
 
@@ -526,47 +594,314 @@ export default function Onboarding() {
               </Card>
             </div>
 
-            {/* Enhanced Action Button */}
-            <div className="text-center">
-              <div className="relative inline-block">
-                <Button 
-                  type="submit"
-                  disabled={createCompanyMutation.isPending || selectedFrameworks.length === 0 || !companyData.name.trim() || !companyData.industry || !companyData.size || !companyData.contactEmail.trim()}
-                  className="relative group bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary hover:shadow-2xl hover:scale-105 transition-all duration-500 text-white font-bold px-12 py-6 rounded-2xl text-xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
-                  data-testid="button-start-journey"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-venzip-secondary via-venzip-accent to-venzip-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="relative flex items-center space-x-3">
-                    {createCompanyMutation.isPending ? (
-                      <>
-                        <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Setting up your workspace...</span>
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-rocket text-2xl group-hover:animate-bounce"></i>
-                        <span>Launch My Compliance Journey</span>
-                        <i className="fas fa-arrow-right text-xl group-hover:translate-x-2 transition-transform duration-300"></i>
-                      </>
-                    )}
-                  </div>
-                </Button>
-                
-                {/* Animated background effects */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-2xl opacity-20 blur-xl animate-pulse"></div>
+            {/* AI Checklist Generation Section */}
+            {selectedFrameworks.length > 0 && companyData.industry && companyData.size && !showStep3 && (
+              <div className="relative">
+                <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
+                  <CardContent className="p-12 text-center">
+                    <div className="mb-8">
+                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full mb-6 shadow-xl">
+                        <i className="fas fa-magic text-white text-2xl"></i>
+                      </div>
+                      <h3 className="text-4xl font-bold text-gray-900 mb-4">
+                        Generate Your <span className="bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent">AI Checklist</span>
+                      </h3>
+                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                        Let our AI create a personalized compliance checklist based on your selected frameworks, industry, and company size.
+                      </p>
+                    </div>
+                    
+                    <Button 
+                      type="button"
+                      onClick={handleGenerateChecklist}
+                      disabled={generateChecklistMutation.isPending}
+                      className="group relative h-16 px-12 text-xl font-bold bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100"
+                      data-testid="button-generate-checklist"
+                    >
+                      <div className="relative flex items-center space-x-4">
+                        {generateChecklistMutation.isPending ? (
+                          <>
+                            <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                            <span>Generating AI Checklist...</span>
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-magic"></i>
+                            <span>Generate AI Compliance Checklist</span>
+                            <i className="fas fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
+                          </>
+                        )}
+                      </div>
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
-              
-              {/* Helper text for disabled button */}
-              {(selectedFrameworks.length === 0 || !companyData.name.trim() || !companyData.industry || !companyData.size || !companyData.contactEmail.trim()) ? (
-                <p className="mt-6 text-amber-600 text-lg font-medium">
-                  ⚠️ Please fill in all required fields and select at least one framework to continue
-                </p>
-              ) : (
-                <p className="mt-6 text-gray-600 text-lg">
-                  🎯 Your AI-powered compliance dashboard will be ready in seconds!
-                </p>
-              )}
-            </div>
+            )}
+
+            {/* AI-Generated Checklist Display */}
+            {aiChecklist.length > 0 && (
+              <div className="relative">
+                <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
+                  <CardContent className="p-12">
+                    <div className="text-center mb-8">
+                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full mb-6 shadow-xl">
+                        <i className="fas fa-tasks text-white text-2xl"></i>
+                      </div>
+                      <h3 className="text-4xl font-bold text-gray-900 mb-4">
+                        Your <span className="bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">AI-Generated Checklist</span>
+                      </h3>
+                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                        Personalized compliance tasks based on your specific requirements and industry best practices.
+                      </p>
+                    </div>
+
+                    <div className="space-y-6">
+                      {aiChecklist.map((category, categoryIndex) => (
+                        <div key={categoryIndex} className="bg-gray-50/50 rounded-xl p-6">
+                          <h4 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <i className="fas fa-folder-open text-emerald-500 mr-3"></i>
+                            {category.category}
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {category.items.map((item) => (
+                              <div key={item.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                                <div className="flex items-start justify-between mb-2">
+                                  <h5 className="font-semibold text-gray-800">{item.title}</h5>
+                                  <Badge 
+                                    className={`text-xs ${
+                                      item.priority === 'high' ? 'bg-red-100 text-red-700 border-red-200' :
+                                      item.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                                      'bg-green-100 text-green-700 border-green-200'
+                                    }`}
+                                  >
+                                    {item.priority} priority
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                                <div className="flex items-center text-xs text-gray-500">
+                                  <i className="fas fa-clock mr-1"></i>
+                                  {item.estimatedHours} hours estimated
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* User Preferences Section */}
+            {showStep3 && (
+              <div className="relative">
+                <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
+                  <CardContent className="p-12">
+                    <div className="text-center mb-12">
+                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-6 shadow-xl">
+                        <i className="fas fa-cog text-white text-2xl"></i>
+                      </div>
+                      <h3 className="text-4xl font-bold text-gray-900 mb-4">
+                        <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Notification Preferences</span>
+                      </h3>
+                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                        Customize how and when you want to receive compliance updates and reminders.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-6">
+                        <h4 className="text-2xl font-semibold text-gray-800 mb-4">Communication Settings</h4>
+                        
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-envelope text-blue-500"></i>
+                              <div>
+                                <Label className="text-lg font-medium text-gray-800">Email Notifications</Label>
+                                <p className="text-sm text-gray-600">Receive important compliance updates via email</p>
+                              </div>
+                            </div>
+                            <Switch
+                              checked={userPreferences.emailNotifications}
+                              onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, emailNotifications: checked }))}
+                              data-testid="switch-email-notifications"
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-bell text-green-500"></i>
+                              <div>
+                                <Label className="text-lg font-medium text-gray-800">Task Reminders</Label>
+                                <p className="text-sm text-gray-600">Get reminded about upcoming compliance tasks</p>
+                              </div>
+                            </div>
+                            <Switch
+                              checked={userPreferences.taskReminders}
+                              onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, taskReminders: checked }))}
+                              data-testid="switch-task-reminders"
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-exclamation-triangle text-red-500"></i>
+                              <div>
+                                <Label className="text-lg font-medium text-gray-800">Risk Alerts</Label>
+                                <p className="text-sm text-gray-600">Immediate alerts for high-priority risks</p>
+                              </div>
+                            </div>
+                            <Switch
+                              checked={userPreferences.riskAlerts}
+                              onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, riskAlerts: checked }))}
+                              data-testid="switch-risk-alerts"
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-chart-line text-purple-500"></i>
+                              <div>
+                                <Label className="text-lg font-medium text-gray-800">Weekly Reports</Label>
+                                <p className="text-sm text-gray-600">Comprehensive weekly compliance summaries</p>
+                              </div>
+                            </div>
+                            <Switch
+                              checked={userPreferences.weeklyReports}
+                              onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, weeklyReports: checked }))}
+                              data-testid="switch-weekly-reports"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        <h4 className="text-2xl font-semibold text-gray-800 mb-4">Reminder Settings</h4>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-lg font-semibold text-gray-800 mb-3 block">
+                              <i className="fas fa-clock mr-2 text-indigo-500"></i>
+                              Reminder Frequency
+                            </Label>
+                            <Select 
+                              value={userPreferences.reminderFrequency} 
+                              onValueChange={(value) => setUserPreferences(prev => ({ ...prev, reminderFrequency: value }))}
+                            >
+                              <SelectTrigger className="h-12 text-lg border-2 border-gray-200 focus:border-orange-500 rounded-lg" data-testid="select-reminder-frequency">
+                                <SelectValue placeholder="Select reminder frequency" />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-lg shadow-xl">
+                                <SelectItem value="daily" className="text-lg py-3 rounded-lg">
+                                  <div className="flex items-center space-x-3">
+                                    <i className="fas fa-sun text-yellow-500"></i>
+                                    <span>Daily</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="weekly" className="text-lg py-3 rounded-lg">
+                                  <div className="flex items-center space-x-3">
+                                    <i className="fas fa-calendar-week text-blue-500"></i>
+                                    <span>Weekly</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="monthly" className="text-lg py-3 rounded-lg">
+                                  <div className="flex items-center space-x-3">
+                                    <i className="fas fa-calendar-alt text-green-500"></i>
+                                    <span>Monthly</span>
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                            <h5 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                              <i className="fas fa-info-circle mr-2"></i>
+                              Notification Summary
+                            </h5>
+                            <div className="space-y-2 text-sm text-blue-700">
+                              {userPreferences.emailNotifications && <p>✓ Email notifications enabled</p>}
+                              {userPreferences.taskReminders && <p>✓ Task reminders enabled ({userPreferences.reminderFrequency})</p>}
+                              {userPreferences.riskAlerts && <p>✓ High-priority risk alerts enabled</p>}
+                              {userPreferences.weeklyReports && <p>✓ Weekly compliance reports enabled</p>}
+                              {!userPreferences.emailNotifications && !userPreferences.taskReminders && 
+                               !userPreferences.riskAlerts && !userPreferences.weeklyReports && (
+                                <p className="text-orange-600">⚠️ No notifications enabled</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Final Submit Section */}
+            {showStep3 && (
+              <div className="relative">
+                <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
+                  <CardContent className="p-12 text-center">
+                    <div className="mb-8">
+                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full mb-6 shadow-xl animate-bounce">
+                        <i className="fas fa-rocket text-white text-2xl"></i>
+                      </div>
+                      <h3 className="text-4xl font-bold text-gray-900 mb-4">
+                        Ready to <span className="bg-gradient-to-r from-venzip-secondary to-success-green bg-clip-text text-transparent">Launch</span>?
+                      </h3>
+                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                        Complete your setup and start your compliance journey with AI-powered guidance and personalized workflows.
+                      </p>
+                    </div>
+                    
+                    {/* Enhanced Submit Button */}
+                    <div className="relative inline-block">
+                      <Button 
+                        type="submit"
+                        disabled={createCompanyMutation.isPending}
+                        className="group relative h-16 px-12 text-xl font-bold bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary text-white rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 overflow-hidden"
+                        data-testid="button-submit-onboarding"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative flex items-center space-x-4">
+                          {createCompanyMutation.isPending ? (
+                            <>
+                              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                              <span>Setting up your workspace...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>🚀 Complete Setup & Launch</span>
+                              <i className="fas fa-arrow-right text-white group-hover:translate-x-2 transition-transform duration-300"></i>
+                            </>
+                          )}
+                        </div>
+                      </Button>
+                    </div>
+                    
+                    <div className="mt-8 flex items-center justify-center space-x-6 text-gray-600">
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-check-circle text-success-green"></i>
+                        <span>AI-Powered Guidance</span>
+                      </div>
+                      <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-shield-alt text-venzip-primary"></i>
+                        <span>Enterprise Security</span>
+                      </div>
+                      <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-clock text-warning-orange"></i>
+                        <span>Real-time Monitoring</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </form>
         </div>
       </div>
