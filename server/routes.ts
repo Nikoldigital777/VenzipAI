@@ -28,6 +28,150 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
+// Helper function to generate initial compliance tasks
+function getInitialTasksForFramework(framework: string, industry: string, size: string) {
+  const baseDate = new Date();
+  const addDays = (days: number) => {
+    const date = new Date(baseDate);
+    date.setDate(date.getDate() + days);
+    return date.toISOString();
+  };
+
+  const tasks = {
+    "SOC 2": [
+      {
+        title: "Establish Information Security Policy",
+        description: "Create and document comprehensive information security policies covering data protection, access controls, and security procedures",
+        priority: "high" as const,
+        dueDate: addDays(30)
+      },
+      {
+        title: "Implement Access Control System",
+        description: "Set up user access management with role-based permissions and multi-factor authentication",
+        priority: "high" as const,
+        dueDate: addDays(45)
+      },
+      {
+        title: "Conduct Security Risk Assessment",
+        description: "Identify and document security risks across all systems and processes",
+        priority: "medium" as const,
+        dueDate: addDays(60)
+      },
+      {
+        title: "Setup System Monitoring & Logging",
+        description: "Implement comprehensive logging and monitoring for all critical systems",
+        priority: "medium" as const,
+        dueDate: addDays(75)
+      },
+      {
+        title: "Develop Incident Response Plan",
+        description: "Create detailed procedures for handling security incidents and breaches",
+        priority: "medium" as const,
+        dueDate: addDays(90)
+      }
+    ],
+    "ISO 27001": [
+      {
+        title: "Define Information Security Management System (ISMS)",
+        description: "Establish the scope and boundaries of your ISMS according to ISO 27001 requirements",
+        priority: "high" as const,
+        dueDate: addDays(30)
+      },
+      {
+        title: "Conduct Initial Risk Assessment",
+        description: "Perform comprehensive risk assessment to identify information security risks",
+        priority: "high" as const,
+        dueDate: addDays(45)
+      },
+      {
+        title: "Create Statement of Applicability (SoA)",
+        description: "Document which ISO 27001 controls apply to your organization and implementation status",
+        priority: "medium" as const,
+        dueDate: addDays(60)
+      },
+      {
+        title: "Implement Security Controls",
+        description: "Begin implementation of selected controls from Annex A of ISO 27001",
+        priority: "medium" as const,
+        dueDate: addDays(90)
+      },
+      {
+        title: "Establish Management Review Process",
+        description: "Set up regular management review meetings for the ISMS",
+        priority: "low" as const,
+        dueDate: addDays(120)
+      }
+    ],
+    "GDPR": [
+      {
+        title: "Data Mapping and Inventory",
+        description: "Create comprehensive inventory of all personal data processing activities",
+        priority: "high" as const,
+        dueDate: addDays(30)
+      },
+      {
+        title: "Update Privacy Policy",
+        description: "Ensure privacy policy meets GDPR transparency requirements",
+        priority: "high" as const,
+        dueDate: addDays(45)
+      },
+      {
+        title: "Implement Data Subject Rights Procedures",
+        description: "Establish processes for handling data subject requests (access, deletion, portability)",
+        priority: "medium" as const,
+        dueDate: addDays(60)
+      },
+      {
+        title: "Conduct Data Protection Impact Assessment (DPIA)",
+        description: "Perform DPIA for high-risk data processing activities",
+        priority: "medium" as const,
+        dueDate: addDays(75)
+      },
+      {
+        title: "Establish Data Breach Response Procedures",
+        description: "Create procedures for detecting, reporting, and responding to data breaches within 72 hours",
+        priority: "medium" as const,
+        dueDate: addDays(90)
+      }
+    ],
+    "HIPAA": [
+      {
+        title: "Conduct HIPAA Security Risk Assessment",
+        description: "Perform comprehensive assessment of potential risks to ePHI",
+        priority: "high" as const,
+        dueDate: addDays(30)
+      },
+      {
+        title: "Implement Administrative Safeguards",
+        description: "Establish security officer role, workforce training, and access management procedures",
+        priority: "high" as const,
+        dueDate: addDays(45)
+      },
+      {
+        title: "Deploy Physical Safeguards",
+        description: "Secure facilities, workstations, and media containing ePHI",
+        priority: "medium" as const,
+        dueDate: addDays(60)
+      },
+      {
+        title: "Configure Technical Safeguards",
+        description: "Implement access controls, encryption, and audit controls for ePHI systems",
+        priority: "medium" as const,
+        dueDate: addDays(75)
+      },
+      {
+        title: "Establish Business Associate Agreements",
+        description: "Create and execute BAAs with all vendors who handle ePHI",
+        priority: "medium" as const,
+        dueDate: addDays(90)
+      }
+    ]
+  };
+
+  // Return framework-specific tasks or empty array if framework not found
+  return tasks[framework as keyof typeof tasks] || [];
+}
+
 // Configure multer for file uploads
 const upload = multer({
   dest: 'uploads/',
@@ -312,6 +456,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             totalControls: framework.totalControls,
             progressPercentage: '0.00'
           });
+          
+          // Generate initial compliance tasks for each framework
+          const initialTasks = getInitialTasksForFramework(framework.name, companyData.industry, companyData.size);
+          
+          for (const taskData of initialTasks) {
+            await storage.createTask({
+              userId,
+              frameworkId: framework.id,
+              title: taskData.title,
+              description: taskData.description,
+              priority: taskData.priority,
+              status: 'pending',
+              assignedTo: null,
+              dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null
+            });
+          }
         }
       }
       
@@ -851,7 +1011,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Company profile not found" });
       }
       
-      const prioritization = await prioritizeTasks(tasks, {
+      const prioritization = await prioritizeTasks(tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description || undefined,
+        framework: task.frameworkId || undefined,
+        priority: task.priority as "high" | "medium" | "low",
+        status: task.status as "pending" | "completed" | "in_progress",
+        dueDate: task.dueDate ? task.dueDate.toISOString() : undefined
+      })), {
         frameworks: company.selectedFrameworks,
         industry: company.industry,
         size: company.size

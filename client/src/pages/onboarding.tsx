@@ -83,14 +83,56 @@ export default function Onboarding() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
     if (selectedFrameworks.length === 0) {
       toast({
-        title: "⚠️ Selection Required",
+        title: "⚠️ Framework Selection Required",
         description: "Please select at least one compliance framework to continue",
         variant: "destructive",
       });
       return;
     }
+
+    if (!companyData.name.trim()) {
+      toast({
+        title: "⚠️ Company Name Required",
+        description: "Please enter your company name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!companyData.industry) {
+      toast({
+        title: "⚠️ Industry Selection Required",
+        description: "Please select your company's industry",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!companyData.size) {
+      toast({
+        title: "⚠️ Company Size Required",
+        description: "Please select your company size",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!companyData.contactEmail.trim()) {
+      toast({
+        title: "⚠️ Email Address Required",
+        description: "Please enter a valid contact email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Submitting onboarding data:", {
+      ...companyData,
+      selectedFrameworks
+    });
 
     createCompanyMutation.mutate({
       ...companyData,
