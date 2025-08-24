@@ -271,14 +271,18 @@ export default function Landing() {
       </section>
 
       {/* Framework Support Section */}
-      <section id="frameworks" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Support for Major <span className="text-gradient-primary">Compliance Frameworks</span>
+      <section id="frameworks" className="py-24 px-6 bg-gradient-to-br from-gray-50/80 to-white/50 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-venzip-secondary/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '3s'}}></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight animate-fadeInUp">
+              Support for Major <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Compliance Frameworks</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Whether you're pursuing SOC 2, ISO 27001, HIPAA, or GDPR compliance, we've got you covered
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-light animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+              Whether you're pursuing SOC 2, ISO 27001, HIPAA, or GDPR compliance, we've got you covered with intelligent automation
             </p>
           </div>
 
@@ -343,141 +347,158 @@ export default function Landing() {
       </section>
 
       {/* How It Works Section */}
-      <section id="process" className="py-20 px-6 bg-white/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Get Compliant in <span className="text-gradient-primary">3 Simple Steps</span>
+      <section id="process" className="py-24 px-6 bg-gradient-to-br from-white/90 to-gray-50/50 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-2xl animate-float"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight animate-fadeInUp">
+              Get Compliant in <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">3 Simple Steps</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Our streamlined process makes compliance accessible for teams of any size
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-light animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+              Our streamlined process makes compliance accessible for teams of any size with intelligent AI guidance
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connecting Lines */}
-            <div className="hidden md:block absolute top-24 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-venzip-primary to-venzip-accent"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+            {/* Connecting Lines with animation */}
+            <div className="hidden md:block absolute top-24 left-1/3 right-1/3 h-1 bg-gradient-to-r from-venzip-primary via-venzip-secondary to-venzip-accent rounded-full shadow-lg animate-gradient-x"></div>
             
             {/* Step 1 */}
-            <div className="text-center relative">
-              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6 relative z-10">
-                <span className="text-white text-xl font-bold">1</span>
+            <div className="text-center relative group animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+              <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-8 relative z-10 shadow-2xl shadow-venzip-primary/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 animate-glow-pulse">
+                <span className="text-white text-2xl font-bold group-hover:animate-bounce">1</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Setup Your Profile</h3>
-              <p className="text-gray-600">
-                Create your company profile, select your target frameworks, and define your compliance goals. 
-                Our AI will customize recommendations based on your industry and company size.
-              </p>
+              <div className="glass-card p-8 group-hover:shadow-2xl transition-all duration-500 hover-lift">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 group-hover:text-venzip-primary transition-colors duration-300">Setup Your Profile</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Create your company profile, select your target frameworks, and define your compliance goals. 
+                  Our AI will customize recommendations based on your industry and company size.
+                </p>
+              </div>
             </div>
 
             {/* Step 2 */}
-            <div className="text-center relative">
-              <div className="w-16 h-16 bg-gradient-warning rounded-full flex items-center justify-center mx-auto mb-6 relative z-10">
-                <span className="text-white text-xl font-bold">2</span>
+            <div className="text-center relative group animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+              <div className="w-20 h-20 bg-gradient-warning rounded-3xl flex items-center justify-center mx-auto mb-8 relative z-10 shadow-2xl shadow-warning-orange/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
+                <span className="text-white text-2xl font-bold group-hover:animate-bounce">2</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Upload & Analyze</h3>
-              <p className="text-gray-600">
-                Upload your existing policies and documentation. Our AI analyzes everything, 
-                identifies gaps, and creates a personalized compliance roadmap with prioritized tasks.
-              </p>
+              <div className="glass-card p-8 group-hover:shadow-2xl transition-all duration-500 hover-lift">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 group-hover:text-warning-orange transition-colors duration-300">Upload & Analyze</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Upload your existing policies and documentation. Our AI analyzes everything, 
+                  identifies gaps, and creates a personalized compliance roadmap with prioritized tasks.
+                </p>
+              </div>
             </div>
 
             {/* Step 3 */}
-            <div className="text-center relative">
-              <div className="w-16 h-16 bg-gradient-success rounded-full flex items-center justify-center mx-auto mb-6 relative z-10">
-                <span className="text-white text-xl font-bold">3</span>
+            <div className="text-center relative group animate-fadeInUp" style={{animationDelay: '0.5s'}}>
+              <div className="w-20 h-20 bg-gradient-success rounded-3xl flex items-center justify-center mx-auto mb-8 relative z-10 shadow-2xl shadow-success-green/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
+                <span className="text-white text-2xl font-bold group-hover:animate-bounce">3</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Track & Maintain</h3>
-              <p className="text-gray-600">
-                Follow your AI-guided roadmap, track progress in real-time, and maintain ongoing compliance 
-                with automated monitoring and continuous improvement recommendations.
-              </p>
+              <div className="glass-card p-8 group-hover:shadow-2xl transition-all duration-500 hover-lift">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 group-hover:text-success-green transition-colors duration-300">Track & Maintain</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Follow your AI-guided roadmap, track progress in real-time, and maintain ongoing compliance 
+                  with automated monitoring and continuous improvement recommendations.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Why Choose <span className="text-gradient-primary">Venzip</span>?
+      <section className="py-24 px-6 bg-gradient-to-br from-gray-50/50 to-white relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="animate-fadeInLeft">
+              <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
+                Why Choose <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Venzip</span>?
               </h2>
-              <p className="text-xl text-gray-600 mb-8">
+              <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed font-light">
                 Transform your compliance process from a burden into a strategic advantage
               </p>
               
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-success-green/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <Clock className="text-success-green h-4 w-4" />
+              <div className="space-y-8">
+                <div className="flex items-start space-x-6 group hover-lift cursor-pointer">
+                  <div className="w-12 h-12 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                    <Clock className="text-success-green h-6 w-6 group-hover:animate-bounce" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Save 80% of Time</h4>
-                    <p className="text-gray-600">Automate tedious compliance tasks and focus on what matters most to your business</p>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-success-green transition-colors duration-300">Save 80% of Time</h4>
+                    <p className="text-gray-600 leading-relaxed">Automate tedious compliance tasks and focus on what matters most to your business growth</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-venzip-primary/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <DollarSign className="text-venzip-primary h-4 w-4" />
+                <div className="flex items-start space-x-6 group hover-lift cursor-pointer">
+                  <div className="w-12 h-12 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
+                    <DollarSign className="text-venzip-primary h-6 w-6 group-hover:animate-bounce" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Reduce Costs by 60%</h4>
-                    <p className="text-gray-600">Eliminate expensive consultants and manual processes with intelligent automation</p>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-venzip-primary transition-colors duration-300">Reduce Costs by 60%</h4>
+                    <p className="text-gray-600 leading-relaxed">Eliminate expensive consultants and manual processes with intelligent automation</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-warning-orange/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <BarChart3 className="text-warning-orange h-4 w-4" />
+                <div className="flex items-start space-x-6 group hover-lift cursor-pointer">
+                  <div className="w-12 h-12 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                    <BarChart3 className="text-warning-orange h-6 w-6 group-hover:animate-bounce" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Increase Success Rate</h4>
-                    <p className="text-gray-600">AI-guided approach ensures you meet all requirements and pass audits on the first try</p>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-warning-orange transition-colors duration-300">Increase Success Rate</h4>
+                    <p className="text-gray-600 leading-relaxed">AI-guided approach ensures you meet all requirements and pass audits on the first try</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-venzip-accent/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <ShieldCheck className="text-venzip-accent h-4 w-4" />
+                <div className="flex items-start space-x-6 group hover-lift cursor-pointer">
+                  <div className="w-12 h-12 bg-gradient-to-br from-venzip-accent/20 to-venzip-accent/10 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                    <ShieldCheck className="text-venzip-accent h-6 w-6 group-hover:animate-bounce" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Enterprise Security</h4>
-                    <p className="text-gray-600">Bank-level encryption and SOC 2 compliant infrastructure protect your sensitive data</p>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-venzip-accent transition-colors duration-300">Enterprise Security</h4>
+                    <p className="text-gray-600 leading-relaxed">Bank-level encryption and SOC 2 compliant infrastructure protect your sensitive data</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="relative">
-              <Card className="glass-card">
-                <CardContent className="p-8">
-                  <div className="text-center mb-6">
-                    <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                      <PieChart className="text-white h-8 w-8" />
+            <div className="relative animate-fadeInRight">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/10 to-venzip-accent/5 rounded-3xl blur-3xl transform rotate-6"></div>
+              <Card className="glass-card relative z-10 hover-lift group cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                <CardContent className="p-10 relative z-10">
+                  <div className="text-center mb-8">
+                    <div className="w-24 h-24 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-venzip-primary/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 animate-glow-pulse">
+                      <PieChart className="text-white h-10 w-10 group-hover:animate-pulse" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">Real Results</h3>
+                    <h3 className="text-3xl font-bold text-gray-900 group-hover:text-venzip-primary transition-colors duration-300">Real Results</h3>
+                    <p className="text-gray-600 mt-2">From companies using Venzip</p>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-venzip-primary mb-2">85%</div>
-                      <div className="text-sm text-gray-600">Time Saved</div>
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="text-center group hover:scale-105 transition-transform duration-300">
+                      <div className="text-4xl font-bold text-venzip-primary mb-2 group-hover:animate-bounce">85%</div>
+                      <div className="text-sm text-gray-600 font-medium">Time Saved</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-success-green mb-2">99%</div>
-                      <div className="text-sm text-gray-600">Audit Success</div>
+                    <div className="text-center group hover:scale-105 transition-transform duration-300">
+                      <div className="text-4xl font-bold text-success-green mb-2 group-hover:animate-bounce">99%</div>
+                      <div className="text-sm text-gray-600 font-medium">Audit Success</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-warning-orange mb-2">65%</div>
-                      <div className="text-sm text-gray-600">Cost Reduction</div>
+                    <div className="text-center group hover:scale-105 transition-transform duration-300">
+                      <div className="text-4xl font-bold text-warning-orange mb-2 group-hover:animate-bounce">65%</div>
+                      <div className="text-sm text-gray-600 font-medium">Cost Reduction</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-venzip-accent mb-2">30%</div>
-                      <div className="text-sm text-gray-600">Faster Compliance</div>
+                    <div className="text-center group hover:scale-105 transition-transform duration-300">
+                      <div className="text-4xl font-bold text-venzip-accent mb-2 group-hover:animate-bounce">3x</div>
+                      <div className="text-sm text-gray-600 font-medium">Faster Compliance</div>
                     </div>
                   </div>
                 </CardContent>
@@ -488,32 +509,36 @@ export default function Landing() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-24 px-6 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary relative overflow-hidden">
-        {/* Enhanced background effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-transparent"></div>
-        <div className="absolute top-0 left-0 w-full h-full opacity-20">
+      <section className="py-32 px-6 bg-gradient-hero relative overflow-hidden">
+        {/* Enhanced glassmorphism background effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/5"></div>
+        <div className="absolute top-0 left-0 w-full h-full opacity-30">
           <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%)'
+            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.15) 0%, transparent 50%)'
           }}></div>
         </div>
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <h2 className="text-5xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">
-            Ready to Transform Your <span className="text-white/90">Compliance?</span>
+        <div className="absolute top-20 left-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-white/10 rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
+        <div className="absolute inset-0 bg-dot-pattern opacity-10"></div>
+        
+        <div className="max-w-6xl mx-auto text-center relative z-10">
+          <h2 className="text-6xl md:text-7xl font-extrabold text-white mb-10 tracking-tight animate-fadeInUp">
+            Ready to Transform Your <span className="text-white/90 animate-gradient-x">Compliance?</span>
           </h2>
-          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+          <p className="text-xl md:text-2xl text-white/90 mb-16 max-w-4xl mx-auto leading-relaxed font-light animate-fadeInUp" style={{animationDelay: '0.2s'}}>
             Join hundreds of companies who have streamlined their compliance process with Venzip. 
-            Start your journey today and achieve compliance faster than ever before.
+            Start your journey today and achieve compliance faster than ever before with AI-powered automation.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
             <Button 
               onClick={handleLogin}
               size="lg"
-              className="bg-white text-venzip-primary hover:bg-gray-50 hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1 transform transition-all duration-500 font-bold px-10 py-5 rounded-2xl text-xl group relative overflow-hidden"
+              className="glass-morphism-enhanced text-venzip-primary hover:bg-white/90 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-3 hover:scale-110 transform transition-all duration-500 font-bold px-12 py-6 rounded-2xl text-xl group relative overflow-hidden border border-white/30"
               data-testid="button-login-cta"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-              <Rocket className="h-6 w-6 mr-3 relative z-10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+              <Rocket className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
               <span className="relative z-10">Start Free Today</span>
             </Button>
             <Button 
@@ -525,71 +550,112 @@ export default function Landing() {
                   console.error('Failed to open email client:', error);
                 }
               }}
-              className="bg-gradient-to-r from-success-green to-success-green/90 text-white border-2 border-success-green hover:from-success-green/90 hover:to-success-green hover:shadow-2xl hover:shadow-success-green/20 hover:-translate-y-1 transform transition-all duration-500 font-bold px-10 py-5 rounded-2xl text-xl"
+              className="bg-white/20 backdrop-blur-xl text-white border-2 border-white/30 hover:bg-white/30 hover:shadow-2xl hover:shadow-white/20 hover:-translate-y-3 hover:scale-110 transform transition-all duration-500 font-bold px-12 py-6 rounded-2xl text-xl group"
             >
-              <Mail className="h-6 w-6 mr-3" />
+              <Mail className="h-6 w-6 mr-3 group-hover:animate-bounce" />
               Contact Sales
             </Button>
           </div>
 
-          <p className="text-white/80 text-base font-medium">
-            Sign in with your Replit account • No credit card required • Setup in under 5 minutes
-          </p>
+          <div className="flex flex-wrap justify-center items-center gap-8 text-white/80 text-base font-medium animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-white/90" />
+              <span>Sign in with Replit account</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-white/90" />
+              <span>No credit card required</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-white/90" />
+              <span>Setup in under 5 minutes</span>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="mb-4">
+      <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 px-6 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-venzip-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-venzip-accent/5 rounded-full blur-2xl"></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div className="md:col-span-1">
+              <div className="mb-6">
                 <img 
                   src={venzipLogo} 
                   alt="Venzip Logo" 
-                  className="h-10"
+                  className="h-12 hover:scale-110 transition-transform duration-300"
                   style={{ width: 'auto' }}
                 />
               </div>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-300 text-sm leading-relaxed mb-6">
                 AI-powered compliance platform for modern businesses. 
-                Simplify SOC 2, ISO 27001, HIPAA, and GDPR compliance.
+                Simplify SOC 2, ISO 27001, HIPAA, and GDPR compliance with intelligent automation.
               </p>
+              <div className="flex space-x-4">
+                <div className="w-10 h-10 bg-venzip-primary/20 rounded-full flex items-center justify-center hover:bg-venzip-primary/30 transition-colors duration-300 cursor-pointer group">
+                  <ShieldCheck className="h-5 w-5 text-venzip-primary group-hover:animate-bounce" />
+                </div>
+                <div className="w-10 h-10 bg-venzip-accent/20 rounded-full flex items-center justify-center hover:bg-venzip-accent/30 transition-colors duration-300 cursor-pointer group">
+                  <Award className="h-5 w-5 text-venzip-accent group-hover:animate-bounce" />
+                </div>
+                <div className="w-10 h-10 bg-success-green/20 rounded-full flex items-center justify-center hover:bg-success-green/30 transition-colors duration-300 cursor-pointer group">
+                  <CheckCircle className="h-5 w-5 text-success-green group-hover:animate-bounce" />
+                </div>
+              </div>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Platform</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#frameworks" className="hover:text-white transition-colors">Frameworks</a></li>
-                <li><a href="#process" className="hover:text-white transition-colors">How It Works</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+              <h4 className="font-bold mb-6 text-lg text-white">Platform</h4>
+              <ul className="space-y-3 text-sm text-gray-300">
+                <li><a href="#features" className="hover:text-venzip-primary transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Features</a></li>
+                <li><a href="#frameworks" className="hover:text-venzip-primary transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Frameworks</a></li>
+                <li><a href="#process" className="hover:text-venzip-primary transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />How It Works</a></li>
+                <li><a href="#" className="hover:text-venzip-primary transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Pricing</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Compliance Guides</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Best Practices</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
+              <h4 className="font-bold mb-6 text-lg text-white">Resources</h4>
+              <ul className="space-y-3 text-sm text-gray-300">
+                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Documentation</a></li>
+                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Compliance Guides</a></li>
+                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Best Practices</a></li>
+                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Support</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="mailto:support@venzip.com" className="hover:text-white transition-colors">Contact</a></li>
+              <h4 className="font-bold mb-6 text-lg text-white">Company</h4>
+              <ul className="space-y-3 text-sm text-gray-300">
+                <li><a href="#" className="hover:text-success-green transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />About Us</a></li>
+                <li><a href="#" className="hover:text-success-green transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Security</a></li>
+                <li><a href="#" className="hover:text-success-green transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Privacy Policy</a></li>
+                <li><a href="mailto:support@venzip.com" className="hover:text-success-green transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Contact</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2025 Venzip. All rights reserved. Built with ❤️ for compliance teams.</p>
+          <div className="border-t border-gray-700/50 mt-12 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-gray-400">
+                &copy; 2025 Venzip. All rights reserved. Built with ❤️ for compliance teams.
+              </p>
+              <div className="flex items-center space-x-6 text-sm text-gray-400">
+                <span className="flex items-center space-x-2">
+                  <ShieldCheck className="h-4 w-4 text-venzip-primary" />
+                  <span>SOC 2 Compliant</span>
+                </span>
+                <span className="flex items-center space-x-2">
+                  <Award className="h-4 w-4 text-venzip-accent" />
+                  <span>Enterprise Grade</span>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
