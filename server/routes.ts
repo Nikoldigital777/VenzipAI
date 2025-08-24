@@ -1393,5 +1393,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  // Evidence mapping routes
+  app.get("/api/evidence/mappings", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const { framework, status } = req.query;
+      const mappings = await storage.getEvidenceMappings({
+        userId,
+        validationStatus: status as string
+      });
+
+      res.json(mappings);
+    } catch (error) {
+      console.error("Error fetching evidence mappings:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/evidence/analyze", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const { documentId, frameworkId } = req.body;
+      
+      // Import and use evidence mapping service
+      const { evidenceMappingService } = await import('./evidenceMapping');
+      const mappings = await evidenceMappingService.analyzeDocumentForCompliance(
+        documentId,
+        userId,
+        frameworkId
+      );
+
+      res.json(mappings);
+    } catch (error) {
+      console.error("Error analyzing document:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.put("/api/evidence/mappings/:id/validate", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const updatedMapping = await storage.updateEvidenceMapping(id, {
+        validationStatus: status,
+        validatedBy: userId,
+        validatedAt: new Date()
+      });
+
+      res.json(updatedMapping);
+    } catch (error) {
+      console.error("Error validating mapping:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/evidence/gaps", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const { framework, status } = req.query;
+      const gaps = await storage.getEvidenceGaps({
+        userId,
+        status: status as string
+      });
+
+      res.json(gaps);
+    } catch (error) {
+      console.error("Error fetching evidence gaps:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/evidence/identify-gaps", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const { frameworkId } = req.body;
+      
+      // Import and use evidence mapping service
+      const { evidenceMappingService } = await import('./evidenceMapping');
+      const gaps = await evidenceMappingService.identifyComplianceGaps(userId, frameworkId);
+
+      res.json(gaps);
+    } catch (error) {
+      console.error("Error identifying gaps:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/evidence/cross-mappings/:requirementId", isAuthenticated, async (req, res) => {
+    try {
+      const { requirementId } = req.params;
+      const crossMappings = await storage.getCrossFrameworkMappings(requirementId);
+      res.json(crossMappings);
+    } catch (error) {
+      console.error("Error fetching cross-framework mappings:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/evidence/create-cross-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const { primaryRequirementId } = req.body;
+      
+      // Import and use evidence mapping service
+      const { evidenceMappingService } = await import('./evidenceMapping');
+      await evidenceMappingService.createCrossFrameworkMappings(primaryRequirementId);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error creating cross-framework mappings:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/compliance/requirements", isAuthenticated, async (req, res) => {
+    try {
+      const { framework } = req.query;
+      const requirements = await storage.getComplianceRequirements(framework as string);
+      res.json(requirements);
+    } catch (error) {
+      console.error("Error fetching compliance requirements:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   return httpServer;
 }

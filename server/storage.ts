@@ -13,6 +13,10 @@ import {
   notifications,
   riskScoreHistory,
   auditLogs,
+  complianceRequirements,
+  evidenceMappings,
+  evidenceGaps,
+  crossFrameworkMappings,
   type User,
   type UpsertUser,
   type Company,
@@ -40,6 +44,14 @@ import {
   type InsertRiskScoreHistory,
   type AuditLog,
   type InsertAuditLog,
+  type ComplianceRequirement,
+  type InsertComplianceRequirement,
+  type EvidenceMapping,
+  type InsertEvidenceMapping,
+  type EvidenceGap,
+  type InsertEvidenceGap,
+  type CrossFrameworkMapping,
+  type InsertCrossFrameworkMapping,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, like } from "drizzle-orm";
@@ -282,6 +294,11 @@ export class DatabaseStorage implements IStorage {
     await db.delete(documents).where(eq(documents.id, id));
   }
 
+  async getDocumentById(id: string): Promise<Document | undefined> {
+    const results = await db.select().from(documents).where(eq(documents.id, id)).limit(1);
+    return results[0];
+  }
+
   // Risk operations
   async getRisksByUserId(userId: string): Promise<Risk[]> {
     return await db.select().from(risks)
@@ -396,6 +413,103 @@ export class DatabaseStorage implements IStorage {
   async createAuditLog(auditLog: InsertAuditLog): Promise<AuditLog> {
     const [newAuditLog] = await db.insert(auditLogs).values(auditLog).returning();
     return newAuditLog;
+  }
+
+  // Evidence mapping operations
+  async createEvidenceMapping(mapping: InsertEvidenceMapping): Promise<EvidenceMapping> {
+    const [result] = await db.insert(evidenceMappings).values(mapping).returning();
+    return result;
+  }
+
+  async getEvidenceMappings(params: {
+    userId: string;
+    documentId?: string;
+    requirementId?: string;
+    validationStatus?: string;
+  }): Promise<EvidenceMapping[]> {
+    let query = db.select().from(evidenceMappings).where(eq(evidenceMappings.userId, params.userId));
+    
+    if (params.documentId) {
+      query = query.where(eq(evidenceMappings.documentId, params.documentId));
+    }
+    if (params.requirementId) {
+      query = query.where(eq(evidenceMappings.requirementId, params.requirementId));
+    }
+    if (params.validationStatus) {
+      query = query.where(eq(evidenceMappings.validationStatus, params.validationStatus));
+    }
+    
+    return await query;
+  }
+
+  async updateEvidenceMapping(id: string, updates: Partial<EvidenceMapping>): Promise<EvidenceMapping> {
+    const [result] = await db.update(evidenceMappings)
+      .set(updates)
+      .where(eq(evidenceMappings.id, id))
+      .returning();
+    return result;
+  }
+
+  // Compliance requirements operations
+  async getComplianceRequirements(frameworkId?: string): Promise<ComplianceRequirement[]> {
+    if (frameworkId) {
+      return await db.select().from(complianceRequirements)
+        .where(eq(complianceRequirements.frameworkId, frameworkId));
+    }
+    return await db.select().from(complianceRequirements);
+  }
+
+  async createComplianceRequirement(requirement: InsertComplianceRequirement): Promise<ComplianceRequirement> {
+    const [result] = await db.insert(complianceRequirements).values(requirement).returning();
+    return result;
+  }
+
+  // Evidence gaps operations
+  async createEvidenceGap(gap: InsertEvidenceGap): Promise<EvidenceGap> {
+    const [result] = await db.insert(evidenceGaps).values(gap).returning();
+    return result;
+  }
+
+  async getEvidenceGaps(params: {
+    userId: string;
+    status?: string;
+    severity?: string;
+  }): Promise<EvidenceGap[]> {
+    let query = db.select().from(evidenceGaps).where(eq(evidenceGaps.userId, params.userId));
+    
+    if (params.status) {
+      query = query.where(eq(evidenceGaps.status, params.status));
+    }
+    if (params.severity) {
+      query = query.where(eq(evidenceGaps.severity, params.severity));
+    }
+    
+    return await query;
+  }
+
+  async updateEvidenceGap(id: string, updates: Partial<EvidenceGap>): Promise<EvidenceGap> {
+    const [result] = await db.update(evidenceGaps)
+      .set(updates)
+      .where(eq(evidenceGaps.id, id))
+      .returning();
+    return result;
+  }
+
+  // Cross-framework mappings operations
+  async getCrossFrameworkMappings(requirementId?: string): Promise<CrossFrameworkMapping[]> {
+    if (requirementId) {
+      return await db.select().from(crossFrameworkMappings)
+        .where(or(
+          eq(crossFrameworkMappings.primaryRequirementId, requirementId),
+          eq(crossFrameworkMappings.relatedRequirementId, requirementId)
+        ));
+    }
+    return await db.select().from(crossFrameworkMappings);
+  }
+
+  async createCrossFrameworkMapping(mapping: InsertCrossFrameworkMapping): Promise<CrossFrameworkMapping> {
+    const [result] = await db.insert(crossFrameworkMappings).values(mapping).returning();
+    return result;
   }
 }
 

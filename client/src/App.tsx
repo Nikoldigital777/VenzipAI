@@ -12,6 +12,7 @@ import Tasks from "@/pages/tasks";
 import Documents from "@/pages/documents";
 import Risks from "@/pages/risks";
 import NotFound from "@/pages/not-found";
+import EvidenceMappingDashboard from "@/components/evidence-mapping-dashboard";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -28,6 +29,7 @@ function Router() {
           <Route path="/tasks" component={Tasks} />
           <Route path="/documents" component={Documents} />
           <Route path="/risks" component={Risks} />
+          <Route path="/evidence" component={EvidenceMappingDashboard} />
         </>
       )}
       <Route component={NotFound} />

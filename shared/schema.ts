@@ -247,6 +247,69 @@ export const riskScoreHistory = pgTable("risk_score_history", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Compliance requirements table for framework-specific requirements
+export const complianceRequirements = pgTable("compliance_requirements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  frameworkId: varchar("framework_id").notNull().references(() => frameworks.id),
+  requirementId: varchar("requirement_id").notNull(), // e.g., "ISO27001-A.5.1.1"
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  category: varchar("category").notNull(), // e.g., "access_control", "data_protection"
+  priority: varchar("priority").notNull().default('medium'), // 'low', 'medium', 'high', 'critical'
+  evidenceTypes: text("evidence_types").array().default(sql`'{}'::text[]`), // Expected evidence types
+  controlObjective: text("control_objective"),
+  implementationGuidance: text("implementation_guidance"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Evidence mappings table for linking documents to compliance requirements
+export const evidenceMappings = pgTable("evidence_mappings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  documentId: varchar("document_id").notNull().references(() => documents.id),
+  requirementId: varchar("requirement_id").notNull().references(() => complianceRequirements.id),
+  mappingConfidence: decimal("mapping_confidence", { precision: 3, scale: 2 }).notNull(), // 0.0 to 1.0
+  qualityScore: decimal("quality_score", { precision: 3, scale: 2 }).notNull(), // 0.0 to 1.0
+  mappingType: varchar("mapping_type").notNull(), // 'direct', 'partial', 'supporting', 'cross_reference'
+  evidenceSnippets: jsonb("evidence_snippets"), // Relevant text snippets from document
+  aiAnalysis: jsonb("ai_analysis"), // AI analysis results
+  validationStatus: varchar("validation_status").notNull().default('pending'), // 'pending', 'validated', 'rejected', 'needs_review'
+  validatedBy: varchar("validated_by").references(() => users.id),
+  validatedAt: timestamp("validated_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Evidence gaps table for tracking compliance gaps
+export const evidenceGaps = pgTable("evidence_gaps", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  requirementId: varchar("requirement_id").notNull().references(() => complianceRequirements.id),
+  gapType: varchar("gap_type").notNull(), // 'missing_evidence', 'insufficient_evidence', 'outdated_evidence', 'poor_quality'
+  severity: varchar("severity").notNull(), // 'low', 'medium', 'high', 'critical'
+  description: text("description").notNull(),
+  recommendedActions: text("recommended_actions").array().default(sql`'{}'::text[]`),
+  estimatedEffort: varchar("estimated_effort"), // 'low', 'medium', 'high'
+  dueDate: timestamp("due_date"),
+  status: varchar("status").notNull().default('open'), // 'open', 'in_progress', 'resolved', 'accepted_risk'
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Cross-framework mappings for requirements that apply across multiple frameworks
+export const crossFrameworkMappings = pgTable("cross_framework_mappings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  primaryRequirementId: varchar("primary_requirement_id").notNull().references(() => complianceRequirements.id),
+  relatedRequirementId: varchar("related_requirement_id").notNull().references(() => complianceRequirements.id),
+  mappingType: varchar("mapping_type").notNull(), // 'equivalent', 'similar', 'related', 'supporting'
+  confidence: decimal("confidence", { precision: 3, scale: 2 }).notNull(), // 0.0 to 1.0
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Audit logs table
 export const auditLogs = pgTable("audit_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -322,6 +385,31 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   createdAt: true,
 });
 
+export const insertComplianceRequirementSchema = createInsertSchema(complianceRequirements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEvidenceMappingSchema = createInsertSchema(evidenceMappings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  validatedAt: true,
+});
+
+export const insertEvidenceGapSchema = createInsertSchema(evidenceGaps).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  resolvedAt: true,
+});
+
+export const insertCrossFrameworkMappingSchema = createInsertSchema(crossFrameworkMappings).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertTaskCommentSchema = createInsertSchema(taskComments).omit({
   id: true,
   createdAt: true,
@@ -360,6 +448,14 @@ export type RiskScoreHistory = typeof riskScoreHistory.$inferSelect;
 export type InsertRiskScoreHistory = z.infer<typeof insertRiskScoreHistorySchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type ComplianceRequirement = typeof complianceRequirements.$inferSelect;
+export type InsertComplianceRequirement = z.infer<typeof insertComplianceRequirementSchema>;
+export type EvidenceMapping = typeof evidenceMappings.$inferSelect;
+export type InsertEvidenceMapping = z.infer<typeof insertEvidenceMappingSchema>;
+export type EvidenceGap = typeof evidenceGaps.$inferSelect;
+export type InsertEvidenceGap = z.infer<typeof insertEvidenceGapSchema>;
+export type CrossFrameworkMapping = typeof crossFrameworkMappings.$inferSelect;
+export type InsertCrossFrameworkMapping = z.infer<typeof insertCrossFrameworkMappingSchema>;
 
 // --- Legacy compliance tasks (keeping for backward compatibility) ---
 export const complianceTasks = pgTable("compliance_tasks", {

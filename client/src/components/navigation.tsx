@@ -12,7 +12,8 @@ import {
   User, 
   LogOut,
   Menu,
-  X
+  X,
+  MapPin
 } from "lucide-react";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 
@@ -27,6 +28,7 @@ export default function Navigation() {
     { path: "/tasks", label: "Tasks", icon: CheckSquare },
     { path: "/documents", label: "Evidence", icon: FileText },
     { path: "/risks", label: "Risks", icon: AlertTriangle },
+    { path: "/evidence", label: "Evidence Mapping", icon: MapPin },
   ];
 
   const isActive = (path: string) => location === path;
