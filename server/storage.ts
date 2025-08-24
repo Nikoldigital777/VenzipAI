@@ -7,6 +7,9 @@ import {
   documents,
   risks,
   chatMessages,
+  vendorAssessments,
+  notifications,
+  auditLogs,
   type User,
   type UpsertUser,
   type Company,
@@ -22,6 +25,12 @@ import {
   type InsertRisk,
   type ChatMessage,
   type InsertChatMessage,
+  type VendorAssessment,
+  type InsertVendorAssessment,
+  type Notification,
+  type InsertNotification,
+  type AuditLog,
+  type InsertAuditLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, like } from "drizzle-orm";
@@ -66,6 +75,22 @@ export interface IStorage {
   // Chat operations
   getChatMessagesByUserId(userId: string, limit?: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  
+  // Vendor assessment operations
+  getVendorAssessmentsByUserId(userId: string): Promise<VendorAssessment[]>;
+  createVendorAssessment(vendorAssessment: InsertVendorAssessment): Promise<VendorAssessment>;
+  updateVendorAssessment(id: string, updates: Partial<InsertVendorAssessment>): Promise<VendorAssessment>;
+  deleteVendorAssessment(id: string): Promise<void>;
+  
+  // Notification operations
+  getNotificationsByUserId(userId: string, unreadOnly?: boolean): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(id: string): Promise<Notification>;
+  deleteNotification(id: string): Promise<void>;
+  
+  // Audit log operations
+  getAuditLogsByUserId(userId: string, limit?: number): Promise<AuditLog[]>;
+  createAuditLog(auditLog: InsertAuditLog): Promise<AuditLog>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -237,6 +262,55 @@ export class DatabaseStorage implements IStorage {
   async createChatMessage(messageData: InsertChatMessage): Promise<ChatMessage> {
     const [message] = await db.insert(chatMessages).values(messageData).returning();
     return message;
+  }
+
+  // Vendor assessment operations
+  async getVendorAssessmentsByUserId(userId: string): Promise<VendorAssessment[]> {
+    return await db.select().from(vendorAssessments).where(eq(vendorAssessments.userId, userId)).orderBy(desc(vendorAssessments.createdAt));
+  }
+
+  async createVendorAssessment(vendorAssessment: InsertVendorAssessment): Promise<VendorAssessment> {
+    const [newVendorAssessment] = await db.insert(vendorAssessments).values(vendorAssessment).returning();
+    return newVendorAssessment;
+  }
+
+  async updateVendorAssessment(id: string, updates: Partial<InsertVendorAssessment>): Promise<VendorAssessment> {
+    const [updatedVendorAssessment] = await db.update(vendorAssessments).set({ ...updates, updatedAt: new Date() }).where(eq(vendorAssessments.id, id)).returning();
+    return updatedVendorAssessment;
+  }
+
+  async deleteVendorAssessment(id: string): Promise<void> {
+    await db.delete(vendorAssessments).where(eq(vendorAssessments.id, id));
+  }
+
+  // Notification operations
+  async getNotificationsByUserId(userId: string, unreadOnly?: boolean): Promise<Notification[]> {
+    const conditions = unreadOnly ? and(eq(notifications.userId, userId), eq(notifications.isRead, false)) : eq(notifications.userId, userId);
+    return await db.select().from(notifications).where(conditions).orderBy(desc(notifications.createdAt));
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [newNotification] = await db.insert(notifications).values(notification).returning();
+    return newNotification;
+  }
+
+  async markNotificationAsRead(id: string): Promise<Notification> {
+    const [updatedNotification] = await db.update(notifications).set({ isRead: true, readAt: new Date() }).where(eq(notifications.id, id)).returning();
+    return updatedNotification;
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.id, id));
+  }
+
+  // Audit log operations
+  async getAuditLogsByUserId(userId: string, limit: number = 100): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs).where(eq(auditLogs.userId, userId)).orderBy(desc(auditLogs.createdAt)).limit(limit);
+  }
+
+  async createAuditLog(auditLog: InsertAuditLog): Promise<AuditLog> {
+    const [newAuditLog] = await db.insert(auditLogs).values(auditLog).returning();
+    return newAuditLog;
   }
 }
 

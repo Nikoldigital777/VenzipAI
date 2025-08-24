@@ -138,6 +138,64 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Vendor assessments table
+export const vendorAssessments = pgTable("vendor_assessments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  frameworkId: varchar("framework_id").references(() => frameworks.id),
+  vendorName: varchar("vendor_name").notNull(),
+  vendorDescription: text("vendor_description"),
+  services: text("services").notNull(), // What services they provide
+  dataProcessing: text("data_processing"), // What data they process
+  riskLevel: varchar("risk_level").notNull(), // 'low', 'medium', 'high', 'critical'
+  assessmentStatus: varchar("assessment_status").notNull().default('pending'), // 'pending', 'in_progress', 'completed', 'approved', 'rejected'
+  contractStartDate: timestamp("contract_start_date"),
+  contractEndDate: timestamp("contract_end_date"),
+  lastReviewDate: timestamp("last_review_date"),
+  nextReviewDate: timestamp("next_review_date"),
+  assessmentNotes: text("assessment_notes"),
+  complianceRequirements: text("compliance_requirements").array().default(sql`'{}'::text[]`),
+  documentationStatus: varchar("documentation_status").default('incomplete'), // 'incomplete', 'pending_review', 'complete'
+  assignedTo: varchar("assigned_to"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  type: varchar("type").notNull(), // 'info', 'warning', 'error', 'success', 'task_due', 'risk_alert', 'document_expiry'
+  priority: varchar("priority").notNull().default('medium'), // 'low', 'medium', 'high', 'urgent'
+  isRead: boolean("is_read").notNull().default(false),
+  actionUrl: varchar("action_url"), // URL to navigate to when clicked
+  relatedEntityType: varchar("related_entity_type"), // 'task', 'risk', 'document', 'vendor'
+  relatedEntityId: varchar("related_entity_id"),
+  expiresAt: timestamp("expires_at"), // Auto-delete after this date
+  createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
+});
+
+// Audit logs table
+export const auditLogs = pgTable("audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id), // Can be null for system actions
+  action: varchar("action").notNull(), // 'create', 'update', 'delete', 'login', 'logout', 'export', 'import'
+  entityType: varchar("entity_type").notNull(), // 'company', 'task', 'risk', 'document', 'vendor', 'user'
+  entityId: varchar("entity_id"), // ID of the affected entity
+  changes: jsonb("changes"), // Store what changed (before/after values)
+  metadata: jsonb("metadata"), // Additional context (IP address, user agent, etc.)
+  description: text("description"), // Human-readable description of the action
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  sessionId: varchar("session_id"),
+  success: boolean("success").notNull().default(true), // Whether the action succeeded
+  errorMessage: text("error_message"), // If action failed, store error details
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertCompanySchema = createInsertSchema(companies).omit({
   id: true,
@@ -173,6 +231,23 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
+export const insertVendorAssessmentSchema = createInsertSchema(vendorAssessments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
+});
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -189,6 +264,12 @@ export type Risk = typeof risks.$inferSelect;
 export type InsertRisk = z.infer<typeof insertRiskSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type VendorAssessment = typeof vendorAssessments.$inferSelect;
+export type InsertVendorAssessment = z.infer<typeof insertVendorAssessmentSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 
 // --- Enhanced Tasks and Risks ---
 export const taskStatusEnum = pgEnum("task_status", ["todo", "in_progress", "blocked", "done"]);
