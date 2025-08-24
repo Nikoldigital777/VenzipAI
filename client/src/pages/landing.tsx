@@ -492,11 +492,13 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-                  <i className="fas fa-shield-alt text-white text-sm"></i>
-                </div>
-                <span className="text-xl font-bold">Venzip</span>
+              <div className="mb-4">
+                <img 
+                  src={venzipLogo} 
+                  alt="Venzip Logo" 
+                  className="h-8"
+                  style={{ width: 'auto' }}
+                />
               </div>
               <p className="text-gray-400 text-sm">
                 AI-powered compliance platform for modern businesses. 
