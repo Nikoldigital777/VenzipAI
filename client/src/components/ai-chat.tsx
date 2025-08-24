@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,18 @@ export default function AIChat() {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
+
+  // Listen for global toggle events from navbar
+  useEffect(() => {
+    const open = () => setIsOpen(true);
+    const toggle = () => setIsOpen(prev => !prev);
+    window.addEventListener("open-ai-chat", open as any);
+    window.addEventListener("toggle-ai-chat", toggle as any);
+    return () => {
+      window.removeEventListener("open-ai-chat", open as any);
+      window.removeEventListener("toggle-ai-chat", toggle as any);
+    };
+  }, []);
 
   // Fetch chat messages
   const { data: messages = [] } = useQuery({

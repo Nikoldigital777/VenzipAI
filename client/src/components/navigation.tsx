@@ -48,6 +48,20 @@ export default function Navigation() {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
+            {/* AI Chat Toggle */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => window.dispatchEvent(new Event("toggle-ai-chat"))}
+              className="rounded-xl px-3 py-1.5 text-sm hover:bg-venzip-primary/10 hover:text-venzip-primary transition-colors"
+              aria-label="Toggle AI Chat"
+              title="Toggle AI Chat"
+              data-testid="button-ai-chat"
+            >
+              <i className="fas fa-robot mr-2"></i>
+              Ask Claude
+            </Button>
+
             {/* Notifications */}
             <Button variant="ghost" size="sm" className="relative" data-testid="notifications">
               <i className="fas fa-bell text-lg"></i>
