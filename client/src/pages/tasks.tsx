@@ -201,7 +201,7 @@ export default function TasksPage() {
     }
   };
 
-  const nextStatus = (currentStatus: string): string => {
+  const nextStatus = (currentStatus: string): "pending" | "in_progress" | "completed" => {
     const order = ["pending", "in_progress", "completed"] as const;
     const idx = order.indexOf(currentStatus as any);
     return order[Math.min(order.length - 1, idx + 1)];
@@ -304,7 +304,7 @@ export default function TasksPage() {
                 <div className="grid gap-4">
                   <div>
                     <Label htmlFor="framework">Framework</Label>
-                    <Select value={draft.frameworkId} onValueChange={(v) => setDraft(d => ({ ...d, frameworkId: v }))}>
+                    <Select value={draft.frameworkId || undefined} onValueChange={(v) => setDraft(d => ({ ...d, frameworkId: v }))}>
                       <SelectTrigger data-testid="task-framework">
                         <SelectValue />
                       </SelectTrigger>
@@ -398,7 +398,7 @@ export default function TasksPage() {
                     </Button>
                     <Button 
                       onClick={editingTask ? onUpdate : onCreate} 
-                      disabled={!draft.title || (!editingTask && createMutation.isPending) || (editingTask && updateMutation.isPending)}
+                      disabled={!Boolean(draft.title?.trim()) || (!editingTask && createMutation.isPending) || (editingTask && updateMutation.isPending)}
                       data-testid="save-task"
                     >
                       {editingTask ? (updateMutation.isPending ? "Updating..." : "Update") : (createMutation.isPending ? "Creating..." : "Create")}

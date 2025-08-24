@@ -415,7 +415,7 @@ export default function RisksPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="framework">Framework</Label>
-                      <Select value={draft.frameworkId} onValueChange={(v) => setDraft(d => ({ ...d, frameworkId: v }))}>
+                      <Select value={draft.frameworkId || undefined} onValueChange={(v) => setDraft(d => ({ ...d, frameworkId: v }))}>
                         <SelectTrigger data-testid="risk-framework">
                           <SelectValue />
                         </SelectTrigger>
@@ -562,7 +562,7 @@ export default function RisksPage() {
                     </Button>
                     <Button 
                       onClick={editingRisk ? onUpdate : onCreate} 
-                      disabled={!draft.title || !draft.description || (!editingRisk && createMutation.isPending) || (editingRisk && updateMutation.isPending)}
+                      disabled={!Boolean(draft.title?.trim()) || !Boolean(draft.description?.trim()) || (!editingRisk && createMutation.isPending) || (editingRisk && updateMutation.isPending)}
                       data-testid="save-risk"
                     >
                       {editingRisk ? (updateMutation.isPending ? "Updating..." : "Update") : (createMutation.isPending ? "Creating..." : "Create")}
