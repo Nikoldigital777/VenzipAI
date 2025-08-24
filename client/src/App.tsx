@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import Onboarding from "@/pages/onboarding";
 import Dashboard from "@/pages/dashboard";
 import Tasks from "@/pages/tasks";
+import AuditCalendar from "@/pages/audit-calendar";
 import Documents from "@/pages/documents";
 import Risks from "@/pages/risks";
 import Evidence from "@/pages/evidence";
@@ -27,6 +28,7 @@ function Router() {
           <Route path="/onboarding" component={Onboarding} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/tasks" component={Tasks} />
+          <Route path="/audit-calendar" component={AuditCalendar} />
           <Route path="/documents" component={Documents} />
           <Route path="/risks" component={Risks} />
           <Route path="/evidence" component={Evidence} />

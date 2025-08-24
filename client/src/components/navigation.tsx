@@ -13,7 +13,8 @@ import {
   LogOut,
   Menu,
   X,
-  MapPin
+  MapPin,
+  Calendar
 } from "lucide-react";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 
@@ -26,6 +27,7 @@ export default function Navigation() {
     { path: "/onboarding", label: "Onboarding", icon: Rocket },
     { path: "/dashboard", label: "Dashboard", icon: BarChart3 },
     { path: "/tasks", label: "Tasks", icon: CheckSquare },
+    { path: "/audit-calendar", label: "Audit Calendar", icon: Calendar },
     { path: "/documents", label: "Evidence", icon: FileText },
     { path: "/risks", label: "Risks", icon: AlertTriangle },
     { path: "/evidence", label: "Evidence Mapping", icon: MapPin },
