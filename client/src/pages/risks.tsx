@@ -275,39 +275,52 @@ export default function RisksPage() {
   return (
     <>
       <Navigation />
-      <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
-        <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
+      <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-danger-coral/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-warning-orange/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-br from-venzip-primary/8 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '1.5s'}}></div>
+        
+        <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
+          {/* Enhanced Header Section */}
+          <div className="mb-12 text-center animate-fadeInUp">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+              Risk <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Management</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Identify, assess, and mitigate compliance risks with AI-powered insights
+            </p>
+          </div>
           
-          {/* Tab Navigation */}
-          <div className="flex space-x-1 bg-white/50 dark:bg-gray-800/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700 w-fit">
-            <button
-              onClick={() => setActiveTab('risks')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'risks'
-                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-gray-600'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-              data-testid="tab-risks"
-            >
-              <AlertTriangle className="h-4 w-4 mr-2 inline" />
-              Risk Management
-            </button>
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'dashboard'
-                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-gray-600'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-              data-testid="tab-dashboard"
-            >
-              <div className="flex items-center">
-                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+          {/* Enhanced Tab Navigation */}
+          <div className="flex justify-center mb-8 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+            <div className="flex space-x-2 glass-card p-2 rounded-2xl border-0 shadow-xl">
+              <button
+                onClick={() => setActiveTab('risks')}
+                className={`px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                  activeTab === 'risks'
+                    ? 'bg-gradient-primary text-white shadow-lg scale-105'
+                    : 'text-gray-600 hover:text-venzip-primary hover:bg-venzip-primary/10'
+                }`}
+                data-testid="tab-risks"
+              >
+                <AlertTriangle className="h-4 w-4" />
+                Risk Management
+              </button>
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                  activeTab === 'dashboard'
+                    ? 'bg-gradient-primary text-white shadow-lg scale-105'
+                    : 'text-gray-600 hover:text-venzip-primary hover:bg-venzip-primary/10'
+                }`}
+                data-testid="tab-dashboard"
+              >
+                <CheckCircle className="h-4 w-4" />
                 AI Risk Dashboard
-              </div>
-            </button>
+              </button>
+            </div>
           </div>
 
           {/* Content based on active tab */}
@@ -315,69 +328,83 @@ export default function RisksPage() {
             <DynamicRiskDashboard />
           ) : (
             <>
-              {/* Risk Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="glass-card hover-lift" data-testid="summary-high-risk">
-              <CardContent className="p-6">
+              {/* Enhanced Risk Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <Card className="glass-card hover-lift group relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.3s'}} data-testid="summary-high-risk">
+              <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-danger-coral/10 rounded-full flex items-center justify-center">
-                    <AlertTriangle className="h-6 w-6 text-danger-coral" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-danger-coral/20 to-danger-coral/10 rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
+                    <AlertTriangle className="h-8 w-8 text-danger-coral group-hover:animate-pulse" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">{highRisks}</div>
-                    <div className="text-sm text-gray-500">High Risk</div>
+                    <div className="text-3xl font-bold text-gray-900 group-hover:text-danger-coral transition-colors duration-300">{highRisks}</div>
+                    <div className="text-sm text-gray-500 font-medium">High Risk Items</div>
+                    <div className="text-xs text-gray-400 mt-1">Require immediate attention</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="glass-card hover-lift" data-testid="summary-medium-risk">
-              <CardContent className="p-6">
+            <Card className="glass-card hover-lift group relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.4s'}} data-testid="summary-medium-risk">
+              <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-warning-orange/10 rounded-full flex items-center justify-center">
-                    <AlertCircle className="h-6 w-6 text-warning-orange" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                    <AlertCircle className="h-8 w-8 text-warning-orange group-hover:animate-bounce" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">{mediumRisks}</div>
-                    <div className="text-sm text-gray-500">Medium Risk</div>
+                    <div className="text-3xl font-bold text-gray-900 group-hover:text-warning-orange transition-colors duration-300">{mediumRisks}</div>
+                    <div className="text-sm text-gray-500 font-medium">Medium Risk Items</div>
+                    <div className="text-xs text-gray-400 mt-1">Monitor and mitigate</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="glass-card hover-lift" data-testid="summary-low-risk">
-              <CardContent className="p-6">
+            <Card className="glass-card hover-lift group relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.5s'}} data-testid="summary-low-risk">
+              <div className="absolute inset-0 bg-gradient-to-br from-success-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-success-green/10 rounded-full flex items-center justify-center">
-                    <CheckCircle className="h-6 w-6 text-success-green" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-3xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                    <CheckCircle className="h-8 w-8 text-success-green group-hover:animate-pulse" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">{lowRisks}</div>
-                    <div className="text-sm text-gray-500">Low Risk</div>
+                    <div className="text-3xl font-bold text-gray-900 group-hover:text-success-green transition-colors duration-300">{lowRisks}</div>
+                    <div className="text-sm text-gray-500 font-medium">Low Risk Items</div>
+                    <div className="text-xs text-gray-400 mt-1">Manageable impact</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Filters */}
-          <Card className="glass-card">
+          {/* Enhanced Filters */}
+          <Card className="glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.6s'}}>
             <CardHeader>
-              <CardTitle>Risks</CardTitle>
+              <CardTitle className="flex items-center gap-3 text-gray-900">
+                <div className="w-10 h-10 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-2xl flex items-center justify-center">
+                  <Search className="h-5 w-5 text-venzip-primary" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold">Risk Filters</div>
+                  <div className="text-sm text-gray-500 font-normal">Search and filter your risk portfolio</div>
+                </div>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="grid lg:grid-cols-5 gap-3">
+            <CardContent className="grid lg:grid-cols-5 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input 
                   placeholder="Search risks..." 
                   value={q} 
                   onChange={(e) => setQ(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 glass-card border-0 shadow-sm"
                   data-testid="search-risks"
                 />
               </div>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger data-testid="filter-category">
+                <SelectTrigger className="glass-card border-0 shadow-sm" data-testid="filter-category">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -389,7 +416,7 @@ export default function RisksPage() {
                 </SelectContent>
               </Select>
               <Select value={impact} onValueChange={setImpact}>
-                <SelectTrigger data-testid="filter-impact">
+                <SelectTrigger className="glass-card border-0 shadow-sm" data-testid="filter-impact">
                   <SelectValue placeholder="Impact" />
                 </SelectTrigger>
                 <SelectContent>
@@ -401,7 +428,7 @@ export default function RisksPage() {
                 </SelectContent>
               </Select>
               <Select value={likelihood} onValueChange={setLikelihood}>
-                <SelectTrigger data-testid="filter-likelihood">
+                <SelectTrigger className="glass-card border-0 shadow-sm" data-testid="filter-likelihood">
                   <SelectValue placeholder="Likelihood" />
                 </SelectTrigger>
                 <SelectContent>
@@ -413,7 +440,7 @@ export default function RisksPage() {
                 </SelectContent>
               </Select>
               <div className="flex gap-2">
-                <Button onClick={() => refetch()} data-testid="apply-filters" className="flex items-center gap-2">
+                <Button onClick={() => refetch()} data-testid="apply-filters" className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 flex items-center gap-2">
                   <RefreshCw className="h-4 w-4" />
                   Apply
                 </Button>
@@ -425,6 +452,7 @@ export default function RisksPage() {
                     setImpact(undefined); 
                     setLikelihood(undefined); 
                   }}
+                  className="glass-card border-0 shadow-sm hover:shadow-lg hover:-translate-y-1 transform transition-all duration-300"
                   data-testid="reset-filters"
                 >
                   Reset
@@ -433,8 +461,8 @@ export default function RisksPage() {
             </CardContent>
           </Card>
 
-          {/* Actions */}
-          <div className="flex justify-end">
+          {/* Enhanced Actions */}
+          <div className="flex justify-end animate-fadeInUp" style={{animationDelay: '0.7s'}}>
             <Dialog open={open || !!editingRisk} onOpenChange={(isOpen) => {
               if (!isOpen) {
                 setOpen(false);
@@ -455,11 +483,11 @@ export default function RisksPage() {
             }}>
               <DialogTrigger asChild>
                 <Button 
-                  className="bg-venzip-primary text-white flex items-center gap-2"
+                  className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 flex items-center gap-2 px-6 py-3 rounded-xl font-medium group"
                   onClick={() => setOpen(true)}
                   data-testid="new-risk-button"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300" />
                   New Risk
                 </Button>
               </DialogTrigger>

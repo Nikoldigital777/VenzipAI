@@ -126,14 +126,14 @@ export default function Navigation() {
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative hover:scale-110 transition-transform duration-300" data-testid="notifications">
+            <Button variant="ghost" size="sm" className="relative hover:scale-110 transition-transform duration-300 glass-card border-0 shadow-sm hover:shadow-lg" data-testid="notifications">
               <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-danger rounded-full animate-pulse"></span>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-danger-coral to-warning-orange rounded-full animate-pulse shadow-lg"></span>
             </Button>
 
             {/* User Profile */}
-            <div className="flex items-center space-x-2 group cursor-pointer">
-              <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <div className="flex items-center space-x-2 group cursor-pointer glass-card px-3 py-2 rounded-xl border-0 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
                 <User className="h-4 w-4 text-white" />
               </div>
               <span className="text-sm font-medium text-gray-700 hidden sm:block group-hover:text-venzip-primary transition-colors duration-300">Sarah Chen</span>
@@ -144,10 +144,10 @@ export default function Navigation() {
               variant="outline" 
               size="sm"
               onClick={() => window.location.href = "/api/logout"}
-              className="hidden sm:flex items-center hover:scale-105 transition-all duration-300"
+              className="hidden sm:flex items-center hover:scale-105 transition-all duration-300 glass-card border-0 shadow-sm hover:shadow-lg hover:-translate-y-1 group"
               data-testid="button-logout"
             >
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
               Logout
             </Button>
           </div>
