@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Clock,
   Activity,
-  RefreshCw
+  RefreshCw,
+  CheckCircle
 } from "lucide-react";
 
 type Gap = { 
@@ -48,9 +49,24 @@ export default function Dashboard() {
     return (
       <>
         <Navigation />
-        <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
-          <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
-            <Card><CardContent className="py-10">Loading dashboard…</CardContent></Card>
+        <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
+          {/* Loading background effects */}
+          <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+          <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '2s'}}></div>
+          
+          <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
+            <div className="grid gap-8">
+              <Card className="glass-card">
+                <CardContent className="py-16 text-center">
+                  <div className="w-16 h-16 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-6 animate-pulse">
+                    <Activity className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-xl font-medium text-gray-700">Loading your compliance dashboard...</div>
+                  <div className="text-sm text-gray-500 mt-2">Analyzing your compliance data</div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
         <AIChat />
@@ -62,20 +78,33 @@ export default function Dashboard() {
     return (
       <>
         <Navigation />
-        <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
-          <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
-            <Card>
-              <CardHeader><CardTitle>Dashboard</CardTitle></CardHeader>
-              <CardContent>
-                <div className="text-red-600 text-sm">
-                  {(error as Error)?.message || "Failed to load summary."}
+        <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-danger-coral/5 relative overflow-hidden">
+          {/* Error background effects */}
+          <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+          <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-danger-coral/10 to-transparent rounded-full blur-3xl animate-float"></div>
+          
+          <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
+            <Card className="glass-card border-danger-coral/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-gray-900">
+                  <div className="w-10 h-10 bg-danger-coral/10 rounded-2xl flex items-center justify-center">
+                    <AlertTriangle className="h-5 w-5 text-danger-coral" />
+                  </div>
+                  Dashboard Error
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-4 bg-danger-coral/5 border border-danger-coral/20 rounded-xl">
+                  <div className="text-danger-coral text-sm font-medium">
+                    {(error as Error)?.message || "Failed to load summary."}
+                  </div>
                 </div>
                 <button
                   onClick={() => refetch()}
-                  className="mt-4 inline-flex items-center px-4 py-2 rounded-md bg-venzip-primary text-white hover:bg-venzip-primary/90 transition-colors"
+                  className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 font-medium group"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry
+                  <RefreshCw className="h-4 w-4 mr-2 group-hover:animate-spin" />
+                  Retry Loading
                 </button>
               </CardContent>
             </Card>
@@ -91,145 +120,230 @@ export default function Dashboard() {
   return (
     <>
       <Navigation />
-      <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
-        <div className="max-w-7xl mx-auto px-4 py-12 grid lg:grid-cols-3 gap-6">
-      {/* Compliance score */}
-      <Card className="lg:col-span-1 glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-venzip-primary/10 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-4 w-4 text-venzip-primary" />
-            </div>
-            Overall compliance
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center py-8">
-          <ProgressRing percentage={compliancePercent} />
-        </CardContent>
-      </Card>
-
-      {/* Stats */}
-      <Card className="lg:col-span-2">
-        <CardHeader><CardTitle>Key stats</CardTitle></CardHeader>
-        <CardContent className="grid sm:grid-cols-4 gap-4">
-          <div className="rounded-xl border p-5 glass-card hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-gray-500">Evidence uploads</div>
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Upload className="h-4 w-4 text-blue-600" />
-              </div>
-            </div>
-            <div className="text-3xl font-semibold text-gray-900">{stats.uploads}</div>
+      <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-br from-venzip-secondary/8 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '1.5s'}}></div>
+        
+        <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
+          {/* Header Section */}
+          <div className="mb-12 text-center animate-fadeInUp">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+              Compliance <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Dashboard</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Monitor your compliance progress and track key metrics in real-time
+            </p>
           </div>
-          <div className="rounded-xl border p-5 glass-card hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-gray-500">AI conversations</div>
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <MessageSquare className="h-4 w-4 text-green-600" />
-              </div>
-            </div>
-            <div className="text-3xl font-semibold text-gray-900">{stats.conversations}</div>
-          </div>
-          <div className="rounded-xl border p-5 glass-card hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-gray-500">High priority tasks</div>
-              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Target className="h-4 w-4 text-orange-600" />
-              </div>
-            </div>
-            <div className="text-3xl font-semibold text-gray-900">{stats.tasksOpenHigh || 0}</div>
-          </div>
-          <div className="rounded-xl border p-5 glass-card hover:shadow-lg transition-all duration-200">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-gray-500">High impact risks</div>
-              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-              </div>
-            </div>
-            <div className="text-3xl font-semibold text-gray-900">{stats.risksHigh || 0}</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Gaps */}
-      <Card className="lg:col-span-2 glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <AlertTriangle className="h-4 w-4 text-yellow-600" />
-            </div>
-            Top gaps
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {gaps.length === 0 ? (
-            <div className="text-sm text-gray-500">No gaps detected.</div>
-          ) : (
-            <ul className="space-y-3">
-              {gaps.map((g: Gap) => (
-                <li key={g.id} className="flex items-center justify-between rounded-lg border p-4">
-                  <div>
-                    <div className="font-medium">
-                      {g.title}
-                      <span className="ml-2 text-xs text-gray-500">
-                        {g.kind === "task" 
-                          ? `(${g.meta?.framework?.toUpperCase() || "task"})` 
-                          : `(${g.meta?.category || "risk"})`
-                        }
-                      </span>
-                    </div>
-                    {g.meta?.dueDate && (
-                      <div className="text-xs text-gray-400 mt-1">
-                        Due: {new Date(g.meta.dueDate).toLocaleDateString()}
-                      </div>
-                    )}
+          
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Enhanced Compliance Score Card */}
+            <Card className="lg:col-span-1 glass-card group hover-lift relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.1s'}}>
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="flex items-center gap-3 text-gray-900 group-hover:text-venzip-primary transition-colors duration-300">
+                  <div className="w-12 h-12 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
+                    <TrendingUp className="h-6 w-6 text-venzip-primary group-hover:animate-bounce" />
                   </div>
-                  <span
-                    className={[
-                      "px-2 py-1 text-xs rounded-full capitalize",
-                      g.severity === "critical" ? "bg-red-500/15 text-red-600" :
-                      g.severity === "high" ? "bg-amber-500/15 text-amber-600" :
-                      g.severity === "medium" ? "bg-venzip-primary/20 text-venzip-primary-dark" :
-                      "bg-success-green/20 text-success-green"
-                    ].join(" ")}
-                  >
-                    {g.severity}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+                  <div>
+                    <div className="text-lg font-bold">Overall Compliance</div>
+                    <div className="text-sm text-gray-500 font-normal">Current progress status</div>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center py-12 relative z-10">
+                <ProgressRing 
+                  percentage={compliancePercent} 
+                  size={140}
+                  strokeWidth={12}
+                  showGlow={true}
+                  label="Complete"
+                />
+              </CardContent>
+            </Card>
 
-      {/* Recent activity */}
-      <Card className="lg:col-span-1 glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Activity className="h-4 w-4 text-purple-600" />
-            </div>
-            Recent activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-3">
-            {recentActivity.length === 0 ? (
-              <li className="text-sm text-gray-500">No activity yet.</li>
-            ) : recentActivity.map((a: Activity) => (
-              <li key={a.id} className="flex items-center justify-between border rounded-lg p-3">
-                <div className="text-sm">
-                  <div className="font-medium">{a.action}</div>
-                  <div className="text-gray-500">{a.resourceType}</div>
+            {/* Enhanced Stats Grid */}
+            <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-gray-900">
+                  <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center">
+                    <Activity className="h-5 w-5 text-info-blue" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold">Key Metrics</div>
+                    <div className="text-sm text-gray-500 font-normal">Real-time compliance statistics</div>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-info-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="text-sm font-medium text-gray-600 group-hover:text-info-blue transition-colors duration-300">Evidence Uploads</div>
+                    <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                      <Upload className="h-5 w-5 text-info-blue group-hover:animate-bounce" />
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 group-hover:text-info-blue transition-colors duration-300 relative z-10">{stats.uploads}</div>
+                  <div className="text-xs text-gray-500 mt-1 relative z-10">Documents processed</div>
                 </div>
-                <div className="text-xs text-gray-400">
-                  {new Date(a.createdAt).toLocaleString()}
+                
+                <div className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-success-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="text-sm font-medium text-gray-600 group-hover:text-success-green transition-colors duration-300">AI Conversations</div>
+                    <div className="w-10 h-10 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                      <MessageSquare className="h-5 w-5 text-success-green group-hover:animate-bounce" />
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 group-hover:text-success-green transition-colors duration-300 relative z-10">{stats.conversations}</div>
+                  <div className="text-xs text-gray-500 mt-1 relative z-10">Expert consultations</div>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+                
+                <div className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="text-sm font-medium text-gray-600 group-hover:text-warning-orange transition-colors duration-300">Priority Tasks</div>
+                    <div className="w-10 h-10 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
+                      <Target className="h-5 w-5 text-warning-orange group-hover:animate-bounce" />
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 group-hover:text-warning-orange transition-colors duration-300 relative z-10">{stats.tasksOpenHigh || 0}</div>
+                  <div className="text-xs text-gray-500 mt-1 relative z-10">High priority items</div>
+                </div>
+                
+                <div className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className="text-sm font-medium text-gray-600 group-hover:text-danger-coral transition-colors duration-300">Critical Risks</div>
+                    <div className="w-10 h-10 bg-gradient-to-br from-danger-coral/20 to-danger-coral/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                      <AlertTriangle className="h-5 w-5 text-danger-coral group-hover:animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 group-hover:text-danger-coral transition-colors duration-300 relative z-10">{stats.risksHigh || 0}</div>
+                  <div className="text-xs text-gray-500 mt-1 relative z-10">Requires attention</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Enhanced Gaps Section */}
+            <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-gray-900">
+                  <div className="w-12 h-12 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                    <AlertTriangle className="h-6 w-6 text-warning-orange group-hover:animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold">Compliance Gaps</div>
+                    <div className="text-sm text-gray-500 font-normal">Areas requiring immediate attention</div>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {gaps.length === 0 ? (
+                  <div className="glass-morphism-enhanced p-8 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="h-8 w-8 text-success-green" />
+                    </div>
+                    <div className="text-lg font-medium text-gray-900 mb-2">No Gaps Detected</div>
+                    <div className="text-sm text-gray-600">Your compliance framework is on track!</div>
+                  </div>
+                ) : (
+                  <ul className="space-y-4">
+                    {gaps.map((g: Gap, index) => (
+                      <li key={g.id} className="glass-morphism-enhanced p-6 group hover-lift cursor-pointer relative overflow-hidden animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
+                        <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div className="flex items-start justify-between relative z-10">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="font-semibold text-gray-900 group-hover:text-warning-orange transition-colors duration-300">
+                                {g.title}
+                              </div>
+                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                {g.kind === "task" 
+                                  ? `${g.meta?.framework?.toUpperCase() || "TASK"}` 
+                                  : `${g.meta?.category?.toUpperCase() || "RISK"}`
+                                }
+                              </span>
+                            </div>
+                            {g.meta?.dueDate && (
+                              <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
+                                <Clock className="h-3 w-3" />
+                                <span>Due: {new Date(g.meta.dueDate).toLocaleDateString()}</span>
+                              </div>
+                            )}
+                          </div>
+                          <span
+                            className={[
+                              "px-3 py-1.5 text-xs font-medium rounded-full capitalize transition-all duration-300 group-hover:scale-110",
+                              g.severity === "critical" ? "bg-danger-coral/15 text-danger-coral border border-danger-coral/20" :
+                              g.severity === "high" ? "bg-warning-orange/15 text-warning-orange border border-warning-orange/20" :
+                              g.severity === "medium" ? "bg-venzip-primary/15 text-venzip-primary border border-venzip-primary/20" :
+                              "bg-success-green/15 text-success-green border border-success-green/20"
+                            ].join(" ")}
+                          >
+                            {g.severity}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Enhanced Recent Activity */}
+            <Card className="lg:col-span-1 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-gray-900">
+                  <div className="w-12 h-12 bg-gradient-to-br from-venzip-secondary/20 to-venzip-secondary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
+                    <Activity className="h-6 w-6 text-venzip-secondary group-hover:animate-bounce" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold">Recent Activity</div>
+                    <div className="text-sm text-gray-500 font-normal">Latest system updates</div>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-4">
+                  {recentActivity.length === 0 ? (
+                    <li className="glass-morphism-enhanced p-6 text-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <Clock className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <div className="text-sm text-gray-500 font-medium">No activity yet</div>
+                      <div className="text-xs text-gray-400 mt-1">Start using the platform to see updates</div>
+                    </li>
+                  ) : recentActivity.map((a: Activity, index) => (
+                    <li key={a.id} className="glass-morphism-enhanced p-4 group hover-lift cursor-pointer relative overflow-hidden animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
+                      <div className="absolute inset-0 bg-gradient-to-br from-venzip-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="flex items-start justify-between relative z-10">
+                        <div className="flex items-start gap-3 flex-1">
+                          <div className="w-8 h-8 bg-gradient-to-br from-venzip-secondary/20 to-venzip-secondary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            <Activity className="h-4 w-4 text-venzip-secondary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium text-gray-900 group-hover:text-venzip-secondary transition-colors duration-300 text-sm leading-tight">
+                              {a.action}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1 capitalize">
+                              {a.resourceType.replace('_', ' ')}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-400 flex-shrink-0 ml-2">
+                          {new Date(a.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
       <AIChat />

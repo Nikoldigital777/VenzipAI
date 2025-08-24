@@ -156,35 +156,49 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Task Management</h1>
-          <p className="text-gray-600">Manage your compliance tasks efficiently</p>
+    <div className="space-y-8">
+      {/* Enhanced Header */}
+      <div className="glass-card p-8 animate-fadeInUp">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+              Task <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Management</span>
+            </h1>
+            <p className="text-xl text-gray-600 leading-relaxed">Manage your compliance tasks efficiently with AI-powered insights</p>
+          </div>
+          <Button 
+            onClick={onCreateTask} 
+            className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 font-medium px-6 py-3 text-lg group"
+            data-testid="button-create-task"
+          >
+            <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+            Create Task
+          </Button>
         </div>
-        <Button onClick={onCreateTask} data-testid="button-create-task">
-          <Plus className="h-4 w-4 mr-2" />
-          Create Task
-        </Button>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters & Search
+      {/* Enhanced Filters */}
+      <Card className="glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.1s'}}>
+        <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+        <CardHeader className="relative z-10">
+          <CardTitle className="flex items-center gap-3 text-gray-900">
+            <div className="w-12 h-12 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
+              <Filter className="h-6 w-6 text-venzip-primary group-hover:animate-bounce" />
+            </div>
+            <div>
+              <div className="text-xl font-bold">Smart Filters</div>
+              <div className="text-sm text-gray-500 font-normal">Find and organize your tasks</div>
+            </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <CardContent className="relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Enhanced Search */}
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-venzip-primary transition-colors duration-300" />
               <Input
                 placeholder="Search tasks..."
-                className="pl-10"
+                className="pl-10 glass-morphism-enhanced border-gray-200/50 focus:border-venzip-primary/50 focus:ring-venzip-primary/20 transition-all duration-300"
                 value={filters.search || ''}
                 onChange={(e) => handleSearch(e.target.value)}
                 data-testid="input-search-tasks"
@@ -267,18 +281,24 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
           ))}
         </div>
       ) : tasksData?.tasks.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <div className="text-6xl mb-4">📋</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
-              <p className="text-gray-600 mb-4">
+        <Card className="glass-card animate-fadeInUp">
+          <CardContent className="p-16 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-24 h-24 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-bounce">
+                <span className="text-4xl">📋</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">No tasks found</h3>
+              <p className="text-gray-600 mb-8 leading-relaxed">
                 {Object.keys(filters).some(key => filters[key as keyof TaskFilters] && key !== 'limit' && key !== 'offset')
                   ? "No tasks match your current filters. Try adjusting your search criteria."
-                  : "Get started by creating your first task."}
+                  : "Get started by creating your first task to track your compliance progress."}
               </p>
-              <Button onClick={onCreateTask} data-testid="button-create-first-task">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button 
+                onClick={onCreateTask} 
+                className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 font-medium px-8 py-3 text-lg group"
+                data-testid="button-create-first-task"
+              >
+                <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
                 Create Your First Task
               </Button>
             </div>
@@ -286,22 +306,32 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="task-grid">
-            {tasksData.tasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onEdit={onEditTask}
-                onComplete={handleCompleteTask}
-                onView={onViewTask}
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="task-grid">
+            {tasksData?.tasks.map((task, index) => (
+              <div 
+                key={task.id} 
+                className="animate-fadeInUp"
+                style={{animationDelay: `${0.1 * index}s`}}
+              >
+                <TaskCard
+                  task={task}
+                  onEdit={onEditTask}
+                  onComplete={handleCompleteTask}
+                  onView={onViewTask}
+                />
+              </div>
             ))}
           </div>
 
-          {/* Load More */}
+          {/* Enhanced Load More */}
           {tasksData && tasksData.pagination.hasMore && (
-            <div className="text-center">
-              <Button variant="outline" onClick={loadMore} data-testid="button-load-more">
+            <div className="text-center animate-fadeInUp">
+              <Button 
+                variant="outline" 
+                onClick={loadMore} 
+                className="border-venzip-primary/30 text-venzip-primary hover:bg-venzip-primary/10 hover:border-venzip-primary/50 hover:scale-105 transition-all duration-300 font-medium px-8 py-3"
+                data-testid="button-load-more"
+              >
                 Load More Tasks
               </Button>
             </div>
