@@ -13,6 +13,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { 
+  AlertTriangle, 
+  AlertCircle, 
+  CheckCircle, 
+  Plus,
+  Loader2,
+  Search,
+  RefreshCw
+} from "lucide-react";
 
 type Risk = {
   id: string;
@@ -273,7 +282,7 @@ export default function RisksPage() {
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-danger-coral/10 rounded-full flex items-center justify-center">
-                    <i className="fas fa-exclamation-triangle text-danger-coral text-lg"></i>
+                    <AlertTriangle className="h-6 w-6 text-danger-coral" />
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-gray-900">{highRisks}</div>
@@ -287,7 +296,7 @@ export default function RisksPage() {
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-warning-orange/10 rounded-full flex items-center justify-center">
-                    <i className="fas fa-exclamation-circle text-warning-orange text-lg"></i>
+                    <AlertCircle className="h-6 w-6 text-warning-orange" />
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-gray-900">{mediumRisks}</div>
@@ -301,7 +310,7 @@ export default function RisksPage() {
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-success-green/10 rounded-full flex items-center justify-center">
-                    <i className="fas fa-check-circle text-success-green text-lg"></i>
+                    <CheckCircle className="h-6 w-6 text-success-green" />
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-gray-900">{lowRisks}</div>
@@ -318,12 +327,16 @@ export default function RisksPage() {
               <CardTitle>Risks</CardTitle>
             </CardHeader>
             <CardContent className="grid lg:grid-cols-5 gap-3">
-              <Input 
-                placeholder="Search…" 
-                value={q} 
-                onChange={(e) => setQ(e.target.value)}
-                data-testid="search-risks"
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input 
+                  placeholder="Search risks..." 
+                  value={q} 
+                  onChange={(e) => setQ(e.target.value)}
+                  className="pl-10"
+                  data-testid="search-risks"
+                />
+              </div>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger data-testid="filter-category">
                   <SelectValue placeholder="Category" />
@@ -361,7 +374,10 @@ export default function RisksPage() {
                 </SelectContent>
               </Select>
               <div className="flex gap-2">
-                <Button onClick={() => refetch()} data-testid="apply-filters">Apply</Button>
+                <Button onClick={() => refetch()} data-testid="apply-filters" className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Apply
+                </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => { 
@@ -400,10 +416,11 @@ export default function RisksPage() {
             }}>
               <DialogTrigger asChild>
                 <Button 
-                  className="bg-venzip-primary text-white"
+                  className="bg-venzip-primary text-white flex items-center gap-2"
                   onClick={() => setOpen(true)}
                   data-testid="new-risk-button"
                 >
+                  <Plus className="h-4 w-4" />
                   New Risk
                 </Button>
               </DialogTrigger>
@@ -578,7 +595,7 @@ export default function RisksPage() {
             <CardContent>
               {isLoading ? (
                 <div className="py-8 text-sm text-gray-500 text-center">
-                  <div className="w-8 h-8 border-4 border-venzip-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-venzip-primary" />
                   Loading risks…
                 </div>
               ) : (

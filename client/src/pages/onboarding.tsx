@@ -13,6 +13,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Shield, 
+  Star, 
+  ChevronRight, 
+  Award, 
+  Building, 
+  Factory, 
+  PieChart, 
+  Check, 
+  Clock, 
+  Lightbulb,
+  X,
+  Sparkles,
+  Target,
+  Rocket,
+  DollarSign,
+  Heart,
+  Cloud,
+  ShoppingCart,
+  MoreHorizontal,
+  Users,
+  Mail,
+  CheckSquare,
+  FolderOpen,
+  Settings,
+  Bell,
+  AlertTriangle,
+  TrendingUp,
+  Info,
+  Calendar,
+  Sun
+} from "lucide-react";
 
 interface CompanyData {
   name: string;
@@ -259,10 +291,10 @@ export default function Onboarding() {
             <div className="inline-flex items-center justify-center p-4 mb-8">
               <div className="relative">
                 <div className="w-24 h-24 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center shadow-2xl animate-float">
-                  <i className="fas fa-shield-alt text-white text-3xl"></i>
+                  <Shield className="h-12 w-12 text-white" />
                 </div>
                 <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center animate-pulse">
-                  <i className="fas fa-star text-white text-xs"></i>
+                  <Star className="h-4 w-4 text-white" />
                 </div>
               </div>
             </div>
@@ -303,7 +335,7 @@ export default function Onboarding() {
                 
                 <div className="flex items-center">
                   <div className="w-20 h-1 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full"></div>
-                  <i className="fas fa-chevron-right text-venzip-primary mx-2"></i>
+                  <ChevronRight className="h-5 w-5 text-venzip-primary mx-2" />
                 </div>
                 
                 <div className="flex flex-col items-center space-y-3 group">
@@ -321,7 +353,7 @@ export default function Onboarding() {
                 
                 <div className="flex items-center">
                   <div className="w-20 h-1 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full"></div>
-                  <i className="fas fa-chevron-right text-venzip-accent mx-2"></i>
+                  <ChevronRight className="h-5 w-5 text-venzip-accent mx-2" />
                 </div>
                 
                 <div className="flex flex-col items-center space-y-3 group">
@@ -348,7 +380,7 @@ export default function Onboarding() {
                 <CardContent className="p-12">
                   <div className="text-center mb-12">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full mb-6 shadow-xl">
-                      <i className="fas fa-certificate text-white text-2xl"></i>
+                      <Award className="h-10 w-10 text-white" />
                     </div>
                     <h2 className="text-4xl font-bold text-gray-900 mb-4">
                       Choose Your <span className="bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Compliance Frameworks</span>
@@ -369,7 +401,7 @@ export default function Onboarding() {
                         />
                         {selectedFrameworks.includes(framework.name) && (
                           <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-success-green to-venzip-primary rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                            <i className="fas fa-check text-white text-sm"></i>
+                            <Check className="h-4 w-4 text-white" />
                           </div>
                         )}
                       </div>
@@ -384,7 +416,7 @@ export default function Onboarding() {
                         <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center space-x-3">
                             <div className="w-12 h-12 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center">
-                              <i className="fas fa-chart-pie text-white text-lg"></i>
+                              <PieChart className="h-6 w-6 text-white" />
                             </div>
                             <div>
                               <h3 className="text-2xl font-bold text-gray-900">Your Selection</h3>
@@ -410,7 +442,7 @@ export default function Onboarding() {
                                       className="ml-2 w-5 h-5 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200"
                                       data-testid={`remove-framework-${frameworkName}`}
                                     >
-                                      <i className="fas fa-times text-xs"></i>
+                                      <X className="h-3 w-3" />
                                     </button>
                                   </span>
                                 </div>
@@ -422,7 +454,7 @@ export default function Onboarding() {
                             <h4 className="text-lg font-semibold text-gray-800 mb-3">Estimated Timeline</h4>
                             <div className="flex items-center space-x-4">
                               <div className="w-16 h-16 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center shadow-lg">
-                                <i className="fas fa-clock text-white text-xl"></i>
+                                <Clock className="h-8 w-8 text-white" />
                               </div>
                               <div>
                                 <div className="text-3xl font-bold bg-gradient-to-r from-warning-orange to-danger-coral bg-clip-text text-transparent">
@@ -435,7 +467,7 @@ export default function Onboarding() {
                         </div>
                         
                         <div className="flex items-center justify-center p-4 bg-gradient-to-r from-success-green/10 to-venzip-primary/10 rounded-xl border border-success-green/20">
-                          <i className="fas fa-lightbulb text-warning-orange mr-3 text-lg"></i>
+                          <Lightbulb className="h-5 w-5 text-warning-orange mr-3" />
                           <span className="text-gray-700 font-medium">AI will customize your roadmap based on these selections</span>
                         </div>
                       </div>
@@ -451,7 +483,7 @@ export default function Onboarding() {
                 <CardContent className="p-12">
                   <div className="text-center mb-12">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full mb-6 shadow-xl">
-                      <i className="fas fa-building text-white text-2xl"></i>
+                      <Building className="h-10 w-10 text-white" />
                     </div>
                     <h3 className="text-4xl font-bold text-gray-900 mb-4">
                       Tell Us About Your <span className="bg-gradient-to-r from-venzip-accent to-venzip-secondary bg-clip-text text-transparent">Company</span>
@@ -464,7 +496,7 @@ export default function Onboarding() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="group">
                       <Label htmlFor="companyName" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-primary transition-colors duration-200">
-                        <i className="fas fa-building mr-2 text-venzip-primary"></i>
+                        <Building className="h-4 w-4 mr-2 text-venzip-primary inline" />
                         Company Name
                       </Label>
                       <div className="relative">
@@ -484,7 +516,7 @@ export default function Onboarding() {
                     
                     <div className="group">
                       <Label htmlFor="industry" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-accent transition-colors duration-200">
-                        <i className="fas fa-industry mr-2 text-venzip-accent"></i>
+                        <Factory className="h-4 w-4 mr-2 text-venzip-accent inline" />
                         Industry
                       </Label>
                       <Select value={companyData.industry} onValueChange={(value) => setCompanyData(prev => ({ ...prev, industry: value }))}>
@@ -494,31 +526,31 @@ export default function Onboarding() {
                         <SelectContent className="rounded-xl shadow-2xl border-0">
                           <SelectItem value="fintech" className="text-lg py-3 rounded-lg hover:bg-venzip-primary/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-coins text-venzip-primary"></i>
+                              <DollarSign className="h-4 w-4 text-venzip-primary" />
                               <span>Financial Technology</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="healthcare" className="text-lg py-3 rounded-lg hover:bg-danger-coral/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-heartbeat text-danger-coral"></i>
+                              <Heart className="h-4 w-4 text-danger-coral" />
                               <span>Healthcare</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="saas" className="text-lg py-3 rounded-lg hover:bg-venzip-accent/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-cloud text-venzip-accent"></i>
+                              <Cloud className="h-4 w-4 text-venzip-accent" />
                               <span>Software as a Service</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="ecommerce" className="text-lg py-3 rounded-lg hover:bg-warning-orange/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-shopping-cart text-warning-orange"></i>
+                              <ShoppingCart className="h-4 w-4 text-warning-orange" />
                               <span>E-commerce</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="other" className="text-lg py-3 rounded-lg hover:bg-gray-100">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-ellipsis-h text-gray-500"></i>
+                              <MoreHorizontal className="h-4 w-4 text-gray-500" />
                               <span>Other</span>
                             </div>
                           </SelectItem>
@@ -528,7 +560,7 @@ export default function Onboarding() {
                     
                     <div className="group">
                       <Label htmlFor="size" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-secondary transition-colors duration-200">
-                        <i className="fas fa-users mr-2 text-venzip-secondary"></i>
+                        <Users className="h-4 w-4 mr-2 text-venzip-secondary inline" />
                         Company Size
                       </Label>
                       <Select value={companyData.size} onValueChange={(value) => setCompanyData(prev => ({ ...prev, size: value }))}>
@@ -538,31 +570,31 @@ export default function Onboarding() {
                         <SelectContent className="rounded-xl shadow-2xl border-0">
                           <SelectItem value="1-10" className="text-lg py-3 rounded-lg hover:bg-success-green/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-user text-success-green"></i>
+                              <Building className="h-4 w-4 text-success-green" />
                               <span>1-10 employees</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="11-50" className="text-lg py-3 rounded-lg hover:bg-venzip-primary/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-user-friends text-venzip-primary"></i>
+                              <Building className="h-4 w-4 text-venzip-primary" />
                               <span>11-50 employees</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="51-200" className="text-lg py-3 rounded-lg hover:bg-warning-orange/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-users text-warning-orange"></i>
+                              <Building className="h-4 w-4 text-warning-orange" />
                               <span>51-200 employees</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="201-500" className="text-lg py-3 rounded-lg hover:bg-venzip-accent/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-users-cog text-venzip-accent"></i>
+                              <Building className="h-4 w-4 text-venzip-accent" />
                               <span>201-500 employees</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="500+" className="text-lg py-3 rounded-lg hover:bg-danger-coral/10">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-city text-danger-coral"></i>
+                              <Building className="h-4 w-4 text-danger-coral" />
                               <span>500+ employees</span>
                             </div>
                           </SelectItem>
@@ -572,7 +604,7 @@ export default function Onboarding() {
                     
                     <div className="group">
                       <Label htmlFor="contactEmail" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-success-green transition-colors duration-200">
-                        <i className="fas fa-envelope mr-2 text-success-green"></i>
+                        <Mail className="h-4 w-4 mr-2 text-success-green inline" />
                         Primary Contact Email
                       </Label>
                       <div className="relative">
@@ -601,7 +633,7 @@ export default function Onboarding() {
                   <CardContent className="p-12 text-center">
                     <div className="mb-8">
                       <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full mb-6 shadow-xl">
-                        <i className="fas fa-magic text-white text-2xl"></i>
+                        <Sparkles className="h-10 w-10 text-white" />
                       </div>
                       <h3 className="text-4xl font-bold text-gray-900 mb-4">
                         Generate Your <span className="bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent">AI Checklist</span>
@@ -626,9 +658,9 @@ export default function Onboarding() {
                           </>
                         ) : (
                           <>
-                            <i className="fas fa-magic"></i>
+                            <Sparkles className="h-6 w-6" />
                             <span>Generate AI Compliance Checklist</span>
-                            <i className="fas fa-arrow-right group-hover:translate-x-2 transition-transform duration-300"></i>
+                            <Target className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
                           </>
                         )}
                       </div>
@@ -645,7 +677,7 @@ export default function Onboarding() {
                   <CardContent className="p-12">
                     <div className="text-center mb-8">
                       <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full mb-6 shadow-xl">
-                        <i className="fas fa-tasks text-white text-2xl"></i>
+                        <CheckSquare className="h-10 w-10 text-white" />
                       </div>
                       <h3 className="text-4xl font-bold text-gray-900 mb-4">
                         Your <span className="bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">AI-Generated Checklist</span>
@@ -659,7 +691,7 @@ export default function Onboarding() {
                       {aiChecklist.map((category, categoryIndex) => (
                         <div key={categoryIndex} className="bg-gray-50/50 rounded-xl p-6">
                           <h4 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
-                            <i className="fas fa-folder-open text-emerald-500 mr-3"></i>
+                            <FolderOpen className="h-5 w-5 text-emerald-500 mr-3" />
                             {category.category}
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -679,7 +711,7 @@ export default function Onboarding() {
                                 </div>
                                 <p className="text-sm text-gray-600 mb-2">{item.description}</p>
                                 <div className="flex items-center text-xs text-gray-500">
-                                  <i className="fas fa-clock mr-1"></i>
+                                  <Clock className="h-4 w-4 mr-1" />
                                   {item.estimatedHours} hours estimated
                                 </div>
                               </div>
@@ -700,7 +732,7 @@ export default function Onboarding() {
                   <CardContent className="p-12">
                     <div className="text-center mb-12">
                       <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-6 shadow-xl">
-                        <i className="fas fa-cog text-white text-2xl"></i>
+                        <Settings className="h-10 w-10 text-white" />
                       </div>
                       <h3 className="text-4xl font-bold text-gray-900 mb-4">
                         <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Notification Preferences</span>
@@ -717,7 +749,7 @@ export default function Onboarding() {
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-envelope text-blue-500"></i>
+                              <Mail className="h-4 w-4 text-blue-500" />
                               <div>
                                 <Label className="text-lg font-medium text-gray-800">Email Notifications</Label>
                                 <p className="text-sm text-gray-600">Receive important compliance updates via email</p>
@@ -732,7 +764,7 @@ export default function Onboarding() {
 
                           <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-bell text-green-500"></i>
+                              <Bell className="h-4 w-4 text-green-500" />
                               <div>
                                 <Label className="text-lg font-medium text-gray-800">Task Reminders</Label>
                                 <p className="text-sm text-gray-600">Get reminded about upcoming compliance tasks</p>
@@ -747,7 +779,7 @@ export default function Onboarding() {
 
                           <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-exclamation-triangle text-red-500"></i>
+                              <AlertTriangle className="h-4 w-4 text-red-500" />
                               <div>
                                 <Label className="text-lg font-medium text-gray-800">Risk Alerts</Label>
                                 <p className="text-sm text-gray-600">Immediate alerts for high-priority risks</p>
@@ -762,7 +794,7 @@ export default function Onboarding() {
 
                           <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
                             <div className="flex items-center space-x-3">
-                              <i className="fas fa-chart-line text-purple-500"></i>
+                              <TrendingUp className="h-4 w-4 text-purple-500" />
                               <div>
                                 <Label className="text-lg font-medium text-gray-800">Weekly Reports</Label>
                                 <p className="text-sm text-gray-600">Comprehensive weekly compliance summaries</p>
@@ -783,7 +815,7 @@ export default function Onboarding() {
                         <div className="space-y-4">
                           <div>
                             <Label className="text-lg font-semibold text-gray-800 mb-3 block">
-                              <i className="fas fa-clock mr-2 text-indigo-500"></i>
+                              <Clock className="h-4 w-4 mr-2 text-indigo-500" />
                               Reminder Frequency
                             </Label>
                             <Select 
@@ -796,19 +828,19 @@ export default function Onboarding() {
                               <SelectContent className="rounded-lg shadow-xl">
                                 <SelectItem value="daily" className="text-lg py-3 rounded-lg">
                                   <div className="flex items-center space-x-3">
-                                    <i className="fas fa-sun text-yellow-500"></i>
+                                    <Sun className="h-4 w-4 text-yellow-500" />
                                     <span>Daily</span>
                                   </div>
                                 </SelectItem>
                                 <SelectItem value="weekly" className="text-lg py-3 rounded-lg">
                                   <div className="flex items-center space-x-3">
-                                    <i className="fas fa-calendar-week text-blue-500"></i>
+                                    <Calendar className="h-4 w-4 text-blue-500" />
                                     <span>Weekly</span>
                                   </div>
                                 </SelectItem>
                                 <SelectItem value="monthly" className="text-lg py-3 rounded-lg">
                                   <div className="flex items-center space-x-3">
-                                    <i className="fas fa-calendar-alt text-green-500"></i>
+                                    <Calendar className="h-4 w-4 text-green-500" />
                                     <span>Monthly</span>
                                   </div>
                                 </SelectItem>
@@ -818,7 +850,7 @@ export default function Onboarding() {
 
                           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
                             <h5 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
-                              <i className="fas fa-info-circle mr-2"></i>
+                              <Info className="h-4 w-4 mr-2" />
                               Notification Summary
                             </h5>
                             <div className="space-y-2 text-sm text-blue-700">
@@ -847,7 +879,7 @@ export default function Onboarding() {
                   <CardContent className="p-12 text-center">
                     <div className="mb-8">
                       <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full mb-6 shadow-xl animate-bounce">
-                        <i className="fas fa-rocket text-white text-2xl"></i>
+                        <Rocket className="h-10 w-10 text-white" />
                       </div>
                       <h3 className="text-4xl font-bold text-gray-900 mb-4">
                         Ready to <span className="bg-gradient-to-r from-venzip-secondary to-success-green bg-clip-text text-transparent">Launch</span>?
@@ -875,7 +907,7 @@ export default function Onboarding() {
                           ) : (
                             <>
                               <span>🚀 Complete Setup & Launch</span>
-                              <i className="fas fa-arrow-right text-white group-hover:translate-x-2 transition-transform duration-300"></i>
+                              <Target className="h-5 w-5 text-white group-hover:translate-x-2 transition-transform duration-300" />
                             </>
                           )}
                         </div>
@@ -884,17 +916,17 @@ export default function Onboarding() {
                     
                     <div className="mt-8 flex items-center justify-center space-x-6 text-gray-600">
                       <div className="flex items-center space-x-2">
-                        <i className="fas fa-check-circle text-success-green"></i>
+                        <Check className="h-5 w-5 text-success-green" />
                         <span>AI-Powered Guidance</span>
                       </div>
                       <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
                       <div className="flex items-center space-x-2">
-                        <i className="fas fa-shield-alt text-venzip-primary"></i>
+                        <Shield className="h-5 w-5 text-venzip-primary" />
                         <span>Enterprise Security</span>
                       </div>
                       <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
                       <div className="flex items-center space-x-2">
-                        <i className="fas fa-clock text-warning-orange"></i>
+                        <Clock className="h-5 w-5 text-warning-orange" />
                         <span>Real-time Monitoring</span>
                       </div>
                     </div>
