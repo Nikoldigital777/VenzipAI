@@ -7,8 +7,14 @@ import {
   insertTaskSchema, 
   insertDocumentSchema, 
   insertRiskSchema,
-  insertChatMessageSchema
+  insertChatMessageSchema,
+  complianceTasks,
+  risks as risksTable,
+  chatMessages,
+  documents as evidenceDocuments,
+  tasks
 } from "@shared/schema";
+import { and, ne, inArray, desc, eq, sql } from "drizzle-orm";
 import { 
   analyzeDocument, 
   chatWithClaude, 
@@ -106,33 +112,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard summary endpoint
+  // --- Dashboard summary (data-driven gaps from tasks + risks) ---
   app.get('/api/summary', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
-      // Get real data counts
+      // Get real data counts using storage layer
       const documents = await storage.getDocumentsByUserId(userId);
-      const chatMessages = await storage.getChatMessagesByUserId(userId, 1000);
-      const tasks = await storage.getTasksByUserId(userId);
-      const risks = await storage.getRisksByUserId(userId);
-      
-      // Calculate compliance percentage based on real activity
-      const baseline = 45;
-      const uploadBonus = Math.min(25, documents.length * 3);
-      const chatBonus = Math.min(20, Math.floor(chatMessages.length / 4));
-      const taskBonus = Math.min(10, tasks.filter(t => t.status === 'completed').length * 2);
-      const compliancePercent = Math.max(0, Math.min(98, baseline + uploadBonus + chatBonus + taskBonus));
+      const chatMessagesData = await storage.getChatMessagesByUserId(userId, 1000);
+      const tasksData = await storage.getTasksByUserId(userId);
+      const risksData = await storage.getRisksByUserId(userId);
 
-      // Generate realistic gaps based on current state  
+      // --- gaps = open high/critical tasks + high/critical risks
+      // Tasks: not completed AND priority in ('high','critical')
+      const highTasks = tasksData.filter(task => 
+        task.status !== 'completed' && 
+        (task.priority === 'high' || task.priority === 'critical')
+      ).slice(0, 10);
+
+      // Risks: impact in ('high') - adapting since we don't have 'critical' in existing schema
+      const highRisks = risksData.filter(risk => 
+        risk.impact === 'high'
+      ).slice(0, 10);
+
+      // Normalize both into one "gaps" list for the UI
       const gaps = [
-        { id: "gap-1", title: "Access Control Policy", severity: "high" },
-        { id: "gap-2", title: "Vendor Risk Assessment", severity: "medium" },
-        { id: "gap-3", title: "Incident Response Runbook", severity: "medium" },
-      ].filter((_, i) => i < Math.max(1, 4 - Math.floor(documents.length / 2)));
+        ...highTasks.map((t) => ({
+          id: `task-${t.id}`,
+          kind: "task" as const,
+          title: t.title,
+          severity: t.priority === "high" ? "high" : "medium",
+          meta: {
+            framework: t.frameworkId,
+            status: t.status,
+            dueDate: t.dueDate,
+          },
+        })),
+        ...highRisks.map((r) => ({
+          id: `risk-${r.id}`,
+          kind: "risk" as const,
+          title: r.title,
+          severity: r.impact, // 'high' | 'medium' | 'low'
+          meta: {
+            category: r.category,
+            likelihood: r.likelihood,
+          },
+        })),
+      ];
+
+      // --- simple, explainable compliance score
+      // Start with baseline + "activity" bonus, then subtract weighted gap penalties
+      const baseline = 45;
+      const bonus = Math.min(35, documents.length * 2 + Math.floor(chatMessagesData.length / 3));
+
+      const highTaskCount = highTasks.filter((t) => t.priority === "high").length;
+      const critTaskCount = 0; // No critical in existing schema
+      const highRiskCount = highRisks.filter((r) => r.impact === "high").length;
+      const critRiskCount = 0; // No critical in existing schema
+
+      // Penalty calculation
+      const penalty =
+        highTaskCount * 2 +
+        critTaskCount * 4 +
+        highRiskCount * 3 +
+        critRiskCount * 6;
+
+      const compliancePercent = Math.max(0, Math.min(98, baseline + bonus - penalty));
 
       // Recent activity from chat and documents
       const recentActivity = [
-        ...chatMessages.slice(0, 4).map(m => ({
+        ...chatMessagesData.slice(0, 4).map(m => ({
           id: m.id,
           action: "chat",
           resourceType: "AI conversation",
@@ -152,10 +201,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         compliancePercent,
-        gaps,
+        gaps, // array of { id, kind: 'task'|'risk', title, severity, meta: {...} }
         stats: {
           uploads: documents.length,
-          conversations: Math.floor(chatMessages.length / 2), // Count back-and-forth as single conversations
+          conversations: Math.floor(chatMessagesData.length / 2),
+          tasksOpenHigh: highTaskCount + critTaskCount,
+          risksHigh: highRiskCount + critRiskCount,
         },
         recentActivity,
       });

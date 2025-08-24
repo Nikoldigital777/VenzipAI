@@ -3,12 +3,29 @@ import { useSummary } from "@/hooks/useSummary";
 import ProgressRing from "@/components/progress-ring";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type Gap = { id: string; title: string; severity: "low" | "medium" | "high" };
+type Gap = { 
+  id: string; 
+  title: string; 
+  severity: "low" | "medium" | "high" | "critical"; 
+  kind: "task" | "risk";
+  meta: {
+    framework?: string;
+    status?: string;
+    dueDate?: string;
+    category?: string;
+    likelihood?: string;
+  };
+};
 type Activity = { id: string; action: string; resourceType: string; createdAt: string };
 type Summary = {
   compliancePercent: number;
   gaps: Gap[];
-  stats: { uploads: number; conversations: number };
+  stats: { 
+    uploads: number; 
+    conversations: number; 
+    tasksOpenHigh?: number; 
+    risksHigh?: number; 
+  };
   recentActivity: Activity[];
 };
 
@@ -61,7 +78,7 @@ export default function Dashboard() {
       {/* Stats */}
       <Card className="lg:col-span-2">
         <CardHeader><CardTitle>Key stats</CardTitle></CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-4">
+        <CardContent className="grid sm:grid-cols-4 gap-4">
           <div className="rounded-xl border p-5">
             <div className="text-sm text-gray-500">Evidence uploads</div>
             <div className="text-3xl font-semibold">{stats.uploads}</div>
@@ -69,6 +86,14 @@ export default function Dashboard() {
           <div className="rounded-xl border p-5">
             <div className="text-sm text-gray-500">AI conversations</div>
             <div className="text-3xl font-semibold">{stats.conversations}</div>
+          </div>
+          <div className="rounded-xl border p-5">
+            <div className="text-sm text-gray-500">High priority tasks</div>
+            <div className="text-3xl font-semibold">{stats.tasksOpenHigh || 0}</div>
+          </div>
+          <div className="rounded-xl border p-5">
+            <div className="text-sm text-gray-500">High impact risks</div>
+            <div className="text-3xl font-semibold">{stats.risksHigh || 0}</div>
           </div>
         </CardContent>
       </Card>
@@ -83,11 +108,27 @@ export default function Dashboard() {
             <ul className="space-y-3">
               {gaps.map((g: Gap) => (
                 <li key={g.id} className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="font-medium">{g.title}</div>
+                  <div>
+                    <div className="font-medium">
+                      {g.title}
+                      <span className="ml-2 text-xs text-gray-500">
+                        {g.kind === "task" 
+                          ? `(${g.meta?.framework?.toUpperCase() || "task"})` 
+                          : `(${g.meta?.category || "risk"})`
+                        }
+                      </span>
+                    </div>
+                    {g.meta?.dueDate && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        Due: {new Date(g.meta.dueDate).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
                   <span
                     className={[
                       "px-2 py-1 text-xs rounded-full capitalize",
-                      g.severity === "high" ? "bg-danger-coral/20 text-danger-coral" :
+                      g.severity === "critical" ? "bg-red-500/15 text-red-600" :
+                      g.severity === "high" ? "bg-amber-500/15 text-amber-600" :
                       g.severity === "medium" ? "bg-venzip-primary/20 text-venzip-primary-dark" :
                       "bg-success-green/20 text-success-green"
                     ].join(" ")}
