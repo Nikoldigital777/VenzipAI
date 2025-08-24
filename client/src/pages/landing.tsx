@@ -494,7 +494,13 @@ export default function Landing() {
             </Button>
             <Button 
               size="lg"
-              onClick={() => window.open('mailto:support@venzip.com', '_blank')}
+              onClick={() => {
+                try {
+                  window.open('mailto:support@venzip.com', '_blank');
+                } catch (error) {
+                  console.error('Failed to open email client:', error);
+                }
+              }}
               className="bg-gradient-to-r from-success-green to-success-green/90 text-white border-2 border-success-green hover:from-success-green/90 hover:to-success-green hover:shadow-2xl hover:shadow-success-green/20 hover:-translate-y-1 transform transition-all duration-500 font-bold px-10 py-5 rounded-2xl text-xl"
             >
               <Mail className="h-6 w-6 mr-3" />
