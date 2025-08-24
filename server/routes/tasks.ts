@@ -13,8 +13,8 @@ const taskFilterSchema = z.object({
   priority: z.string().optional(),
   frameworkId: z.string().optional(),
   search: z.string().optional(),
-  limit: z.number().int().positive().max(100).default(20),
-  offset: z.number().int().min(0).default(0)
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0)
 });
 
 // GET /api/tasks - Enhanced task listing with filters
