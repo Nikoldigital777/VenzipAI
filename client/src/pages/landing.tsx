@@ -39,15 +39,13 @@ export default function Landing() {
       {/* Navigation Header */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center">
-              <img 
-                src={venzipLogo} 
-                alt="Venzip Logo" 
-                className="w-10 h-10 rounded-full"
-              />
-            </div>
-            <span className="text-2xl font-bold text-gradient-primary">Venzip</span>
+          <div className="flex items-center">
+            <img 
+              src={venzipLogo} 
+              alt="Venzip Logo" 
+              className="h-10"
+              style={{ width: 'auto' }}
+            />
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-gray-900 transition-colors">Features</button>
