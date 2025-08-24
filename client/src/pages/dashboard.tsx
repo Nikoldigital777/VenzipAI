@@ -2,6 +2,8 @@
 import { useSummary } from "@/hooks/useSummary";
 import ProgressRing from "@/components/progress-ring";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Navigation from "@/components/navigation";
+import AIChat from "@/components/ai-chat";
 
 type Gap = { 
   id: string; 
@@ -34,37 +36,52 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
-        <Card><CardContent className="py-10">Loading dashboard…</CardContent></Card>
-      </div>
+      <>
+        <Navigation />
+        <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
+          <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
+            <Card><CardContent className="py-10">Loading dashboard…</CardContent></Card>
+          </div>
+        </div>
+        <AIChat />
+      </>
     );
   }
 
   if (isError || !data) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
-        <Card>
-          <CardHeader><CardTitle>Dashboard</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-red-600 text-sm">
-              {(error as Error)?.message || "Failed to load summary."}
-            </div>
-            <button
-              onClick={() => refetch()}
-              className="mt-4 inline-flex items-center px-4 py-2 rounded-md bg-venzip-primary text-white"
-            >
-              Retry
-            </button>
-          </CardContent>
-        </Card>
-      </div>
+      <>
+        <Navigation />
+        <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
+          <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
+            <Card>
+              <CardHeader><CardTitle>Dashboard</CardTitle></CardHeader>
+              <CardContent>
+                <div className="text-red-600 text-sm">
+                  {(error as Error)?.message || "Failed to load summary."}
+                </div>
+                <button
+                  onClick={() => refetch()}
+                  className="mt-4 inline-flex items-center px-4 py-2 rounded-md bg-venzip-primary text-white"
+                >
+                  Retry
+                </button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <AIChat />
+      </>
     );
   }
 
   const { compliancePercent, gaps, stats, recentActivity } = data;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 grid lg:grid-cols-3 gap-6">
+    <>
+      <Navigation />
+      <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
+        <div className="max-w-7xl mx-auto px-4 py-12 grid lg:grid-cols-3 gap-6">
       {/* Compliance score */}
       <Card className="lg:col-span-1">
         <CardHeader>
@@ -163,6 +180,9 @@ export default function Dashboard() {
           </ul>
         </CardContent>
       </Card>
-    </div>
+        </div>
+      </div>
+      <AIChat />
+    </>
   );
 }
