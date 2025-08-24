@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { 
@@ -11,11 +11,15 @@ import {
   Bot, 
   Bell, 
   User, 
-  LogOut 
+  LogOut,
+  Menu,
+  X
 } from "lucide-react";
 
 export default function Navigation() {
   const [location] = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { path: "/onboarding", label: "Onboarding", icon: Rocket },
@@ -27,68 +31,110 @@ export default function Navigation() {
 
   const isActive = (path: string) => location === path;
 
+  // Handle scroll effects
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setScrolled(scrollPosition > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close mobile menu when location changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
+
   return (
-    <header className="fixed top-0 w-full z-50 glass-morphism border-b border-white/20">
+    <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      scrolled 
+        ? 'glass-morphism-enhanced shadow-xl border-b border-white/30' 
+        : 'glass-morphism border-b border-white/20'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className={`flex items-center justify-between transition-all duration-300 ${
+          scrolled ? 'h-14' : 'h-16'
+        }`}>
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center space-x-4" data-testid="logo">
-            <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center shadow-lg animate-float">
-              <Shield className="text-white text-lg h-5 w-5" />
+          <Link href="/" className="flex items-center space-x-4 group" data-testid="logo">
+            <div className={`bg-gradient-primary rounded-full flex items-center justify-center shadow-lg animate-float transition-all duration-300 ${
+              scrolled ? 'w-8 h-8' : 'w-10 h-10'
+            } group-hover:scale-110`}>
+              <Shield className={`text-white transition-all duration-300 ${
+                scrolled ? 'h-4 w-4' : 'h-5 w-5'
+              }`} />
             </div>
-            <h1 className="text-xl font-bold text-gray-900">Venzip</h1>
+            <h1 className={`font-bold text-gray-900 transition-all duration-300 ${
+              scrolled ? 'text-lg' : 'text-xl'
+            } group-hover:text-venzip-primary`}>Venzip</h1>
           </Link>
 
           {/* Main Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => {
+          <nav className="hidden md:flex items-center space-x-2">
+            {navItems.map((item, index) => {
               const IconComponent = item.icon;
               return (
                 <Link
                   key={item.path}
                   href={item.path}
-                  className={`nav-item px-4 py-2 rounded-lg transition-all duration-200 flex items-center ${
+                  className={`nav-item px-3 py-2 rounded-xl transition-all duration-300 flex items-center group hover:scale-105 hover:-translate-y-0.5 ${
                     isActive(item.path)
-                      ? "bg-venzip-primary/10 text-venzip-primary"
-                      : "text-gray-600 hover:text-venzip-primary hover:bg-venzip-primary/5"
+                      ? "bg-venzip-primary/15 text-venzip-primary shadow-lg scale-105"
+                      : "text-gray-600 hover:text-venzip-primary hover:bg-venzip-primary/8"
                   }`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                   data-testid={`nav-${item.label.toLowerCase()}`}
                 >
-                  <IconComponent className="h-4 w-4 mr-2" />
-                  {item.label}
+                  <IconComponent className={`transition-all duration-300 mr-2 ${
+                    isActive(item.path) ? 'h-4 w-4' : 'h-4 w-4 group-hover:rotate-12'
+                  }`} />
+                  <span className="font-medium">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            data-testid="mobile-menu-toggle"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+
           {/* Right Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
             {/* AI Chat Toggle */}
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => window.dispatchEvent(new Event("toggle-ai-chat"))}
-              className="rounded-xl px-3 py-1.5 text-sm hover:bg-venzip-primary/10 hover:text-venzip-primary transition-colors flex items-center"
+              className="rounded-xl px-3 py-2 text-sm hover:bg-venzip-primary/10 hover:text-venzip-primary transition-all duration-300 flex items-center group hover:scale-105"
               aria-label="Toggle AI Chat"
               title="Toggle AI Chat"
               data-testid="button-ai-chat"
             >
-              <Bot className="h-4 w-4 mr-2" />
-              Ask Claude
+              <Bot className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+              <span className="font-medium">Ask Claude</span>
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative" data-testid="notifications">
+            <Button variant="ghost" size="sm" className="relative hover:scale-110 transition-transform duration-300" data-testid="notifications">
               <Bell className="h-5 w-5" />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-danger rounded-full animate-pulse"></span>
             </Button>
 
             {/* User Profile */}
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
+            <div className="flex items-center space-x-2 group cursor-pointer">
+              <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <User className="h-4 w-4 text-white" />
               </div>
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">Sarah Chen</span>
+              <span className="text-sm font-medium text-gray-700 hidden sm:block group-hover:text-venzip-primary transition-colors duration-300">Sarah Chen</span>
             </div>
 
             {/* Logout */}
@@ -96,10 +142,63 @@ export default function Navigation() {
               variant="outline" 
               size="sm"
               onClick={() => window.location.href = "/api/logout"}
-              className="hidden sm:flex items-center"
+              className="hidden sm:flex items-center hover:scale-105 transition-all duration-300"
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <div className={`md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b border-white/20 shadow-xl transition-all duration-300 ${
+        mobileMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-4'
+      }`}>
+        <div className="px-4 py-6 space-y-4">
+          {/* Mobile Navigation Items */}
+          {navItems.map((item, index) => {
+            const IconComponent = item.icon;
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`mobile-nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
+                  isActive(item.path)
+                    ? "bg-venzip-primary/15 text-venzip-primary"
+                    : "text-gray-600 hover:text-venzip-primary hover:bg-venzip-primary/8"
+                }`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+                data-testid={`mobile-nav-${item.label.toLowerCase()}`}
+              >
+                <IconComponent className="h-5 w-5 mr-3" />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* Mobile Actions */}
+          <div className="pt-4 border-t border-gray-200 space-y-3">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => window.dispatchEvent(new Event("toggle-ai-chat"))}
+              className="w-full justify-start rounded-xl px-4 py-3 hover:bg-venzip-primary/10 hover:text-venzip-primary transition-colors flex items-center"
+              data-testid="mobile-ai-chat"
+            >
+              <Bot className="h-5 w-5 mr-3" />
+              Ask Claude
+            </Button>
+
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.href = "/api/logout"}
+              className="w-full justify-start rounded-xl px-4 py-3"
+              data-testid="mobile-logout"
+            >
+              <LogOut className="h-5 w-5 mr-3" />
               Logout
             </Button>
           </div>
