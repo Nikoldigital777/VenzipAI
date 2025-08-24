@@ -19,7 +19,10 @@ import {
   analyzeDocument, 
   chatWithClaude, 
   generateComplianceRecommendations,
-  assessRisk 
+  assessRisk,
+  prioritizeTasks,
+  detectComplianceGaps,
+  analyzeDocumentAdvanced
 } from "./anthropic";
 import multer from 'multer';
 import path from 'path';
@@ -832,6 +835,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting risk:", error);
       res.status(500).json({ error: "Failed to delete risk" });
+    }
+  });
+
+  // Enhanced AI endpoints for intelligent compliance management
+  
+  // Intelligent task prioritization endpoint
+  app.post('/api/tasks/prioritize', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const company = await storage.getCompanyByUserId(userId);
+      const tasks = await storage.getTasksByUserId(userId);
+      
+      if (!company) {
+        return res.status(400).json({ message: "Company profile not found" });
+      }
+      
+      const prioritization = await prioritizeTasks(tasks, {
+        frameworks: company.selectedFrameworks,
+        industry: company.industry,
+        size: company.size
+      });
+      
+      res.json(prioritization);
+    } catch (error) {
+      console.error("Error prioritizing tasks:", error);
+      res.status(500).json({ message: "Failed to prioritize tasks" });
+    }
+  });
+  
+  // Compliance gap detection endpoint
+  app.post('/api/compliance/gaps', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const company = await storage.getCompanyByUserId(userId);
+      const tasks = await storage.getTasksByUserId(userId);
+      const documents = await storage.getDocumentsByUserId(userId);
+      const risks = await storage.getRisksByUserId(userId);
+      
+      if (!company) {
+        return res.status(400).json({ message: "Company profile not found" });
+      }
+      
+      const completedTasks = tasks.filter(t => t.status === 'completed').length;
+      const openRisks = risks.filter(r => r.status === 'open').length;
+      
+      const gapAnalysis = await detectComplianceGaps(
+        {
+          frameworks: company.selectedFrameworks,
+          completedTasks,
+          totalTasks: tasks.length,
+          openRisks,
+          uploadedDocuments: documents.length
+        },
+        company.industry,
+        company.size
+      );
+      
+      res.json(gapAnalysis);
+    } catch (error) {
+      console.error("Error detecting compliance gaps:", error);
+      res.status(500).json({ message: "Failed to detect compliance gaps" });
+    }
+  });
+  
+  // Advanced document analysis endpoint
+  app.post('/api/documents/:id/analyze-advanced', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const documentId = req.params.id;
+      const { framework } = req.body;
+      
+      // Get document details
+      const documents = await storage.getDocumentsByUserId(userId);
+      const document = documents.find(d => d.id === documentId);
+      
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Read file content
+      const filePath = path.join('uploads', document.filePath.split('/').pop() || '');
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const existingDocs = documents.map(d => d.fileName);
+      
+      const analysis = await analyzeDocumentAdvanced(
+        fileContent,
+        document.fileName,
+        framework,
+        existingDocs
+      );
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error in advanced document analysis:", error);
+      res.status(500).json({ message: "Failed to analyze document" });
     }
   });
 
