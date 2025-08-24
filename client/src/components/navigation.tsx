@@ -63,7 +63,7 @@ export default function Navigation() {
               src={venzipLogo} 
               alt="Venzip Logo" 
               className={`shadow-lg transition-all duration-300 ${
-                scrolled ? 'h-8' : 'h-10'
+                scrolled ? 'h-10' : 'h-12'
               }`}
               style={{ width: 'auto' }}
             />
