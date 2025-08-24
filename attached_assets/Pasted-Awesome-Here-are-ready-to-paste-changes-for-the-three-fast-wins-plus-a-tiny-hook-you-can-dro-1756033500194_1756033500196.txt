@@ -1,0 +1,388 @@
+Awesome. Here are **ready-to-paste** changes for the three “fast wins,” plus a tiny hook you can drop in if you prefer. I matched your existing patterns: React Query + `apiRequest`, shadcn UI, and your `ProgressRing` component.
+
+> Why these exact endpoints and imports? Your chat already uses `apiRequest` from `lib/queryClient` and your pages are wired in `App.tsx`, so we follow the same client data layer and page routing conventions.
+
+---
+
+# 1) Bind **Dashboard** to `/api/summary`
+
+**File:** `client/src/pages/dashboard.tsx`
+**Replace file contents** with:
+
+```tsx
+// client/src/pages/dashboard.tsx
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import ProgressRing from "@/components/progress-ring";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+type Gap = { id: string; title: string; severity: "low" | "medium" | "high" };
+type Activity = { id: string; action: string; resourceType: string; createdAt: string };
+type Summary = {
+  compliancePercent: number;
+  gaps: Gap[];
+  stats: { uploads: number; conversations: number };
+  recentActivity: Activity[];
+};
+
+export default function Dashboard() {
+  const { data, isLoading, isError, error, refetch } = useQuery<Summary>({
+    queryKey: ["/api/summary"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/summary");
+      if (!res.ok) throw new Error("Failed to load summary");
+      return res.json();
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
+        <Card><CardContent className="py-10">Loading dashboard…</CardContent></Card>
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
+        <Card>
+          <CardHeader><CardTitle>Dashboard</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-red-600 text-sm">
+              {(error as Error)?.message || "Failed to load summary."}
+            </div>
+            <button
+              onClick={() => refetch()}
+              className="mt-4 inline-flex items-center px-4 py-2 rounded-md bg-venzip-primary text-white"
+            >
+              Retry
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { compliancePercent, gaps, stats, recentActivity } = data;
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-12 grid lg:grid-cols-3 gap-6">
+      {/* Compliance score */}
+      <Card className="lg:col-span-1">
+        <CardHeader>
+          <CardTitle>Overall compliance</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center py-8">
+          <ProgressRing percentage={compliancePercent} />
+        </CardContent>
+      </Card>
+
+      {/* Stats */}
+      <Card className="lg:col-span-2">
+        <CardHeader><CardTitle>Key stats</CardTitle></CardHeader>
+        <CardContent className="grid sm:grid-cols-2 gap-4">
+          <div className="rounded-xl border p-5">
+            <div className="text-sm text-gray-500">Evidence uploads</div>
+            <div className="text-3xl font-semibold">{stats.uploads}</div>
+          </div>
+          <div className="rounded-xl border p-5">
+            <div className="text-sm text-gray-500">AI conversations</div>
+            <div className="text-3xl font-semibold">{stats.conversations}</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Gaps */}
+      <Card className="lg:col-span-2">
+        <CardHeader><CardTitle>Top gaps</CardTitle></CardHeader>
+        <CardContent>
+          {gaps.length === 0 ? (
+            <div className="text-sm text-gray-500">No gaps detected.</div>
+          ) : (
+            <ul className="space-y-3">
+              {gaps.map(g => (
+                <li key={g.id} className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="font-medium">{g.title}</div>
+                  <span
+                    className={[
+                      "px-2 py-1 text-xs rounded-full capitalize",
+                      g.severity === "high" ? "bg-danger-coral/20 text-danger-coral" :
+                      g.severity === "medium" ? "bg-venzip-primary/20 text-venzip-primary-dark" :
+                      "bg-success-green/20 text-success-green"
+                    ].join(" ")}
+                  >
+                    {g.severity}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Recent activity */}
+      <Card className="lg:col-span-1">
+        <CardHeader><CardTitle>Recent activity</CardTitle></CardHeader>
+        <CardContent>
+          <ul className="space-y-3">
+            {recentActivity.length === 0 ? (
+              <li className="text-sm text-gray-500">No activity yet.</li>
+            ) : recentActivity.map(a => (
+              <li key={a.id} className="flex items-center justify-between border rounded-lg p-3">
+                <div className="text-sm">
+                  <div className="font-medium">{a.action}</div>
+                  <div className="text-gray-500">{a.resourceType}</div>
+                </div>
+                <div className="text-xs text-gray-400">
+                  {new Date(a.createdAt).toLocaleString()}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+```
+
+> Your `Dashboard` page already exists in routing; we are just binding it to the new `GET /api/summary` endpoint.
+
+---
+
+# 2) Add drag-and-drop upload to **Documents** page
+
+You already have a `file-upload.tsx` component file in place. Let’s make it functional and then render it on the `Documents` page.
+
+## 2a) Replace `client/src/components/file-upload.tsx`
+
+```tsx
+// client/src/components/file-upload.tsx
+import { useState, useCallback } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+type UploadResult = { id: string; filename: string; mimetype: string; size: number; url: string };
+
+export default function FileUpload() {
+  const [dragActive, setDragActive] = useState(false);
+  const [lastResult, setLastResult] = useState<UploadResult | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: async (file: File) => {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/documents/upload", { method: "POST", body: form });
+      if (!res.ok) throw new Error("Upload failed");
+      return res.json() as Promise<UploadResult>;
+    },
+    onSuccess: (data) => {
+      setLastResult(data);
+      // if you later list docs with a query, invalidate it here
+      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+    },
+  });
+
+  const handleFiles = useCallback((files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    mutation.mutate(files[0]);
+  }, [mutation]);
+
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    handleFiles(e.dataTransfer.files);
+  };
+
+  const onDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+    if (e.type === "dragleave") setDragActive(false);
+  };
+
+  const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFiles(e.target.files);
+    e.currentTarget.value = "";
+  };
+
+  return (
+    <Card>
+      <CardHeader><CardTitle>Upload evidence</CardTitle></CardHeader>
+      <CardContent>
+        <div
+          onDragEnter={onDrag}
+          onDragOver={onDrag}
+          onDragLeave={onDrag}
+          onDrop={onDrop}
+          className={[
+            "border-2 border-dashed rounded-xl p-8 text-center transition",
+            dragActive ? "border-venzip-primary bg-venzip-primary/5" : "border-gray-300"
+          ].join(" ")}
+        >
+          <p className="text-sm text-gray-600 mb-4">
+            Drag and drop a file here, or click to select
+          </p>
+          <label className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-venzip-primary text-white cursor-pointer">
+            Choose file
+            <input
+              type="file"
+              className="hidden"
+              onChange={onInput}
+            />
+          </label>
+
+          {mutation.isPending && (
+            <div className="mt-4 text-sm text-gray-500">Uploading…</div>
+          )}
+
+          {lastResult && !mutation.isPending && (
+            <div className="mt-6 text-left border rounded-lg p-4">
+              <div className="font-medium">{lastResult.filename}</div>
+              <div className="text-xs text-gray-500">{lastResult.mimetype} • {Math.round(lastResult.size / 1024)} KB</div>
+              <a
+                className="inline-block mt-2 text-sm text-venzip-primary underline"
+                href={lastResult.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View file
+              </a>
+            </div>
+          )}
+        </div>
+
+        {mutation.isError && (
+          <div className="mt-4 text-sm text-red-600">
+            {(mutation.error as Error).message || "Upload failed"}
+          </div>
+        )}
+
+        {lastResult && (
+          <div className="mt-4">
+            <Button variant="outline" onClick={() => setLastResult(null)}>
+              Upload another
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## 2b) Update `client/src/pages/documents.tsx` to render the uploader
+
+```tsx
+// client/src/pages/documents.tsx
+import FileUpload from "@/components/file-upload";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function Documents() {
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-12 grid gap-6">
+      <FileUpload />
+
+      {/* Placeholder: future list of uploaded docs */}
+      <Card>
+        <CardHeader><CardTitle>Documents</CardTitle></CardHeader>
+        <CardContent className="text-sm text-gray-500">
+          Your recent uploads will appear here.
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+```
+
+> The server route `POST /api/documents/upload` is already added in the backend patch, and uploads are served from `/uploads`.
+
+---
+
+# 3) Extend the schema for **tasks** and **risks**
+
+**File:** `shared/schema.ts`
+Append these **below** your existing exports so they integrate with Drizzle immediately.
+
+```ts
+// --- Tasks ---
+export const taskStatusEnum = pgEnum("task_status", ["todo", "in_progress", "blocked", "done"]);
+export const taskPriorityEnum = pgEnum("task_priority", ["low", "medium", "high", "critical"]);
+
+export const complianceTasks = pgTable("compliance_tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  framework: varchar("framework", { length: 64 }).notNull(), // "SOC2" | "HIPAA" | ...
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  priority: taskPriorityEnum("priority").default("medium").notNull(),
+  status: taskStatusEnum("status").default("todo").notNull(),
+  dueDate: timestamp("due_date", { withTimezone: false }),
+  assigneeId: uuid("assignee_id"), // reference users.id if you want a FK later
+  createdAt: timestamp("created_at", { withTimezone: false }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: false }).defaultNow().notNull(),
+});
+
+// --- Risks ---
+export const riskSeverityEnum = pgEnum("risk_severity", ["low", "medium", "high", "critical"]);
+export const riskProbabilityEnum = pgEnum("risk_probability", ["low", "medium", "high"]);
+
+export const risks = pgTable("risks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  category: varchar("category", { length: 64 }).notNull(), // "operational" | "technical" | "compliance"
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  severity: riskSeverityEnum("severity").default("medium").notNull(),
+  probability: riskProbabilityEnum("probability").default("medium").notNull(),
+  mitigation: text("mitigation"),
+  ownerId: uuid("owner_id"),
+  createdAt: timestamp("created_at", { withTimezone: false }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: false }).defaultNow().notNull(),
+});
+```
+
+> Once these tables exist, we can evolve `/api/summary` to compute the real gaps from tasks and risks rather than the placeholder list.
+
+---
+
+# 4) Optional tiny hook for `/api/summary`
+
+If you prefer a reusable hook:
+
+**File:** `client/src/hooks/useSummary.ts`
+
+```ts
+// client/src/hooks/useSummary.ts
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+
+export function useSummary() {
+  return useQuery({
+    queryKey: ["/api/summary"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/summary");
+      if (!res.ok) throw new Error("Failed to load summary");
+      return res.json();
+    },
+    refetchOnWindowFocus: false,
+  });
+}
+```
+
+Then in `dashboard.tsx`:
+
+```tsx
+import { useSummary } from "@/hooks/useSummary";
+```
+
+---
+
+## After you paste
+
+1. Ensure backend is running with the earlier server routes and static `/uploads`.
+2. Visit **Dashboard**: you will see the real compliance percent derived from live counts.
+3. Visit **Documents**: drag a PDF or image, watch it appear, and click its public URL.

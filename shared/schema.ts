@@ -8,7 +8,8 @@ import {
   text,
   integer,
   boolean,
-  decimal
+  decimal,
+  pgEnum
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -187,3 +188,37 @@ export type Risk = typeof risks.$inferSelect;
 export type InsertRisk = z.infer<typeof insertRiskSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+
+// --- Enhanced Tasks and Risks ---
+export const taskStatusEnum = pgEnum("task_status", ["todo", "in_progress", "blocked", "done"]);
+export const taskPriorityEnum = pgEnum("task_priority", ["low", "medium", "high", "critical"]);
+
+export const complianceTasks = pgTable("compliance_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  framework: varchar("framework", { length: 64 }).notNull(), // "SOC2" | "HIPAA" | ...
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  priority: taskPriorityEnum("priority").default("medium").notNull(),
+  status: taskStatusEnum("status").default("todo").notNull(),
+  dueDate: timestamp("due_date", { withTimezone: false }),
+  assigneeId: varchar("assignee_id"), // reference users.id if you want a FK later
+  createdAt: timestamp("created_at", { withTimezone: false }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: false }).defaultNow().notNull(),
+});
+
+// --- Enhanced Risks ---
+export const riskSeverityEnum = pgEnum("risk_severity", ["low", "medium", "high", "critical"]);
+export const riskProbabilityEnum = pgEnum("risk_probability", ["low", "medium", "high"]);
+
+export const complianceRisks = pgTable("compliance_risks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: varchar("category", { length: 64 }).notNull(), // "operational" | "technical" | "compliance"
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  severity: riskSeverityEnum("severity").default("medium").notNull(),
+  probability: riskProbabilityEnum("probability").default("medium").notNull(),
+  mitigation: text("mitigation"),
+  ownerId: varchar("owner_id"),
+  createdAt: timestamp("created_at", { withTimezone: false }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: false }).defaultNow().notNull(),
+});
