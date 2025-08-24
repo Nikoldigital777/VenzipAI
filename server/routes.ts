@@ -545,6 +545,245 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // --- TASKS CRUD & FILTERS ---
+  // GET /api/tasks?framework=&status=&priority=&q=&limit=&offset=
+  app.get('/api/tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { framework, status, priority, q } = req.query as Record<string, string | undefined>;
+      const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit ?? "25"), 10)));
+      const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10));
+
+      let tasks = await storage.getTasksByUserId(userId);
+      
+      // Apply filters
+      if (framework) {
+        tasks = tasks.filter(task => task.frameworkId?.includes(framework));
+      }
+      if (status) {
+        tasks = tasks.filter(task => task.status === status);
+      }
+      if (priority) {
+        tasks = tasks.filter(task => task.priority === priority);
+      }
+      if (q && q.trim()) {
+        const needle = q.toLowerCase();
+        tasks = tasks.filter(task =>
+          task.title.toLowerCase().includes(needle) ||
+          (task.description && task.description.toLowerCase().includes(needle))
+        );
+      }
+
+      // Apply pagination
+      const total = tasks.length;
+      const paginatedTasks = tasks.slice(offset, offset + limit);
+
+      res.json({ items: paginatedTasks, total });
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ error: "Failed to fetch tasks" });
+    }
+  });
+
+  // POST /api/tasks
+  app.post('/api/tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const body = req.body ?? {};
+      
+      if (!body.title) {
+        return res.status(400).json({ error: "title is required" });
+      }
+
+      const task = await storage.createTask({
+        userId,
+        frameworkId: body.frameworkId || null,
+        title: String(body.title),
+        description: body.description || null,
+        priority: body.priority || "medium",
+        status: body.status || "pending",
+        assignedTo: body.assignedTo || null,
+        dueDate: body.dueDate ? new Date(body.dueDate) : null,
+      });
+
+      res.json(task);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ error: "Failed to create task" });
+    }
+  });
+
+  // PUT /api/tasks/:id
+  app.put('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = String(req.params.id);
+      const body = req.body ?? {};
+
+      const updates: any = {};
+      if (body.title !== undefined) updates.title = String(body.title);
+      if (body.description !== undefined) updates.description = body.description || null;
+      if (body.frameworkId !== undefined) updates.frameworkId = body.frameworkId || null;
+      if (body.priority !== undefined) updates.priority = body.priority;
+      if (body.status !== undefined) {
+        updates.status = body.status;
+        if (body.status === 'completed') {
+          updates.completedAt = new Date();
+        } else {
+          updates.completedAt = null;
+        }
+      }
+      if (body.assignedTo !== undefined) updates.assignedTo = body.assignedTo || null;
+      if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate) : null;
+      if (body.completedAt !== undefined) updates.completedAt = body.completedAt ? new Date(body.completedAt) : null;
+
+      const task = await storage.updateTask(id, updates);
+      res.json(task);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ error: "Failed to update task" });
+    }
+  });
+
+  // DELETE /api/tasks/:id
+  app.delete('/api/tasks/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = String(req.params.id);
+      await storage.deleteTask(id);
+      res.json({ ok: true, id });
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ error: "Failed to delete task" });
+    }
+  });
+
+  // --- RISKS CRUD & FILTERS ---
+  // GET /api/risks?category=&impact=&likelihood=&q=&limit=&offset=
+  app.get('/api/risks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { category, impact, likelihood, q } = req.query as Record<string, string | undefined>;
+      const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit ?? "25"), 10)));
+      const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10));
+
+      let risks = await storage.getRisksByUserId(userId);
+      
+      // Apply filters
+      if (category) {
+        risks = risks.filter(risk => risk.category === category);
+      }
+      if (impact) {
+        risks = risks.filter(risk => risk.impact === impact);
+      }
+      if (likelihood) {
+        risks = risks.filter(risk => risk.likelihood === likelihood);
+      }
+      if (q && q.trim()) {
+        const needle = q.toLowerCase();
+        risks = risks.filter(risk =>
+          risk.title.toLowerCase().includes(needle) ||
+          risk.description.toLowerCase().includes(needle)
+        );
+      }
+
+      // Apply pagination
+      const total = risks.length;
+      const paginatedRisks = risks.slice(offset, offset + limit);
+
+      res.json({ items: paginatedRisks, total });
+    } catch (error) {
+      console.error("Error fetching risks:", error);
+      res.status(500).json({ error: "Failed to fetch risks" });
+    }
+  });
+
+  // POST /api/risks
+  app.post('/api/risks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const body = req.body ?? {};
+      
+      if (!body.title || !body.description || !body.category) {
+        return res.status(400).json({ error: "title, description, and category are required" });
+      }
+
+      // Calculate risk score
+      const impactScore = body.impact === 'high' ? 3 : body.impact === 'medium' ? 2 : 1;
+      const likelihoodScore = body.likelihood === 'high' ? 3 : body.likelihood === 'medium' ? 2 : 1;
+      const riskScore = (impactScore * likelihoodScore).toString();
+
+      const risk = await storage.createRisk({
+        userId,
+        frameworkId: body.frameworkId || null,
+        title: String(body.title),
+        description: String(body.description),
+        category: String(body.category),
+        impact: body.impact || "medium",
+        likelihood: body.likelihood || "medium",
+        riskScore,
+        mitigation: body.mitigation || null,
+        owner: body.owner || null,
+        dueDate: body.dueDate ? new Date(body.dueDate) : null,
+        status: body.status || "open",
+      });
+
+      res.json(risk);
+    } catch (error) {
+      console.error("Error creating risk:", error);
+      res.status(500).json({ error: "Failed to create risk" });
+    }
+  });
+
+  // PUT /api/risks/:id
+  app.put('/api/risks/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = String(req.params.id);
+      const body = req.body ?? {};
+
+      const updates: any = {};
+      if (body.title !== undefined) updates.title = String(body.title);
+      if (body.description !== undefined) updates.description = String(body.description);
+      if (body.category !== undefined) updates.category = String(body.category);
+      if (body.frameworkId !== undefined) updates.frameworkId = body.frameworkId || null;
+      if (body.impact !== undefined) updates.impact = body.impact;
+      if (body.likelihood !== undefined) updates.likelihood = body.likelihood;
+      if (body.mitigation !== undefined) updates.mitigation = body.mitigation || null;
+      if (body.owner !== undefined) updates.owner = body.owner || null;
+      if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate) : null;
+      if (body.status !== undefined) updates.status = body.status;
+
+      // Recalculate risk score if impact or likelihood changed
+      if (body.impact !== undefined || body.likelihood !== undefined) {
+        const currentRisk = await storage.getRisksByUserId(req.user.claims.sub);
+        const risk = currentRisk.find(r => r.id === id);
+        if (risk) {
+          const impact = body.impact || risk.impact;
+          const likelihood = body.likelihood || risk.likelihood;
+          const impactScore = impact === 'high' ? 3 : impact === 'medium' ? 2 : 1;
+          const likelihoodScore = likelihood === 'high' ? 3 : likelihood === 'medium' ? 2 : 1;
+          updates.riskScore = (impactScore * likelihoodScore).toString();
+        }
+      }
+
+      const risk = await storage.updateRisk(id, updates);
+      res.json(risk);
+    } catch (error) {
+      console.error("Error updating risk:", error);
+      res.status(500).json({ error: "Failed to update risk" });
+    }
+  });
+
+  // DELETE /api/risks/:id
+  app.delete('/api/risks/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = String(req.params.id);
+      await storage.deleteRisk(id);
+      res.json({ ok: true, id });
+    } catch (error) {
+      console.error("Error deleting risk:", error);
+      res.status(500).json({ error: "Failed to delete risk" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
