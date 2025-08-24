@@ -42,11 +42,6 @@ export default function AIChat() {
     { icon: Clock, text: "How long does compliance take?", color: "text-orange-600" }
   ];
 
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, sendMessageMutation.isPending]);
-
   // Listen for global toggle events from navbar
   useEffect(() => {
     const open = () => setIsOpen(true);
@@ -87,6 +82,11 @@ export default function AIChat() {
       });
     },
   });
+
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, sendMessageMutation.isPending]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
