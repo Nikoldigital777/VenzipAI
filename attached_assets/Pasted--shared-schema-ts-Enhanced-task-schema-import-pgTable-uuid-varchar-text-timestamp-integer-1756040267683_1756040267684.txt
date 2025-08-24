@@ -1,0 +1,114 @@
+// shared/schema.ts - Enhanced task schema
+import { pgTable, uuid, varchar, text, timestamp, integer, boolean, pgEnum } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { users, companies, frameworks } from "./existing-schema"; // Assuming existing schema
+
+// Task priority enum
+export const taskPriorityEnum = pgEnum('task_priority', ['low', 'medium', 'high', 'critical']);
+
+// Task status enum  
+export const taskStatusEnum = pgEnum('task_status', ['not_started', 'in_progress', 'under_review', 'completed', 'blocked']);
+
+// Task category enum
+export const taskCategoryEnum = pgEnum('task_category', ['policy', 'procedure', 'training', 'audit', 'risk_assessment', 'documentation', 'technical', 'other']);
+
+// Enhanced tasks table
+export const tasks = pgTable("tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  companyId: uuid("company_id").references(() => companies.id).notNull(),
+  frameworkId: uuid("framework_id").references(() => frameworks.id).notNull(),
+  
+  // Basic task info
+  title: varchar("title", { length: 500 }).notNull(),
+  description: text("description"),
+  
+  // Task classification
+  category: taskCategoryEnum("category").notNull().default('other'),
+  priority: taskPriorityEnum("priority").notNull().default('medium'),
+  status: taskStatusEnum("status").notNull().default('not_started'),
+  
+  // Assignment and ownership
+  assignedToId: uuid("assigned_to_id").references(() => users.id),
+  createdById: uuid("created_by_id").references(() => users.id).notNull(),
+  
+  // Dates and progress
+  dueDate: timestamp("due_date"),
+  startDate: timestamp("start_date"),
+  completedAt: timestamp("completed_at"),
+  estimatedHours: integer("estimated_hours"),
+  actualHours: integer("actual_hours"),
+  progressPercentage: integer("progress_percentage").default(0),
+  
+  // Compliance specific
+  complianceRequirement: text("compliance_requirement"),
+  evidenceRequired: boolean("evidence_required").default(false),
+  blockedReason: text("blocked_reason"),
+  
+  // Metadata
+  tags: text("tags"), // JSON array as text
+  dependencies: text("dependencies"), // JSON array of task IDs
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Task comments for collaboration
+export const taskComments = pgTable("task_comments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id").references(() => tasks.id).notNull(),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Task attachments
+export const taskAttachments = pgTable("task_attachments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id").references(() => tasks.id).notNull(),
+  documentId: uuid("document_id").references(() => documents.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Relations
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  company: one(companies, {
+    fields: [tasks.companyId],
+    references: [companies.id]
+  }),
+  framework: one(frameworks, {
+    fields: [tasks.frameworkId],
+    references: [frameworks.id]
+  }),
+  assignedTo: one(users, {
+    fields: [tasks.assignedToId],
+    references: [users.id]
+  }),
+  createdBy: one(users, {
+    fields: [tasks.createdById],
+    references: [users.id]
+  }),
+  comments: many(taskComments),
+  attachments: many(taskAttachments)
+}));
+
+export const taskCommentsRelations = relations(taskComments, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskComments.taskId],
+    references: [tasks.id]
+  }),
+  user: one(users, {
+    fields: [taskComments.userId],
+    references: [users.id]
+  })
+}));
+
+export const taskAttachmentsRelations = relations(taskAttachments, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskAttachments.taskId],
+    references: [tasks.id]
+  }),
+  document: one(documents, {
+    fields: [taskAttachments.documentId],
+    references: [documents.id]
+  })
+}));

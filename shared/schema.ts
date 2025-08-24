@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { sql, relations } from 'drizzle-orm';
 import {
   index,
   jsonb,
@@ -78,20 +78,72 @@ export const frameworkProgress = pgTable("framework_progress", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Tasks table
+// Task enums
+export const taskPriorityEnum = pgEnum('task_priority', ['low', 'medium', 'high', 'critical']);
+export const taskStatusEnum = pgEnum('task_status', ['not_started', 'in_progress', 'under_review', 'completed', 'blocked']);
+export const taskCategoryEnum = pgEnum('task_category', ['policy', 'procedure', 'training', 'audit', 'risk_assessment', 'documentation', 'technical', 'other']);
+
+// Enhanced tasks table
 export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  companyId: varchar("company_id").references(() => companies.id),
   frameworkId: varchar("framework_id").references(() => frameworks.id),
-  title: varchar("title").notNull(),
+  
+  // Basic task info
+  title: varchar("title", { length: 500 }).notNull(),
   description: text("description"),
-  priority: varchar("priority").notNull(), // 'low', 'medium', 'high'
-  status: varchar("status").notNull().default('pending'), // 'pending', 'in_progress', 'completed'
-  assignedTo: varchar("assigned_to"),
+  
+  // Task classification
+  category: taskCategoryEnum("category").notNull().default('other'),
+  priority: taskPriorityEnum("priority").notNull().default('medium'),
+  status: taskStatusEnum("status").notNull().default('not_started'),
+  
+  // Assignment and ownership
+  assignedToId: varchar("assigned_to_id").references(() => users.id),
+  createdById: varchar("created_by_id").references(() => users.id).notNull(),
+  
+  // Legacy userId field for backward compatibility
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Dates and progress
   dueDate: timestamp("due_date"),
+  startDate: timestamp("start_date"),
   completedAt: timestamp("completed_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  estimatedHours: integer("estimated_hours"),
+  actualHours: integer("actual_hours"),
+  progressPercentage: integer("progress_percentage").default(0),
+  
+  // Compliance specific
+  complianceRequirement: text("compliance_requirement"),
+  evidenceRequired: boolean("evidence_required").default(false),
+  blockedReason: text("blocked_reason"),
+  
+  // Legacy assignedTo field for backward compatibility
+  assignedTo: varchar("assigned_to"),
+  
+  // Metadata
+  tags: text("tags"), // JSON array as text
+  dependencies: text("dependencies"), // JSON array of task IDs
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Task comments for collaboration
+export const taskComments = pgTable("task_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  taskId: varchar("task_id").references(() => tasks.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  comment: text("comment").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Task attachments
+export const taskAttachments = pgTable("task_attachments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  taskId: varchar("task_id").references(() => tasks.id).notNull(),
+  documentId: varchar("document_id").references(() => documents.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
 // Documents table
@@ -248,6 +300,16 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   createdAt: true,
 });
 
+export const insertTaskCommentSchema = createInsertSchema(taskComments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTaskAttachmentSchema = createInsertSchema(taskAttachments).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -258,6 +320,10 @@ export type FrameworkProgress = typeof frameworkProgress.$inferSelect;
 export type InsertFrameworkProgress = z.infer<typeof insertFrameworkProgressSchema>;
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type TaskComment = typeof taskComments.$inferSelect;
+export type InsertTaskComment = z.infer<typeof insertTaskCommentSchema>;
+export type TaskAttachment = typeof taskAttachments.$inferSelect;
+export type InsertTaskAttachment = z.infer<typeof insertTaskAttachmentSchema>;
 export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type Risk = typeof risks.$inferSelect;
@@ -271,17 +337,14 @@ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 
-// --- Enhanced Tasks and Risks ---
-export const taskStatusEnum = pgEnum("task_status", ["todo", "in_progress", "blocked", "done"]);
-export const taskPriorityEnum = pgEnum("task_priority", ["low", "medium", "high", "critical"]);
-
+// --- Legacy compliance tasks (keeping for backward compatibility) ---
 export const complianceTasks = pgTable("compliance_tasks", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   framework: varchar("framework", { length: 64 }).notNull(), // "SOC2" | "HIPAA" | ...
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  priority: taskPriorityEnum("priority").default("medium").notNull(),
-  status: taskStatusEnum("status").default("todo").notNull(),
+  priority: varchar("priority").default("medium").notNull(),
+  status: varchar("status").default("todo").notNull(),
   dueDate: timestamp("due_date", { withTimezone: false }),
   assigneeId: varchar("assignee_id"), // reference users.id if you want a FK later
   createdAt: timestamp("created_at", { withTimezone: false }).defaultNow().notNull(),
@@ -291,3 +354,53 @@ export const complianceTasks = pgTable("compliance_tasks", {
 // --- Enhanced Risks (extending existing risks table) ---
 export const riskSeverityEnum = pgEnum("risk_severity", ["low", "medium", "high", "critical"]);
 export const riskProbabilityEnum = pgEnum("risk_probability", ["low", "medium", "high"]);
+
+// Relations for enhanced task tables (using Drizzle relations for better type safety)
+
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  company: one(companies, {
+    fields: [tasks.companyId],
+    references: [companies.id]
+  }),
+  framework: one(frameworks, {
+    fields: [tasks.frameworkId],
+    references: [frameworks.id]
+  }),
+  assignedTo: one(users, {
+    fields: [tasks.assignedToId],
+    references: [users.id]
+  }),
+  createdBy: one(users, {
+    fields: [tasks.createdById],
+    references: [users.id]
+  }),
+  // Legacy user relation for backward compatibility
+  user: one(users, {
+    fields: [tasks.userId],
+    references: [users.id]
+  }),
+  comments: many(taskComments),
+  attachments: many(taskAttachments)
+}));
+
+export const taskCommentsRelations = relations(taskComments, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskComments.taskId],
+    references: [tasks.id]
+  }),
+  user: one(users, {
+    fields: [taskComments.userId],
+    references: [users.id]
+  })
+}));
+
+export const taskAttachmentsRelations = relations(taskAttachments, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskAttachments.taskId],
+    references: [tasks.id]
+  }),
+  document: one(documents, {
+    fields: [taskAttachments.documentId],
+    references: [documents.id]
+  })
+}));

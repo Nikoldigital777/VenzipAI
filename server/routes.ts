@@ -508,9 +508,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: taskData.title,
               description: taskData.description,
               priority: taskData.priority,
-              status: 'pending',
+              status: 'not_started',
               assignedTo: null,
-              dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null
+              dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
+              createdById: userId
             });
           }
         }
@@ -590,6 +591,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting task:", error);
       res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
+  // Task comment routes
+  app.get('/api/tasks/:taskId/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const { taskId } = req.params;
+      const comments = await storage.getTaskComments(taskId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching task comments:", error);
+      res.status(500).json({ message: "Failed to fetch task comments" });
+    }
+  });
+
+  app.post('/api/tasks/:taskId/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const { taskId } = req.params;
+      const userId = req.user.claims.sub;
+      const commentData = {
+        taskId,
+        userId,
+        comment: req.body.comment
+      };
+      const comment = await storage.createTaskComment(commentData);
+      res.json(comment);
+    } catch (error) {
+      console.error("Error creating task comment:", error);
+      res.status(500).json({ message: "Failed to create task comment" });
+    }
+  });
+
+  app.delete('/api/tasks/comments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteTaskComment(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting task comment:", error);
+      res.status(500).json({ message: "Failed to delete task comment" });
+    }
+  });
+
+  // Task attachment routes
+  app.get('/api/tasks/:taskId/attachments', isAuthenticated, async (req: any, res) => {
+    try {
+      const { taskId } = req.params;
+      const attachments = await storage.getTaskAttachments(taskId);
+      res.json(attachments);
+    } catch (error) {
+      console.error("Error fetching task attachments:", error);
+      res.status(500).json({ message: "Failed to fetch task attachments" });
+    }
+  });
+
+  app.post('/api/tasks/:taskId/attachments', isAuthenticated, async (req: any, res) => {
+    try {
+      const { taskId } = req.params;
+      const { documentId } = req.body;
+      const attachmentData = {
+        taskId,
+        documentId
+      };
+      const attachment = await storage.createTaskAttachment(attachmentData);
+      res.json(attachment);
+    } catch (error) {
+      console.error("Error creating task attachment:", error);
+      res.status(500).json({ message: "Failed to create task attachment" });
+    }
+  });
+
+  app.delete('/api/tasks/attachments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteTaskAttachment(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting task attachment:", error);
+      res.status(500).json({ message: "Failed to delete task attachment" });
     }
   });
 
@@ -856,9 +936,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: String(body.title),
         description: body.description || null,
         priority: body.priority || "medium",
-        status: body.status || "pending",
+        status: body.status || "not_started",
         assignedTo: body.assignedTo || null,
         dueDate: body.dueDate ? new Date(body.dueDate) : null,
+        createdById: userId
       });
 
       res.json(task);
@@ -1058,7 +1139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: task.description || undefined,
         framework: task.frameworkId || undefined,
         priority: task.priority as "high" | "medium" | "low",
-        status: task.status as "pending" | "completed" | "in_progress",
+        status: task.status as "not_started" | "completed" | "in_progress",
         dueDate: task.dueDate ? task.dueDate.toISOString() : undefined
       })), {
         frameworks: company.selectedFrameworks,

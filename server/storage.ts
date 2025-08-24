@@ -4,6 +4,8 @@ import {
   frameworks,
   frameworkProgress,
   tasks,
+  taskComments,
+  taskAttachments,
   documents,
   risks,
   chatMessages,
@@ -19,6 +21,10 @@ import {
   type InsertFrameworkProgress,
   type Task,
   type InsertTask,
+  type TaskComment,
+  type InsertTaskComment,
+  type TaskAttachment,
+  type InsertTaskAttachment,
   type Document,
   type InsertDocument,
   type Risk,
@@ -59,6 +65,16 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: string, updates: Partial<InsertTask>): Promise<Task>;
   deleteTask(id: string): Promise<void>;
+  
+  // Task comment operations
+  getTaskComments(taskId: string): Promise<TaskComment[]>;
+  createTaskComment(comment: InsertTaskComment): Promise<TaskComment>;
+  deleteTaskComment(id: string): Promise<void>;
+  
+  // Task attachment operations
+  getTaskAttachments(taskId: string): Promise<TaskAttachment[]>;
+  createTaskAttachment(attachment: InsertTaskAttachment): Promise<TaskAttachment>;
+  deleteTaskAttachment(id: string): Promise<void>;
   
   // Document operations
   getDocumentsByUserId(userId: string): Promise<Document[]>;
@@ -199,6 +215,38 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTask(id: string): Promise<void> {
     await db.delete(tasks).where(eq(tasks.id, id));
+  }
+
+  // Task comment operations
+  async getTaskComments(taskId: string): Promise<TaskComment[]> {
+    return await db.select().from(taskComments)
+      .where(eq(taskComments.taskId, taskId))
+      .orderBy(desc(taskComments.createdAt));
+  }
+
+  async createTaskComment(commentData: InsertTaskComment): Promise<TaskComment> {
+    const [comment] = await db.insert(taskComments).values(commentData).returning();
+    return comment;
+  }
+
+  async deleteTaskComment(id: string): Promise<void> {
+    await db.delete(taskComments).where(eq(taskComments.id, id));
+  }
+
+  // Task attachment operations
+  async getTaskAttachments(taskId: string): Promise<TaskAttachment[]> {
+    return await db.select().from(taskAttachments)
+      .where(eq(taskAttachments.taskId, taskId))
+      .orderBy(desc(taskAttachments.createdAt));
+  }
+
+  async createTaskAttachment(attachmentData: InsertTaskAttachment): Promise<TaskAttachment> {
+    const [attachment] = await db.insert(taskAttachments).values(attachmentData).returning();
+    return attachment;
+  }
+
+  async deleteTaskAttachment(id: string): Promise<void> {
+    await db.delete(taskAttachments).where(eq(taskAttachments.id, id));
   }
 
   // Document operations
