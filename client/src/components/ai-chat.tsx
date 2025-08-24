@@ -18,7 +18,17 @@ import {
   FileText,
   AlertTriangle,
   Clock,
-  Loader2
+  Loader2,
+  Zap,
+  Star,
+  TrendingUp,
+  Brain,
+  CheckCircle2,
+  MessageSquare,
+  ArrowUp,
+  Mic,
+  VolumeX,
+  Volume2
 } from "lucide-react";
 
 interface ChatMessage {
@@ -32,14 +42,26 @@ export default function AIChat() {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
+  const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Quick action prompts
+  // Enhanced quick action prompts with categories
   const quickPrompts = [
-    { icon: Shield, text: "How do I start SOC 2 compliance?", color: "text-blue-600" },
-    { icon: FileText, text: "What documents do I need for ISO 27001?", color: "text-green-600" },
-    { icon: AlertTriangle, text: "What are the most critical risks?", color: "text-red-600" },
-    { icon: Clock, text: "How long does compliance take?", color: "text-orange-600" }
+    { icon: Shield, text: "How do I start SOC 2 compliance?", color: "text-blue-600", category: "Getting Started", bg: "from-blue-500/10 to-blue-600/5" },
+    { icon: FileText, text: "What documents do I need for ISO 27001?", color: "text-green-600", category: "Documentation", bg: "from-green-500/10 to-green-600/5" },
+    { icon: AlertTriangle, text: "What are the most critical risks?", color: "text-red-600", category: "Risk Assessment", bg: "from-red-500/10 to-red-600/5" },
+    { icon: Clock, text: "How long does compliance take?", color: "text-orange-600", category: "Timeline", bg: "from-orange-500/10 to-orange-600/5" },
+    { icon: TrendingUp, text: "Show me my compliance progress", color: "text-purple-600", category: "Analytics", bg: "from-purple-500/10 to-purple-600/5" },
+    { icon: Brain, text: "Suggest automation opportunities", color: "text-indigo-600", category: "AI Insights", bg: "from-indigo-500/10 to-indigo-600/5" }
+  ];
+  
+  // Achievement system
+  const achievements = [
+    { threshold: 1, icon: Star, text: "First question!", unlocked: messageCount >= 1 },
+    { threshold: 5, icon: Zap, text: "Getting curious!", unlocked: messageCount >= 5 },
+    { threshold: 10, icon: Brain, text: "AI enthusiast!", unlocked: messageCount >= 10 }
   ];
 
   // Listen for global toggle events from navbar
@@ -64,17 +86,32 @@ export default function AIChat() {
     enabled: isOpen,
   });
 
-  // Send message mutation
+  // Enhanced send message mutation with typing simulation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageText: string) => {
+      setIsTyping(true);
+      // Simulate typing delay for better UX
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
       const response = await apiRequest("POST", "/api/chat", { message: messageText });
       return response.json();
     },
     onSuccess: () => {
+      setIsTyping(false);
+      setMessageCount(prev => prev + 1);
       queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
       setMessage("");
+      // Show achievement toast for milestones
+      const newAchievement = achievements.find(a => a.threshold === messageCount + 1);
+      if (newAchievement) {
+        toast({
+          title: "🎉 Achievement Unlocked!",
+          description: newAchievement.text,
+          duration: 3000,
+        });
+      }
     },
     onError: (error: Error) => {
+      setIsTyping(false);
       toast({
         title: "Error",
         description: error.message || "Failed to send message",
@@ -96,8 +133,18 @@ export default function AIChat() {
 
   const handleQuickPrompt = (prompt: string) => {
     setMessage(prompt);
-    sendMessageMutation.mutate(prompt);
+    // Add a brief animation delay for better UX
+    setTimeout(() => {
+      sendMessageMutation.mutate(prompt);
+    }, 300);
   };
+  
+  // Hide welcome animation after first interaction
+  useEffect(() => {
+    if (messageCount > 0) {
+      setShowWelcomeAnimation(false);
+    }
+  }, [messageCount]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -105,26 +152,43 @@ export default function AIChat() {
 
   return (
     <>
-      {/* AI Chat Window */}
+      {/* Enhanced AI Chat Window */}
       {isOpen && (
         <div className="fixed bottom-6 right-6 z-50 animate-scale-in" data-testid="ai-chat-window">
-          <Card className="glass-card w-96 h-[500px] shadow-2xl border-0 bg-white/95 backdrop-blur-lg">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200/50 bg-gradient-to-r from-venzip-primary/5 to-venzip-accent/5">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center shadow-lg">
-                  <Bot className="h-4 w-4 text-white" />
+          <Card className="glass-card w-96 h-[600px] shadow-2xl border-0 bg-white/95 backdrop-blur-xl hover:shadow-3xl transition-all duration-500 animate-fadeInUp relative overflow-hidden">
+            {/* Background animation */}
+            <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 via-transparent to-venzip-accent/5 opacity-50"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-2xl animate-float"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-xl animate-float" style={{animationDelay: '2s'}}></div>
+            <div className="flex items-center justify-between p-6 border-b border-gray-200/50 bg-gradient-to-r from-venzip-primary/8 to-venzip-accent/8 relative z-10">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div className="w-12 h-12 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 animate-glow-pulse">
+                    <Bot className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-pulse flex items-center justify-center shadow-lg">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900">Claude Assistant</h3>
-                    <Badge variant="outline" className="text-xs px-2 py-0.5 border-green-200 text-green-700 bg-green-50">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-bold text-gray-900 text-lg">Claude</h3>
+                    <Badge className="text-xs px-3 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-sm animate-pulse">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
                       Online
                     </Badge>
+                    {messageCount > 0 && (
+                      <Badge variant="outline" className="text-xs px-2 py-1 border-venzip-primary/30 text-venzip-primary bg-venzip-primary/10">
+                        {messageCount} chats
+                      </Badge>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500 flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" />
-                    AI-powered compliance guidance
+                  <p className="text-sm text-gray-600 flex items-center gap-2 mt-1">
+                    <Sparkles className="h-4 w-4 text-venzip-primary animate-pulse" />
+                    <span className="font-medium">AI Compliance Expert</span>
+                    {isTyping && (
+                      <span className="text-venzip-primary font-medium animate-pulse">typing...</span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -139,25 +203,37 @@ export default function AIChat() {
               </Button>
             </div>
             
-            <div className="p-4 h-80 overflow-y-auto bg-gradient-to-b from-gray-50/50 to-white">
-              <div className="space-y-4">
+            <div className="p-6 h-96 overflow-y-auto bg-gradient-to-b from-gray-50/30 to-white/80 relative z-10 scrollbar-thin scrollbar-thumb-venzip-primary/20 scrollbar-track-transparent">
+              <div className="space-y-6">
                 {messages.length === 0 ? (
                   <>
-                    <div className="flex space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                        <Bot className="h-4 w-4 text-white" />
+                    <div className={`flex space-x-4 ${showWelcomeAnimation ? 'animate-fadeInUp' : ''}`}>
+                      <div className="w-12 h-12 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg animate-bounce">
+                        <Bot className="h-6 w-6 text-white" />
                       </div>
-                      <div className="bg-white p-4 rounded-2xl rounded-tl-sm max-w-xs shadow-sm border border-gray-100">
-                        <p className="text-sm text-gray-800 leading-relaxed">
-                          👋 Hi! I'm Claude, your AI compliance assistant. I can help you with SOC 2, ISO 27001, HIPAA, and GDPR questions.
+                      <div className="bg-white p-6 rounded-3xl rounded-tl-md max-w-sm shadow-lg border border-gray-100 relative hover:shadow-xl transition-all duration-300">
+                        <div className="absolute -top-2 -left-2 w-4 h-4 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full animate-ping"></div>
+                        <p className="text-base text-gray-800 leading-relaxed font-medium">
+                          👋 <span className="text-gradient-primary font-bold">Welcome!</span> I'm Claude, your AI compliance expert.
                         </p>
+                        <p className="text-sm text-gray-600 mt-3 leading-relaxed">
+                          I specialize in <span className="font-semibold text-venzip-primary">SOC 2</span>, <span className="font-semibold text-venzip-secondary">ISO 27001</span>, <span className="font-semibold text-venzip-accent">HIPAA</span>, and <span className="font-semibold text-success-green">GDPR</span> compliance.
+                        </p>
+                        <div className="flex items-center gap-2 mt-4 text-xs text-gray-500">
+                          <Sparkles className="h-3 w-3 text-venzip-primary animate-pulse" />
+                          <span>Powered by Claude AI</span>
+                        </div>
                       </div>
                     </div>
                     
-                    {/* Quick Action Prompts */}
-                    <div className="space-y-2">
-                      <p className="text-xs text-gray-500 font-medium px-1">Quick actions:</p>
-                      <div className="grid grid-cols-1 gap-2">
+                    {/* Enhanced Quick Action Prompts */}
+                    <div className={`space-y-4 mt-6 ${showWelcomeAnimation ? 'animate-fadeInUp' : ''}`} style={{animationDelay: '0.3s'}}>
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-venzip-primary" />
+                        <p className="text-sm text-gray-700 font-semibold">Quick Start Options</p>
+                        <div className="flex-1 h-px bg-gradient-to-r from-gray-200 to-transparent"></div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3">
                         {quickPrompts.map((prompt, index) => {
                           const IconComponent = prompt.icon;
                           return (
@@ -166,11 +242,20 @@ export default function AIChat() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleQuickPrompt(prompt.text)}
-                              className="justify-start h-auto p-3 text-left hover:bg-gray-50 border-gray-200 hover:border-gray-300 transition-all duration-200"
+                              className={`justify-start h-auto p-4 text-left hover:shadow-lg border-0 bg-gradient-to-r ${prompt.bg} hover:scale-105 transition-all duration-300 group relative overflow-hidden animate-fadeInUp`}
+                              style={{animationDelay: `${0.1 * index}s`}}
                               disabled={sendMessageMutation.isPending}
                             >
-                              <IconComponent className={`h-4 w-4 mr-2 ${prompt.color}`} />
-                              <span className="text-xs text-gray-700">{prompt.text}</span>
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                              <div className="flex items-start gap-3 relative z-10">
+                                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br from-white to-gray-50 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+                                  <IconComponent className={`h-4 w-4 ${prompt.color}`} />
+                                </div>
+                                <div>
+                                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">{prompt.category}</div>
+                                  <div className="text-sm text-gray-800 font-medium leading-relaxed">{prompt.text}</div>
+                                </div>
+                              </div>
                             </Button>
                           );
                         })}
@@ -178,42 +263,66 @@ export default function AIChat() {
                     </div>
                   </>
                 ) : (
-                  [...messages].reverse().map((msg: ChatMessage) => (
-                    <div key={msg.id} className={`flex space-x-3 ${msg.messageType === 'user' ? 'justify-end' : ''}`}>
+                  [...messages].reverse().map((msg: ChatMessage, index) => (
+                    <div key={msg.id} className={`flex space-x-4 mb-6 ${msg.messageType === 'user' ? 'justify-end' : ''} animate-fadeInUp`} style={{animationDelay: `${index * 0.1}s`}}>
                       {msg.messageType === 'assistant' && (
-                        <div className="w-8 h-8 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                          <Bot className="h-4 w-4 text-white" />
+                        <div className="relative">
+                          <div className="w-10 h-10 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg hover:scale-110 transition-transform duration-300">
+                            <Bot className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-md">
+                            <CheckCircle2 className="h-2 w-2 text-white" />
+                          </div>
                         </div>
                       )}
-                      <div className={`p-4 rounded-2xl max-w-xs shadow-sm border transition-all duration-200 ${
+                      <div className={`p-5 rounded-3xl max-w-sm shadow-lg border transition-all duration-300 hover:shadow-xl relative group ${
                         msg.messageType === 'user' 
-                          ? 'bg-gradient-to-r from-venzip-primary to-venzip-accent text-white rounded-tr-sm border-venzip-primary/20' 
-                          : 'bg-white text-gray-800 rounded-tl-sm border-gray-100 hover:shadow-md'
+                          ? 'bg-gradient-to-r from-venzip-primary to-venzip-accent text-white rounded-tr-lg border-venzip-primary/20' 
+                          : 'bg-white text-gray-800 rounded-tl-lg border-gray-100'
                       }`}>
-                        <p className="text-sm leading-relaxed">{msg.message}</p>
+                        {msg.messageType === 'assistant' && (
+                          <div className="absolute -top-2 -left-2 w-3 h-3 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full animate-pulse"></div>
+                        )}
+                        <p className="text-sm leading-relaxed font-medium">{msg.message}</p>
+                        <div className="flex items-center justify-between mt-3 text-xs opacity-70">
+                          <span>{new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                          {msg.messageType === 'assistant' && (
+                            <div className="flex items-center gap-1">
+                              <Brain className="h-3 w-3" />
+                              <span>AI</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       {msg.messageType === 'user' && (
-                        <div className="w-8 h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                          <User className="h-4 w-4 text-white" />
+                        <div className="w-10 h-10 bg-gradient-to-r from-gray-400 to-gray-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg hover:scale-110 transition-transform duration-300">
+                          <User className="h-5 w-5 text-white" />
                         </div>
                       )}
                     </div>
                   ))
                 )}
                 
-                {sendMessageMutation.isPending && (
-                  <div className="flex space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                      <Loader2 className="h-4 w-4 text-white animate-spin" />
+                {(sendMessageMutation.isPending || isTyping) && (
+                  <div className="flex space-x-4 animate-fadeInUp">
+                    <div className="w-10 h-10 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg animate-pulse">
+                      <Loader2 className="h-5 w-5 text-white animate-spin" />
                     </div>
-                    <div className="bg-white p-4 rounded-2xl rounded-tl-sm max-w-xs shadow-sm border border-gray-100">
-                      <div className="flex items-center space-x-2">
+                    <div className="bg-white p-5 rounded-3xl rounded-tl-lg max-w-sm shadow-lg border border-gray-100 relative">
+                      <div className="absolute -top-2 -left-2 w-3 h-3 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full animate-ping"></div>
+                      <div className="flex items-center space-x-3">
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-venzip-primary rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-venzip-accent rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-venzip-secondary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-3 h-3 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full animate-bounce"></div>
+                          <div className="w-3 h-3 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-3 h-3 bg-gradient-to-r from-venzip-secondary to-venzip-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
-                        <span className="text-xs text-gray-500">Claude is thinking...</span>
+                        <div>
+                          <span className="text-sm text-gray-700 font-medium">Claude is thinking</span>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Brain className="h-3 w-3 text-venzip-primary animate-pulse" />
+                            <span className="text-xs text-gray-500">Processing your request...</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -222,52 +331,98 @@ export default function AIChat() {
               </div>
             </div>
             
-            <div className="p-4 border-t border-gray-200/50 bg-white/50">
-              <form onSubmit={handleSubmit} className="flex space-x-3">
+            <div className="p-6 border-t border-gray-200/50 bg-gradient-to-r from-white/80 to-gray-50/80 relative z-10">
+              <form onSubmit={handleSubmit} className="flex space-x-4">
                 <div className="relative flex-1">
                   <Input
                     type="text"
                     placeholder="Ask about compliance, frameworks, or risks..."
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    disabled={sendMessageMutation.isPending}
-                    className="text-sm focus:ring-2 focus:ring-venzip-primary focus:border-venzip-primary border-gray-200 rounded-xl pl-4 pr-12 h-11 shadow-sm"
+                    disabled={sendMessageMutation.isPending || isTyping}
+                    className="text-sm focus:ring-2 focus:ring-venzip-primary focus:border-venzip-primary border-0 rounded-2xl pl-5 pr-14 h-12 shadow-lg bg-white/90 backdrop-blur-sm placeholder:text-gray-500 font-medium"
                     data-testid="input-chat-message"
                   />
-                  <HelpCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                    {message.trim() && (
+                      <ArrowUp className="h-4 w-4 text-venzip-primary animate-bounce" />
+                    )}
+                    <MessageSquare className="h-4 w-4 text-gray-400" />
+                  </div>
                 </div>
                 <Button 
                   type="submit"
-                  disabled={sendMessageMutation.isPending || !message.trim()}
-                  className="bg-gradient-to-r from-venzip-primary to-venzip-accent text-white hover:shadow-lg transition-all duration-200 rounded-xl px-4 h-11 min-w-[44px]"
+                  disabled={sendMessageMutation.isPending || isTyping || !message.trim()}
+                  className="bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary text-white hover:shadow-xl hover:shadow-venzip-primary/25 hover:scale-110 transition-all duration-300 rounded-2xl px-6 h-12 min-w-[48px] relative overflow-hidden group"
                   data-testid="button-send-message"
                 >
-                  {sendMessageMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                  {sendMessageMutation.isPending || isTyping ? (
+                    <Loader2 className="h-5 w-5 animate-spin relative z-10" />
                   ) : (
-                    <Send className="h-4 w-4" />
+                    <Send className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300 relative z-10" />
                   )}
                 </Button>
               </form>
+              
+              {/* Achievement indicators */}
+              {messageCount > 0 && (
+                <div className="flex items-center justify-center gap-2 mt-3">
+                  {achievements.filter(a => a.unlocked).map((achievement, index) => {
+                    const IconComponent = achievement.icon;
+                    return (
+                      <div key={index} className="flex items-center gap-1 text-xs text-venzip-primary font-medium animate-fadeInUp">
+                        <IconComponent className="h-3 w-3" />
+                        <span>{achievement.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </Card>
         </div>
       )}
 
-      {/* AI Chat Bubble */}
+      {/* Enhanced AI Chat Bubble */}
       {!isOpen && (
         <div className="fixed bottom-6 right-6 z-50" data-testid="ai-chat-bubble">
-          <Button
-            onClick={toggleChat}
-            className="group w-16 h-16 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary text-white rounded-full shadow-2xl hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center relative overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-            <MessageCircle className="h-8 w-8 relative z-10 group-hover:scale-110 transition-transform duration-200" />
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-pulse flex items-center justify-center">
-              <Sparkles className="h-3 w-3 text-white" />
+          <div className="relative">
+            {/* Floating action hints */}
+            <div className="absolute -top-16 -left-20 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg border border-gray-200 animate-bounce opacity-80 hover:opacity-100 transition-opacity">
+              <p className="text-xs font-medium text-gray-700 whitespace-nowrap">💬 Ask Claude anything!</p>
+              <div className="absolute bottom-0 right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-white/90"></div>
             </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/50 to-venzip-accent/50 rounded-full animate-ping opacity-75"></div>
-          </Button>
+            
+            <Button
+              onClick={toggleChat}
+              className="group w-20 h-20 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary text-white rounded-3xl shadow-2xl hover:shadow-3xl hover:scale-110 transition-all duration-500 flex items-center justify-center relative overflow-hidden animate-glow-pulse"
+            >
+              {/* Background animations */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/50 to-venzip-accent/50 rounded-3xl animate-ping opacity-75"></div>
+              
+              {/* Main icon */}
+              <MessageCircle className="h-10 w-10 relative z-10 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300" />
+              
+              {/* Status indicators */}
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-pulse flex items-center justify-center shadow-lg">
+                <Sparkles className="h-4 w-4 text-white animate-spin" />
+              </div>
+              
+              {/* Message count badge */}
+              {messageCount > 0 && (
+                <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-r from-venzip-secondary to-venzip-primary rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                  <span className="text-xs font-bold text-white">{messageCount}</span>
+                </div>
+              )}
+              
+              {/* Floating particles */}
+              <div className="absolute top-1 left-1 w-2 h-2 bg-white/50 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+              <div className="absolute top-3 right-2 w-1.5 h-1.5 bg-white/40 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+              <div className="absolute bottom-2 left-3 w-1 h-1 bg-white/30 rounded-full animate-ping" style={{animationDelay: '1.5s'}}></div>
+            </Button>
+          </div>
         </div>
       )}
     </>
