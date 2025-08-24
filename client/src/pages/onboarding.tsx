@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface CompanyData {
   name: string;
@@ -50,14 +51,14 @@ export default function Onboarding() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/company"] });
       toast({
-        title: "Success",
-        description: "Company profile created successfully!",
+        title: "🎉 Welcome to Venzip!",
+        description: "Your compliance journey starts now. Let's achieve excellence together!",
       });
       setLocation("/dashboard");
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: "❌ Setup Failed",
         description: error.message || "Failed to create company profile",
         variant: "destructive",
       });
@@ -84,8 +85,8 @@ export default function Onboarding() {
     
     if (selectedFrameworks.length === 0) {
       toast({
-        title: "Selection Required",
-        description: "Please select at least one compliance framework",
+        title: "⚠️ Selection Required",
+        description: "Please select at least one compliance framework to continue",
         variant: "destructive",
       });
       return;
@@ -105,172 +106,393 @@ export default function Onboarding() {
   return (
     <>
       <Navigation />
-      <div className="pt-16 min-h-screen bg-gradient-to-br from-venzip-primary/10 via-venzip-secondary/5 to-venzip-accent/10">
-        <div className="max-w-6xl mx-auto p-6">
-          <Card className="glass-card animate-fade-in">
-            <CardContent className="p-8">
-              {/* Header */}
-              <div className="text-center mb-12">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-primary rounded-full flex items-center justify-center animate-float shadow-xl">
-                  <i className="fas fa-shield-alt text-white text-2xl"></i>
-                </div>
-                <h1 className="text-5xl font-bold text-gray-900 mb-4">
-                  Welcome to <span className="bg-gradient-primary bg-clip-text text-transparent">Venzip</span>
-                </h1>
-                <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                  AI-powered compliance made simple. Let's get your compliance journey started in just 3 steps.
-                </p>
+      
+      {/* Background with animated particles */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/80 to-teal-50/60"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-venzip-primary/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-16 w-96 h-96 bg-venzip-accent/8 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-venzip-secondary/6 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
 
-                {/* Progress Indicator */}
-                <div className="flex items-center justify-center space-x-4 mb-8">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">1</div>
-                    <span className="text-sm font-medium text-venzip-primary">Frameworks</span>
+      <div className="relative pt-20 min-h-screen">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center p-4 mb-8">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center shadow-2xl animate-float">
+                  <i className="fas fa-shield-alt text-white text-3xl"></i>
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center animate-pulse">
+                  <i className="fas fa-star text-white text-xs"></i>
+                </div>
+              </div>
+            </div>
+
+            <Badge className="mb-6 bg-venzip-primary/10 text-venzip-primary border-venzip-primary/20 px-6 py-3 text-lg font-semibold rounded-full shadow-lg animate-bounce">
+              🚀 AI-Powered Setup Wizard
+            </Badge>
+            
+            <h1 className="text-6xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+              Welcome to
+              <br />
+              <span className="bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary bg-clip-text text-transparent animate-pulse">
+                Venzip
+              </span>
+            </h1>
+            
+            <p className="text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Transform your compliance journey with AI-powered automation. 
+              <br />
+              <span className="font-semibold text-venzip-primary">Let's get started in just 3 simple steps.</span>
+            </p>
+
+            {/* Enhanced Progress Indicator */}
+            <div className="flex items-center justify-center mb-12">
+              <div className="flex items-center space-x-8">
+                <div className="flex flex-col items-center space-y-3 group">
+                  <div className="relative">
+                    <div className="w-16 h-16 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 transition-transform duration-300">
+                      1
+                    </div>
+                    <div className="absolute -inset-2 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full opacity-20 blur animate-pulse"></div>
                   </div>
-                  <div className="w-12 h-px bg-gray-300"></div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">2</div>
-                    <span className="text-sm font-medium text-venzip-primary">Company</span>
+                  <div className="text-center">
+                    <div className="font-semibold text-venzip-primary text-lg">Frameworks</div>
+                    <div className="text-sm text-gray-500">Choose your standards</div>
                   </div>
-                  <div className="w-12 h-px bg-gray-300"></div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">3</div>
-                    <span className="text-sm font-medium text-venzip-primary">Setup</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <div className="w-20 h-1 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full"></div>
+                  <i className="fas fa-chevron-right text-venzip-primary mx-2"></i>
+                </div>
+                
+                <div className="flex flex-col items-center space-y-3 group">
+                  <div className="relative">
+                    <div className="w-16 h-16 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 transition-transform duration-300">
+                      2
+                    </div>
+                    <div className="absolute -inset-2 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full opacity-20 blur animate-pulse delay-500"></div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-venzip-accent text-lg">Company</div>
+                    <div className="text-sm text-gray-500">Your information</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <div className="w-20 h-1 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full"></div>
+                  <i className="fas fa-chevron-right text-venzip-accent mx-2"></i>
+                </div>
+                
+                <div className="flex flex-col items-center space-y-3 group">
+                  <div className="relative">
+                    <div className="w-16 h-16 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 transition-transform duration-300">
+                      3
+                    </div>
+                    <div className="absolute -inset-2 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full opacity-20 blur animate-pulse delay-1000"></div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-venzip-secondary text-lg">Launch</div>
+                    <div className="text-sm text-gray-500">Start your journey</div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <form onSubmit={handleSubmit} className="space-y-12">
-                {/* Framework Selection */}
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">Choose Your Compliance Frameworks</h2>
-                  <p className="text-gray-600 text-center mb-8">Select the standards you need to comply with. You can always add more later.</p>
+          <form onSubmit={handleSubmit} className="space-y-16">
+            
+            {/* Framework Selection Section */}
+            <div className="relative">
+              <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
+                <CardContent className="p-12">
+                  <div className="text-center mb-12">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full mb-6 shadow-xl">
+                      <i className="fas fa-certificate text-white text-2xl"></i>
+                    </div>
+                    <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                      Choose Your <span className="bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Compliance Frameworks</span>
+                    </h2>
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                      Select the regulatory standards your organization needs to comply with. 
+                      Our AI will customize your compliance roadmap accordingly.
+                    </p>
+                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                     {frameworks.map((framework: any) => (
-                      <FrameworkCard
-                        key={framework.id}
-                        framework={framework}
-                        selected={selectedFrameworks.includes(framework.name)}
-                        onToggle={() => toggleFramework(framework.name)}
-                      />
+                      <div key={framework.id} className="relative group">
+                        <FrameworkCard
+                          framework={framework}
+                          selected={selectedFrameworks.includes(framework.name)}
+                          onToggle={() => toggleFramework(framework.name)}
+                        />
+                        {selectedFrameworks.includes(framework.name) && (
+                          <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-success-green to-venzip-primary rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                            <i className="fas fa-check text-white text-sm"></i>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
 
-                  {/* Selection Summary */}
+                  {/* Enhanced Selection Summary */}
                   {selectedFrameworks.length > 0 && (
-                    <div className="glass-card p-6 rounded-xl animate-slide-up" data-testid="selection-summary">
-                      <h3 className="text-lg font-semibold mb-4">Selected Frameworks ({selectedFrameworks.length})</h3>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {selectedFrameworks.map(frameworkName => (
-                          <span key={frameworkName} className="px-3 py-1 bg-venzip-primary/20 text-venzip-primary text-sm font-medium rounded-full">
-                            {frameworkName.toUpperCase()}
-                            <button 
-                              type="button"
-                              onClick={() => toggleFramework(frameworkName)} 
-                              className="ml-2 text-venzip-primary/70 hover:text-venzip-primary"
-                              data-testid={`remove-framework-${frameworkName}`}
-                            >
-                              <i className="fas fa-times text-xs"></i>
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Estimated completion time: <span className="font-medium">{estimatedTime} months</span>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-venzip-primary/10 via-venzip-accent/10 to-venzip-secondary/10 border border-venzip-primary/20 p-8 animate-slide-up shadow-xl" data-testid="selection-summary">
+                      <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 to-venzip-accent/5 blur-xl"></div>
+                      <div className="relative">
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center">
+                              <i className="fas fa-chart-pie text-white text-lg"></i>
+                            </div>
+                            <div>
+                              <h3 className="text-2xl font-bold text-gray-900">Your Selection</h3>
+                              <p className="text-gray-600">Frameworks chosen for compliance</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-gradient-to-r from-success-green to-venzip-primary text-white px-4 py-2 text-lg font-bold shadow-lg">
+                            {selectedFrameworks.length} Selected
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-800 mb-3">Selected Frameworks</h4>
+                            <div className="flex flex-wrap gap-3">
+                              {selectedFrameworks.map(frameworkName => (
+                                <div key={frameworkName} className="group relative">
+                                  <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-venzip-primary to-venzip-accent text-white text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                                    {frameworkName.toUpperCase()}
+                                    <button 
+                                      type="button"
+                                      onClick={() => toggleFramework(frameworkName)} 
+                                      className="ml-2 w-5 h-5 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200"
+                                      data-testid={`remove-framework-${frameworkName}`}
+                                    >
+                                      <i className="fas fa-times text-xs"></i>
+                                    </button>
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-800 mb-3">Estimated Timeline</h4>
+                            <div className="flex items-center space-x-4">
+                              <div className="w-16 h-16 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center shadow-lg">
+                                <i className="fas fa-clock text-white text-xl"></i>
+                              </div>
+                              <div>
+                                <div className="text-3xl font-bold bg-gradient-to-r from-warning-orange to-danger-coral bg-clip-text text-transparent">
+                                  {estimatedTime} {estimatedTime === 1 ? 'month' : 'months'}
+                                </div>
+                                <div className="text-sm text-gray-600">Estimated completion time</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-center p-4 bg-gradient-to-r from-success-green/10 to-venzip-primary/10 rounded-xl border border-success-green/20">
+                          <i className="fas fa-lightbulb text-warning-orange mr-3 text-lg"></i>
+                          <span className="text-gray-700 font-medium">AI will customize your roadmap based on these selections</span>
+                        </div>
                       </div>
                     </div>
                   )}
-                </div>
+                </CardContent>
+              </Card>
+            </div>
 
-                {/* Company Profile Setup */}
-                <div className="glass-card p-8 rounded-xl">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Company Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">Company Name</Label>
-                      <Input 
-                        id="companyName"
-                        type="text" 
-                        placeholder="Enter your company name"
-                        value={companyData.name}
-                        onChange={(e) => setCompanyData(prev => ({ ...prev, name: e.target.value }))}
-                        required
-                        data-testid="input-company-name"
-                      />
+            {/* Company Information Section */}
+            <div className="relative">
+              <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
+                <CardContent className="p-12">
+                  <div className="text-center mb-12">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full mb-6 shadow-xl">
+                      <i className="fas fa-building text-white text-2xl"></i>
+                    </div>
+                    <h3 className="text-4xl font-bold text-gray-900 mb-4">
+                      Tell Us About Your <span className="bg-gradient-to-r from-venzip-accent to-venzip-secondary bg-clip-text text-transparent">Company</span>
+                    </h3>
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                      Help us personalize your compliance experience with some basic information about your organization.
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="group">
+                      <Label htmlFor="companyName" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-primary transition-colors duration-200">
+                        <i className="fas fa-building mr-2 text-venzip-primary"></i>
+                        Company Name
+                      </Label>
+                      <div className="relative">
+                        <Input 
+                          id="companyName"
+                          type="text" 
+                          placeholder="Enter your company name"
+                          value={companyData.name}
+                          onChange={(e) => setCompanyData(prev => ({ ...prev, name: e.target.value }))}
+                          required
+                          className="h-14 text-lg border-2 border-gray-200 focus:border-venzip-primary focus:ring-4 focus:ring-venzip-primary/20 rounded-xl shadow-sm transition-all duration-300"
+                          data-testid="input-company-name"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                      </div>
                     </div>
                     
-                    <div>
-                      <Label htmlFor="industry" className="block text-sm font-medium text-gray-700 mb-2">Industry</Label>
+                    <div className="group">
+                      <Label htmlFor="industry" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-accent transition-colors duration-200">
+                        <i className="fas fa-industry mr-2 text-venzip-accent"></i>
+                        Industry
+                      </Label>
                       <Select value={companyData.industry} onValueChange={(value) => setCompanyData(prev => ({ ...prev, industry: value }))}>
-                        <SelectTrigger data-testid="select-industry">
+                        <SelectTrigger className="h-14 text-lg border-2 border-gray-200 focus:border-venzip-accent focus:ring-4 focus:ring-venzip-accent/20 rounded-xl shadow-sm" data-testid="select-industry">
                           <SelectValue placeholder="Select your industry" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fintech">Financial Technology</SelectItem>
-                          <SelectItem value="healthcare">Healthcare</SelectItem>
-                          <SelectItem value="saas">Software as a Service</SelectItem>
-                          <SelectItem value="ecommerce">E-commerce</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                        <SelectContent className="rounded-xl shadow-2xl border-0">
+                          <SelectItem value="fintech" className="text-lg py-3 rounded-lg hover:bg-venzip-primary/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-coins text-venzip-primary"></i>
+                              <span>Financial Technology</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="healthcare" className="text-lg py-3 rounded-lg hover:bg-danger-coral/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-heartbeat text-danger-coral"></i>
+                              <span>Healthcare</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="saas" className="text-lg py-3 rounded-lg hover:bg-venzip-accent/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-cloud text-venzip-accent"></i>
+                              <span>Software as a Service</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="ecommerce" className="text-lg py-3 rounded-lg hover:bg-warning-orange/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-shopping-cart text-warning-orange"></i>
+                              <span>E-commerce</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="other" className="text-lg py-3 rounded-lg hover:bg-gray-100">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-ellipsis-h text-gray-500"></i>
+                              <span>Other</span>
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     
-                    <div>
-                      <Label htmlFor="size" className="block text-sm font-medium text-gray-700 mb-2">Company Size</Label>
+                    <div className="group">
+                      <Label htmlFor="size" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-secondary transition-colors duration-200">
+                        <i className="fas fa-users mr-2 text-venzip-secondary"></i>
+                        Company Size
+                      </Label>
                       <Select value={companyData.size} onValueChange={(value) => setCompanyData(prev => ({ ...prev, size: value }))}>
-                        <SelectTrigger data-testid="select-company-size">
+                        <SelectTrigger className="h-14 text-lg border-2 border-gray-200 focus:border-venzip-secondary focus:ring-4 focus:ring-venzip-secondary/20 rounded-xl shadow-sm" data-testid="select-company-size">
                           <SelectValue placeholder="Select company size" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1-10">1-10 employees</SelectItem>
-                          <SelectItem value="11-50">11-50 employees</SelectItem>
-                          <SelectItem value="51-200">51-200 employees</SelectItem>
-                          <SelectItem value="201-500">201-500 employees</SelectItem>
-                          <SelectItem value="500+">500+ employees</SelectItem>
+                        <SelectContent className="rounded-xl shadow-2xl border-0">
+                          <SelectItem value="1-10" className="text-lg py-3 rounded-lg hover:bg-success-green/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-user text-success-green"></i>
+                              <span>1-10 employees</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="11-50" className="text-lg py-3 rounded-lg hover:bg-venzip-primary/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-user-friends text-venzip-primary"></i>
+                              <span>11-50 employees</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="51-200" className="text-lg py-3 rounded-lg hover:bg-warning-orange/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-users text-warning-orange"></i>
+                              <span>51-200 employees</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="201-500" className="text-lg py-3 rounded-lg hover:bg-venzip-accent/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-users-cog text-venzip-accent"></i>
+                              <span>201-500 employees</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="500+" className="text-lg py-3 rounded-lg hover:bg-danger-coral/10">
+                            <div className="flex items-center space-x-3">
+                              <i className="fas fa-city text-danger-coral"></i>
+                              <span>500+ employees</span>
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     
-                    <div>
-                      <Label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-2">Primary Contact Email</Label>
-                      <Input 
-                        id="contactEmail"
-                        type="email" 
-                        placeholder="contact@company.com"
-                        value={companyData.contactEmail}
-                        onChange={(e) => setCompanyData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                        required
-                        data-testid="input-contact-email"
-                      />
+                    <div className="group">
+                      <Label htmlFor="contactEmail" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-success-green transition-colors duration-200">
+                        <i className="fas fa-envelope mr-2 text-success-green"></i>
+                        Primary Contact Email
+                      </Label>
+                      <div className="relative">
+                        <Input 
+                          id="contactEmail"
+                          type="email" 
+                          placeholder="contact@company.com"
+                          value={companyData.contactEmail}
+                          onChange={(e) => setCompanyData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                          required
+                          className="h-14 text-lg border-2 border-gray-200 focus:border-success-green focus:ring-4 focus:ring-success-green/20 rounded-xl shadow-sm transition-all duration-300"
+                          data-testid="input-contact-email"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-success-green/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
+            </div>
 
-                {/* Action Buttons */}
-                <div className="flex justify-center">
-                  <Button 
-                    type="submit"
-                    disabled={createCompanyMutation.isPending}
-                    className="bg-gradient-primary hover:shadow-xl hover:scale-105 transition-all duration-300 text-white font-semibold px-8 py-4 rounded-xl"
-                    data-testid="button-start-journey"
-                  >
+            {/* Enhanced Action Button */}
+            <div className="text-center">
+              <div className="relative inline-block">
+                <Button 
+                  type="submit"
+                  disabled={createCompanyMutation.isPending}
+                  className="relative group bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary hover:shadow-2xl hover:scale-105 transition-all duration-500 text-white font-bold px-12 py-6 rounded-2xl text-xl overflow-hidden"
+                  data-testid="button-start-journey"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-venzip-secondary via-venzip-accent to-venzip-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="relative flex items-center space-x-3">
                     {createCompanyMutation.isPending ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Setting up...
+                        <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Setting up your workspace...</span>
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-rocket mr-2"></i>
-                        Start Compliance Journey
+                        <i className="fas fa-rocket text-2xl group-hover:animate-bounce"></i>
+                        <span>Launch My Compliance Journey</span>
+                        <i className="fas fa-arrow-right text-xl group-hover:translate-x-2 transition-transform duration-300"></i>
                       </>
                     )}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                  </div>
+                </Button>
+                
+                {/* Animated background effects */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-2xl opacity-20 blur-xl animate-pulse"></div>
+              </div>
+              
+              <p className="mt-6 text-gray-600 text-lg">
+                🎯 Your AI-powered compliance dashboard will be ready in seconds!
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </>
