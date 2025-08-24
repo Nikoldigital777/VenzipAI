@@ -7,9 +7,11 @@ import {
   insertTaskSchema, 
   insertDocumentSchema, 
   insertRiskSchema,
+  insertRiskScoreHistorySchema,
   insertChatMessageSchema,
   complianceTasks,
   risks as risksTable,
+  riskScoreHistory,
   chatMessages,
   documents as evidenceDocuments,
   tasks
@@ -20,6 +22,7 @@ import {
   chatWithClaude, 
   generateComplianceRecommendations,
   assessRisk,
+  calculateDynamicRiskScore,
   prioritizeTasks,
   detectComplianceGaps,
   analyzeDocumentAdvanced,
@@ -581,7 +584,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Get the task before update to check status change
+      const currentTask = await storage.getTaskById(id);
+      
       const task = await storage.updateTask(id, updates);
+      
+      // Trigger automatic risk score calculation if task was completed
+      if (updates.status === 'completed' && currentTask?.status !== 'completed') {
+        try {
+          // Get current data for calculation
+          const [risks, userTasks] = await Promise.all([
+            storage.getRisksByUserId(userId),
+            storage.getTasksByUserId(userId)
+          ]);
+          
+          // Filter by framework if task has one
+          const frameworkId = task.frameworkId;
+          const filteredRisks = frameworkId 
+            ? risks.filter(risk => risk.frameworkId === frameworkId)
+            : risks;
+          const filteredTasks = frameworkId 
+            ? userTasks.filter(task => task.frameworkId === frameworkId)
+            : userTasks;
+          
+          // Calculate metrics
+          const totalTasks = filteredTasks.length;
+          const completedTasks = filteredTasks.filter(task => task.status === 'completed').length;
+          const highRisks = filteredRisks.filter(risk => risk.impact === 'high').length;
+          const mediumRisks = filteredRisks.filter(risk => risk.impact === 'medium').length;
+          const lowRisks = filteredRisks.filter(risk => risk.impact === 'low').length;
+          const mitigatedRisks = filteredRisks.filter(risk => risk.status === 'mitigated').length;
+          
+          // Call AI calculation
+          const scoreData = await calculateDynamicRiskScore(userId, frameworkId, {
+            totalTasks,
+            completedTasks,
+            highRisks,
+            mediumRisks,
+            lowRisks,
+            mitigatedRisks,
+            recentChanges: [`Task completed: ${task.title}`]
+          });
+          
+          // Save to history
+          const historyData = insertRiskScoreHistorySchema.parse({
+            userId,
+            frameworkId,
+            overallRiskScore: scoreData.overallRiskScore.toString(),
+            highRisks,
+            mediumRisks,
+            lowRisks,
+            mitigatedRisks,
+            totalTasks,
+            completedTasks,
+            calculationFactors: scoreData.factors,
+            triggeredBy: 'task_completion'
+          });
+          
+          await storage.createRiskScoreHistory(historyData);
+          
+          console.log(`Auto-calculated risk score after task completion: ${scoreData.overallRiskScore}`);
+        } catch (error) {
+          console.error("Error auto-calculating risk score:", error);
+          // Don't fail the task update if risk calculation fails
+        }
+      }
+      
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);
@@ -812,6 +882,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting risk:", error);
       res.status(500).json({ message: "Failed to delete risk" });
+    }
+  });
+
+  // Dynamic Risk Scoring Engine APIs
+  app.post('/api/risks/calculate-score', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { frameworkId } = req.body;
+      
+      // Get current data for calculation
+      const [risks, userTasks] = await Promise.all([
+        storage.getRisksByUserId(userId),
+        storage.getTasksByUserId(userId)
+      ]);
+      
+      // Filter by framework if specified
+      const filteredRisks = frameworkId 
+        ? risks.filter(risk => risk.frameworkId === frameworkId)
+        : risks;
+      const filteredTasks = frameworkId 
+        ? userTasks.filter(task => task.frameworkId === frameworkId)
+        : userTasks;
+      
+      // Calculate metrics
+      const totalTasks = filteredTasks.length;
+      const completedTasks = filteredTasks.filter(task => task.status === 'completed').length;
+      const highRisks = filteredRisks.filter(risk => risk.impact === 'high').length;
+      const mediumRisks = filteredRisks.filter(risk => risk.impact === 'medium').length;
+      const lowRisks = filteredRisks.filter(risk => risk.impact === 'low').length;
+      const mitigatedRisks = filteredRisks.filter(risk => risk.status === 'mitigated').length;
+      
+      // Call AI calculation
+      const scoreData = await calculateDynamicRiskScore(userId, frameworkId, {
+        totalTasks,
+        completedTasks,
+        highRisks,
+        mediumRisks,
+        lowRisks,
+        mitigatedRisks,
+        recentChanges: [] // Could be enhanced to track recent changes
+      });
+      
+      // Save to history
+      const historyData = insertRiskScoreHistorySchema.parse({
+        userId,
+        frameworkId,
+        overallRiskScore: scoreData.overallRiskScore.toString(),
+        highRisks,
+        mediumRisks,
+        lowRisks,
+        mitigatedRisks,
+        totalTasks,
+        completedTasks,
+        calculationFactors: scoreData.factors,
+        triggeredBy: 'manual_calculation'
+      });
+      
+      await storage.createRiskScoreHistory(historyData);
+      
+      res.json(scoreData);
+    } catch (error) {
+      console.error("Error calculating dynamic risk score:", error);
+      res.status(500).json({ message: "Failed to calculate risk score" });
+    }
+  });
+
+  app.get('/api/risks/score-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { frameworkId } = req.query;
+      
+      const history = await storage.getRiskScoreHistoryByUserId(userId, frameworkId as string);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching risk score history:", error);
+      res.status(500).json({ message: "Failed to fetch risk score history" });
+    }
+  });
+
+  app.get('/api/risks/latest-score', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { frameworkId } = req.query;
+      
+      const latestScore = await storage.getLatestRiskScore(userId, frameworkId as string);
+      res.json(latestScore);
+    } catch (error) {
+      console.error("Error fetching latest risk score:", error);
+      res.status(500).json({ message: "Failed to fetch latest risk score" });
     }
   });
 

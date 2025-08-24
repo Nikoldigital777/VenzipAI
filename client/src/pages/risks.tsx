@@ -4,6 +4,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/navigation";
 import AIChat from "@/components/ai-chat";
+import DynamicRiskDashboard from "@/components/dynamic-risk-dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ const FRAMEWORKS = ["soc2", "iso27001", "hipaa", "gdpr"];
 
 export default function RisksPage() {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<'risks' | 'dashboard'>('risks');
   
   // filters
   const [q, setQ] = useState("");
@@ -276,7 +278,44 @@ export default function RisksPage() {
       <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
         <div className="max-w-7xl mx-auto px-4 py-12 grid gap-6">
           
-          {/* Risk Summary Cards */}
+          {/* Tab Navigation */}
+          <div className="flex space-x-1 bg-white/50 dark:bg-gray-800/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700 w-fit">
+            <button
+              onClick={() => setActiveTab('risks')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'risks'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-gray-600'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+              data-testid="tab-risks"
+            >
+              <AlertTriangle className="h-4 w-4 mr-2 inline" />
+              Risk Management
+            </button>
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'dashboard'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-gray-600'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+              data-testid="tab-dashboard"
+            >
+              <div className="flex items-center">
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                AI Risk Dashboard
+              </div>
+            </button>
+          </div>
+
+          {/* Content based on active tab */}
+          {activeTab === 'dashboard' ? (
+            <DynamicRiskDashboard />
+          ) : (
+            <>
+              {/* Risk Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="glass-card hover-lift" data-testid="summary-high-risk">
               <CardContent className="p-6">
@@ -678,6 +717,8 @@ export default function RisksPage() {
               )}
             </CardContent>
           </Card>
+            </>
+          )}
         </div>
       </div>
       <AIChat />

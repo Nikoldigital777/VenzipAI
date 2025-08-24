@@ -230,6 +230,23 @@ export const notifications = pgTable("notifications", {
   readAt: timestamp("read_at"),
 });
 
+// Risk score history table for trend analysis
+export const riskScoreHistory = pgTable("risk_score_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  frameworkId: varchar("framework_id").references(() => frameworks.id),
+  overallRiskScore: decimal("overall_risk_score", { precision: 5, scale: 2 }).notNull(),
+  highRisks: integer("high_risks").notNull().default(0),
+  mediumRisks: integer("medium_risks").notNull().default(0),
+  lowRisks: integer("low_risks").notNull().default(0),
+  mitigatedRisks: integer("mitigated_risks").notNull().default(0),
+  totalTasks: integer("total_tasks").notNull().default(0),
+  completedTasks: integer("completed_tasks").notNull().default(0),
+  calculationFactors: jsonb("calculation_factors"), // Store factors that influenced the score
+  triggeredBy: varchar("triggered_by"), // 'task_completion', 'risk_update', 'manual_calculation'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Audit logs table
 export const auditLogs = pgTable("audit_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -295,6 +312,11 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   readAt: true,
 });
 
+export const insertRiskScoreHistorySchema = createInsertSchema(riskScoreHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   id: true,
   createdAt: true,
@@ -334,6 +356,8 @@ export type VendorAssessment = typeof vendorAssessments.$inferSelect;
 export type InsertVendorAssessment = z.infer<typeof insertVendorAssessmentSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type RiskScoreHistory = typeof riskScoreHistory.$inferSelect;
+export type InsertRiskScoreHistory = z.infer<typeof insertRiskScoreHistorySchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 

@@ -11,6 +11,7 @@ import {
   chatMessages,
   vendorAssessments,
   notifications,
+  riskScoreHistory,
   auditLogs,
   type User,
   type UpsertUser,
@@ -35,6 +36,8 @@ import {
   type InsertVendorAssessment,
   type Notification,
   type InsertNotification,
+  type RiskScoreHistory,
+  type InsertRiskScoreHistory,
   type AuditLog,
   type InsertAuditLog,
 } from "@shared/schema";
@@ -217,6 +220,11 @@ export class DatabaseStorage implements IStorage {
     await db.delete(tasks).where(eq(tasks.id, id));
   }
 
+  async getTaskById(id: string): Promise<Task | undefined> {
+    const results = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
+    return results[0];
+  }
+
   // Task comment operations
   async getTaskComments(taskId: string): Promise<TaskComment[]> {
     return await db.select().from(taskComments)
@@ -297,6 +305,35 @@ export class DatabaseStorage implements IStorage {
 
   async deleteRisk(id: string): Promise<void> {
     await db.delete(risks).where(eq(risks.id, id));
+  }
+
+  // Risk Score History Management
+  async createRiskScoreHistory(historyData: InsertRiskScoreHistory): Promise<RiskScoreHistory> {
+    const [history] = await db.insert(riskScoreHistory).values(historyData).returning();
+    return history;
+  }
+
+  async getRiskScoreHistoryByUserId(userId: string, frameworkId?: string): Promise<RiskScoreHistory[]> {
+    const conditions = frameworkId 
+      ? and(eq(riskScoreHistory.userId, userId), eq(riskScoreHistory.frameworkId, frameworkId))
+      : eq(riskScoreHistory.userId, userId);
+    
+    return await db.select().from(riskScoreHistory)
+      .where(conditions)
+      .orderBy(desc(riskScoreHistory.createdAt));
+  }
+
+  async getLatestRiskScore(userId: string, frameworkId?: string): Promise<RiskScoreHistory | null> {
+    const conditions = frameworkId 
+      ? and(eq(riskScoreHistory.userId, userId), eq(riskScoreHistory.frameworkId, frameworkId))
+      : eq(riskScoreHistory.userId, userId);
+    
+    const results = await db.select().from(riskScoreHistory)
+      .where(conditions)
+      .orderBy(desc(riskScoreHistory.createdAt))
+      .limit(1);
+    
+    return results[0] || null;
   }
 
   // Chat operations

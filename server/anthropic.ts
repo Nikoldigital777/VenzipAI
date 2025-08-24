@@ -245,6 +245,110 @@ Provide strategic recommendations:
   }
 }
 
+// Dynamic Risk Scoring Engine - AI-powered risk calculation based on multiple factors
+export async function calculateDynamicRiskScore(
+  userId: string,
+  frameworkId?: string,
+  context?: {
+    totalTasks: number;
+    completedTasks: number;
+    highRisks: number;
+    mediumRisks: number;
+    lowRisks: number;
+    mitigatedRisks: number;
+    recentChanges?: string[];
+  }
+): Promise<{
+  overallRiskScore: number;
+  riskTrend: 'improving' | 'declining' | 'stable';
+  factors: {
+    taskCompletion: number;
+    riskMitigation: number;
+    timelyCompletion: number;
+    overallHealth: number;
+  };
+  recommendations: string[];
+  alerts: string[];
+  nextActions: string[];
+}> {
+  const prompt = `Analyze compliance risk profile and calculate dynamic risk score:
+
+User: ${userId}
+Framework: ${frameworkId || 'All frameworks'}
+Current State:
+- Total Tasks: ${context?.totalTasks || 0}
+- Completed Tasks: ${context?.completedTasks || 0}
+- High Risks: ${context?.highRisks || 0}
+- Medium Risks: ${context?.mediumRisks || 0}
+- Low Risks: ${context?.lowRisks || 0}
+- Mitigated Risks: ${context?.mitigatedRisks || 0}
+- Recent Changes: ${context?.recentChanges?.join(', ') || 'None'}
+
+Calculate comprehensive risk score (0-100, where 0 is lowest risk) considering:
+1. Task completion rate and compliance readiness
+2. Risk mitigation effectiveness
+3. Trend analysis and momentum
+4. Regulatory exposure level
+
+Provide JSON response:
+{
+  "overallRiskScore": 0-100,
+  "riskTrend": "improving|declining|stable",
+  "factors": {
+    "taskCompletion": 0-100,
+    "riskMitigation": 0-100,
+    "timelyCompletion": 0-100,
+    "overallHealth": 0-100
+  },
+  "recommendations": ["Specific actionable recommendations"],
+  "alerts": ["Urgent items requiring immediate attention"],
+  "nextActions": ["Priority actions to improve risk posture"]
+}`;
+
+  try {
+    const response = await anthropic.messages.create({
+      // "claude-sonnet-4-20250514"
+      model: DEFAULT_MODEL_STR,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response format from Claude');
+    }
+
+    // Clean the response text to handle markdown code blocks
+    let cleanedText = content.text.trim();
+    if (cleanedText.startsWith('```json')) {
+      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedText.startsWith('```')) {
+      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    return JSON.parse(cleanedText);
+  } catch (error) {
+    console.error('Error calculating dynamic risk score:', error);
+    // Return safe fallback response
+    const completionRate = context ? (context.completedTasks / Math.max(context.totalTasks, 1)) * 100 : 50;
+    const mitigationRate = context ? (context.mitigatedRisks / Math.max(context.highRisks + context.mediumRisks + context.lowRisks, 1)) * 100 : 50;
+    
+    return {
+      overallRiskScore: Math.max(0, Math.min(100, 100 - (completionRate + mitigationRate) / 2)),
+      riskTrend: "stable" as const,
+      factors: {
+        taskCompletion: completionRate,
+        riskMitigation: mitigationRate,
+        timelyCompletion: 50,
+        overallHealth: 50
+      },
+      recommendations: ["Complete pending compliance tasks", "Review and update risk assessments", "Implement additional controls"],
+      alerts: completionRate < 30 ? ["Low task completion rate requires immediate attention"] : [],
+      nextActions: ["Prioritize high-impact compliance tasks", "Schedule regular risk reviews", "Update documentation"]
+    };
+  }
+}
+
 // Enhanced risk assessment using Claude with comprehensive analysis
 export async function assessRisk(
   riskDescription: string,
