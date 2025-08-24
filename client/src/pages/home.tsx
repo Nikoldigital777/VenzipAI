@@ -17,19 +17,12 @@ export default function Home() {
     queryKey: ["/api/company"],
   });
 
-  // Redirect to onboarding if no company profile
+  // Always redirect to onboarding first for streamlined user flow
   useEffect(() => {
-    if (!companyLoading && !company) {
+    if (!companyLoading) {
       setLocation("/onboarding");
     }
-  }, [company, companyLoading, setLocation]);
-
-  // Redirect to dashboard if company exists
-  useEffect(() => {
-    if (!companyLoading && company) {
-      setLocation("/dashboard");
-    }
-  }, [company, companyLoading, setLocation]);
+  }, [companyLoading, setLocation]);
 
   if (companyLoading) {
     return (

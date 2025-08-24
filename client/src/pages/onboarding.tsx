@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -41,14 +41,39 @@ export default function Onboarding() {
     }
   });
 
+  // Check for existing company profile
+  const { data: existingCompany } = useQuery({
+    queryKey: ["/api/company"],
+  });
+
+  // Prefill form if company exists
+  useEffect(() => {
+    if (existingCompany) {
+      setCompanyData({
+        name: existingCompany.name || "",
+        industry: existingCompany.industry || "",
+        size: existingCompany.size || "",
+        contactEmail: existingCompany.contactEmail || "",
+        selectedFrameworks: existingCompany.selectedFrameworks || []
+      });
+      setSelectedFrameworks(existingCompany.selectedFrameworks || []);
+    }
+  }, [existingCompany]);
+
   const frameworks = initData?.frameworks || [];
 
   const createCompanyMutation = useMutation({
     mutationFn: async (data: CompanyData) => {
+      console.log("Submitting company data:", data);
       const response = await apiRequest("POST", "/api/company", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create company profile");
+      }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Company creation successful:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/company"] });
       toast({
         title: "🎉 Welcome to Venzip!",
@@ -57,6 +82,7 @@ export default function Onboarding() {
       setLocation("/dashboard");
     },
     onError: (error: Error) => {
+      console.error("Company creation error:", error);
       toast({
         title: "❌ Setup Failed",
         description: error.message || "Failed to create company profile",
@@ -505,8 +531,8 @@ export default function Onboarding() {
               <div className="relative inline-block">
                 <Button 
                   type="submit"
-                  disabled={createCompanyMutation.isPending}
-                  className="relative group bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary hover:shadow-2xl hover:scale-105 transition-all duration-500 text-white font-bold px-12 py-6 rounded-2xl text-xl overflow-hidden"
+                  disabled={createCompanyMutation.isPending || selectedFrameworks.length === 0 || !companyData.name.trim() || !companyData.industry || !companyData.size || !companyData.contactEmail.trim()}
+                  className="relative group bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary hover:shadow-2xl hover:scale-105 transition-all duration-500 text-white font-bold px-12 py-6 rounded-2xl text-xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
                   data-testid="button-start-journey"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-venzip-secondary via-venzip-accent to-venzip-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -530,9 +556,16 @@ export default function Onboarding() {
                 <div className="absolute -inset-4 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-2xl opacity-20 blur-xl animate-pulse"></div>
               </div>
               
-              <p className="mt-6 text-gray-600 text-lg">
-                🎯 Your AI-powered compliance dashboard will be ready in seconds!
-              </p>
+              {/* Helper text for disabled button */}
+              {(selectedFrameworks.length === 0 || !companyData.name.trim() || !companyData.industry || !companyData.size || !companyData.contactEmail.trim()) ? (
+                <p className="mt-6 text-amber-600 text-lg font-medium">
+                  ⚠️ Please fill in all required fields and select at least one framework to continue
+                </p>
+              ) : (
+                <p className="mt-6 text-gray-600 text-lg">
+                  🎯 Your AI-powered compliance dashboard will be ready in seconds!
+                </p>
+              )}
             </div>
           </form>
         </div>
