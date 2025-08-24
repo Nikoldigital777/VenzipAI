@@ -58,11 +58,11 @@ export default function Navigation() {
           scrolled ? 'h-14' : 'h-16'
         }`}>
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center group" data-testid="logo">
+          <Link href="/" className="flex items-center" data-testid="logo">
             <img 
               src={venzipLogo} 
               alt="Venzip Logo" 
-              className={`shadow-lg animate-float transition-all duration-300 group-hover:scale-110 ${
+              className={`shadow-lg transition-all duration-300 ${
                 scrolled ? 'h-8' : 'h-10'
               }`}
               style={{ width: 'auto' }}
