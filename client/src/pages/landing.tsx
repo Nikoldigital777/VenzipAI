@@ -22,7 +22,7 @@ import {
   BarChart3,
   PieChart,
   Mail,
-  Sparkles
+  Star
 } from "lucide-react";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 
@@ -76,7 +76,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center px-8 py-4 rounded-full glass-card text-venzip-primary text-sm font-semibold mb-8 border border-venzip-primary/30 shadow-xl hover-glow animate-scale-in group cursor-pointer">
-              <Sparkles className="h-4 w-4 mr-2 animate-spin group-hover:animate-pulse" />
+              <Star className="h-4 w-4 mr-2 animate-spin group-hover:animate-pulse" />
               <span className="text-gradient-primary font-bold">AI-Powered Compliance Platform</span>
               <div className="absolute inset-0 rounded-full bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
             </div>
