@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Shield,
   Rocket,
   Play,
   CheckCircle,
@@ -24,6 +23,7 @@ import {
   PieChart,
   Mail
 } from "lucide-react";
+import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 
 export default function Landing() {
   const handleLogin = () => {
@@ -40,8 +40,12 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
-              <Shield className="text-white h-5 w-5" />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center">
+              <img 
+                src={venzipLogo} 
+                alt="Venzip Logo" 
+                className="w-10 h-10 rounded-full"
+              />
             </div>
             <span className="text-2xl font-bold text-gradient-primary">Venzip</span>
           </div>
@@ -167,7 +171,7 @@ export default function Landing() {
             <Card className="glass-card hover-lift group">
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-gradient-danger rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Shield className="text-white h-8 w-8" />
+                  <ShieldAlert className="text-white h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Intelligent Risk Assessment</h3>
                 <p className="text-gray-600 mb-4">

@@ -7,7 +7,6 @@ import {
   CheckSquare, 
   FileText, 
   AlertTriangle, 
-  Shield, 
   Bot, 
   Bell, 
   User, 
@@ -15,6 +14,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -59,12 +59,16 @@ export default function Navigation() {
         }`}>
           {/* Logo & Brand */}
           <Link href="/" className="flex items-center space-x-4 group" data-testid="logo">
-            <div className={`bg-gradient-primary rounded-full flex items-center justify-center shadow-lg animate-float transition-all duration-300 ${
+            <div className={`rounded-full flex items-center justify-center shadow-lg animate-float transition-all duration-300 ${
               scrolled ? 'w-8 h-8' : 'w-10 h-10'
             } group-hover:scale-110`}>
-              <Shield className={`text-white transition-all duration-300 ${
-                scrolled ? 'h-4 w-4' : 'h-5 w-5'
-              }`} />
+              <img 
+                src={venzipLogo} 
+                alt="Venzip Logo" 
+                className={`rounded-full transition-all duration-300 ${
+                  scrolled ? 'w-8 h-8' : 'w-10 h-10'
+                }`}
+              />
             </div>
             <h1 className={`font-bold text-gray-900 transition-all duration-300 ${
               scrolled ? 'text-lg' : 'text-xl'
