@@ -396,6 +396,11 @@ export class DatabaseStorage implements IStorage {
     return newNotification;
   }
 
+  async updateNotification(id: string, updates: Partial<InsertNotification>): Promise<Notification> {
+    const [updatedNotification] = await db.update(notifications).set(updates).where(eq(notifications.id, id)).returning();
+    return updatedNotification;
+  }
+
   async markNotificationAsRead(id: string): Promise<Notification> {
     const [updatedNotification] = await db.update(notifications).set({ isRead: true, readAt: new Date() }).where(eq(notifications.id, id)).returning();
     return updatedNotification;

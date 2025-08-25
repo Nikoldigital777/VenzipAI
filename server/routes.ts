@@ -573,6 +573,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const taskData = insertTaskSchema.parse({ ...req.body, userId });
       const task = await storage.createTask(taskData);
+      
+      // Create notification for new task
+      if (task.priority === 'high' || task.priority === 'critical') {
+        await createNotification(userId, {
+          title: 'High Priority Task Created',
+          message: `New ${task.priority} priority task: ${task.title}`,
+          type: 'task_created',
+          priority: task.priority === 'critical' ? 'urgent' : 'high',
+          actionUrl: '/tasks',
+          relatedEntityType: 'task',
+          relatedEntityId: task.id
+        });
+      }
+
+      // Create notification for due date if within 7 days
+      if (task.dueDate) {
+        const daysUntilDue = Math.ceil((new Date(task.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        if (daysUntilDue <= 7 && daysUntilDue > 0) {
+          await createNotification(userId, {
+            title: 'Task Due Soon',
+            message: `Task "${task.title}" is due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}`,
+            type: 'task_due_soon',
+            priority: daysUntilDue <= 2 ? 'high' : 'medium',
+            actionUrl: '/tasks',
+            relatedEntityType: 'task',
+            relatedEntityId: task.id
+          });
+        }
+      }
+      
       res.json(task);
     } catch (error) {
       console.error("Error creating task:", error);
@@ -590,6 +620,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentTask = await storage.getTaskById(id);
       
       const task = await storage.updateTask(id, updates);
+      
+      // Create notification for task completion
+      if (updates.status === 'completed' && currentTask?.status !== 'completed') {
+        await createNotification(userId, {
+          title: 'Task Completed',
+          message: `Congratulations! You completed: ${task.title}`,
+          type: 'task_completed',
+          priority: 'medium',
+          actionUrl: '/tasks',
+          relatedEntityType: 'task',
+          relatedEntityId: task.id
+        });
+      }
+      
+      // Create notification if task becomes overdue
+      if (task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed') {
+        await createNotification(userId, {
+          title: 'Task Overdue',
+          message: `Task "${task.title}" is now overdue`,
+          type: 'task_overdue',
+          priority: 'high',
+          actionUrl: '/tasks',
+          relatedEntityType: 'task',
+          relatedEntityId: task.id
+        });
+      }
       
       // Trigger automatic risk score calculation if task was completed
       if (updates.status === 'completed' && currentTask?.status !== 'completed') {
@@ -855,6 +911,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const validatedData = insertRiskSchema.parse(riskData);
       const risk = await storage.createRisk(validatedData);
+      
+      // Create notification for high-impact risks
+      if (risk.impact === 'high') {
+        await createNotification(userId, {
+          title: 'High Impact Risk Identified',
+          message: `New high-impact risk detected: ${risk.title}`,
+          type: 'high_risk_alert',
+          priority: 'high',
+          actionUrl: '/risks',
+          relatedEntityType: 'risk',
+          relatedEntityId: risk.id
+        });
+      }
+
+      // Create notification for high risk score
+      const scoreValue = parseFloat(risk.riskScore);
+      if (scoreValue >= 6) {
+        await createNotification(userId, {
+          title: 'Critical Risk Score',
+          message: `Risk "${risk.title}" has a critical score of ${risk.riskScore}`,
+          type: 'critical_risk_score',
+          priority: 'urgent',
+          actionUrl: '/risks',
+          relatedEntityType: 'risk',
+          relatedEntityId: risk.id
+        });
+      }
+      
       res.json(risk);
     } catch (error) {
       console.error("Error creating risk:", error);
@@ -1252,13 +1336,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (body.dueDate !== undefined) updates.dueDate = body.dueDate ? new Date(body.dueDate) : null;
       if (body.status !== undefined) updates.status = body.status;
 
+      // Get the current risk before update to check status changes
+      const currentRisks = await storage.getRisksByUserId(req.user.claims.sub);
+      const currentRisk = currentRisks.find(r => r.id === id);
+
       // Recalculate risk score if impact or likelihood changed
       if (body.impact !== undefined || body.likelihood !== undefined) {
-        const currentRisk = await storage.getRisksByUserId(req.user.claims.sub);
-        const risk = currentRisk.find(r => r.id === id);
-        if (risk) {
-          const impact = body.impact || risk.impact;
-          const likelihood = body.likelihood || risk.likelihood;
+        if (currentRisk) {
+          const impact = body.impact || currentRisk.impact;
+          const likelihood = body.likelihood || currentRisk.likelihood;
           const impactScore = impact === 'high' ? 3 : impact === 'medium' ? 2 : 1;
           const likelihoodScore = likelihood === 'high' ? 3 : likelihood === 'medium' ? 2 : 1;
           updates.riskScore = (impactScore * likelihoodScore).toString();
@@ -1266,6 +1352,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const risk = await storage.updateRisk(id, updates);
+      
+      // Create notification for risk mitigation
+      if (updates.status === 'mitigated' && currentRisk?.status !== 'mitigated') {
+        await createNotification(req.user.claims.sub, {
+          title: 'Risk Mitigated',
+          message: `Risk "${risk.title}" has been successfully mitigated`,
+          type: 'risk_mitigated',
+          priority: 'medium',
+          actionUrl: '/risks',
+          relatedEntityType: 'risk',
+          relatedEntityId: risk.id
+        });
+      }
+      
+      // Create notification for risk escalation
+      if (updates.impact === 'high' && currentRisk?.impact !== 'high') {
+        await createNotification(req.user.claims.sub, {
+          title: 'Risk Escalated',
+          message: `Risk "${risk.title}" has been escalated to high impact`,
+          type: 'risk_escalated',
+          priority: 'high',
+          actionUrl: '/risks',
+          relatedEntityType: 'risk',
+          relatedEntityId: risk.id
+        });
+      }
       res.json(risk);
     } catch (error) {
       console.error("Error updating risk:", error);
@@ -1537,6 +1649,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Internal server error" });
     }
   });
+
+  // Notification API routes
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { filter, limit = 20 } = req.query;
+      const notifications = await storage.getNotificationsByUserId(userId);
+      
+      let filteredNotifications = notifications;
+      if (filter === 'unread') {
+        filteredNotifications = notifications.filter(n => !n.isRead);
+      } else if (filter === 'high' || filter === 'urgent') {
+        filteredNotifications = notifications.filter(n => n.priority === filter);
+      }
+      
+      res.json(filteredNotifications.slice(0, parseInt(limit)));
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ error: 'Failed to fetch notifications' });
+    }
+  });
+
+  app.get('/api/notifications/count', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getNotificationsByUserId(userId);
+      const unreadCount = notifications.filter(n => !n.isRead).length;
+      res.json({ unreadCount, total: notifications.length });
+    } catch (error) {
+      console.error('Error fetching notification count:', error);
+      res.status(500).json({ unreadCount: 0, total: 0 });
+    }
+  });
+
+  app.put('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Verify notification belongs to user
+      const notifications = await storage.getNotificationsByUserId(userId);
+      const notification = notifications.find(n => n.id === id);
+      
+      if (!notification) {
+        return res.status(404).json({ error: 'Notification not found' });
+      }
+      
+      const updatedNotification = await storage.updateNotification(id, {
+        isRead: true,
+        readAt: new Date()
+      });
+      
+      res.json(updatedNotification);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(500).json({ error: 'Failed to mark notification as read' });
+    }
+  });
+
+  app.put('/api/notifications/mark-all-read', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getNotificationsByUserId(userId);
+      const unreadNotifications = notifications.filter(n => !n.isRead);
+      
+      for (const notification of unreadNotifications) {
+        await storage.updateNotification(notification.id, {
+          isRead: true,
+          readAt: new Date()
+        });
+      }
+      
+      res.json({ marked: unreadNotifications.length });
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      res.status(500).json({ error: 'Failed to mark all notifications as read' });
+    }
+  });
+
+  app.delete('/api/notifications/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Verify notification belongs to user
+      const notifications = await storage.getNotificationsByUserId(userId);
+      const notification = notifications.find(n => n.id === id);
+      
+      if (!notification) {
+        return res.status(404).json({ error: 'Notification not found' });
+      }
+      
+      await storage.deleteNotification(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      res.status(500).json({ error: 'Failed to delete notification' });
+    }
+  });
+
+  // Helper function to create notifications
+  async function createNotification(userId: string, notification: {
+    title: string;
+    message: string;
+    type: string;
+    priority?: string;
+    actionUrl?: string;
+    relatedEntityType?: string;
+    relatedEntityId?: string;
+    expiresAt?: Date;
+  }) {
+    try {
+      await storage.createNotification({
+        userId,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        priority: notification.priority || 'medium',
+        isRead: false,
+        actionUrl: notification.actionUrl,
+        relatedEntityType: notification.relatedEntityType,
+        relatedEntityId: notification.relatedEntityId,
+        expiresAt: notification.expiresAt
+      });
+    } catch (error) {
+      console.error('Error creating notification:', error);
+    }
+  }
 
   return httpServer;
 }

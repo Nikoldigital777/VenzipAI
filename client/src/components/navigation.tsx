@@ -8,7 +8,6 @@ import {
   FileText, 
   AlertTriangle, 
   Bot, 
-  Bell, 
   User, 
   LogOut,
   Menu,
@@ -17,6 +16,7 @@ import {
   Calendar
 } from "lucide-react";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
+import NotificationButton from "./notification-button";
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -126,10 +126,7 @@ export default function Navigation() {
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative hover:scale-110 transition-transform duration-300 glass-card border-0 shadow-sm hover:shadow-lg" data-testid="notifications">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-danger-coral to-warning-orange rounded-full animate-pulse shadow-lg"></span>
-            </Button>
+            <NotificationButton />
 
             {/* User Profile */}
             <div className="flex items-center space-x-2 group cursor-pointer glass-card px-3 py-2 rounded-xl border-0 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
