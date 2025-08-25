@@ -8,6 +8,7 @@ import {
   FileText, 
   AlertTriangle, 
   Bot, 
+  Bell,
   User, 
   LogOut,
   Menu,
@@ -31,6 +32,7 @@ export default function Navigation() {
     { path: "/documents", label: "Evidence", icon: FileText },
     { path: "/risks", label: "Risks", icon: AlertTriangle },
     { path: "/evidence", label: "Evidence Mapping", icon: MapPin },
+    { path: "/test-notifications", label: "Test Notifications", icon: Bell },
   ];
 
   const isActive = (path: string) => location === path;

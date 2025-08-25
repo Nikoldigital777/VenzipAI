@@ -13,6 +13,7 @@ import AuditCalendar from "@/pages/audit-calendar";
 import Documents from "@/pages/documents";
 import Risks from "@/pages/risks";
 import Evidence from "@/pages/evidence";
+import TestNotifications from "@/pages/test-notifications";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +33,7 @@ function Router() {
           <Route path="/documents" component={Documents} />
           <Route path="/risks" component={Risks} />
           <Route path="/evidence" component={Evidence} />
+          <Route path="/test-notifications" component={TestNotifications} />
         </>
       )}
       <Route component={NotFound} />
