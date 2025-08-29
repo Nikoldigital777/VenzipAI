@@ -143,7 +143,7 @@ export default function Navigation() {
               variant="outline" 
               size="sm"
               onClick={() => window.location.href = "/api/logout"}
-              className="hidden sm:flex items-center hover:scale-105 transition-all duration-300 glass-card border-0 shadow-sm hover:shadow-lg hover:-translate-y-1 group"
+              className="flex items-center hover:scale-105 transition-all duration-300 glass-card border-0 shadow-sm hover:shadow-lg hover:-translate-y-1 group"
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
