@@ -127,24 +127,36 @@ export default function Landing() {
               </Button>
             </div>
 
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500 mb-12">
-              <div className="flex items-center space-x-2">
-                <Shield className="h-4 w-4 text-success-green" />
-                <span>ISO 27001 Certified</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <ShieldCheck className="h-4 w-4 text-success-green" />
-                <span>SOC 2 Type II Compliant</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Building2 className="h-4 w-4 text-success-green" />
-                <span>Enterprise-Grade Platform</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4 text-success-green" />
-                <span>Trusted by Fortune 500</span>
-              </div>
+            {/* Enhanced Corporate Trust Indicators */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto">
+              <Card className="glass-card border border-success-green/20 bg-success-green/5">
+                <CardContent className="p-4 text-center">
+                  <Shield className="h-8 w-8 text-success-green mx-auto mb-2" />
+                  <div className="text-sm font-semibold text-gray-900">ISO 27001</div>
+                  <div className="text-xs text-gray-600">Certified</div>
+                </CardContent>
+              </Card>
+              <Card className="glass-card border border-venzip-primary/20 bg-venzip-primary/5">
+                <CardContent className="p-4 text-center">
+                  <ShieldCheck className="h-8 w-8 text-venzip-primary mx-auto mb-2" />
+                  <div className="text-sm font-semibold text-gray-900">SOC 2 Type II</div>
+                  <div className="text-xs text-gray-600">Compliant</div>
+                </CardContent>
+              </Card>
+              <Card className="glass-card border border-info-blue/20 bg-info-blue/5">
+                <CardContent className="p-4 text-center">
+                  <Building2 className="h-8 w-8 text-info-blue mx-auto mb-2" />
+                  <div className="text-sm font-semibold text-gray-900">Enterprise</div>
+                  <div className="text-xs text-gray-600">Grade Security</div>
+                </CardContent>
+              </Card>
+              <Card className="glass-card border border-warning-orange/20 bg-warning-orange/5">
+                <CardContent className="p-4 text-center">
+                  <Users className="h-8 w-8 text-warning-orange mx-auto mb-2" />
+                  <div className="text-sm font-semibold text-gray-900">Fortune 500</div>
+                  <div className="text-xs text-gray-600">Trusted</div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Enterprise Client Logos Placeholder */}
@@ -607,6 +619,76 @@ export default function Landing() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Enterprise ROI Section */}
+      <section id="roi-metrics" className="py-24 px-6 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Proven <span className="text-venzip-primary">Enterprise Results</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Quantifiable compliance ROI for enterprise organizations
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <Card className="glass-card text-center border-0 shadow-lg">
+              <CardContent className="p-8">
+                <div className="text-4xl font-bold text-venzip-primary mb-2">$2.3M</div>
+                <div className="text-lg font-semibold text-gray-900 mb-2">Average Cost Savings</div>
+                <div className="text-sm text-gray-600">Per compliance program annually</div>
+              </CardContent>
+            </Card>
+            <Card className="glass-card text-center border-0 shadow-lg">
+              <CardContent className="p-8">
+                <div className="text-4xl font-bold text-success-green mb-2">75%</div>
+                <div className="text-lg font-semibold text-gray-900 mb-2">Faster Audit Prep</div>
+                <div className="text-sm text-gray-600">Reduced audit preparation time</div>
+              </CardContent>
+            </Card>
+            <Card className="glass-card text-center border-0 shadow-lg">
+              <CardContent className="p-8">
+                <div className="text-4xl font-bold text-warning-orange mb-2">98%</div>
+                <div className="text-lg font-semibold text-gray-900 mb-2">First-Time Pass Rate</div>
+                <div className="text-sm text-gray-600">Successful audit outcomes</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="glass-card">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Enterprise Cost Analysis</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Traditional Approach</h4>
+                  <ul className="space-y-3 text-gray-600">
+                    <li className="flex justify-between"><span>External consultants</span><span className="font-medium">$150K - $300K</span></li>
+                    <li className="flex justify-between"><span>Internal resource time</span><span className="font-medium">$200K - $400K</span></li>
+                    <li className="flex justify-between"><span>Tool licensing</span><span className="font-medium">$50K - $100K</span></li>
+                    <li className="flex justify-between"><span>Audit failures/delays</span><span className="font-medium">$100K - $500K</span></li>
+                    <li className="border-t pt-3 flex justify-between font-bold"><span>Total Annual Cost</span><span className="text-danger-coral">$500K - $1.3M</span></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Venzip Platform</h4>
+                  <ul className="space-y-3 text-gray-600">
+                    <li className="flex justify-between"><span>Platform subscription</span><span className="font-medium">$120K - $200K</span></li>
+                    <li className="flex justify-between"><span>Reduced internal time</span><span className="font-medium">$50K - $100K</span></li>
+                    <li className="flex justify-between"><span>Minimal consulting</span><span className="font-medium">$25K - $50K</span></li>
+                    <li className="flex justify-between"><span>Audit success rate</span><span className="font-medium">$0 - $25K</span></li>
+                    <li className="border-t pt-3 flex justify-between font-bold"><span>Total Annual Cost</span><span className="text-success-green">$195K - $375K</span></li>
+                  </ul>
+                </div>
+              </div>
+              <div className="text-center mt-8 p-6 bg-success-green/10 rounded-xl">
+                <div className="text-2xl font-bold text-success-green mb-2">Average ROI: 312%</div>
+                <div className="text-gray-600">Typical payback period: 4-6 months</div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 

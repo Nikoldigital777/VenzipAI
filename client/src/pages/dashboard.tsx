@@ -129,13 +129,24 @@ export default function Dashboard() {
         
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           {/* Header Section */}
-          <div className="mb-12 text-center animate-fadeInUp">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
-              Compliance <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Dashboard</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Monitor your compliance progress and track key metrics in real-time
-            </p>
+          <div className="mb-12 animate-fadeInUp">
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+                  Compliance Overview
+                </h1>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Enterprise compliance monitoring and risk management dashboard
+                </p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="text-right">
+                  <div className="text-sm text-gray-500">Last Updated</div>
+                  <div className="text-sm font-medium text-gray-900">{new Date().toLocaleString()}</div>
+                </div>
+                <div className="h-2 w-2 bg-success-green rounded-full animate-pulse"></div>
+              </div>
+            </div>
           </div>
           
           <div className="grid lg:grid-cols-3 gap-8">
@@ -186,6 +197,113 @@ export default function Dashboard() {
                       <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
                         <Upload className="h-5 w-5 text-info-blue group-hover:animate-bounce" />
                       </div>
+
+
+          {/* Corporate Compliance Metrics Table */}
+          <Card className="lg:col-span-3 glass-card animate-fadeInUp" style={{animationDelay: '0.5s'}}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-gray-900">
+                <div className="w-10 h-10 bg-info-blue/10 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-info-blue" />
+                </div>
+                <div>
+                  <div className="text-lg font-semibold">Compliance Framework Status</div>
+                  <div className="text-sm text-gray-500 font-normal">Detailed progress across all frameworks</div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Framework</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Progress</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Controls</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Risk Level</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Next Audit</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-venzip-primary" />
+                          <span className="font-medium">SOC 2 Type II</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div className="bg-venzip-primary h-2 rounded-full" style={{width: `${compliancePercent}%`}}></div>
+                          </div>
+                          <span className="text-sm font-medium">{compliancePercent}%</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-600">64/75</td>
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 bg-success-green/10 text-success-green rounded-full text-xs font-medium">Low</span>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-600">Q3 2025</td>
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 bg-warning-orange/10 text-warning-orange rounded-full text-xs font-medium">In Progress</span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4 text-venzip-accent" />
+                          <span className="font-medium">ISO 27001</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div className="bg-venzip-accent h-2 rounded-full" style={{width: '45%'}}></div>
+                          </div>
+                          <span className="text-sm font-medium">45%</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-600">51/114</td>
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 bg-warning-orange/10 text-warning-orange rounded-full text-xs font-medium">Medium</span>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-600">Q4 2025</td>
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 bg-info-blue/10 text-info-blue rounded-full text-xs font-medium">Planning</span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <ShieldAlert className="h-4 w-4 text-danger-coral" />
+                          <span className="font-medium">HIPAA</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div className="bg-danger-coral h-2 rounded-full" style={{width: '78%'}}></div>
+                          </div>
+                          <span className="text-sm font-medium">78%</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-600">28/36</td>
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 bg-success-green/10 text-success-green rounded-full text-xs font-medium">Low</span>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-600">Q2 2025</td>
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 bg-success-green/10 text-success-green rounded-full text-xs font-medium">Compliant</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
                     </div>
                     <div className="text-3xl font-bold text-gray-900 group-hover:text-info-blue transition-colors duration-300">{stats.uploads}</div>
                     <div className="text-xs text-gray-500 mt-1">Documents processed</div>
@@ -309,15 +427,15 @@ export default function Dashboard() {
             </Card>
 
             {/* Enhanced Recent Activity */}
-            <Card className="lg:col-span-1 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+            <Card className="lg:col-span-1 glass-card group hover:shadow-lg transition-shadow duration-300 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-gray-900">
-                  <div className="w-12 h-12 bg-gradient-to-br from-venzip-secondary/20 to-venzip-secondary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
-                    <Activity className="h-6 w-6 text-venzip-secondary group-hover:animate-bounce" />
+                  <div className="w-10 h-10 bg-venzip-secondary/10 rounded-lg flex items-center justify-center">
+                    <Activity className="h-5 w-5 text-venzip-secondary" />
                   </div>
                   <div>
-                    <div className="text-xl font-bold">Recent Activity</div>
-                    <div className="text-sm text-gray-500 font-normal">Latest system updates</div>
+                    <div className="text-lg font-semibold">Audit Trail</div>
+                    <div className="text-sm text-gray-500 font-normal">Recent compliance activities</div>
                   </div>
                 </CardTitle>
               </CardHeader>
