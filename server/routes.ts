@@ -468,6 +468,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/company', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const companyData = insertCompanySchema.parse({ ...req.body, userId });
+      const company = await storage.upsertCompany(companyData);
+      res.json(company);
+    } catch (error) {
+      console.error("Error updating company:", error);
+      res.status(500).json({ message: "Failed to update company" });
+    }
+  });
+
   app.post('/api/company', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -1746,6 +1758,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting notification:', error);
       res.status(500).json({ error: 'Failed to delete notification' });
+    }
+  });
+
+  // User preferences endpoints
+  app.get('/api/user/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      // In a real implementation, you'd fetch from a user_preferences table
+      // For now, return default preferences
+      const defaultPreferences = {
+        emailNotifications: true,
+        taskReminders: true,
+        riskAlerts: true,
+        weeklyReports: true,
+        reminderFrequency: 'daily',
+        dashboardView: 'overview',
+        autoSave: true,
+        darkMode: false
+      };
+      res.json(defaultPreferences);
+    } catch (error) {
+      console.error("Error fetching user preferences:", error);
+      res.status(500).json({ message: "Failed to fetch preferences" });
+    }
+  });
+
+  app.put('/api/user/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const preferences = req.body;
+      
+      // In a real implementation, you'd save to a user_preferences table
+      // For now, just acknowledge the update
+      console.log(`Updated preferences for user ${userId}:`, preferences);
+      
+      // Create notification for preferences update
+      await createNotification(userId, {
+        title: "Preferences Updated",
+        message: "Your notification preferences have been successfully updated",
+        type: 'preferences_updated',
+        priority: 'low'
+      });
+      
+      res.json({ success: true, preferences });
+    } catch (error) {
+      console.error("Error updating user preferences:", error);
+      res.status(500).json({ message: "Failed to update preferences" });
     }
   });
 

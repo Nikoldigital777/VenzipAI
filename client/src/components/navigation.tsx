@@ -178,6 +178,14 @@ export default function Navigation() {
               </Link>
             );
           })}
+          <Link
+              href="/company-profile"
+              className="mobile-nav-item flex items-center px-4 py-3 rounded-xl transition-all duration-300 text-gray-600 hover:text-venzip-primary hover:bg-venzip-primary/8"
+              data-testid="mobile-nav-profile"
+            >
+              <User className="h-5 w-5 mr-3" />
+              <span className="font-medium">Profile</span>
+            </Link>
 
           {/* Mobile Actions */}
           <div className="pt-4 border-t border-gray-200 space-y-3">

@@ -48,6 +48,12 @@ export const companies = pgTable("companies", {
   size: varchar("size").notNull(),
   contactEmail: varchar("contact_email").notNull(),
   selectedFrameworks: text("selected_frameworks").array().notNull().default(sql`'{}'::text[]`),
+  description: text("description"),
+  website: varchar("website"),
+  address: text("address"),
+  phone: varchar("phone"),
+  complianceContact: varchar("compliance_contact"),
+  securityContact: varchar("security_contact"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
