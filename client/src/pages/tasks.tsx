@@ -12,21 +12,22 @@ interface Task {
   title: string;
   description?: string;
   category: string;
-  priority: string;
-  status: string;
-  frameworkId: string;
-  assignedTo?: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'not_started' | 'in_progress' | 'under_review' | 'completed' | 'blocked';
   dueDate?: string;
-  estimatedHours?: number;
-  complianceRequirement?: string;
-  evidenceRequired?: boolean;
-  tags: string[];
   progressPercentage: number;
   framework: {
     id: string;
     name: string;
     displayName: string;
   };
+  assignedTo?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  tags: string[];
 }
 
 export default function TasksPage() {
@@ -92,7 +93,11 @@ export default function TasksPage() {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               {selectedTask && (
                 <TaskForm
-                  task={selectedTask}
+                  task={{
+                    ...selectedTask,
+                    frameworkId: selectedTask.framework.id,
+                    assignedTo: selectedTask.assignedTo?.email || undefined
+                  }}
                   onSuccess={handleFormSuccess}
                   onCancel={handleFormCancel}
                 />

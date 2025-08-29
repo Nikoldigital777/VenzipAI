@@ -201,10 +201,10 @@ export default function TaskDetails({ task, onClose, onEdit }: TaskDetailsProps)
           </div>
           
           <div className="flex flex-wrap gap-2 mb-4">
-            <Badge className={priorityColors[detailedTask.priority]} variant="secondary">
+            <Badge className={priorityColors[detailedTask.priority as keyof typeof priorityColors]} variant="secondary">
               {detailedTask.priority}
             </Badge>
-            <Badge className={statusColors[detailedTask.status]} variant="secondary">
+            <Badge className={statusColors[detailedTask.status as keyof typeof statusColors]} variant="secondary">
               {detailedTask.status.replace('_', ' ')}
             </Badge>
             <Badge variant="outline">
@@ -309,7 +309,7 @@ export default function TaskDetails({ task, onClose, onEdit }: TaskDetailsProps)
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {detailedTask.tags.map((tag, index) => (
+              {detailedTask.tags.map((tag: string, index: number) => (
                 <Badge key={index} variant="outline" data-testid={`task-tag-${index}`}>
                   {tag}
                 </Badge>
@@ -355,7 +355,7 @@ export default function TaskDetails({ task, onClose, onEdit }: TaskDetailsProps)
           {/* Comments List */}
           {detailedTask.comments && detailedTask.comments.length > 0 ? (
             <div className="space-y-4">
-              {detailedTask.comments.map((comment, index) => (
+              {detailedTask.comments.map((comment: Comment, index: number) => (
                 <div key={comment.id} className="border-l-2 border-gray-200 pl-4" data-testid={`comment-${index}`}>
                   <div className="flex justify-between items-start mb-2">
                     <span className="font-medium text-sm">
@@ -386,7 +386,7 @@ export default function TaskDetails({ task, onClose, onEdit }: TaskDetailsProps)
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {detailedTask.attachments.map((attachment, index) => (
+              {detailedTask.attachments.map((attachment: Attachment, index: number) => (
                 <div key={attachment.id} className="flex items-center justify-between p-2 border rounded" data-testid={`attachment-${index}`}>
                   <div className="flex items-center gap-2">
                     <Paperclip className="h-4 w-4 text-gray-500" />

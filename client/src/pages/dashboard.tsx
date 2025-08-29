@@ -13,7 +13,11 @@ import {
   Clock,
   Activity,
   RefreshCw,
-  CheckCircle
+  CheckCircle,
+  BarChart3,
+  Shield,
+  Globe,
+  ShieldAlert
 } from "lucide-react";
 
 type Gap = { 
