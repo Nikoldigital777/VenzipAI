@@ -577,17 +577,17 @@ export default function Onboarding() {
 
             {/* Company Information Section */}
             <div className="relative">
-              <Card className="border-0 shadow-2xl backdrop-blur-xl bg-white/90 rounded-3xl overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/50"></div>
-                <CardContent className="p-12">
-                  <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full mb-6 shadow-xl">
-                      <Building className="h-10 w-10 text-white" />
+              <Card className="border border-blue-100/60 shadow-2xl backdrop-blur-xl bg-white/95 rounded-3xl overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/80"></div>
+                <CardContent className="p-12 relative z-10">
+                  <div className="text-center mb-12 relative z-10">
+                    <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl mb-8 shadow-2xl shadow-blue-500/25 -rotate-3">
+                      <Building className="h-12 w-12 text-white drop-shadow-lg" />
                     </div>
                     <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                      Configure Your <span className="bg-gradient-to-r from-venzip-accent to-venzip-secondary bg-clip-text text-transparent">Enterprise Profile</span>
+                      Configure Your <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Enterprise Profile</span>
                     </h3>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-xl text-gray-700 max-w-2xl mx-auto font-medium">
                       Establish your organizational profile to enable industry-specific compliance workflows, risk assessments, and regulatory reporting aligned with your business requirements.
                     </p>
                   </div>
