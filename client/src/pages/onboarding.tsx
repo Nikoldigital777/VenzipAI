@@ -273,7 +273,6 @@ export default function Onboarding() {
 
   return (
     <>
-      <Navigation />
       
       {/* Background with animated particles */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
