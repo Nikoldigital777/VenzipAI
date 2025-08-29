@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import Navigation from "@/components/navigation";
+import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 import FrameworkCard from "@/components/framework-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -273,6 +273,30 @@ export default function Onboarding() {
 
   return (
     <>
+      {/* Simplified Header for Onboarding */}
+      <header className="fixed top-0 w-full z-50 glass-morphism border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo & Brand */}
+            <div className="flex items-center">
+              <img 
+                src={venzipLogo} 
+                alt="Venzip Logo" 
+                className="h-12 shadow-lg"
+                style={{ width: 'auto' }}
+              />
+            </div>
+            
+            {/* Right side - Enterprise badge */}
+            <div className="flex items-center">
+              <div className="flex items-center space-x-2 bg-gradient-to-r from-venzip-primary/10 to-venzip-accent/10 px-4 py-2 rounded-full border border-venzip-primary/20">
+                <Shield className="h-4 w-4 text-venzip-primary" />
+                <span className="text-sm font-medium text-venzip-primary">Enterprise Platform</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
       
       {/* Background with animated particles */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -282,7 +306,7 @@ export default function Onboarding() {
         <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-venzip-secondary/6 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
-      <div className="relative pt-8 min-h-screen">
+      <div className="relative pt-20 min-h-screen">
         <div className="max-w-7xl mx-auto px-6 py-8">
           
           {/* Enhanced Hero Section with Floating Elements */}
