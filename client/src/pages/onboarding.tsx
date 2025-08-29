@@ -276,7 +276,7 @@ export default function Onboarding() {
       {/* Simplified Header for Onboarding */}
       <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-18">
+          <div className="flex items-center justify-between h-16">
             {/* Logo & Brand */}
             <div className="flex items-center">
               <img 
@@ -301,13 +301,13 @@ export default function Onboarding() {
       {/* Background with animated particles */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/80 to-teal-50/60"></div>
-        <div className="absolute top-20 left-10 w-72 h-72 bg-venzip-primary/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-16 w-96 h-96 bg-venzip-accent/8 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-venzip-secondary/6 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-16 left-10 w-72 h-72 bg-emerald-400/8 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-32 right-16 w-96 h-96 bg-blue-400/6 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-400/5 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
-      <div className="relative pt-20 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-        <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="relative pt-18 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <div className="max-w-6xl mx-auto px-6 py-8">
           
           {/* Enhanced Hero Section with Floating Elements */}
           <div className="text-center mb-16 relative">
