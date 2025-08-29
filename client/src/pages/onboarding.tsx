@@ -282,11 +282,11 @@ export default function Onboarding() {
         <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-venzip-secondary/6 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
-      <div className="relative pt-20 min-h-screen">
-        <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="relative pt-8 min-h-screen">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           
           {/* Enhanced Hero Section with Floating Elements */}
-          <div className="text-center mb-16 relative">
+          <div className="text-center mb-12 relative">
             {/* Floating decorative elements */}
             <div className="absolute -top-10 left-1/4 w-4 h-4 bg-venzip-primary/30 rounded-full animate-float opacity-60" style={{animationDelay: '0s'}}></div>
             <div className="absolute top-20 right-1/3 w-3 h-3 bg-venzip-accent/40 rounded-full animate-float opacity-50" style={{animationDelay: '2s'}}></div>
@@ -347,7 +347,7 @@ export default function Onboarding() {
             </div>
 
             {/* Enhanced Progress Indicator with 3D Effects */}
-            <div className="flex items-center justify-center mb-16 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
+            <div className="flex items-center justify-center mb-12 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
               <div className="flex items-center space-x-12 relative">
                 {/* Background glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 via-venzip-accent/5 to-success-green/5 blur-3xl rounded-full"></div>
