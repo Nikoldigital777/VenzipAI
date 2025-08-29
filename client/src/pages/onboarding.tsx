@@ -728,14 +728,15 @@ export default function Onboarding() {
             {/* AI Checklist Generation Section */}
             {selectedFrameworks.length > 0 && companyData.industry && companyData.size && !showStep3 && (
               <div className="relative">
-                <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
-                  <CardContent className="p-12 text-center">
+                <Card className="border border-emerald-100/60 shadow-2xl backdrop-blur-xl bg-white/95 rounded-3xl overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/80"></div>
+                  <CardContent className="p-12 text-center relative z-10">
                     <div className="mb-8">
-                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full mb-6 shadow-xl">
-                        <Sparkles className="h-10 w-10 text-white" />
+                      <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl mb-8 shadow-2xl shadow-emerald-500/25 rotate-3">
+                        <Sparkles className="h-12 w-12 text-white drop-shadow-lg" />
                       </div>
                       <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                        Generate Your <span className="bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent">AI Checklist</span>
+                        Generate Your <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">AI Checklist</span>
                       </h3>
                       <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                         Let our AI create a personalized compliance checklist based on your selected frameworks, industry, and company size.
@@ -746,14 +747,19 @@ export default function Onboarding() {
                       type="button"
                       onClick={handleGenerateChecklist}
                       disabled={generateChecklistMutation.isPending}
-                      className="group relative h-16 px-12 text-xl font-bold bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100"
+                      className="group relative h-16 px-12 text-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl shadow-2xl shadow-emerald-500/30 hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-75 disabled:hover:scale-100 disabled:cursor-not-allowed"
                       data-testid="button-generate-checklist"
                     >
                       <div className="relative flex items-center space-x-4">
                         {generateChecklistMutation.isPending ? (
                           <>
-                            <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
-                            <span>Generating AI Checklist...</span>
+                            <div className="animate-spin rounded-full h-7 w-7 border-3 border-white border-t-transparent"></div>
+                            <span>Generating Your Personalized Checklist...</span>
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                            </div>
                           </>
                         ) : (
                           <>
