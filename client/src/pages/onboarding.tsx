@@ -314,7 +314,7 @@ export default function Onboarding() {
                 <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 via-venzip-accent/5 to-venzip-secondary/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 <div className="relative flex items-center space-x-3">
                   <Rocket className="h-5 w-5 text-venzip-primary animate-bounce" />
-                  <span>AI-Powered Setup Wizard</span>
+                  <span>Enterprise Setup Accelerator</span>
                   <Sparkles className="h-5 w-5 text-venzip-accent animate-pulse" />
                 </div>
               </Badge>
@@ -338,12 +338,12 @@ export default function Onboarding() {
             
             <div className="animate-fadeInUp" style={{animationDelay: '0.6s'}}>
               <p className="text-2xl text-gray-600 mb-10 max-w-4xl mx-auto leading-relaxed">
-                <span className="font-light">Transform your compliance journey with</span>
+                <span className="font-light">Enterprise-grade compliance platform trusted by</span>
                 <br />
-                <span className="font-bold bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">AI-powered automation.</span>
-                <span className="font-light"> Let's get started in just</span>
+                <span className="font-bold bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Fortune 500 companies.</span>
+                <span className="font-light"> Streamline audit readiness in</span>
                 <br />
-                <span className="font-bold text-venzip-primary text-3xl">3 simple steps.</span>
+                <span className="font-bold text-venzip-primary text-3xl">3 strategic steps.</span>
               </p>
             </div>
 
@@ -460,11 +460,11 @@ export default function Onboarding() {
                       <Award className="h-10 w-10 text-white" />
                     </div>
                     <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                      Choose Your <span className="bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Compliance Frameworks</span>
+                      Select Your <span className="bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Regulatory Requirements</span>
                     </h2>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                      Select the regulatory standards your organization needs to comply with. 
-                      Our AI will customize your compliance roadmap accordingly.
+                      Select the regulatory frameworks critical to your industry. 
+                      Our enterprise AI engine will generate a comprehensive compliance roadmap tailored to your organization's risk profile and operational requirements.
                     </p>
                   </div>
 
@@ -563,10 +563,10 @@ export default function Onboarding() {
                       <Building className="h-10 w-10 text-white" />
                     </div>
                     <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                      Tell Us About Your <span className="bg-gradient-to-r from-venzip-accent to-venzip-secondary bg-clip-text text-transparent">Company</span>
+                      Configure Your <span className="bg-gradient-to-r from-venzip-accent to-venzip-secondary bg-clip-text text-transparent">Enterprise Profile</span>
                     </h3>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                      Help us personalize your compliance experience with some basic information about your organization.
+                      Establish your organizational profile to enable industry-specific compliance workflows, risk assessments, and regulatory reporting aligned with your business requirements.
                     </p>
                   </div>
                   
@@ -574,13 +574,13 @@ export default function Onboarding() {
                     <div className="group">
                       <Label htmlFor="companyName" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-primary transition-colors duration-200">
                         <Building className="h-4 w-4 mr-2 text-venzip-primary inline" />
-                        Company Name
+                        Organization Name
                       </Label>
                       <div className="relative">
                         <Input 
                           id="companyName"
                           type="text" 
-                          placeholder="Enter your company name"
+                          placeholder="Enter your organization name"
                           value={companyData.name}
                           onChange={(e) => setCompanyData(prev => ({ ...prev, name: e.target.value }))}
                           required
@@ -983,7 +983,7 @@ export default function Onboarding() {
                             </>
                           ) : (
                             <>
-                              <span>🚀 Complete Setup & Launch</span>
+                              <span>🚀 Deploy Enterprise Platform</span>
                               <Target className="h-5 w-5 text-white group-hover:translate-x-2 transition-transform duration-300" />
                             </>
                           )}
@@ -991,7 +991,7 @@ export default function Onboarding() {
                       </Button>
                     </div>
                     
-                    <div className="mt-8 flex items-center justify-center space-x-6 text-gray-600">
+                    <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-gray-600">
                       <div className="flex items-center space-x-2">
                         <Check className="h-5 w-5 text-success-green" />
                         <span>AI-Powered Guidance</span>
@@ -1004,7 +1004,12 @@ export default function Onboarding() {
                       <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
                       <div className="flex items-center space-x-2">
                         <Clock className="h-5 w-5 text-warning-orange" />
-                        <span>Real-time Monitoring</span>
+                        <span>24/7 Monitoring</span>
+                      </div>
+                      <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                      <div className="flex items-center space-x-2">
+                        <Award className="h-5 w-5 text-venzip-accent" />
+                        <span>SOC 2 Certified</span>
                       </div>
                     </div>
                   </CardContent>
@@ -1013,6 +1018,167 @@ export default function Onboarding() {
             )}
           </form>
         </div>
+        
+        {/* Professional Corporate Footer */}
+        <footer className="relative mt-32 bg-gradient-to-b from-slate-900 to-slate-950 text-white">
+          {/* Top decorative element */}
+          <div className="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary"></div>
+          
+          <div className="max-w-7xl mx-auto px-6 py-16">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+              
+              {/* Company Information */}
+              <div className="md:col-span-1">
+                <div className="flex items-center mb-6">
+                  <div className="w-10 h-10 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-lg flex items-center justify-center mr-3">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-2xl font-bold">Venzip</span>
+                </div>
+                <p className="text-gray-300 mb-6 leading-relaxed">
+                  Enterprise compliance automation platform trusted by leading organizations worldwide. 
+                  Achieve audit readiness faster with AI-powered workflows.
+                </p>
+                <div className="flex space-x-4">
+                  <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-venzip-primary transition-colors cursor-pointer">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-venzip-primary transition-colors cursor-pointer">
+                    <Building className="h-4 w-4" />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Compliance Frameworks */}
+              <div>
+                <h3 className="text-lg font-semibold mb-6 text-gray-100">Supported Frameworks</h3>
+                <ul className="space-y-3 text-gray-300">
+                  <li className="flex items-center">
+                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
+                    <span>SOC 2 Type II</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
+                    <span>ISO 27001</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
+                    <span>HIPAA</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
+                    <span>GDPR</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
+                    <span>PCI DSS</span>
+                  </li>
+                </ul>
+              </div>
+              
+              {/* Solutions */}
+              <div>
+                <h3 className="text-lg font-semibold mb-6 text-gray-100">Enterprise Solutions</h3>
+                <ul className="space-y-3 text-gray-300">
+                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Automated Risk Assessment</li>
+                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Continuous Monitoring</li>
+                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Evidence Management</li>
+                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Audit Coordination</li>
+                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Executive Reporting</li>
+                </ul>
+              </div>
+              
+              {/* Contact & Support */}
+              <div>
+                <h3 className="text-lg font-semibold mb-6 text-gray-100">Enterprise Support</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <Mail className="h-5 w-5 text-venzip-accent mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <div className="text-gray-200 font-medium">enterprise@venzip.com</div>
+                      <div className="text-gray-400 text-sm">Sales & Implementation</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <Users className="h-5 w-5 text-venzip-accent mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <div className="text-gray-200 font-medium">24/7 Support</div>
+                      <div className="text-gray-400 text-sm">Dedicated Success Manager</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <Settings className="h-5 w-5 text-venzip-accent mt-1 mr-3 flex-shrink-0" />
+                    <div>
+                      <div className="text-gray-200 font-medium">Custom Integration</div>
+                      <div className="text-gray-400 text-sm">API & SSO Available</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Trust Indicators & Certifications */}
+            <div className="border-t border-gray-800 pt-12 mb-12">
+              <div className="text-center mb-8">
+                <h3 className="text-lg font-semibold text-gray-100 mb-6">Trusted by Enterprise Leaders</h3>
+                <div className="flex flex-wrap justify-center items-center gap-8">
+                  {/* Security Badges */}
+                  <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
+                    <Shield className="h-5 w-5 text-venzip-accent" />
+                    <span className="text-sm font-medium text-gray-200">SOC 2 Certified</span>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
+                    <Award className="h-5 w-5 text-venzip-accent" />
+                    <span className="text-sm font-medium text-gray-200">ISO 27001 Compliant</span>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
+                    <Cloud className="h-5 w-5 text-venzip-accent" />
+                    <span className="text-sm font-medium text-gray-200">GDPR Ready</span>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
+                    <Users className="h-5 w-5 text-venzip-accent" />
+                    <span className="text-sm font-medium text-gray-200">Enterprise SSO</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Enterprise Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-venzip-accent mb-2">500+</div>
+                  <div className="text-gray-300 text-sm">Enterprise Clients</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-venzip-accent mb-2">99.9%</div>
+                  <div className="text-gray-300 text-sm">Uptime SLA</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-venzip-accent mb-2">60%</div>
+                  <div className="text-gray-300 text-sm">Faster Audit Prep</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-venzip-accent mb-2">24/7</div>
+                  <div className="text-gray-300 text-sm">Expert Support</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Bottom Footer */}
+            <div className="border-t border-gray-800 pt-8">
+              <div className="flex flex-col md:flex-row justify-between items-center">
+                <div className="text-gray-400 text-sm mb-4 md:mb-0">
+                  © 2025 Venzip. All rights reserved. Enterprise Compliance Platform.
+                </div>
+                <div className="flex space-x-6 text-sm text-gray-400">
+                  <a href="#" className="hover:text-venzip-accent transition-colors">Privacy Policy</a>
+                  <a href="#" className="hover:text-venzip-accent transition-colors">Terms of Service</a>
+                  <a href="#" className="hover:text-venzip-accent transition-colors">Security</a>
+                  <a href="#" className="hover:text-venzip-accent transition-colors">Status</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );
