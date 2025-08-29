@@ -292,15 +292,15 @@ export default function Onboarding() {
             <div className="absolute top-20 right-1/3 w-3 h-3 bg-venzip-accent/40 rounded-full animate-float opacity-50" style={{animationDelay: '2s'}}></div>
             <div className="absolute top-32 left-1/6 w-2 h-2 bg-venzip-secondary/50 rounded-full animate-float opacity-70" style={{animationDelay: '4s'}}></div>
             
-            <div className="inline-flex items-center justify-center p-4 mb-8 animate-fadeInUp">
+            <div className="inline-flex items-center justify-center p-3 mb-6 animate-fadeInUp">
               <div className="relative group">
                 <div className="absolute -inset-4 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-all duration-500 animate-pulse"></div>
-                <div className="relative w-28 h-28 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center shadow-2xl animate-float group-hover:scale-110 transition-transform duration-500">
-                  <Shield className="h-14 w-14 text-white" />
+                <div className="relative w-20 h-20 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center shadow-2xl animate-float group-hover:scale-110 transition-transform duration-500">
+                  <Shield className="h-10 w-10 text-white" />
                   <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center animate-bounce shadow-lg">
-                  <Star className="h-5 w-5 text-white" />
+                <div className="absolute -top-1 -right-1 w-7 h-7 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                  <Star className="h-3 w-3 text-white" />
                 </div>
                 {/* Orbiting particles */}
                 <div className="absolute top-0 left-1/2 w-2 h-2 bg-white rounded-full animate-ping opacity-60"></div>
@@ -309,7 +309,7 @@ export default function Onboarding() {
             </div>
 
             <div className="animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-              <Badge className="mb-8 bg-gradient-to-r from-venzip-primary/10 via-venzip-accent/10 to-venzip-secondary/10 text-venzip-primary border border-venzip-primary/30 px-8 py-4 text-xl font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 relative overflow-hidden group">
+              <Badge className="mb-6 bg-gradient-to-r from-venzip-primary/10 via-venzip-accent/10 to-venzip-secondary/10 text-venzip-primary border border-venzip-primary/30 px-6 py-3 text-lg font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 via-venzip-accent/5 to-venzip-secondary/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 <div className="relative flex items-center space-x-3">
                   <Rocket className="h-5 w-5 text-venzip-primary animate-bounce" />
@@ -320,7 +320,7 @@ export default function Onboarding() {
             </div>
             
             <div className="animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-              <h1 className="text-7xl md:text-8xl font-black text-gray-900 mb-8 leading-tight tracking-tight relative">
+              <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 leading-tight tracking-tight relative">
                 <span className="relative inline-block">
                   Welcome to
                   <div className="absolute -inset-2 bg-gradient-to-r from-venzip-primary/10 to-venzip-accent/10 blur-xl opacity-30 rounded-lg"></div>
@@ -336,13 +336,13 @@ export default function Onboarding() {
             </div>
             
             <div className="animate-fadeInUp" style={{animationDelay: '0.6s'}}>
-              <p className="text-2xl text-gray-600 mb-10 max-w-4xl mx-auto leading-relaxed">
+              <p className="text-xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
                 <span className="font-light">Enterprise-grade compliance platform trusted by</span>
                 <br />
                 <span className="font-bold bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Fortune 500 companies.</span>
                 <span className="font-light"> Streamline audit readiness in</span>
                 <br />
-                <span className="font-bold text-venzip-primary text-3xl">3 strategic steps.</span>
+                <span className="font-bold text-venzip-primary text-2xl">3 strategic steps.</span>
               </p>
             </div>
 
