@@ -95,6 +95,7 @@ export default function Onboarding() {
   
   const [aiChecklist, setAiChecklist] = useState<AIChecklist[]>([]);
   const [isGeneratingChecklist, setIsGeneratingChecklist] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
   const [showStep3, setShowStep3] = useState(false);
 
   // Initialize frameworks
@@ -140,12 +141,18 @@ export default function Onboarding() {
       return response.json();
     },
     onSuccess: (data) => {
-      setAiChecklist(data.checklist || []);
-      setShowStep3(true);
-      setIsGeneratingChecklist(false);
+      // Complete the progress to 100% and show success
+      setGenerationProgress(100);
+      setTimeout(() => {
+        setAiChecklist(data.checklist || []);
+        setShowStep3(true);
+        setIsGeneratingChecklist(false);
+        setGenerationProgress(0); // Reset for next time
+      }, 500); // Brief pause to show 100% completion
     },
     onError: (error: Error) => {
       setIsGeneratingChecklist(false);
+      setGenerationProgress(0); // Reset progress on error
       toast({
         title: "❌ AI Generation Failed",
         description: error.message || "Failed to generate compliance checklist",
@@ -228,6 +235,21 @@ export default function Onboarding() {
     }
 
     setIsGeneratingChecklist(true);
+    setGenerationProgress(0);
+    
+    // Start progress simulation
+    const progressInterval = setInterval(() => {
+      setGenerationProgress(prev => {
+        if (prev >= 95) {
+          clearInterval(progressInterval);
+          return 95; // Stop at 95% until actual completion
+        }
+        // Simulate realistic AI processing with variable speed
+        const increment = Math.random() * 3 + 1; // 1-4% increments
+        return Math.min(prev + increment, 95);
+      });
+    }, 800); // Update every 800ms for smooth progression
+    
     generateChecklistMutation.mutate();
   };
 
@@ -753,12 +775,25 @@ export default function Onboarding() {
                       <div className="relative flex items-center space-x-4">
                         {(isGeneratingChecklist || generateChecklistMutation.isPending) ? (
                           <>
-                            <div className="animate-spin rounded-full h-7 w-7 border-3 border-white border-t-transparent"></div>
-                            <span>Generating Your Personalized Checklist...</span>
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-                              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-                              <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                            <div className="flex flex-col items-center space-y-4">
+                              <div className="flex items-center space-x-3">
+                                <div className="animate-spin rounded-full h-7 w-7 border-3 border-white border-t-transparent"></div>
+                                <span>Generating Your Personalized Checklist...</span>
+                              </div>
+                              
+                              {/* Progress Bar */}
+                              <div className="w-80 bg-white/20 rounded-full h-3 overflow-hidden">
+                                <div 
+                                  className="h-full bg-white rounded-full transition-all duration-500 ease-out"
+                                  style={{ width: `${generationProgress}%` }}
+                                ></div>
+                              </div>
+                              
+                              {/* Progress Percentage */}
+                              <div className="flex items-center space-x-2 text-white/90">
+                                <span className="text-lg font-bold">{Math.round(generationProgress)}%</span>
+                                <span className="text-sm">• Analyzing compliance requirements</span>
+                              </div>
                             </div>
                           </>
                         ) : (
