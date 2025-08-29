@@ -1043,12 +1043,12 @@ export default function Onboarding() {
         </div>
         
         {/* Professional Corporate Footer */}
-        <footer className="relative mt-32 bg-gradient-to-b from-slate-900 to-slate-950 text-white">
+        <footer className="relative mt-16 bg-gradient-to-b from-slate-900 to-slate-950 text-white">
           {/* Top decorative element */}
           <div className="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary"></div>
           
-          <div className="max-w-7xl mx-auto px-6 py-16">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               
               {/* Company Information */}
               <div className="md:col-span-1">
@@ -1058,9 +1058,8 @@ export default function Onboarding() {
                   </div>
                   <span className="text-2xl font-bold">Venzip</span>
                 </div>
-                <p className="text-gray-300 mb-6 leading-relaxed">
-                  Enterprise compliance automation platform trusted by leading organizations worldwide. 
-                  Achieve audit readiness faster with AI-powered workflows.
+                <p className="text-gray-300 mb-4 leading-relaxed text-sm">
+                  Enterprise compliance automation platform trusted by leading organizations worldwide.
                 </p>
                 <div className="flex space-x-4">
                   <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-venzip-primary transition-colors cursor-pointer">
@@ -1074,8 +1073,8 @@ export default function Onboarding() {
               
               {/* Compliance Frameworks */}
               <div>
-                <h3 className="text-lg font-semibold mb-6 text-gray-100">Supported Frameworks</h3>
-                <ul className="space-y-3 text-gray-300">
+                <h3 className="text-base font-semibold mb-4 text-gray-100">Supported Frameworks</h3>
+                <ul className="space-y-2 text-gray-300 text-sm">
                   <li className="flex items-center">
                     <Check className="h-4 w-4 text-venzip-accent mr-3" />
                     <span>SOC 2 Type II</span>
@@ -1102,7 +1101,7 @@ export default function Onboarding() {
               {/* Solutions */}
               <div>
                 <h3 className="text-lg font-semibold mb-6 text-gray-100">Enterprise Solutions</h3>
-                <ul className="space-y-3 text-gray-300">
+                <ul className="space-y-2 text-gray-300 text-sm">
                   <li className="hover:text-venzip-accent cursor-pointer transition-colors">Automated Risk Assessment</li>
                   <li className="hover:text-venzip-accent cursor-pointer transition-colors">Continuous Monitoring</li>
                   <li className="hover:text-venzip-accent cursor-pointer transition-colors">Evidence Management</li>
@@ -1141,9 +1140,9 @@ export default function Onboarding() {
             </div>
             
             {/* Trust Indicators & Certifications */}
-            <div className="border-t border-gray-800 pt-12 mb-12">
+            <div className="border-t border-gray-800 pt-6 mb-6">
               <div className="text-center mb-8">
-                <h3 className="text-lg font-semibold text-gray-100 mb-6">Trusted by Enterprise Leaders</h3>
+                <h3 className="text-base font-semibold text-gray-100 mb-4">Trusted by Enterprise Leaders</h3>
                 <div className="flex flex-wrap justify-center items-center gap-8">
                   {/* Security Badges */}
                   <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
@@ -1166,28 +1165,28 @@ export default function Onboarding() {
               </div>
               
               {/* Enterprise Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                  <div className="text-3xl font-bold text-venzip-accent mb-2">500+</div>
-                  <div className="text-gray-300 text-sm">Enterprise Clients</div>
+                  <div className="text-2xl font-bold text-venzip-accent mb-1">500+</div>
+                  <div className="text-gray-300 text-xs">Enterprise Clients</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-venzip-accent mb-2">99.9%</div>
-                  <div className="text-gray-300 text-sm">Uptime SLA</div>
+                  <div className="text-2xl font-bold text-venzip-accent mb-1">99.9%</div>
+                  <div className="text-gray-300 text-xs">Uptime SLA</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-venzip-accent mb-2">60%</div>
-                  <div className="text-gray-300 text-sm">Faster Audit Prep</div>
+                  <div className="text-2xl font-bold text-venzip-accent mb-1">60%</div>
+                  <div className="text-gray-300 text-xs">Faster Audit Prep</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-venzip-accent mb-2">24/7</div>
-                  <div className="text-gray-300 text-sm">Expert Support</div>
+                  <div className="text-2xl font-bold text-venzip-accent mb-1">24/7</div>
+                  <div className="text-gray-300 text-xs">Expert Support</div>
                 </div>
               </div>
             </div>
             
             {/* Bottom Footer */}
-            <div className="border-t border-gray-800 pt-8">
+            <div className="border-t border-gray-800 pt-4">
               <div className="flex flex-col md:flex-row justify-between items-center">
                 <div className="text-gray-400 text-sm mb-4 md:mb-0">
                   © 2025 Venzip. All rights reserved. Enterprise Compliance Platform.
