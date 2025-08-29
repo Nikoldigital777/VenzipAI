@@ -415,64 +415,68 @@ export default function Landing() {
       </section>
 
       {/* ROI Metrics Section */}
-      <section id="roi-metrics" className="py-24 px-6 bg-gradient-to-br from-slate-900/95 to-gray-800/90 relative overflow-hidden text-white">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/10 to-venzip-secondary/5"></div>
-        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-venzip-accent/20 to-transparent rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-br from-venzip-primary/20 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+      <section id="roi-metrics" className="py-24 px-6 bg-gradient-to-br from-white/95 to-gray-50/80 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
         
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-extrabold mb-8 tracking-tight">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
               Proven <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Business Impact</span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-light">
               See why enterprises choose Venzip for compliance automation and risk management
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl hover-lift group text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-success rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+            <Card className="glass-card hover-lift group text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-success-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-16 h-16 bg-gradient-success rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl shadow-success-green/30">
                   <Target className="text-white h-8 w-8" />
                 </div>
-                <div className="text-4xl font-bold text-white mb-2 animate-glow-pulse">87%</div>
-                <p className="text-gray-300 font-medium">Faster Compliance</p>
-                <p className="text-gray-400 text-sm mt-2">Average time to certification</p>
+                <div className="text-4xl font-bold text-gray-900 mb-2 group-hover:text-success-green transition-colors duration-300">87%</div>
+                <p className="text-gray-700 font-medium">Faster Compliance</p>
+                <p className="text-gray-500 text-sm mt-2">Average time to certification</p>
               </CardContent>
             </Card>
 
-            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl hover-lift group text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-warning rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+            <Card className="glass-card hover-lift group text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-16 h-16 bg-gradient-warning rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl shadow-warning-orange/30">
                   <DollarSign className="text-white h-8 w-8" />
                 </div>
-                <div className="text-4xl font-bold text-white mb-2">$2.3M</div>
-                <p className="text-gray-300 font-medium">Average Cost Savings</p>
-                <p className="text-gray-400 text-sm mt-2">Per compliance program</p>
+                <div className="text-4xl font-bold text-gray-900 mb-2 group-hover:text-warning-orange transition-colors duration-300">$2.3M</div>
+                <p className="text-gray-700 font-medium">Average Cost Savings</p>
+                <p className="text-gray-500 text-sm mt-2">Per compliance program</p>
               </CardContent>
             </Card>
 
-            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl hover-lift group text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-danger rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+            <Card className="glass-card hover-lift group text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-16 h-16 bg-gradient-danger rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl shadow-danger-coral/30">
                   <Zap className="text-white h-8 w-8" />
                 </div>
-                <div className="text-4xl font-bold text-white mb-2">95%</div>
-                <p className="text-gray-300 font-medium">Risk Reduction</p>
-                <p className="text-gray-400 text-sm mt-2">In compliance gaps</p>
+                <div className="text-4xl font-bold text-gray-900 mb-2 group-hover:text-danger-coral transition-colors duration-300">95%</div>
+                <p className="text-gray-700 font-medium">Risk Reduction</p>
+                <p className="text-gray-500 text-sm mt-2">In compliance gaps</p>
               </CardContent>
             </Card>
 
-            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl hover-lift group text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+            <Card className="glass-card hover-lift group text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 relative z-10">
+                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl shadow-venzip-primary/30 animate-glow-pulse">
                   <BarChart3 className="text-white h-8 w-8" />
                 </div>
-                <div className="text-4xl font-bold text-white mb-2">340%</div>
-                <p className="text-gray-300 font-medium">ROI Average</p>
-                <p className="text-gray-400 text-sm mt-2">Within first year</p>
+                <div className="text-4xl font-bold text-gray-900 mb-2 group-hover:text-venzip-primary transition-colors duration-300">340%</div>
+                <p className="text-gray-700 font-medium">ROI Average</p>
+                <p className="text-gray-500 text-sm mt-2">Within first year</p>
               </CardContent>
             </Card>
           </div>
@@ -481,12 +485,13 @@ export default function Landing() {
             <Button 
               onClick={handleLogin}
               size="lg"
-              className="bg-white text-gray-900 hover:bg-gray-100 hover:scale-105 hover:shadow-2xl transform transition-all duration-300 px-8 py-4 rounded-xl text-lg font-bold shadow-xl"
+              className="bg-gradient-primary hover:shadow-xl hover:shadow-venzip-primary/25 hover:scale-105 transform transition-all duration-300 px-8 py-4 rounded-xl text-lg font-bold text-white group relative overflow-hidden"
             >
-              <Building2 className="h-5 w-5 mr-3" />
-              Schedule Enterprise Demo
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+              <Building2 className="h-5 w-5 mr-3 relative z-10" />
+              <span className="relative z-10">Schedule Enterprise Demo</span>
             </Button>
-            <p className="text-gray-400 mt-4 text-sm">Free 30-day trial • No credit card required</p>
+            <p className="text-gray-500 mt-4 text-sm">Free 30-day trial • No credit card required</p>
           </div>
         </div>
       </section>
@@ -715,56 +720,60 @@ export default function Landing() {
       </section>
 
       {/* Executive Testimonial Section */}
-      <section className="py-24 px-6 bg-gradient-to-br from-slate-900/95 to-gray-800/90 relative overflow-hidden text-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/10 to-venzip-secondary/5"></div>
-        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-venzip-accent/20 to-transparent rounded-full blur-3xl animate-float"></div>
+      <section className="py-24 px-6 bg-gradient-to-br from-gray-50/80 to-white/50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
         <div className="max-w-6xl mx-auto text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-16 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-16 tracking-tight">
             Trusted by <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Industry Leaders</span>
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Card className="glass-card hover-lift group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 text-center relative z-10">
+                <div className="w-16 h-16 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Building2 className="h-8 w-8 text-venzip-primary" />
                 </div>
-                <blockquote className="text-lg text-gray-300 mb-6 italic leading-relaxed">
+                <blockquote className="text-lg text-gray-700 mb-6 italic leading-relaxed">
                   "Venzip reduced our compliance costs by $2.1M annually and helped us achieve SOC 2 certification in just 4 months."
                 </blockquote>
                 <div className="text-sm">
-                  <div className="font-semibold text-white">Sarah Chen</div>
-                  <div className="text-gray-400">Chief Risk Officer, TechCorp</div>
+                  <div className="font-semibold text-gray-900">Sarah Chen</div>
+                  <div className="text-gray-600">Chief Risk Officer, TechCorp</div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Card className="glass-card hover-lift group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-success-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 text-center relative z-10">
+                <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Shield className="h-8 w-8 text-success-green" />
                 </div>
-                <blockquote className="text-lg text-gray-300 mb-6 italic leading-relaxed">
+                <blockquote className="text-lg text-gray-700 mb-6 italic leading-relaxed">
                   "The AI-driven approach eliminated 80% of manual work. Our audit prep time went from 6 months to 6 weeks."
                 </blockquote>
                 <div className="text-sm">
-                  <div className="font-semibold text-white">Michael Rodriguez</div>
-                  <div className="text-gray-400">CISO, Global Financial Services</div>
+                  <div className="font-semibold text-gray-900">Michael Rodriguez</div>
+                  <div className="text-gray-600">CISO, Global Financial Services</div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-venzip-accent/20 to-venzip-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Card className="glass-card hover-lift group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="p-8 text-center relative z-10">
+                <div className="w-16 h-16 bg-gradient-to-br from-venzip-accent/20 to-venzip-accent/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                   <TrendingUp className="h-8 w-8 text-venzip-accent" />
                 </div>
-                <blockquote className="text-lg text-gray-300 mb-6 italic leading-relaxed">
+                <blockquote className="text-lg text-gray-700 mb-6 italic leading-relaxed">
                   "Board reporting became effortless. Real-time dashboards give executives the visibility they need."
                 </blockquote>
                 <div className="text-sm">
-                  <div className="font-semibold text-white">Jennifer Park</div>
-                  <div className="text-gray-400">VP Compliance, Healthcare Leaders</div>
+                  <div className="font-semibold text-gray-900">Jennifer Park</div>
+                  <div className="text-gray-600">VP Compliance, Healthcare Leaders</div>
                 </div>
               </CardContent>
             </Card>
