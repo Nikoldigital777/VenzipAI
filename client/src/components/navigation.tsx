@@ -32,7 +32,6 @@ export default function Navigation() {
     { path: "/documents", label: "Evidence", icon: FileText },
     { path: "/risks", label: "Risks", icon: AlertTriangle },
     { path: "/evidence", label: "Evidence Mapping", icon: MapPin },
-    { path: "/setup-wizard", label: "Setup Wizard", icon: Rocket },
     { path: "/test-notifications", label: "Test Notifications", icon: Bell },
   ];
 

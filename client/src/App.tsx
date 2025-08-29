@@ -14,7 +14,6 @@ import Documents from "@/pages/documents";
 import Risks from "@/pages/risks";
 import Evidence from "@/pages/evidence";
 import TestNotifications from "@/pages/test-notifications";
-import SetupWizard from "@/pages/setup-wizard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -35,7 +34,6 @@ function Router() {
           <Route path="/risks" component={Risks} />
           <Route path="/evidence" component={Evidence} />
           <Route path="/test-notifications" component={TestNotifications} />
-          <Route path="/setup-wizard" component={SetupWizard} />
         </>
       )}
       <Route component={NotFound} />
