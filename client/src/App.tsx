@@ -22,12 +22,14 @@ function Router() {
 
   return (
     <Switch>
+      {/* Allow onboarding access during auth flow */}
+      <Route path="/onboarding" component={Onboarding} />
+      
       {!isAuthenticated && !isLoading ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
           <Route path="/" component={Home} />
-          <Route path="/onboarding" component={Onboarding} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/tasks" component={Tasks} />
           <Route path="/audit-calendar" component={AuditCalendar} />
