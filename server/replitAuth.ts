@@ -52,6 +52,7 @@ function updateUserSession(
   user.access_token = tokens.access_token;
   user.refresh_token = tokens.refresh_token;
   user.expires_at = user.claims?.exp;
+  user.sub = user.claims?.sub; // Add sub directly to user object for easy access
 }
 
 async function upsertUser(
