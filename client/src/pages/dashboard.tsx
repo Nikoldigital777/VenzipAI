@@ -201,9 +201,57 @@ export default function Dashboard() {
                       <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
                         <Upload className="h-5 w-5 text-info-blue group-hover:animate-bounce" />
                       </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-info-blue transition-colors duration-300">{stats.uploads}</div>
+                    <div className="text-xs text-gray-500">Documents uploaded</div>
+                  </CardContent>
+                </Card>
 
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-br from-venzip-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                  <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-sm font-medium text-gray-600 group-hover:text-venzip-accent transition-colors duration-300">AI Conversations</div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-venzip-accent/20 to-venzip-accent/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                        <MessageSquare className="h-5 w-5 text-venzip-accent group-hover:animate-bounce" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-venzip-accent transition-colors duration-300">{stats.conversations}</div>
+                    <div className="text-xs text-gray-500">Claude interactions</div>
+                  </CardContent>
+                </Card>
 
-          {/* Corporate Compliance Metrics Table */}
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                  <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-sm font-medium text-gray-600 group-hover:text-warning-orange transition-colors duration-300">High Priority Tasks</div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                        <Target className="h-5 w-5 text-warning-orange group-hover:animate-bounce" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-warning-orange transition-colors duration-300">{stats.tasksOpenHigh || 0}</div>
+                    <div className="text-xs text-gray-500">Tasks requiring attention</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                  <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+                  <CardContent className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-sm font-medium text-gray-600 group-hover:text-danger-coral transition-colors duration-300">High Risks</div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-danger-coral/20 to-danger-coral/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
+                        <ShieldAlert className="h-5 w-5 text-danger-coral group-hover:animate-bounce" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-danger-coral transition-colors duration-300">{stats.risksHigh || 0}</div>
+                    <div className="text-xs text-gray-500">Critical risks identified</div>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+
+            {/* Corporate Compliance Metrics Table */}
           <Card className="lg:col-span-3 glass-card animate-fadeInUp" style={{animationDelay: '0.5s'}}>
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-gray-900">
