@@ -286,88 +286,165 @@ export default function Onboarding() {
       <div className="relative pt-20 min-h-screen">
         <div className="max-w-7xl mx-auto px-6 py-12">
           
-          {/* Hero Section */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center p-4 mb-8">
-              <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center shadow-2xl animate-float">
-                  <Shield className="h-12 w-12 text-white" />
+          {/* Enhanced Hero Section with Floating Elements */}
+          <div className="text-center mb-16 relative">
+            {/* Floating decorative elements */}
+            <div className="absolute -top-10 left-1/4 w-4 h-4 bg-venzip-primary/30 rounded-full animate-float opacity-60" style={{animationDelay: '0s'}}></div>
+            <div className="absolute top-20 right-1/3 w-3 h-3 bg-venzip-accent/40 rounded-full animate-float opacity-50" style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-32 left-1/6 w-2 h-2 bg-venzip-secondary/50 rounded-full animate-float opacity-70" style={{animationDelay: '4s'}}></div>
+            
+            <div className="inline-flex items-center justify-center p-4 mb-8 animate-fadeInUp">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-all duration-500 animate-pulse"></div>
+                <div className="relative w-28 h-28 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center shadow-2xl animate-float group-hover:scale-110 transition-transform duration-500">
+                  <Shield className="h-14 w-14 text-white" />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center animate-pulse">
-                  <Star className="h-4 w-4 text-white" />
+                <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                  <Star className="h-5 w-5 text-white" />
                 </div>
+                {/* Orbiting particles */}
+                <div className="absolute top-0 left-1/2 w-2 h-2 bg-white rounded-full animate-ping opacity-60"></div>
+                <div className="absolute bottom-0 right-1/2 w-1.5 h-1.5 bg-venzip-accent rounded-full animate-ping opacity-40" style={{animationDelay: '1s'}}></div>
               </div>
             </div>
 
-            <Badge className="mb-6 bg-venzip-primary/10 text-venzip-primary border-venzip-primary/20 px-6 py-3 text-lg font-semibold rounded-full shadow-lg animate-bounce">
-              🚀 AI-Powered Setup Wizard
-            </Badge>
+            <div className="animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+              <Badge className="mb-8 bg-gradient-to-r from-venzip-primary/10 via-venzip-accent/10 to-venzip-secondary/10 text-venzip-primary border border-venzip-primary/30 px-8 py-4 text-xl font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 via-venzip-accent/5 to-venzip-secondary/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <div className="relative flex items-center space-x-3">
+                  <Rocket className="h-5 w-5 text-venzip-primary animate-bounce" />
+                  <span>AI-Powered Setup Wizard</span>
+                  <Sparkles className="h-5 w-5 text-venzip-accent animate-pulse" />
+                </div>
+              </Badge>
+            </div>
             
-            <h1 className="text-6xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              Welcome to
-              <br />
-              <span className="bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary bg-clip-text text-transparent animate-pulse">
-                Venzip
-              </span>
-            </h1>
+            <div className="animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+              <h1 className="text-7xl md:text-8xl font-black text-gray-900 mb-8 leading-tight tracking-tight relative">
+                <span className="relative inline-block">
+                  Welcome to
+                  <div className="absolute -inset-2 bg-gradient-to-r from-venzip-primary/10 to-venzip-accent/10 blur-xl opacity-30 rounded-lg"></div>
+                </span>
+                <br />
+                <span className="relative inline-block group">
+                  <span className="bg-gradient-to-r from-venzip-primary via-venzip-accent via-venzip-secondary to-venzip-primary bg-[length:200%_100%] animate-gradient-x bg-clip-text text-transparent font-black">
+                    Venzip
+                  </span>
+                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                </span>
+              </h1>
+            </div>
             
-            <p className="text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Transform your compliance journey with AI-powered automation. 
-              <br />
-              <span className="font-semibold text-venzip-primary">Let's get started in just 3 simple steps.</span>
-            </p>
+            <div className="animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+              <p className="text-2xl text-gray-600 mb-10 max-w-4xl mx-auto leading-relaxed">
+                <span className="font-light">Transform your compliance journey with</span>
+                <br />
+                <span className="font-bold bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">AI-powered automation.</span>
+                <span className="font-light"> Let's get started in just</span>
+                <br />
+                <span className="font-bold text-venzip-primary text-3xl">3 simple steps.</span>
+              </p>
+            </div>
 
-            {/* Enhanced Progress Indicator */}
-            <div className="flex items-center justify-center mb-12">
-              <div className="flex items-center space-x-8">
-                <div className="flex flex-col items-center space-y-3 group">
-                  <div className="relative">
-                    <div className="w-16 h-16 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 transition-transform duration-300">
-                      1
+            {/* Enhanced Progress Indicator with 3D Effects */}
+            <div className="flex items-center justify-center mb-16 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
+              <div className="flex items-center space-x-12 relative">
+                {/* Background glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 via-venzip-accent/5 to-success-green/5 blur-3xl rounded-full"></div>
+                
+                {/* Step 1 */}
+                <div className="flex flex-col items-center space-y-4 group relative">
+                  <div className="relative transform perspective-1000 hover:rotate-y-12 transition-all duration-500">
+                    <div className="absolute -inset-4 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500 animate-pulse"></div>
+                    <div className="w-20 h-20 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center text-white font-black text-2xl shadow-2xl group-hover:scale-125 group-hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10 group-hover:text-shadow-lg">1</span>
+                      <div className="absolute top-1 left-1 w-3 h-3 bg-white/30 rounded-full animate-ping"></div>
                     </div>
-                    <div className="absolute -inset-2 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full opacity-20 blur animate-pulse"></div>
                   </div>
-                  <div className="text-center">
-                    <div className="font-semibold text-venzip-primary text-lg">Frameworks</div>
-                    <div className="text-sm text-gray-500">Choose your standards</div>
+                  <div className="text-center group-hover:scale-105 transition-transform duration-300">
+                    <div className="font-bold text-venzip-primary text-xl mb-1 group-hover:text-venzip-accent transition-colors duration-300">Frameworks</div>
+                    <div className="text-sm text-gray-600 font-medium">Choose your standards</div>
                   </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="w-20 h-1 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full"></div>
-                  <ChevronRight className="h-5 w-5 text-venzip-primary mx-2" />
-                </div>
-                
-                <div className="flex flex-col items-center space-y-3 group">
-                  <div className="relative">
-                    <div className="w-16 h-16 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 transition-transform duration-300">
-                      2
+                  {selectedFrameworks.length > 0 && (
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-success-green to-venzip-primary rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                      <Check className="h-3 w-3 text-white" />
                     </div>
-                    <div className="absolute -inset-2 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full opacity-20 blur animate-pulse delay-500"></div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-semibold text-venzip-accent text-lg">Company</div>
-                    <div className="text-sm text-gray-500">Your information</div>
-                  </div>
+                  )}
                 </div>
                 
-                <div className="flex items-center">
-                  <div className="w-20 h-1 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full"></div>
-                  <ChevronRight className="h-5 w-5 text-venzip-accent mx-2" />
+                {/* Connector 1 */}
+                <div className="flex items-center space-x-3 relative">
+                  <div className="w-24 h-2 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full shadow-lg overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+                  </div>
+                  <ChevronRight className="h-6 w-6 text-venzip-primary animate-bounce mx-2 drop-shadow-lg" />
                 </div>
                 
-                <div className="flex flex-col items-center space-y-3 group">
-                  <div className="relative">
-                    <div className="w-16 h-16 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 transition-transform duration-300">
-                      3
+                {/* Step 2 */}
+                <div className="flex flex-col items-center space-y-4 group relative">
+                  <div className="relative transform perspective-1000 hover:rotate-y-12 transition-all duration-500">
+                    <div className="absolute -inset-4 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500 animate-pulse delay-500"></div>
+                    <div className="w-20 h-20 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center text-white font-black text-2xl shadow-2xl group-hover:scale-125 group-hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10">2</span>
+                      <div className="absolute top-1 left-1 w-3 h-3 bg-white/30 rounded-full animate-ping delay-300"></div>
                     </div>
-                    <div className="absolute -inset-2 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full opacity-20 blur animate-pulse delay-1000"></div>
                   </div>
-                  <div className="text-center">
-                    <div className="font-semibold text-venzip-secondary text-lg">Launch</div>
-                    <div className="text-sm text-gray-500">Start your journey</div>
+                  <div className="text-center group-hover:scale-105 transition-transform duration-300">
+                    <div className="font-bold text-venzip-accent text-xl mb-1 group-hover:text-venzip-secondary transition-colors duration-300">Company</div>
+                    <div className="text-sm text-gray-600 font-medium">Your information</div>
                   </div>
+                  {companyData.name && companyData.industry && (
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-success-green to-venzip-accent rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                      <Check className="h-3 w-3 text-white" />
+                    </div>
+                  )}
                 </div>
+                
+                {/* Connector 2 */}
+                <div className="flex items-center space-x-3 relative">
+                  <div className="w-24 h-2 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full shadow-lg overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse delay-1000"></div>
+                  </div>
+                  <ChevronRight className="h-6 w-6 text-venzip-accent animate-bounce mx-2 drop-shadow-lg" style={{animationDelay: '0.5s'}} />
+                </div>
+                
+                {/* Step 3 */}
+                <div className="flex flex-col items-center space-y-4 group relative">
+                  <div className="relative transform perspective-1000 hover:rotate-y-12 transition-all duration-500">
+                    <div className="absolute -inset-4 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500 animate-pulse delay-1000"></div>
+                    <div className="w-20 h-20 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full flex items-center justify-center text-white font-black text-2xl shadow-2xl group-hover:scale-125 group-hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10">3</span>
+                      <div className="absolute top-1 left-1 w-3 h-3 bg-white/30 rounded-full animate-ping delay-700"></div>
+                    </div>
+                  </div>
+                  <div className="text-center group-hover:scale-105 transition-transform duration-300">
+                    <div className="font-bold text-venzip-secondary text-xl mb-1 group-hover:text-success-green transition-colors duration-300">Launch</div>
+                    <div className="text-sm text-gray-600 font-medium">Start your journey</div>
+                  </div>
+                  {showStep3 && (
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-success-green to-venzip-secondary rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                      <Rocket className="h-3 w-3 text-white" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Progress bar at bottom */}
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-64 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-venzip-primary via-venzip-accent to-success-green rounded-full transition-all duration-1000 ease-out"
+                  style={{ 
+                    width: `${
+                      selectedFrameworks.length > 0 && companyData.industry && companyData.size 
+                        ? showStep3 ? '100%' : '66%'
+                        : selectedFrameworks.length > 0 ? '33%' : '0%'
+                    }` 
+                  }}
+                ></div>
               </div>
             </div>
           </div>
