@@ -380,6 +380,171 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ROI Metrics Section */}
+      <section id="roi-metrics" className="py-24 px-6 bg-gradient-to-br from-slate-900/95 to-gray-800/90 relative overflow-hidden text-white">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/10 to-venzip-secondary/5"></div>
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-venzip-accent/20 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-br from-venzip-primary/20 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-extrabold mb-8 tracking-tight">
+              Proven <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Business Impact</span>
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
+              See why enterprises choose Venzip for compliance automation and risk management
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl hover-lift group text-center">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-success rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Target className="text-white h-8 w-8" />
+                </div>
+                <div className="text-4xl font-bold text-white mb-2 animate-glow-pulse">87%</div>
+                <p className="text-gray-300 font-medium">Faster Compliance</p>
+                <p className="text-gray-400 text-sm mt-2">Average time to certification</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl hover-lift group text-center">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-warning rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <DollarSign className="text-white h-8 w-8" />
+                </div>
+                <div className="text-4xl font-bold text-white mb-2">$2.3M</div>
+                <p className="text-gray-300 font-medium">Average Cost Savings</p>
+                <p className="text-gray-400 text-sm mt-2">Per compliance program</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl hover-lift group text-center">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-danger rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="text-white h-8 w-8" />
+                </div>
+                <div className="text-4xl font-bold text-white mb-2">95%</div>
+                <p className="text-gray-300 font-medium">Risk Reduction</p>
+                <p className="text-gray-400 text-sm mt-2">In compliance gaps</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl hover-lift group text-center">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <BarChart3 className="text-white h-8 w-8" />
+                </div>
+                <div className="text-4xl font-bold text-white mb-2">340%</div>
+                <p className="text-gray-300 font-medium">ROI Average</p>
+                <p className="text-gray-400 text-sm mt-2">Within first year</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center">
+            <Button 
+              onClick={handleLogin}
+              size="lg"
+              className="bg-white text-gray-900 hover:bg-gray-100 hover:scale-105 hover:shadow-2xl transform transition-all duration-300 px-8 py-4 rounded-xl text-lg font-bold shadow-xl"
+            >
+              <Building2 className="h-5 w-5 mr-3" />
+              Schedule Enterprise Demo
+            </Button>
+            <p className="text-gray-400 mt-4 text-sm">Free 30-day trial • No credit card required</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Enterprise Features Section */}
+      <section id="enterprise" className="py-24 px-6 bg-gradient-to-br from-white/95 to-gray-50/80 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-2xl animate-float"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
+              Built for <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero">Enterprise Scale</span>
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-light">
+              Advanced features and enterprise-grade security for organizations of all sizes
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+            <div className="space-y-8">
+              <div className="flex items-start space-x-4 group">
+                <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <Shield className="text-white h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Advanced Security & Privacy</h3>
+                  <p className="text-gray-600 leading-relaxed">Enterprise-grade encryption, RBAC, SSO integration, and comprehensive audit trails. SOC 2 Type II certified infrastructure.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4 group">
+                <div className="w-12 h-12 bg-gradient-success rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <Users className="text-white h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Team Collaboration</h3>
+                  <p className="text-gray-600 leading-relaxed">Multi-tenant architecture, role-based permissions, workflow approvals, and real-time collaboration across departments.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4 group">
+                <div className="w-12 h-12 bg-gradient-warning rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <BarChart3 className="text-white h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Executive Reporting</h3>
+                  <p className="text-gray-600 leading-relaxed">C-level dashboards, automated compliance reports, risk analytics, and customizable KPI tracking for board presentations.</p>
+                </div>
+              </div>
+            </div>
+
+            <Card className="glass-card hover-lift p-8 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-venzip-accent/5"></div>
+              <div className="relative z-10">
+                <h3 className="text-3xl font-bold text-gray-900 mb-6">Enterprise Support</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-success-green" />
+                    <span className="text-gray-700">Dedicated Customer Success Manager</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-success-green" />
+                    <span className="text-gray-700">24/7 Priority Support</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-success-green" />
+                    <span className="text-gray-700">Custom Integration Support</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-success-green" />
+                    <span className="text-gray-700">On-site Implementation</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-success-green" />
+                    <span className="text-gray-700">Compliance Advisory Services</span>
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleLogin}
+                  className="mt-6 w-full bg-gradient-primary hover:shadow-lg transition-all duration-300"
+                >
+                  Contact Enterprise Sales
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section id="process" className="py-24 px-6 bg-gradient-to-br from-white/90 to-gray-50/50 relative overflow-hidden">
         {/* Background decoration */}
