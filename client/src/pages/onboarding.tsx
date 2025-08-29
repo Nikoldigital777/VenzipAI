@@ -746,12 +746,12 @@ export default function Onboarding() {
                     <Button 
                       type="button"
                       onClick={handleGenerateChecklist}
-                      disabled={generateChecklistMutation.isPending}
+                      disabled={isGeneratingChecklist || generateChecklistMutation.isPending}
                       className="group relative h-16 px-12 text-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl shadow-2xl shadow-emerald-500/30 hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-75 disabled:hover:scale-100 disabled:cursor-not-allowed"
                       data-testid="button-generate-checklist"
                     >
                       <div className="relative flex items-center space-x-4">
-                        {generateChecklistMutation.isPending ? (
+                        {(isGeneratingChecklist || generateChecklistMutation.isPending) ? (
                           <>
                             <div className="animate-spin rounded-full h-7 w-7 border-3 border-white border-t-transparent"></div>
                             <span>Generating Your Personalized Checklist...</span>
