@@ -274,24 +274,24 @@ export default function Onboarding() {
   return (
     <>
       {/* Simplified Header for Onboarding */}
-      <header className="fixed top-0 w-full z-50 glass-morphism border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between h-18">
             {/* Logo & Brand */}
             <div className="flex items-center">
               <img 
                 src={venzipLogo} 
                 alt="Venzip Logo" 
-                className="h-12 shadow-lg"
+                className="h-10 drop-shadow-sm"
                 style={{ width: 'auto' }}
               />
             </div>
             
             {/* Right side - Enterprise badge */}
             <div className="flex items-center">
-              <div className="flex items-center space-x-2 bg-gradient-to-r from-venzip-primary/10 to-venzip-accent/10 px-4 py-2 rounded-full border border-venzip-primary/20">
-                <Shield className="h-4 w-4 text-venzip-primary" />
-                <span className="text-sm font-medium text-venzip-primary">Enterprise Platform</span>
+              <div className="flex items-center space-x-2 bg-gradient-to-r from-emerald-50 to-blue-50 px-4 py-2 rounded-full border border-emerald-200/60 shadow-sm">
+                <Shield className="h-4 w-4 text-emerald-600" />
+                <span className="text-sm font-semibold text-emerald-800">Enterprise Platform</span>
               </div>
             </div>
           </div>
@@ -306,75 +306,72 @@ export default function Onboarding() {
         <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-venzip-secondary/6 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
-      <div className="relative pt-20 min-h-screen">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="relative pt-20 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <div className="max-w-6xl mx-auto px-6 py-12">
           
           {/* Enhanced Hero Section with Floating Elements */}
-          <div className="text-center mb-12 relative">
+          <div className="text-center mb-16 relative">
             {/* Floating decorative elements */}
             <div className="absolute -top-10 left-1/4 w-4 h-4 bg-venzip-primary/30 rounded-full animate-float opacity-60" style={{animationDelay: '0s'}}></div>
             <div className="absolute top-20 right-1/3 w-3 h-3 bg-venzip-accent/40 rounded-full animate-float opacity-50" style={{animationDelay: '2s'}}></div>
             <div className="absolute top-32 left-1/6 w-2 h-2 bg-venzip-secondary/50 rounded-full animate-float opacity-70" style={{animationDelay: '4s'}}></div>
             
-            <div className="inline-flex items-center justify-center p-3 mb-6 animate-fadeInUp">
+            <div className="inline-flex items-center justify-center p-4 mb-8 animate-fadeInUp">
               <div className="relative group">
-                <div className="absolute -inset-4 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-all duration-500 animate-pulse"></div>
-                <div className="relative w-20 h-20 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center shadow-2xl animate-float group-hover:scale-110 transition-transform duration-500">
-                  <Shield className="h-10 w-10 text-white" />
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute -inset-6 bg-gradient-to-r from-emerald-400/20 via-blue-400/20 to-teal-400/20 rounded-full blur-2xl opacity-60 group-hover:opacity-80 transition-all duration-700 animate-pulse"></div>
+                <div className="relative w-24 h-24 bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/25 group-hover:scale-105 transition-all duration-500 rotate-3 group-hover:rotate-6">
+                  <Shield className="h-12 w-12 text-white drop-shadow-lg" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <div className="absolute -top-1 -right-1 w-7 h-7 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center animate-bounce shadow-lg">
-                  <Star className="h-3 w-3 text-white" />
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center animate-bounce shadow-lg shadow-orange-400/40">
+                  <Star className="h-4 w-4 text-white drop-shadow-sm" />
                 </div>
-                {/* Orbiting particles */}
-                <div className="absolute top-0 left-1/2 w-2 h-2 bg-white rounded-full animate-ping opacity-60"></div>
-                <div className="absolute bottom-0 right-1/2 w-1.5 h-1.5 bg-venzip-accent rounded-full animate-ping opacity-40" style={{animationDelay: '1s'}}></div>
               </div>
             </div>
 
             <div className="animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-              <Badge className="mb-6 bg-gradient-to-r from-venzip-primary/10 via-venzip-accent/10 to-venzip-secondary/10 text-venzip-primary border border-venzip-primary/30 px-6 py-3 text-lg font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 via-venzip-accent/5 to-venzip-secondary/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <Badge className="mb-8 bg-gradient-to-r from-emerald-50 via-blue-50 to-teal-50 text-emerald-700 border border-emerald-200/60 px-8 py-4 text-lg font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 relative overflow-hidden group backdrop-blur-sm">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/50 via-blue-100/50 to-teal-100/50 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 <div className="relative flex items-center space-x-3">
-                  <Rocket className="h-5 w-5 text-venzip-primary animate-bounce" />
+                  <Rocket className="h-5 w-5 text-emerald-600 animate-bounce" />
                   <span>Enterprise Setup Accelerator</span>
-                  <Sparkles className="h-5 w-5 text-venzip-accent animate-pulse" />
+                  <Sparkles className="h-5 w-5 text-blue-500 animate-pulse" />
                 </div>
               </Badge>
             </div>
             
             <div className="animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-              <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 leading-tight tracking-tight relative">
+              <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-8 leading-tight tracking-tight relative">
                 <span className="relative inline-block">
                   Welcome to
-                  <div className="absolute -inset-2 bg-gradient-to-r from-venzip-primary/10 to-venzip-accent/10 blur-xl opacity-30 rounded-lg"></div>
+                  <div className="absolute -inset-4 bg-gradient-to-r from-emerald-100/40 to-blue-100/40 blur-2xl opacity-50 rounded-2xl"></div>
                 </span>
                 <br />
                 <span className="relative inline-block group">
-                  <span className="bg-gradient-to-r from-venzip-primary via-venzip-accent via-venzip-secondary to-venzip-primary bg-[length:200%_100%] animate-gradient-x bg-clip-text text-transparent font-black">
+                  <span className="bg-gradient-to-r from-emerald-600 via-teal-500 via-blue-500 to-emerald-600 bg-[length:200%_100%] animate-gradient-x bg-clip-text text-transparent font-black">
                     Venzip
                   </span>
-                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                  <div className="absolute -bottom-3 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-blue-500 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
                 </span>
               </h1>
             </div>
             
             <div className="animate-fadeInUp" style={{animationDelay: '0.6s'}}>
-              <p className="text-xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
+              <p className="text-xl text-gray-600 mb-10 max-w-4xl mx-auto leading-relaxed">
                 <span className="font-light">Enterprise-grade compliance platform trusted by</span>
                 <br />
-                <span className="font-bold bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Fortune 500 companies.</span>
+                <span className="font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Fortune 500 companies.</span>
                 <span className="font-light"> Streamline audit readiness in</span>
                 <br />
-                <span className="font-bold text-venzip-primary text-2xl">3 strategic steps.</span>
+                <span className="font-bold text-emerald-600 text-2xl">3 strategic steps.</span>
               </p>
             </div>
 
             {/* Enhanced Progress Indicator with 3D Effects */}
-            <div className="flex items-center justify-center mb-12 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
-              <div className="flex items-center space-x-12 relative">
+            <div className="flex items-center justify-center mb-16 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
+              <div className="flex items-center space-x-16 relative">
                 {/* Background glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 via-venzip-accent/5 to-success-green/5 blur-3xl rounded-full"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/60 via-blue-100/60 to-teal-100/60 blur-3xl rounded-full"></div>
                 
                 {/* Step 1 */}
                 <div className="flex flex-col items-center space-y-4 group relative">
@@ -472,15 +469,16 @@ export default function Onboarding() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-16">
+          <form onSubmit={handleSubmit} className="space-y-20">
             
             {/* Framework Selection Section */}
             <div className="relative">
-              <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
+              <Card className="border-0 shadow-2xl backdrop-blur-xl bg-white/90 rounded-3xl overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-white to-blue-50/50"></div>
                 <CardContent className="p-12">
-                  <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full mb-6 shadow-xl">
-                      <Award className="h-10 w-10 text-white" />
+                  <div className="text-center mb-12 relative z-10">
+                    <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl mb-8 shadow-2xl shadow-emerald-500/25 rotate-3">
+                      <Award className="h-12 w-12 text-white drop-shadow-lg" />
                     </div>
                     <h2 className="text-4xl font-bold text-gray-900 mb-4">
                       Select Your <span className="bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Regulatory Requirements</span>
@@ -579,7 +577,8 @@ export default function Onboarding() {
 
             {/* Company Information Section */}
             <div className="relative">
-              <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
+              <Card className="border-0 shadow-2xl backdrop-blur-xl bg-white/90 rounded-3xl overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/50"></div>
                 <CardContent className="p-12">
                   <div className="text-center mb-12">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full mb-6 shadow-xl">
