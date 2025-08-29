@@ -173,63 +173,63 @@ export default function DynamicRiskDashboard() {
       </div>
 
       {/* Current Risk Score Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-2 min-h-[120px]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Current Risk Score</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300 truncate">Current Risk Score</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="flex items-center justify-between">
-              <div>
-                <div className={`text-3xl font-bold ${getRiskScoreColor(parseFloat(latestScore?.overallRiskScore || '0'))}`}>
+              <div className="min-w-0 flex-1">
+                <div className={`text-2xl lg:text-3xl font-bold ${getRiskScoreColor(parseFloat(latestScore?.overallRiskScore || '0'))}`}>
                   {latestScore ? parseFloat(latestScore.overallRiskScore).toFixed(1) : '--'}
                 </div>
-                <div className="text-xs text-gray-500">out of 100</div>
+                <div className="text-xs text-gray-500 mt-1">out of 100</div>
               </div>
-              <div className="flex items-center">
+              <div className="flex items-center ml-2 flex-shrink-0">
                 {riskHistory && getRiskTrendIcon(riskHistory)}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 border-green-200">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 border-green-200 min-h-[120px]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Task Completion</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300 truncate">Task Completion</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-800 dark:text-green-200">
+          <CardContent className="pt-0">
+            <div className="text-2xl lg:text-2xl font-bold text-green-800 dark:text-green-200">
               {latestScore ? Math.round((latestScore.completedTasks / Math.max(latestScore.totalTasks, 1)) * 100) : 0}%
             </div>
-            <div className="text-xs text-green-600 dark:text-green-400">
+            <div className="text-xs text-green-600 dark:text-green-400 mt-1">
               {latestScore?.completedTasks || 0} of {latestScore?.totalTasks || 0} tasks
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-blue-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-blue-200 min-h-[120px]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Risk Mitigation</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300 truncate">Risk Mitigation</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-800 dark:text-blue-200">
+          <CardContent className="pt-0">
+            <div className="text-2xl lg:text-2xl font-bold text-blue-800 dark:text-blue-200">
               {latestScore?.calculationFactors?.riskMitigation?.toFixed(1) || '--'}%
             </div>
-            <div className="text-xs text-blue-600 dark:text-blue-400">
+            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
               {latestScore?.mitigatedRisks || 0} risks mitigated
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 border-purple-200">
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 border-purple-200 min-h-[120px]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Overall Health</CardTitle>
+            <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300 truncate">Overall Health</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-800 dark:text-purple-200">
+          <CardContent className="pt-0">
+            <div className="text-2xl lg:text-2xl font-bold text-purple-800 dark:text-purple-200">
               {latestScore?.calculationFactors?.overallHealth?.toFixed(1) || '--'}%
             </div>
-            <div className="text-xs text-purple-600 dark:text-purple-400">
+            <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
               Compliance health score
             </div>
           </CardContent>
