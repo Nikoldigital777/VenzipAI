@@ -205,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -217,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat endpoints
   app.get('/api/chat/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const limit = Math.max(1, Math.min(100, parseInt(String(req.query.limit ?? "20"), 10)));
       const messages = await storage.getChatMessagesByUserId(userId, limit);
       res.json(messages);
@@ -229,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/chat', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { message } = req.body;
       
       if (!message || typeof message !== "string") {
@@ -272,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // --- Dashboard summary (data-driven gaps from tasks + risks) ---
   app.get('/api/summary', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       
       // Get real data counts using storage layer
       const documents = await storage.getDocumentsByUserId(userId);
@@ -436,7 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company profile routes
   app.get('/api/company', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const company = await storage.getCompanyByUserId(userId);
       res.json(company);
     } catch (error) {
@@ -470,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/company', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const companyData = insertCompanySchema.parse({ ...req.body, userId });
       const company = await storage.upsertCompany(companyData);
       res.json(company);
@@ -482,7 +482,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/company', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const companyData = insertCompanySchema.parse({ ...req.body, userId });
       const company = await storage.upsertCompany(companyData);
       
@@ -558,7 +558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/framework-progress', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const progress = await storage.getFrameworkProgressByUserId(userId);
       res.json(progress);
     } catch (error) {
@@ -570,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
   app.get('/api/tasks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const frameworkId = req.query.framework as string;
       const tasks = await storage.getTasksByUserIdAndFramework(userId, frameworkId);
       res.json(tasks);
@@ -582,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/tasks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const taskData = insertTaskSchema.parse({ ...req.body, userId });
       const task = await storage.createTask(taskData);
       
@@ -626,7 +626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       
       // Get the task before update to check status change
       const currentTask = await storage.getTaskById(id);
@@ -686,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const mitigatedRisks = filteredRisks.filter(risk => risk.status === 'mitigated').length;
           
           // Call AI calculation
-          const scoreData = await calculateDynamicRiskScore(userId, frameworkId, {
+          const scoreData = await calculateDynamicRiskScore(userId, frameworkId || undefined, {
             totalTasks,
             completedTasks,
             highRisks,
@@ -753,7 +753,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/tasks/:taskId/comments', isAuthenticated, async (req: any, res) => {
     try {
       const { taskId } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const commentData = {
         taskId,
         userId,
@@ -820,7 +820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Document routes
   app.get('/api/documents', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const documents = await storage.getDocumentsByUserId(userId);
       res.json(documents);
     } catch (error) {
@@ -835,7 +835,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { frameworkId } = req.body;
       
       // Read file content for analysis
@@ -884,7 +884,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Risk routes
   app.get('/api/risks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const risks = await storage.getRisksByUserId(userId);
       res.json(risks);
     } catch (error) {
@@ -895,7 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/risks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       
       // Use Claude to assess the risk if description is provided
       let riskData = { ...req.body, userId };
@@ -984,7 +984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dynamic Risk Scoring Engine APIs
   app.post('/api/risks/calculate-score', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { frameworkId } = req.body;
       
       // Get current data for calculation
@@ -1046,7 +1046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/risks/score-history', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { frameworkId } = req.query;
       
       const history = await storage.getRiskScoreHistoryByUserId(userId, frameworkId as string);
@@ -1059,7 +1059,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/risks/latest-score', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { frameworkId } = req.query;
       
       const latestScore = await storage.getLatestRiskScore(userId, frameworkId as string);
@@ -1073,7 +1073,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Claude chat routes
   app.get('/api/chat/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const limit = parseInt(req.query.limit as string) || 50;
       const messages = await storage.getChatMessagesByUserId(userId, limit);
       res.json(messages);
@@ -1085,7 +1085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/chat', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { message } = req.body;
       
       // Save user message
@@ -1119,7 +1119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Compliance recommendations
   app.post('/api/recommendations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const company = await storage.getCompanyByUserId(userId);
       const progress = await storage.getFrameworkProgressByUserId(userId);
       
@@ -1145,7 +1145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/tasks?framework=&status=&priority=&q=&limit=&offset=
   app.get('/api/tasks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { framework, status, priority, q } = req.query as Record<string, string | undefined>;
       const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit ?? "25"), 10)));
       const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10));
@@ -1184,7 +1184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/tasks
   app.post('/api/tasks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const body = req.body ?? {};
       
       if (!body.title) {
@@ -1257,7 +1257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/risks?category=&impact=&likelihood=&q=&limit=&offset=
   app.get('/api/risks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { category, impact, likelihood, q } = req.query as Record<string, string | undefined>;
       const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit ?? "25"), 10)));
       const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10));
@@ -1296,7 +1296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/risks
   app.post('/api/risks', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const body = req.body ?? {};
       
       if (!body.title || !body.description || !body.category) {
@@ -1414,7 +1414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Intelligent task prioritization endpoint
   app.post('/api/tasks/prioritize', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const company = await storage.getCompanyByUserId(userId);
       const tasks = await storage.getTasksByUserId(userId);
       
@@ -1428,7 +1428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: task.description || undefined,
         framework: task.frameworkId || undefined,
         priority: task.priority as "high" | "medium" | "low",
-        status: task.status as "not_started" | "completed" | "in_progress",
+        status: task.status === "not_started" ? "pending" : task.status as "pending" | "completed" | "in_progress",
         dueDate: task.dueDate ? task.dueDate.toISOString() : undefined
       })), {
         frameworks: company.selectedFrameworks,
@@ -1446,7 +1446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Compliance gap detection endpoint
   app.post('/api/compliance/gaps', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const company = await storage.getCompanyByUserId(userId);
       const tasks = await storage.getTasksByUserId(userId);
       const documents = await storage.getDocumentsByUserId(userId);
@@ -1481,7 +1481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Advanced document analysis endpoint
   app.post('/api/documents/:id/analyze-advanced', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const documentId = req.params.id;
       const { framework } = req.body;
       
@@ -1518,9 +1518,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   // Evidence mapping routes
-  app.get("/api/evidence/mappings", isAuthenticated, async (req, res) => {
+  app.get("/api/evidence/mappings", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user.sub;
       if (!userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
@@ -1538,9 +1538,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/evidence/analyze", isAuthenticated, async (req, res) => {
+  app.post("/api/evidence/analyze", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user.sub;
       if (!userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
@@ -1562,9 +1562,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/evidence/mappings/:id/validate", isAuthenticated, async (req, res) => {
+  app.put("/api/evidence/mappings/:id/validate", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user.sub;
       if (!userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
@@ -1585,9 +1585,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/evidence/gaps", isAuthenticated, async (req, res) => {
+  app.get("/api/evidence/gaps", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user.sub;
       if (!userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
@@ -1605,9 +1605,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/evidence/identify-gaps", isAuthenticated, async (req, res) => {
+  app.post("/api/evidence/identify-gaps", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user.sub;
       if (!userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
@@ -1665,7 +1665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Notification API routes
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const { filter, limit = 20 } = req.query;
       const notifications = await storage.getNotificationsByUserId(userId);
       
@@ -1685,7 +1685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/notifications/count', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const notifications = await storage.getNotificationsByUserId(userId);
       const unreadCount = notifications.filter(n => !n.isRead).length;
       res.json({ unreadCount, total: notifications.length });
@@ -1698,7 +1698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       
       // Verify notification belongs to user
       const notifications = await storage.getNotificationsByUserId(userId);
@@ -1709,8 +1709,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updatedNotification = await storage.updateNotification(id, {
-        isRead: true,
-        readAt: new Date()
+        isRead: true
       });
       
       res.json(updatedNotification);
@@ -1722,14 +1721,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/notifications/mark-all-read', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const notifications = await storage.getNotificationsByUserId(userId);
       const unreadNotifications = notifications.filter(n => !n.isRead);
       
       for (const notification of unreadNotifications) {
         await storage.updateNotification(notification.id, {
-          isRead: true,
-          readAt: new Date()
+          isRead: true
         });
       }
       
@@ -1743,7 +1741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/notifications/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       
       // Verify notification belongs to user
       const notifications = await storage.getNotificationsByUserId(userId);
@@ -1764,7 +1762,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User preferences endpoints
   app.get('/api/user/preferences', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       // In a real implementation, you'd fetch from a user_preferences table
       // For now, return default preferences
       const defaultPreferences = {
@@ -1786,7 +1784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/user/preferences', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.sub;
       const preferences = req.body;
       
       // In a real implementation, you'd save to a user_preferences table

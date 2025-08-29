@@ -432,19 +432,19 @@ export class DatabaseStorage implements IStorage {
     requirementId?: string;
     validationStatus?: string;
   }): Promise<EvidenceMapping[]> {
-    let query = db.select().from(evidenceMappings).where(eq(evidenceMappings.userId, params.userId));
+    const conditions = [eq(evidenceMappings.userId, params.userId)];
     
     if (params.documentId) {
-      query = query.where(eq(evidenceMappings.documentId, params.documentId));
+      conditions.push(eq(evidenceMappings.documentId, params.documentId));
     }
     if (params.requirementId) {
-      query = query.where(eq(evidenceMappings.requirementId, params.requirementId));
+      conditions.push(eq(evidenceMappings.requirementId, params.requirementId));
     }
     if (params.validationStatus) {
-      query = query.where(eq(evidenceMappings.validationStatus, params.validationStatus));
+      conditions.push(eq(evidenceMappings.validationStatus, params.validationStatus));
     }
     
-    return await query;
+    return await db.select().from(evidenceMappings).where(and(...conditions));
   }
 
   async updateEvidenceMapping(id: string, updates: Partial<EvidenceMapping>): Promise<EvidenceMapping> {
@@ -480,16 +480,16 @@ export class DatabaseStorage implements IStorage {
     status?: string;
     severity?: string;
   }): Promise<EvidenceGap[]> {
-    let query = db.select().from(evidenceGaps).where(eq(evidenceGaps.userId, params.userId));
+    const conditions = [eq(evidenceGaps.userId, params.userId)];
     
     if (params.status) {
-      query = query.where(eq(evidenceGaps.status, params.status));
+      conditions.push(eq(evidenceGaps.status, params.status));
     }
     if (params.severity) {
-      query = query.where(eq(evidenceGaps.severity, params.severity));
+      conditions.push(eq(evidenceGaps.severity, params.severity));
     }
     
-    return await query;
+    return await db.select().from(evidenceGaps).where(and(...conditions));
   }
 
   async updateEvidenceGap(id: string, updates: Partial<EvidenceGap>): Promise<EvidenceGap> {
