@@ -22,7 +22,7 @@ function Router() {
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      {!isAuthenticated && !isLoading ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
