@@ -112,43 +112,47 @@ export default function Navigation() {
           </Button>
 
           {/* Right Actions */}
-          <div className="hidden md:flex items-center space-x-3">
-            {/* AI Chat Toggle */}
+          <div className="hidden md:flex items-center space-x-2">
+            {/* AI Chat Toggle - Show icon only on smaller screens */}
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => window.dispatchEvent(new Event("toggle-ai-chat"))}
-              className="rounded-xl px-3 py-2 text-sm hover:bg-venzip-primary/10 hover:text-venzip-primary transition-all duration-300 flex items-center group hover:scale-105"
+              className="rounded-xl px-2 lg:px-3 py-2 text-sm hover:bg-venzip-primary/10 hover:text-venzip-primary transition-all duration-300 flex items-center group hover:scale-105"
               aria-label="Toggle AI Chat"
               title="Toggle AI Chat"
               data-testid="button-ai-chat"
             >
-              <Bot className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              <span className="font-medium">Ask Claude</span>
+              <Bot className="h-4 w-4 lg:mr-2 group-hover:rotate-12 transition-transform duration-300" />
+              <span className="font-medium hidden lg:inline">Ask Claude</span>
             </Button>
 
             {/* Notifications */}
             <NotificationButton />
 
-            {/* User Profile */}
-            <div className="flex items-center space-x-2 group cursor-pointer glass-card px-3 py-2 rounded-xl border-0 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <User className="h-4 w-4 text-white" />
+            {/* User Profile with Logout combined */}
+            <div className="flex items-center space-x-1 glass-card px-2 py-1 rounded-xl border-0 shadow-sm hover:shadow-lg transition-all duration-300">
+              {/* User Info */}
+              <div className="flex items-center space-x-2 group cursor-pointer px-2 py-1 rounded-lg hover:bg-venzip-primary/5 transition-all duration-300">
+                <div className="w-7 h-7 bg-gradient-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <User className="h-3 w-3 text-white" />
+                </div>
+                <span className="text-sm font-medium text-gray-700 hidden lg:block group-hover:text-venzip-primary transition-colors duration-300">Sarah Chen</span>
               </div>
-              <span className="text-sm font-medium text-gray-700 hidden sm:block group-hover:text-venzip-primary transition-colors duration-300">Sarah Chen</span>
+              
+              {/* Logout Button */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => window.location.href = "/api/logout"}
+                className="flex items-center hover:scale-105 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-red-50 hover:text-red-600 group"
+                data-testid="button-logout"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4 lg:mr-1 group-hover:rotate-12 transition-transform duration-300" />
+                <span className="font-medium hidden lg:inline text-xs">Logout</span>
+              </Button>
             </div>
-
-            {/* Logout */}
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.location.href = "/api/logout"}
-              className="flex items-center hover:scale-105 transition-all duration-300 glass-card border-0 shadow-sm hover:shadow-lg hover:-translate-y-1 group"
-              data-testid="button-logout"
-            >
-              <LogOut className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              Logout
-            </Button>
           </div>
         </div>
       </div>
