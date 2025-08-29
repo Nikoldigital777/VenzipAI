@@ -482,7 +482,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/company', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("User object:", JSON.stringify(req.user, null, 2));
       const userId = req.user.sub;
+      console.log("Extracted userId:", userId);
       const companyData = insertCompanySchema.parse({ ...req.body, userId });
       const company = await storage.upsertCompany(companyData);
       
