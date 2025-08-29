@@ -88,7 +88,10 @@ export default function Landing() {
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center px-8 py-4 rounded-full glass-card text-venzip-primary text-sm font-semibold mb-8 border border-venzip-primary/30 shadow-xl hover-glow animate-scale-in group cursor-pointer">
               <Star className="h-4 w-4 mr-2 animate-spin group-hover:animate-pulse" />
-              <span className="text-gradient-primary font-bold">AI-Powered Compliance Platform</span>
+              <span className="text-gradient-primary font-bold">Enterprise-Grade AI Compliance Platform</span>
+              <Badge className="ml-3 bg-success-green/10 text-success-green border-success-green/30 text-xs">
+                Fortune 500 Trusted
+              </Badge>
               <div className="absolute inset-0 rounded-full bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
             </div>
             
@@ -100,9 +103,9 @@ export default function Landing() {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto font-light">
-              Trusted by <span className="font-semibold text-venzip-primary">500+ enterprises</span> to transform complex compliance requirements into manageable workflows. 
-              Our enterprise-grade AI platform guides you through SOC 2, ISO 27001, HIPAA, and GDPR 
-              compliance with intelligent automation and expert insights.
+              The <span className="font-semibold text-venzip-primary">compliance platform of choice for Fortune 500 companies</span> seeking to reduce audit costs by 65% and achieve certification 87% faster. 
+              Our enterprise-grade AI platform transforms SOC 2, ISO 27001, HIPAA, and GDPR compliance from 
+              <span className="font-semibold text-gray-900">reactive overhead into strategic competitive advantage.</span>
             </p>
             
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
@@ -159,23 +162,42 @@ export default function Landing() {
               </Card>
             </div>
 
-            {/* Enterprise Client Logos Placeholder */}
+            {/* Enterprise Integration Showcase */}
             <div className="text-center">
-              <p className="text-sm text-gray-500 mb-6 font-medium">Trusted by leading organizations worldwide</p>
-              <div className="flex justify-center items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                <div className="w-24 h-12 bg-gray-200/50 rounded-lg flex items-center justify-center glass-card border border-gray-200/30">
-                  <Building2 className="h-6 w-6 text-gray-400" />
+              <p className="text-sm text-gray-500 mb-6 font-medium">Enterprise-grade integrations with your existing tech stack</p>
+              <div className="flex justify-center items-center gap-8 opacity-70 hover:opacity-100 transition-all duration-500">
+                <div className="flex flex-col items-center gap-2 group">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl flex items-center justify-center glass-card border border-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <Shield className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <span className="text-xs text-gray-500 font-medium">Azure AD</span>
                 </div>
-                <div className="w-24 h-12 bg-gray-200/50 rounded-lg flex items-center justify-center glass-card border border-gray-200/30">
-                  <Building2 className="h-6 w-6 text-gray-400" />
+                <div className="flex flex-col items-center gap-2 group">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-xl flex items-center justify-center glass-card border border-orange-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <Building2 className="h-8 w-8 text-orange-600" />
+                  </div>
+                  <span className="text-xs text-gray-500 font-medium">Okta SSO</span>
                 </div>
-                <div className="w-24 h-12 bg-gray-200/50 rounded-lg flex items-center justify-center glass-card border border-gray-200/30">
-                  <Building2 className="h-6 w-6 text-gray-400" />
+                <div className="flex flex-col items-center gap-2 group">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-xl flex items-center justify-center glass-card border border-purple-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <BarChart3 className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <span className="text-xs text-gray-500 font-medium">Slack</span>
                 </div>
-                <div className="w-24 h-12 bg-gray-200/50 rounded-lg flex items-center justify-center glass-card border border-gray-200/30">
-                  <Building2 className="h-6 w-6 text-gray-400" />
+                <div className="flex flex-col items-center gap-2 group">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-xl flex items-center justify-center glass-card border border-green-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <Users className="h-8 w-8 text-green-600" />
+                  </div>
+                  <span className="text-xs text-gray-500 font-medium">Jira</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 group">
+                  <div className="w-16 h-16 bg-gradient-to-br from-red-500/10 to-red-600/5 rounded-xl flex items-center justify-center glass-card border border-red-500/20 group-hover:scale-110 transition-transform duration-300">
+                    <FolderOpen className="h-8 w-8 text-red-600" />
+                  </div>
+                  <span className="text-xs text-gray-500 font-medium">ServiceNow</span>
                 </div>
               </div>
+              <p className="text-xs text-gray-400 mt-4">+ 50+ more enterprise integrations</p>
             </div>
           </div>
         </div>
@@ -689,6 +711,64 @@ export default function Landing() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Executive Testimonial Section */}
+      <section className="py-24 px-6 bg-gradient-to-br from-slate-900/95 to-gray-800/90 relative overflow-hidden text-white">
+        <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/10 to-venzip-secondary/5"></div>
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-venzip-accent/20 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="max-w-6xl mx-auto text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-16 tracking-tight">
+            Trusted by <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Industry Leaders</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Building2 className="h-8 w-8 text-venzip-primary" />
+                </div>
+                <blockquote className="text-lg text-gray-300 mb-6 italic leading-relaxed">
+                  "Venzip reduced our compliance costs by $2.1M annually and helped us achieve SOC 2 certification in just 4 months."
+                </blockquote>
+                <div className="text-sm">
+                  <div className="font-semibold text-white">Sarah Chen</div>
+                  <div className="text-gray-400">Chief Risk Officer, TechCorp</div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Shield className="h-8 w-8 text-success-green" />
+                </div>
+                <blockquote className="text-lg text-gray-300 mb-6 italic leading-relaxed">
+                  "The AI-driven approach eliminated 80% of manual work. Our audit prep time went from 6 months to 6 weeks."
+                </blockquote>
+                <div className="text-sm">
+                  <div className="font-semibold text-white">Michael Rodriguez</div>
+                  <div className="text-gray-400">CISO, Global Financial Services</div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass-card border-white/20 bg-white/5 backdrop-blur-xl">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-venzip-accent/20 to-venzip-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <TrendingUp className="h-8 w-8 text-venzip-accent" />
+                </div>
+                <blockquote className="text-lg text-gray-300 mb-6 italic leading-relaxed">
+                  "Board reporting became effortless. Real-time dashboards give executives the visibility they need."
+                </blockquote>
+                <div className="text-sm">
+                  <div className="font-semibold text-white">Jennifer Park</div>
+                  <div className="text-gray-400">VP Compliance, Healthcare Leaders</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
