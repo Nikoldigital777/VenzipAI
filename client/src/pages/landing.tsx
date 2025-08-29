@@ -22,7 +22,17 @@ import {
   BarChart3,
   PieChart,
   Mail,
-  Star
+  Star,
+  Building2,
+  Users,
+  Target,
+  Zap,
+  Shield,
+  Phone,
+  MapPin,
+  Linkedin,
+  Twitter,
+  Facebook
 } from "lucide-react";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 
@@ -61,11 +71,12 @@ export default function Landing() {
             />
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-gray-900 transition-colors">Features</button>
-            <button onClick={() => scrollToSection('frameworks')} className="text-gray-600 hover:text-gray-900 transition-colors">Frameworks</button>
-            <button onClick={() => scrollToSection('process')} className="text-gray-600 hover:text-gray-900 transition-colors">How It Works</button>
-            <Button onClick={handleLogin} className="bg-gradient-primary hover:shadow-lg transition-all duration-300">
-              Get Started
+            <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Platform</button>
+            <button onClick={() => scrollToSection('frameworks')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Compliance</button>
+            <button onClick={() => scrollToSection('enterprise')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Enterprise</button>
+            <button onClick={() => scrollToSection('roi-metrics')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">ROI</button>
+            <Button onClick={handleLogin} className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold">
+              Start Free Trial
             </Button>
           </div>
         </div>
@@ -89,8 +100,8 @@ export default function Landing() {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto font-light">
-              Transform complex compliance requirements into manageable workflows. 
-              Our cutting-edge AI platform guides you through SOC 2, ISO 27001, HIPAA, and GDPR 
+              Trusted by <span className="font-semibold text-venzip-primary">500+ enterprises</span> to transform complex compliance requirements into manageable workflows. 
+              Our enterprise-grade AI platform guides you through SOC 2, ISO 27001, HIPAA, and GDPR 
               compliance with intelligent automation and expert insights.
             </p>
             
@@ -117,18 +128,41 @@ export default function Landing() {
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500">
+            <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500 mb-12">
               <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-success-green" />
-                <span>Enterprise-Grade Security</span>
+                <Shield className="h-4 w-4 text-success-green" />
+                <span>ISO 27001 Certified</span>
               </div>
               <div className="flex items-center space-x-2">
                 <ShieldCheck className="h-4 w-4 text-success-green" />
-                <span>SOC 2 Compliant Platform</span>
+                <span>SOC 2 Type II Compliant</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-success-green" />
-                <span>Setup in Minutes</span>
+                <Building2 className="h-4 w-4 text-success-green" />
+                <span>Enterprise-Grade Platform</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="h-4 w-4 text-success-green" />
+                <span>Trusted by Fortune 500</span>
+              </div>
+            </div>
+
+            {/* Enterprise Client Logos Placeholder */}
+            <div className="text-center">
+              <p className="text-sm text-gray-500 mb-6 font-medium">Trusted by leading organizations worldwide</p>
+              <div className="flex justify-center items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="w-24 h-12 bg-gray-200/50 rounded-lg flex items-center justify-center glass-card border border-gray-200/30">
+                  <Building2 className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="w-24 h-12 bg-gray-200/50 rounded-lg flex items-center justify-center glass-card border border-gray-200/30">
+                  <Building2 className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="w-24 h-12 bg-gray-200/50 rounded-lg flex items-center justify-center glass-card border border-gray-200/30">
+                  <Building2 className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="w-24 h-12 bg-gray-200/50 rounded-lg flex items-center justify-center glass-card border border-gray-200/30">
+                  <Building2 className="h-6 w-6 text-gray-400" />
+                </div>
               </div>
             </div>
           </div>
