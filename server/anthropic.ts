@@ -12,26 +12,32 @@ When copying code from this code snippet, ensure you also include this informati
 const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 // </important_do_not_delete>
 
+// Validate API key on startup
+const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+if (!apiKey) {
+  console.warn('Warning: No Anthropic API key found. Claude features will not work. Please set ANTHROPIC_API_KEY or CLAUDE_API_KEY in Secrets.');
+}
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY || "",
+  apiKey: apiKey || 'dummy-key', // Provide fallback to prevent crashes
 });
 
 // Helper function to truncate text to a reasonable size for analysis
 function truncateText(text: string, maxTokens: number = 150000): string {
   // Rough estimate: 1 token ≈ 4 characters
   const maxChars = maxTokens * 4;
-  
+
   if (text.length <= maxChars) {
     return text;
   }
-  
+
   // Take the beginning and end to preserve context
   const beginningSize = Math.floor(maxChars * 0.7);
   const endSize = Math.floor(maxChars * 0.3);
-  
+
   const beginning = text.substring(0, beginningSize);
   const ending = text.substring(text.length - endSize);
-  
+
   return `${beginning}\n\n[... document truncated for analysis ...]\n\n${ending}`;
 }
 
@@ -52,7 +58,7 @@ export async function analyzeDocument(
   // Truncate text if it's too large
   const truncatedText = truncateText(text);
   const wasTruncated = text !== truncatedText;
-  
+
   const prompt = `You are a compliance expert. Analyze this document for ${framework || 'general'} compliance with advanced gap detection.
 
 ${filename ? `Filename: ${filename}` : ''}
@@ -92,7 +98,7 @@ Provide comprehensive analysis:
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
-    
+
     const result = JSON.parse(cleanedText);
     return result;
   } catch (error) {
@@ -141,6 +147,10 @@ ${userProfile ? `User profile:
 - Progress: ${userProfile.currentProgress}% complete` : ''}`;
 
   try {
+    // Check if API key is available
+    if (!apiKey || apiKey === 'dummy-key') {
+      return "I'm sorry, but Claude AI is not currently configured. Please contact your administrator to set up the ANTHROPIC_API_KEY in the application secrets.";
+    }
     const response = await anthropic.messages.create({
       // "claude-sonnet-4-20250514"
       model: DEFAULT_MODEL_STR,
@@ -225,7 +235,7 @@ Provide strategic recommendations:
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
-    
+
     return JSON.parse(cleanedText);
   } catch (error) {
     console.error('Error generating recommendations:', error);
@@ -325,14 +335,14 @@ Provide JSON response:
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
-    
+
     return JSON.parse(cleanedText);
   } catch (error) {
     console.error('Error calculating dynamic risk score:', error);
     // Return safe fallback response
     const completionRate = context ? (context.completedTasks / Math.max(context.totalTasks, 1)) * 100 : 50;
     const mitigationRate = context ? (context.mitigatedRisks / Math.max(context.highRisks + context.mediumRisks + context.lowRisks, 1)) * 100 : 50;
-    
+
     return {
       overallRiskScore: Math.max(0, Math.min(100, 100 - (completionRate + mitigationRate) / 2)),
       riskTrend: "stable" as const,
@@ -401,7 +411,7 @@ Provide detailed risk analysis:
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
-    
+
     return JSON.parse(cleanedText);
   } catch (error) {
     console.error('Error assessing risk:', error);
@@ -493,7 +503,7 @@ Provide prioritization with scores (1-100) and reasoning:
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
-    
+
     return JSON.parse(cleanedText);
   } catch (error) {
     console.error('Error prioritizing tasks:', error);
@@ -580,7 +590,7 @@ Provide detailed gap analysis:
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
-    
+
     return JSON.parse(cleanedText);
   } catch (error) {
     console.error('Error detecting compliance gaps:', error);
@@ -615,7 +625,7 @@ export async function analyzeDocumentAdvanced(
 }> {
   const truncatedText = truncateText(text);
   const wasTruncated = text !== truncatedText;
-  
+
   const prompt = `Analyze this compliance document with advanced insights:
 
 Filename: ${filename}
@@ -665,7 +675,7 @@ Provide comprehensive analysis:
     } else if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
-    
+
     return JSON.parse(cleanedText);
   } catch (error) {
     console.error('Error analyzing document:', error);
@@ -715,7 +725,7 @@ export async function generateComplianceChecklist(
 
 **Consider the company size when estimating effort:**
 - 1-10 employees: Focus on essential, streamlined requirements
-- 11-50 employees: Balanced approach with some dedicated resources
+- 11-50 employees: Balanced approach with dedicated resources
 - 51-200 employees: More comprehensive with specialized roles
 - 201-500 employees: Advanced implementation with dedicated teams
 - 500+ employees: Enterprise-level with complex governance
@@ -756,7 +766,7 @@ Make tasks specific, actionable, and relevant to the selected frameworks. Priori
     });
 
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
-    
+
     // Extract JSON from the response
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
