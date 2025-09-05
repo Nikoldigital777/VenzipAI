@@ -28,7 +28,8 @@ import {
   ArrowUp,
   Mic,
   VolumeX,
-  Volume2
+  Volume2,
+  Target
 } from "lucide-react";
 
 interface ChatMessage {

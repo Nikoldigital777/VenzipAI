@@ -530,3 +530,59 @@ export const taskAttachmentsRelations = relations(taskAttachments, ({ one }) => 
     references: [documents.id]
   })
 }));
+
+// Learning resources table for Self-Learning Hub
+export const learningResourcesEnum = pgEnum('resource_type', ['pdf', 'video', 'article', 'course']);
+export const difficultyEnum = pgEnum('difficulty', ['beginner', 'intermediate', 'advanced']);
+
+export const learningResources = pgTable("learning_resources", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  resourceType: learningResourcesEnum("resource_type").notNull(),
+  frameworkId: varchar("framework_id").references(() => frameworks.id),
+  category: varchar("category").notNull(), // e.g., "access_control", "data_protection"
+  difficulty: difficultyEnum("difficulty").notNull().default('beginner'),
+  duration: integer("duration"), // duration in minutes
+  resourceUrl: varchar("resource_url").notNull(),
+  thumbnailUrl: varchar("thumbnail_url"),
+  tags: text("tags").array().default(sql`'{}'::text[]`),
+  isPublic: boolean("is_public").notNull().default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User progress tracking for learning resources
+export const learningProgress = pgTable("learning_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  resourceId: varchar("resource_id").notNull().references(() => learningResources.id),
+  progressPercentage: integer("progress_percentage").notNull().default(0),
+  completedAt: timestamp("completed_at"),
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
+  totalTimeSpent: integer("total_time_spent").default(0), // in minutes
+  bookmarkPosition: integer("bookmark_position"), // for videos/courses
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for learning resources
+export const insertLearningResourceSchema = createInsertSchema(learningResources).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLearningProgressSchema = createInsertSchema(learningProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  completedAt: true,
+});
+
+// Types for learning resources
+export type LearningResource = typeof learningResources.$inferSelect;
+export type InsertLearningResource = z.infer<typeof insertLearningResourceSchema>;
+export type LearningProgress = typeof learningProgress.$inferSelect;
+export type InsertLearningProgress = z.infer<typeof insertLearningProgressSchema>;

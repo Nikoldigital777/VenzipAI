@@ -14,7 +14,8 @@ import {
   Menu,
   X,
   MapPin,
-  Calendar
+  Calendar,
+  GraduationCap
 } from "lucide-react";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 import NotificationButton from "./notification-button";
@@ -32,6 +33,7 @@ export default function Navigation() {
     { path: "/documents", label: "Evidence", icon: FileText },
     { path: "/risks", label: "Risks", icon: AlertTriangle },
     { path: "/evidence", label: "Evidence Mapping", icon: MapPin },
+    { path: "/learning-hub", label: "Learning Hub", icon: GraduationCap },
     { path: "/test-notifications", label: "Test Notifications", icon: Bell },
   ];
 

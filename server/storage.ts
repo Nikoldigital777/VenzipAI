@@ -17,6 +17,8 @@ import {
   evidenceMappings,
   evidenceGaps,
   crossFrameworkMappings,
+  learningResources,
+  learningProgress,
   type User,
   type UpsertUser,
   type Company,
@@ -52,6 +54,10 @@ import {
   type InsertEvidenceGap,
   type CrossFrameworkMapping,
   type InsertCrossFrameworkMapping,
+  type LearningResource,
+  type InsertLearningResource,
+  type LearningProgress,
+  type InsertLearningProgress,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, like } from "drizzle-orm";
@@ -122,6 +128,17 @@ export interface IStorage {
   // Audit log operations
   getAuditLogsByUserId(userId: string, limit?: number): Promise<AuditLog[]>;
   createAuditLog(auditLog: InsertAuditLog): Promise<AuditLog>;
+  
+  // Learning resource operations
+  getLearningResources(params?: { frameworkId?: string; resourceType?: string; category?: string; search?: string }): Promise<LearningResource[]>;
+  createLearningResource(resource: InsertLearningResource): Promise<LearningResource>;
+  updateLearningResource(id: string, updates: Partial<InsertLearningResource>): Promise<LearningResource>;
+  deleteLearningResource(id: string): Promise<void>;
+  
+  // Learning progress operations
+  getLearningProgress(userId: string, resourceId?: string): Promise<LearningProgress[]>;
+  upsertLearningProgress(progress: InsertLearningProgress): Promise<LearningProgress>;
+  getUserCompletedResources(userId: string): Promise<LearningProgress[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -515,6 +532,100 @@ export class DatabaseStorage implements IStorage {
   async createCrossFrameworkMapping(mapping: InsertCrossFrameworkMapping): Promise<CrossFrameworkMapping> {
     const [result] = await db.insert(crossFrameworkMappings).values(mapping).returning();
     return result;
+  }
+
+  // Learning resource operations
+  async getLearningResources(params?: { 
+    frameworkId?: string; 
+    resourceType?: string; 
+    category?: string; 
+    search?: string 
+  }): Promise<LearningResource[]> {
+    let query = db.select().from(learningResources);
+    
+    const conditions = [];
+    
+    if (params?.frameworkId) {
+      conditions.push(eq(learningResources.frameworkId, params.frameworkId));
+    }
+    
+    if (params?.resourceType) {
+      conditions.push(eq(learningResources.resourceType, params.resourceType));
+    }
+    
+    if (params?.category) {
+      conditions.push(eq(learningResources.category, params.category));
+    }
+    
+    if (params?.search) {
+      conditions.push(
+        or(
+          like(learningResources.title, `%${params.search}%`),
+          like(learningResources.description, `%${params.search}%`)
+        )
+      );
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(learningResources.sortOrder, learningResources.createdAt);
+  }
+
+  async createLearningResource(resource: InsertLearningResource): Promise<LearningResource> {
+    const [result] = await db.insert(learningResources).values(resource).returning();
+    return result;
+  }
+
+  async updateLearningResource(id: string, updates: Partial<InsertLearningResource>): Promise<LearningResource> {
+    const [result] = await db.update(learningResources)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(learningResources.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteLearningResource(id: string): Promise<void> {
+    await db.delete(learningResources).where(eq(learningResources.id, id));
+  }
+
+  // Learning progress operations
+  async getLearningProgress(userId: string, resourceId?: string): Promise<LearningProgress[]> {
+    const conditions = [eq(learningProgress.userId, userId)];
+    
+    if (resourceId) {
+      conditions.push(eq(learningProgress.resourceId, resourceId));
+    }
+    
+    return await db.select().from(learningProgress)
+      .where(and(...conditions))
+      .orderBy(desc(learningProgress.lastAccessedAt));
+  }
+
+  async upsertLearningProgress(progressData: InsertLearningProgress): Promise<LearningProgress> {
+    const [result] = await db.insert(learningProgress)
+      .values(progressData)
+      .onConflictDoUpdate({
+        target: [learningProgress.userId, learningProgress.resourceId],
+        set: {
+          ...progressData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return result;
+  }
+
+  async getUserCompletedResources(userId: string): Promise<LearningProgress[]> {
+    return await db.select().from(learningProgress)
+      .where(
+        and(
+          eq(learningProgress.userId, userId),
+          eq(learningProgress.progressPercentage, 100)
+        )
+      )
+      .orderBy(desc(learningProgress.completedAt));
   }
 }
 

@@ -9,6 +9,8 @@ import {
   insertRiskSchema,
   insertRiskScoreHistorySchema,
   insertChatMessageSchema,
+  insertLearningResourceSchema,
+  insertLearningProgressSchema,
   complianceTasks,
   risks as risksTable,
   riskScoreHistory,
@@ -1888,6 +1890,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user preferences:", error);
       res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  // Learning Hub API Routes
+  app.get('/api/learning-resources', async (req, res) => {
+    try {
+      const { frameworkId, resourceType, category, search } = req.query;
+      
+      const resources = await storage.getLearningResources({
+        frameworkId: frameworkId as string,
+        resourceType: resourceType as string,
+        category: category as string,
+        search: search as string,
+      });
+      
+      res.json(resources);
+    } catch (error) {
+      console.error("Error fetching learning resources:", error);
+      res.status(500).json({ message: "Failed to fetch learning resources" });
+    }
+  });
+
+  app.get('/api/learning-progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const { resourceId } = req.query;
+      
+      const progress = await storage.getLearningProgress(userId, resourceId as string);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching learning progress:", error);
+      res.status(500).json({ message: "Failed to fetch learning progress" });
+    }
+  });
+
+  app.post('/api/learning-progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const progressData = insertLearningProgressSchema.parse({
+        ...req.body,
+        userId
+      });
+      
+      const progress = await storage.upsertLearningProgress(progressData);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error updating learning progress:", error);
+      res.status(500).json({ message: "Failed to update learning progress" });
+    }
+  });
+
+  app.get('/api/learning-completed', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const completedResources = await storage.getUserCompletedResources(userId);
+      res.json(completedResources);
+    } catch (error) {
+      console.error("Error fetching completed resources:", error);
+      res.status(500).json({ message: "Failed to fetch completed resources" });
     }
   });
 

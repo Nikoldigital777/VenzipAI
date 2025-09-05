@@ -15,6 +15,7 @@ import Risks from "@/pages/risks";
 import Evidence from "@/pages/evidence";
 import CompanyProfile from "@/pages/company-profile";
 import TestNotifications from "@/pages/test-notifications";
+import LearningHub from "@/pages/learning-hub";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -36,6 +37,7 @@ function Router() {
           <Route path="/documents" component={Documents} />
           <Route path="/risks" component={Risks} />
           <Route path="/evidence" component={Evidence} />
+          <Route path="/learning-hub" component={LearningHub} />
           <Route path="/company-profile" component={CompanyProfile} />
           <Route path="/test-notifications" component={TestNotifications} />
         </>
