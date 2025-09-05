@@ -90,7 +90,7 @@ export default function LearningHub() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
 
   // Fetch learning resources
-  const { data: resources = [], isLoading } = useQuery({
+  const { data: resourcesResponse, isLoading } = useQuery<{items: LearningResource[]}>({
     queryKey: ["/api/learning-resources", selectedFramework, selectedResourceType, selectedDifficulty, searchQuery],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -102,6 +102,8 @@ export default function LearningHub() {
       return response.json();
     },
   });
+  
+  const resources = resourcesResponse?.items || [];
 
   // Fetch user progress
   const { data: progressData = [] } = useQuery({
