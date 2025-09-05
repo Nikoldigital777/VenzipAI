@@ -15,7 +15,11 @@ const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 // Validate API key on startup
 const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
 if (!apiKey) {
-  console.warn('Warning: No Anthropic API key found. Claude features will not work. Please set ANTHROPIC_API_KEY or CLAUDE_API_KEY in Secrets.');
+  console.error('CRITICAL: No Anthropic API key found. Claude features will not work.');
+  console.log('Please set ANTHROPIC_API_KEY in Secrets with your Anthropic API key.');
+  console.log('You can find your API key at: https://console.anthropic.com/');
+} else {
+  console.log('✅ Anthropic API key found and configured');
 }
 
 const anthropic = new Anthropic({
