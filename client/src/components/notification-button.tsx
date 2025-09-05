@@ -39,10 +39,12 @@ export default function NotificationButton() {
   });
 
   // Fetch notifications when popover opens
-  const { data: notifications = [], isLoading } = useQuery<Notification[]>({
+  const { data: notificationsResponse, isLoading } = useQuery<{items: Notification[]}>({
     queryKey: ['/api/notifications'],
     enabled: isOpen,
   });
+  
+  const notifications = notificationsResponse?.items || [];
 
   // Mark notification as read
   const markReadMutation = useMutation({
@@ -174,7 +176,7 @@ export default function NotificationButton() {
             </div>
           ) : (
             <div className="divide-y divide-white/5">
-              {(Array.isArray(notifications) ? notifications : []).map((notification) => (
+              {notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`p-4 hover:bg-white/5 transition-colors cursor-pointer ${
