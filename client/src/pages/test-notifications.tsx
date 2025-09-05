@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { CheckSquare, AlertTriangle, Calendar, FileText } from 'lucide-react';
+import Navigation from '@/components/navigation';
 
 export default function TestNotifications() {
   const [taskTitle, setTaskTitle] = useState('');
@@ -113,15 +114,23 @@ export default function TestNotifications() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-venzip-primary to-purple-600 bg-clip-text text-transparent">
-          Test Notification System
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Create tasks and risks to test the accurate notification system. Check the notification bell in the top navigation.
-        </p>
-      </div>
+    <>
+      <Navigation />
+      <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
+        
+        <div className="max-w-4xl mx-auto px-6 py-16 relative z-10">
+          <div className="mb-12 text-center animate-fadeInUp">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+              Test <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Notification System</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Create tasks and risks to test the accurate notification system. Check the notification bell in the top navigation.
+            </p>
+          </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Task Creation */}
@@ -314,6 +323,8 @@ export default function TestNotifications() {
           </div>
         </CardContent>
       </Card>
-    </div>
+        </div>
+      </div>
+    </>
   );
 }
