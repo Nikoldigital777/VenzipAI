@@ -49,7 +49,7 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/30 relative overflow-hidden noise-texture">
       {/* Animated glassmorphism background particles */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-venzip-primary/20 to-venzip-secondary/15 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/20 to-venzip-secondary/15 rounded-full blur-3xl animate-float"></div>
         <div className="absolute top-40 right-20 w-[500px] h-[500px] bg-gradient-to-br from-venzip-accent/15 to-success-green/10 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
         <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-gradient-to-br from-venzip-secondary/20 to-venzip-primary/15 rounded-full blur-3xl animate-float" style={{animationDelay: '4s'}}></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-venzip-accent/5 to-transparent rounded-full blur-3xl animate-gradient-x"></div>
@@ -94,20 +94,20 @@ export default function Landing() {
               </Badge>
               <div className="absolute inset-0 rounded-full bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
             </div>
-            
+
             <h1 className="text-6xl md:text-8xl font-extrabold text-gray-900 mb-8 leading-tight tracking-tight animate-fadeInUp">
               <span className="block">Simplify Your</span>
               <span className="block text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x hover:scale-105 transition-transform duration-500 cursor-default">
                 Compliance Journey
               </span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto font-light">
               The <span className="font-semibold text-venzip-primary">compliance platform of choice for Fortune 500 companies</span> seeking to reduce audit costs by 65% and achieve certification 87% faster. 
               Our enterprise-grade AI platform transforms SOC 2, ISO 27001, HIPAA, and GDPR compliance from 
               <span className="font-semibold text-gray-900">reactive overhead into strategic competitive advantage.</span>
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
               <Button 
                 onClick={handleLogin}
@@ -214,7 +214,7 @@ export default function Landing() {
             <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
               Compliance Made <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-to-r from-venzip-primary to-venzip-accent">Intelligent</span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto font-light leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-light">
               Our cutting-edge platform combines AI-powered automation with expert guidance to streamline your compliance workflows
             </p>
           </div>
@@ -420,7 +420,7 @@ export default function Landing() {
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
         <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-10 left-10 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20">
             <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
@@ -502,7 +502,7 @@ export default function Landing() {
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-2xl animate-float"></div>
         <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20">
             <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
@@ -524,7 +524,7 @@ export default function Landing() {
                   <p className="text-gray-600 leading-relaxed">Enterprise-grade encryption, RBAC, SSO integration, and comprehensive audit trails. SOC 2 Type II certified infrastructure.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-4 group">
                 <div className="w-12 h-12 bg-gradient-success rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <Users className="text-white h-6 w-6" />
@@ -534,7 +534,7 @@ export default function Landing() {
                   <p className="text-gray-600 leading-relaxed">Multi-tenant architecture, role-based permissions, workflow approvals, and real-time collaboration across departments.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-4 group">
                 <div className="w-12 h-12 bg-gradient-warning rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <BarChart3 className="text-white h-6 w-6" />
@@ -603,7 +603,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
             {/* Connecting Lines with animation */}
             <div className="hidden md:block absolute top-24 left-1/3 right-1/3 h-1 bg-gradient-to-r from-venzip-primary via-venzip-secondary to-venzip-accent rounded-full shadow-lg animate-gradient-x"></div>
-            
+
             {/* Step 1 */}
             <div className="text-center relative group animate-fadeInUp" style={{animationDelay: '0.3s'}}>
               <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-8 relative z-10 shadow-2xl shadow-venzip-primary/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 animate-glow-pulse">
@@ -660,7 +660,7 @@ export default function Landing() {
               Quantifiable compliance ROI for enterprise organizations
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <Card className="glass-card text-center border-0 shadow-lg">
               <CardContent className="p-8">
@@ -728,7 +728,7 @@ export default function Landing() {
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-16 tracking-tight">
             Trusted by <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Industry Leaders</span>
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <Card className="glass-card hover-lift group relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -745,7 +745,7 @@ export default function Landing() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="glass-card hover-lift group relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-success-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="p-8 text-center relative z-10">
@@ -761,7 +761,7 @@ export default function Landing() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="glass-card hover-lift group relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-venzip-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="p-8 text-center relative z-10">
@@ -796,7 +796,7 @@ export default function Landing() {
               <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed font-light">
                 Transform your compliance process from a burden into a strategic advantage
               </p>
-              
+
               <div className="space-y-8">
                 <div className="flex items-start space-x-6 group hover-lift cursor-pointer">
                   <div className="w-12 h-12 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
@@ -852,7 +852,7 @@ export default function Landing() {
                     <h3 className="text-3xl font-bold text-gray-900 group-hover:text-venzip-primary transition-colors duration-300">Real Results</h3>
                     <p className="text-gray-600 mt-2">From companies using Venzip</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-8">
                     <div className="text-center group hover:scale-105 transition-transform duration-300">
                       <div className="text-4xl font-bold text-venzip-primary mb-2 group-hover:animate-bounce">85%</div>
@@ -890,7 +890,7 @@ export default function Landing() {
         <div className="absolute top-20 left-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-20 w-80 h-80 bg-white/10 rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
         <div className="absolute inset-0 bg-dot-pattern opacity-10"></div>
-        
+
         <div className="max-w-6xl mx-auto text-center relative z-10">
           <h2 className="text-6xl md:text-7xl font-extrabold text-white mb-10 tracking-tight animate-fadeInUp">
             Ready to Transform Your <span className="text-white/90 animate-gradient-x">Compliance?</span>
@@ -899,7 +899,7 @@ export default function Landing() {
             Join hundreds of companies who have streamlined their compliance process with Venzip. 
             Start your journey today and achieve compliance faster than ever before with AI-powered automation.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
             <Button 
               onClick={handleLogin}
@@ -950,7 +950,7 @@ export default function Landing() {
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
         <div className="absolute top-0 left-0 w-96 h-96 bg-venzip-primary/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-venzip-accent/5 rounded-full blur-2xl"></div>
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-1">
@@ -978,7 +978,7 @@ export default function Landing() {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-bold mb-6 text-lg text-white">Platform</h4>
               <ul className="space-y-3 text-sm text-gray-300">
@@ -988,7 +988,7 @@ export default function Landing() {
                 <li><a href="#" className="hover:text-venzip-primary transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Pricing</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-bold mb-6 text-lg text-white">Resources</h4>
               <ul className="space-y-3 text-sm text-gray-300">
@@ -998,7 +998,7 @@ export default function Landing() {
                 <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 flex items-center group"><ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />Support</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-bold mb-6 text-lg text-white">Company</h4>
               <ul className="space-y-3 text-sm text-gray-300">
@@ -1009,7 +1009,7 @@ export default function Landing() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-700/50 mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-sm text-gray-400">

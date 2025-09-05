@@ -1,5 +1,6 @@
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 import passport from "passport";
 import session from "express-session";
@@ -99,6 +100,49 @@ export async function setupAuth(app: Express) {
     passport.use(strategy);
   }
 
+  // Setup Google OAuth Strategy
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/api/auth/google/callback"
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        // Create user object similar to Replit auth
+        const user = {
+          sub: profile.id,
+          claims: {
+            sub: profile.id,
+            email: profile.emails?.[0]?.value,
+            first_name: profile.name?.givenName,
+            last_name: profile.name?.familyName,
+            profile_image_url: profile.photos?.[0]?.value,
+          },
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+        };
+
+        // Upsert user to database
+        await storage.upsertUser({
+          id: profile.id,
+          email: profile.emails?.[0]?.value || '',
+          firstName: profile.name?.givenName || '',
+          lastName: profile.name?.familyName || '',
+          profileImageUrl: profile.photos?.[0]?.value || '',
+        });
+
+        return done(null, user);
+      } catch (error) {
+        console.error("Error in Google OAuth:", error);
+        return done(error, null);
+      }
+    }));
+  } else {
+    console.warn("Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Secrets.");
+  }
+
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser(async (user: Express.User, cb) => {
     try {
@@ -138,6 +182,18 @@ export async function setupAuth(app: Express) {
       );
     });
   });
+
+  // Google OAuth routes
+  app.get("/api/auth/google", 
+    passport.authenticate("google", { scope: ["profile", "email"] })
+  );
+
+  app.get("/api/auth/google/callback",
+    passport.authenticate("google", { 
+      successRedirect: "/onboarding",
+      failureRedirect: "/api/login" 
+    })
+  );
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
