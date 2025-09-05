@@ -772,36 +772,34 @@ export default function Onboarding() {
                       className="group relative h-16 px-12 text-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl shadow-2xl shadow-emerald-500/30 hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-75 disabled:hover:scale-100 disabled:cursor-not-allowed"
                       data-testid="button-generate-checklist"
                     >
-                      <div className="relative flex items-center space-x-4">
+                      <div className="relative w-full">
                         {(isGeneratingChecklist || generateChecklistMutation.isPending) ? (
-                          <>
-                            <div className="flex flex-col items-center space-y-4">
-                              <div className="flex items-center space-x-3">
-                                <div className="animate-spin rounded-full h-7 w-7 border-3 border-white border-t-transparent"></div>
-                                <span>Generating Your Personalized Checklist...</span>
-                              </div>
-                              
-                              {/* Progress Bar */}
-                              <div className="w-80 bg-white/20 rounded-full h-3 overflow-hidden">
-                                <div 
-                                  className="h-full bg-white rounded-full transition-all duration-500 ease-out"
-                                  style={{ width: `${generationProgress}%` }}
-                                ></div>
-                              </div>
-                              
-                              {/* Progress Percentage */}
-                              <div className="flex items-center space-x-2 text-white/90">
-                                <span className="text-lg font-bold">{Math.round(generationProgress)}%</span>
-                                <span className="text-sm">• Analyzing compliance requirements</span>
-                              </div>
+                          <div className="flex flex-col items-center space-y-3 w-full px-4">
+                            <div className="flex items-center space-x-3 text-white">
+                              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                              <span className="text-lg font-semibold">Generating Your Personalized Checklist...</span>
                             </div>
-                          </>
+                            
+                            {/* Progress Bar */}
+                            <div className="w-full max-w-xs bg-white/20 rounded-full h-2 overflow-hidden">
+                              <div 
+                                className="h-full bg-white rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${generationProgress}%` }}
+                              ></div>
+                            </div>
+                            
+                            {/* Progress Percentage */}
+                            <div className="flex items-center space-x-2 text-white">
+                              <span className="text-base font-bold">{Math.round(generationProgress)}%</span>
+                              <span className="text-sm opacity-90">• Analyzing compliance requirements</span>
+                            </div>
+                          </div>
                         ) : (
-                          <>
+                          <div className="flex items-center space-x-4">
                             <Sparkles className="h-6 w-6" />
                             <span>Generate AI Compliance Checklist</span>
                             <Target className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
-                          </>
+                          </div>
                         )}
                       </div>
                     </Button>
