@@ -49,13 +49,15 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Fetch uploaded documents
-  const { data: documents = [] } = useQuery({
+  const { data: documentsResponse } = useQuery<{items: UploadResult[]}>({
     queryKey: ["/api/documents"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/documents");
       return response.json();
     },
   });
+  
+  const documents = documentsResponse?.items || [];
 
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
