@@ -39,6 +39,79 @@ interface ChatMessage {
   createdAt: string;
 }
 
+// Helper function to format messages with basic markdown support
+const formatMessage = (text: string) => {
+  // Split text into paragraphs
+  const paragraphs = text.split('\n\n').filter(p => p.trim());
+  
+  return paragraphs.map((paragraph, index) => {
+    // Handle bullet points
+    if (paragraph.includes('•') || paragraph.includes('-') || paragraph.includes('*')) {
+      const lines = paragraph.split('\n');
+      return (
+        <div key={index} className="space-y-1">
+          {lines.map((line, lineIndex) => {
+            const trimmed = line.trim();
+            if (trimmed.match(/^[•\-\*]\s/)) {
+              return (
+                <div key={lineIndex} className="flex items-start gap-2">
+                  <span className="text-venzip-primary mt-1">•</span>
+                  <span>{trimmed.replace(/^[•\-\*]\s/, '')}</span>
+                </div>
+              );
+            }
+            return <div key={lineIndex}>{trimmed}</div>;
+          })}
+        </div>
+      );
+    }
+    
+    // Handle numbered lists
+    if (paragraph.match(/^\d+\./)) {
+      const lines = paragraph.split('\n');
+      return (
+        <div key={index} className="space-y-1">
+          {lines.map((line, lineIndex) => {
+            const trimmed = line.trim();
+            if (trimmed.match(/^\d+\./)) {
+              return (
+                <div key={lineIndex} className="flex items-start gap-2">
+                  <span className="text-venzip-primary font-semibold min-w-[1.2rem]">
+                    {trimmed.match(/^\d+/)?.[0]}.
+                  </span>
+                  <span>{trimmed.replace(/^\d+\.\s/, '')}</span>
+                </div>
+              );
+            }
+            return <div key={lineIndex}>{trimmed}</div>;
+          })}
+        </div>
+      );
+    }
+    
+    // Handle bold text **text**
+    const formatInlineStyles = (text: string) => {
+      return text.split(/(\*\*.*?\*\*)/).map((part, partIndex) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return (
+            <strong key={partIndex} className="font-semibold text-venzip-primary">
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        return part;
+      });
+    };
+    
+    // Regular paragraph
+    return (
+      <div key={index} className="mb-2 last:mb-0">
+        {formatInlineStyles(paragraph)}
+      </div>
+    );
+  });
+};
+
 export default function AIChat() {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -46,7 +119,9 @@ export default function AIChat() {
   const [isTyping, setIsTyping] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   
   // Enhanced quick action prompts with categories
   const quickPrompts = [
@@ -138,10 +213,36 @@ export default function AIChat() {
     },
   });
 
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
+  // Enhanced scroll behavior
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, sendMessageMutation.isPending]);
+  };
+
+  // Check if user has scrolled up from bottom
+  const handleScroll = () => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      setShowScrollButton(!isNearBottom && messages.length > 3);
+    }
+  };
+
+  // Scroll to bottom when new messages arrive or when typing starts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100); // Small delay to ensure DOM is updated
+    return () => clearTimeout(timer);
+  }, [messages, isTyping]);
+
+  // Add scroll listener to messages container
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [messages.length]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,7 +274,7 @@ export default function AIChat() {
       {/* Enhanced AI Chat Window */}
       {isOpen && (
         <div className="fixed bottom-6 right-6 z-50 animate-scale-in" data-testid="ai-chat-window">
-          <Card className="glass-card w-96 h-[600px] shadow-2xl border-0 bg-white/95 backdrop-blur-xl hover:shadow-3xl transition-all duration-500 animate-fadeInUp relative overflow-hidden">
+          <Card className="glass-card w-[420px] max-h-[80vh] min-h-[600px] shadow-2xl border-0 bg-white/95 backdrop-blur-xl hover:shadow-3xl transition-all duration-500 animate-fadeInUp relative overflow-hidden flex flex-col">
             {/* Background animation */}
             <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 via-transparent to-venzip-accent/5 opacity-50"></div>
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-2xl animate-float"></div>
@@ -221,7 +322,10 @@ export default function AIChat() {
               </Button>
             </div>
             
-            <div className="p-6 h-96 overflow-y-auto bg-gradient-to-b from-gray-50/30 to-white/80 relative z-10 scrollbar-thin scrollbar-thumb-venzip-primary/20 scrollbar-track-transparent">
+            <div 
+              ref={messagesContainerRef}
+              className="p-4 flex-1 overflow-y-auto bg-gradient-to-b from-gray-50/30 to-white/80 relative z-10 scrollbar-thin scrollbar-thumb-venzip-primary/20 scrollbar-track-transparent scroll-smooth"
+            >
               <div className="space-y-6">
                 {messages.length === 0 ? (
                   <>
@@ -229,7 +333,7 @@ export default function AIChat() {
                       <div className="w-12 h-12 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg animate-bounce">
                         <Bot className="h-6 w-6 text-white" />
                       </div>
-                      <div className="bg-white p-6 rounded-3xl rounded-tl-md max-w-sm shadow-lg border border-gray-100 relative hover:shadow-xl transition-all duration-300">
+                      <div className="bg-white p-4 rounded-3xl rounded-tl-md max-w-[300px] shadow-lg border border-gray-100 relative hover:shadow-xl transition-all duration-300">
                         <div className="absolute -top-2 -left-2 w-4 h-4 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full animate-ping"></div>
                         <p className="text-base text-gray-800 leading-relaxed font-medium">
                           👋 <span className="text-gradient-primary font-bold">Welcome!</span> I'm Claude, your AI compliance expert.
@@ -293,7 +397,9 @@ export default function AIChat() {
                           </div>
                         </div>
                       )}
-                      <div className={`p-5 rounded-3xl max-w-sm shadow-lg border transition-all duration-300 hover:shadow-xl relative group ${
+                      <div className={`p-4 rounded-3xl shadow-lg border transition-all duration-300 hover:shadow-xl relative group ${
+                        msg.messageType === 'user' ? 'max-w-[300px] ml-auto' : 'max-w-[340px]'
+                      } ${
                         msg.messageType === 'user' 
                           ? 'bg-gradient-to-r from-venzip-primary to-venzip-accent text-white rounded-tr-lg border-venzip-primary/20' 
                           : 'bg-white text-gray-800 rounded-tl-lg border-gray-100'
@@ -301,7 +407,9 @@ export default function AIChat() {
                         {msg.messageType === 'assistant' && (
                           <div className="absolute -top-2 -left-2 w-3 h-3 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full animate-pulse"></div>
                         )}
-                        <p className="text-sm leading-relaxed font-medium">{msg.message}</p>
+                        <div className="text-sm leading-relaxed font-medium space-y-2 whitespace-pre-wrap break-words">
+                          {formatMessage(msg.message)}
+                        </div>
                         <div className="flex items-center justify-between mt-3 text-xs opacity-70">
                           <span>{new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                           {msg.messageType === 'assistant' && (
@@ -326,7 +434,7 @@ export default function AIChat() {
                     <div className="w-10 h-10 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg animate-pulse">
                       <Loader2 className="h-5 w-5 text-white animate-spin" />
                     </div>
-                    <div className="bg-white p-5 rounded-3xl rounded-tl-lg max-w-sm shadow-lg border border-gray-100 relative">
+                    <div className="bg-white p-4 rounded-3xl rounded-tl-lg max-w-[320px] shadow-lg border border-gray-100 relative">
                       <div className="absolute -top-2 -left-2 w-3 h-3 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full animate-ping"></div>
                       <div className="flex items-center space-x-3">
                         <div className="flex space-x-1">
@@ -347,6 +455,18 @@ export default function AIChat() {
                 )}
                 <div ref={messagesEndRef} />
               </div>
+
+              {/* Scroll to bottom button */}
+              {showScrollButton && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+                  <Button
+                    onClick={scrollToBottom}
+                    className="bg-white/90 backdrop-blur-sm hover:bg-white text-venzip-primary border border-venzip-primary/20 rounded-full w-10 h-10 p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                  >
+                    <ArrowUp className="h-4 w-4 rotate-180" />
+                  </Button>
+                </div>
+              )}
             </div>
             
             <div className="p-6 border-t border-gray-200/50 bg-gradient-to-r from-white/80 to-gray-50/80 relative z-10">
