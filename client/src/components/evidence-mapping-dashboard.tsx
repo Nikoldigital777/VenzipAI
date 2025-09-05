@@ -443,7 +443,7 @@ export default function EvidenceMappingDashboard() {
                     .filter(group => group.mappings.length > 1) // Only show multi-framework docs
                     .slice(0, 3)
                     .map((group, index) => {
-                      const frameworks = [...new Set(group.mappings.map(m => m.frameworkId))];
+                      const frameworks = Array.from(new Set(group.mappings.map(m => m.frameworkId).filter(Boolean)));
                       const validatedMappings = group.mappings.filter(m => m.validationStatus === 'validated').length;
                       
                       return (
@@ -564,71 +564,120 @@ export default function EvidenceMappingDashboard() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Document</TableHead>
+                <TableHead>Document & Framework</TableHead>
                 <TableHead>Requirement</TableHead>
+                <TableHead>Cross-Framework</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Quality</TableHead>
-                <TableHead>Confidence</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredMappings.map((mapping) => (
-                <TableRow key={mapping.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{mapping.documentName}</div>
-                      <div className="text-sm text-gray-500">{mapping.frameworkId}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{mapping.requirementTitle}</TableCell>
-                  <TableCell>
-                    <Badge className={getMappingTypeColor(mapping.mappingType)}>
-                      {mapping.mappingType}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {getQualityStars(parseFloat(mapping.qualityScore))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm font-medium">
-                      {(parseFloat(mapping.mappingConfidence) * 100).toFixed(0)}%
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getValidationStatusColor(mapping.validationStatus)}>
-                      {mapping.validationStatus}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => validateMappingMutation.mutate({ 
-                          mappingId: mapping.id, 
-                          status: 'validated' 
-                        })}
-                      >
-                        <CheckSquare className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => validateMappingMutation.mutate({ 
-                          mappingId: mapping.id, 
-                          status: 'rejected' 
-                        })}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filteredMappings.map((mapping) => {
+                const docMappings = mockMappings.filter(m => m.documentId === mapping.documentId);
+                const frameworks = Array.from(new Set(docMappings.map(m => m.frameworkId).filter(Boolean)));
+                const frameworkColors: Record<string, string> = { 
+                  SOC2: 'bg-blue-100 text-blue-800', 
+                  ISO27001: 'bg-green-100 text-green-800', 
+                  HIPAA: 'bg-purple-100 text-purple-800', 
+                  GDPR: 'bg-orange-100 text-orange-800' 
+                };
+                
+                return (
+                  <TableRow key={mapping.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium mb-1 flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-gray-400" />
+                          {mapping.documentName}
+                        </div>
+                        <Badge className={`text-xs ${frameworkColors[mapping.frameworkId || ''] || 'bg-gray-100 text-gray-800'}`}>
+                          {mapping.frameworkId}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-xs">
+                        <div className="font-medium text-sm">{mapping.requirementTitle}</div>
+                        {mapping.evidenceSnippets?.snippets?.[0] && (
+                          <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            "{mapping.evidenceSnippets.snippets[0]}"
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {frameworks.length > 1 ? (
+                          <div>
+                            <div className="flex items-center gap-1 mb-1">
+                              <MapPin className="h-3 w-3 text-venzip-primary" />
+                              <span className="text-xs font-medium text-venzip-primary">{frameworks.length} frameworks</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {frameworks.slice(0, 3).map((fw, idx) => (
+                                <Badge key={idx} className={`text-xs px-1.5 py-0.5 ${fw ? frameworkColors[fw] || 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800'}`}>
+                                  {fw}
+                                </Badge>
+                              ))}
+                              {frameworks.length > 3 && (
+                                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                                  +{frameworks.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">Single framework</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getMappingTypeColor(mapping.mappingType)}>
+                        {mapping.mappingType}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        {getQualityStars(parseFloat(mapping.qualityScore))}
+                        <span className="text-xs text-gray-500 ml-1">
+                          {(parseFloat(mapping.mappingConfidence) * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getValidationStatusColor(mapping.validationStatus)}>
+                        {mapping.validationStatus}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => validateMappingMutation.mutate({ 
+                            mappingId: mapping.id, 
+                            status: 'validated' 
+                          })}
+                        >
+                          <CheckSquare className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => validateMappingMutation.mutate({ 
+                            mappingId: mapping.id, 
+                            status: 'rejected' 
+                          })}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

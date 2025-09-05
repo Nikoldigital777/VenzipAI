@@ -174,7 +174,7 @@ export default function NotificationButton() {
             </div>
           ) : (
             <div className="divide-y divide-white/5">
-              {notifications.map((notification) => (
+              {(Array.isArray(notifications) ? notifications : []).map((notification) => (
                 <div
                   key={notification.id}
                   className={`p-4 hover:bg-white/5 transition-colors cursor-pointer ${

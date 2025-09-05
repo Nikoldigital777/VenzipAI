@@ -1,0 +1,132 @@
+[plugin:runtime-error-plugin] notifications.map is not a function. (In 'notifications.map(
+        (notification) => /* @__PURE__ */ jsxDEV(
+          "div",
+          {
+            "data-replit-metadata": "client/src/components/notification-button.tsx:178:12",
+            "data-component-name": "div",
+            className: `p-4 hover:bg-white/5 transition-colors cursor-pointer ${!notification.isRead ? "bg-blue-50/10" : ""}`,
+            onClick: () => handleNotificationClick(notification),
+            children: /* @__PURE__ */ jsxDEV("div", { "data-replit-metadata": "client/src/components/notification-button.tsx:185:18", "data-component-name": "div", className: "flex items-start gap-3", children: [
+              /* @__PURE__ */ jsxDEV("div", { "data-replit-metadata": "client/src/components/notification-button.tsx:186:20", "data-component-name": "div", className: "flex-shrink-0 mt-0.5", children: getNotificationIcon(notification.type, notification.priority) }, void 0, false, {
+                fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                lineNumber: 186,
+                columnNumber: 21
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { "data-replit-metadata": "client/src/components/notification-button.tsx:189:20", "data-component-name": "div", className: "flex-1 min-w-0", children: [
+                /* @__PURE__ */ jsxDEV("div", { "data-replit-metadata": "client/src/components/notification-button.tsx:190:22", "data-component-name": "div", className: "flex items-center gap-2 mb-1", children: [
+                  /* @__PURE__ */ jsxDEV("p", { "data-replit-metadata": "client/src/components/notification-button.tsx:191:24", "data-component-name": "p", className: "text-sm font-medium truncate", children: notification.title }, void 0, false, {
+                    fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                    lineNumber: 191,
+                    columnNumber: 25
+                  }, this),
+                  /* @__PURE__ */ jsxDEV(Badge, { "data-replit-metadata": "client/src/components/notification-button.tsx:194:24", "data-component-name": "Badge", className: `text-xs ${getPriorityColor(notification.priority)}`, children: notification.priority }, void 0, false, {
+                    fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                    lineNumber: 194,
+                    columnNumber: 25
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                  lineNumber: 190,
+                  columnNumber: 23
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { "data-replit-metadata": "client/src/components/notification-button.tsx:198:22", "data-component-name": "p", className: "text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-2", children: notification.message }, void 0, false, {
+                  fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                  lineNumber: 198,
+                  columnNumber: 23
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { "data-replit-metadata": "client/src/components/notification-button.tsx:201:22", "data-component-name": "div", className: "flex items-center justify-between", children: [
+                  /* @__PURE__ */ jsxDEV("span", { "data-replit-metadata": "client/src/components/notification-button.tsx:202:24", "data-component-name": "span", className: "text-xs text-gray-500", children: formatTimeAgo(notification.createdAt) }, void 0, false, {
+                    fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                    lineNumber: 202,
+                    columnNumber: 25
+                  }, this),
+                  /* @__PURE__ */ jsxDEV("div", { "data-replit-metadata": "client/src/components/notification-button.tsx:205:24", "data-component-name": "div", className: "flex items-center gap-1", children: [
+                    !notification.isRead && /* @__PURE__ */ jsxDEV(
+                      Button,
+                      {
+                        "data-replit-metadata": "client/src/components/notification-button.tsx:207:22",
+                        "data-component-name": "Button",
+                        variant: "ghost",
+                        size: "sm",
+                        onClick: (e) => {
+                          e.stopPropagation();
+                          markReadMutation.mutate(notification.id);
+                        },
+                        disabled: markReadMutation.isPending,
+                        className: "h-6 w-6 p-0",
+                        children: /* @__PURE__ */ jsxDEV(Check, { "data-replit-metadata": "client/src/components/notification-button.tsx:217:30", "data-component-name": "Check", className: "h-3 w-3" }, void 0, false, {
+                          fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                          lineNumber: 217,
+                          columnNumber: 31
+                        }, this)
+                      },
+                      void 0,
+                      false,
+                      {
+                        fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                        lineNumber: 207,
+                        columnNumber: 23
+                      },
+                      this
+                    ),
+                    /* @__PURE__ */ jsxDEV(
+                      Button,
+                      {
+                        "data-replit-metadata": "client/src/components/notification-button.tsx:220:26",
+                        "data-component-name": "Button",
+                        variant: "ghost",
+                        size: "sm",
+                        onClick: (e) => {
+                          e.stopPropagation();
+                          dismissMutation.mutate(notification.id);
+                        },
+                        disabled: dismissMutation.isPending,
+                        className: "h-6 w-6 p-0",
+                        children: /* @__PURE__ */ jsxDEV(X, { "data-replit-metadata": "client/src/components/notification-button.tsx:230:28", "data-component-name": "X", className: "h-3 w-3" }, void 0, false, {
+                          fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                          lineNumber: 230,
+                          columnNumber: 29
+                        }, this)
+                      },
+                      void 0,
+                      false,
+                      {
+                        fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                        lineNumber: 220,
+                        columnNumber: 27
+                      },
+                      this
+                    )
+                  ] }, void 0, true, {
+                    fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                    lineNumber: 205,
+                    columnNumber: 25
+                  }, this)
+                ] }, void 0, true, {
+                  fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                  lineNumber: 201,
+                  columnNumber: 23
+                }, this)
+              ] }, void 0, true, {
+                fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+                lineNumber: 189,
+                columnNumber: 21
+              }, this)
+            ] }, void 0, true, {
+              fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+              lineNumber: 185,
+              columnNumber: 19
+            }, this)
+          },
+          notification.id,
+          false,
+          {
+            fileName: "/home/runner/workspace/client/src/components/notification-button.tsx",
+            lineNumber: 178,
+            columnNumber: 13
+          },
+          this
+        )
+      )', 'notifications.map' is undefined)
+Click outside, press Esc key, or fix the code to dismiss.
+You can also disable this overlay by setting server.hmr.overlay to false in vite.config.js.
