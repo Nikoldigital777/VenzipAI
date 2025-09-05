@@ -18,6 +18,14 @@ import {
   documents as evidenceDocuments,
   tasks
 } from "@shared/schema";
+import {
+  riskFilterSchema,
+  documentFilterSchema,
+  notificationFilterSchema,
+  learningResourceFilterSchema,
+  createPaginationResponse,
+  applyPagination
+} from "./pagination";
 import { and, ne, inArray, desc, eq, sql } from "drizzle-orm";
 import { 
   analyzeDocument, 
@@ -819,12 +827,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Document routes
+  // Document routes with pagination
   app.get('/api/documents', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      const documents = await storage.getDocumentsByUserId(userId);
-      res.json(documents);
+      const filters = documentFilterSchema.parse(req.query);
+      
+      // Get all user documents
+      let documents = await storage.getDocumentsByUserId(userId);
+      
+      // Apply filters
+      if (filters.frameworkId) {
+        documents = documents.filter(doc => doc.frameworkId === filters.frameworkId);
+      }
+      
+      if (filters.documentType) {
+        documents = documents.filter(doc => doc.fileType === filters.documentType);
+      }
+      
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        documents = documents.filter(doc => 
+          doc.fileName.toLowerCase().includes(searchLower) ||
+          doc.fileType.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      // Apply pagination
+      const { paginatedItems, total } = applyPagination(documents, filters.limit, filters.offset);
+      const response = createPaginationResponse(paginatedItems, total, filters.limit, filters.offset);
+      
+      res.json(response);
     } catch (error) {
       console.error("Error fetching documents:", error);
       res.status(500).json({ message: "Failed to fetch documents" });
@@ -945,12 +978,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Risk routes
+  // Risk routes with pagination
   app.get('/api/risks', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      const risks = await storage.getRisksByUserId(userId);
-      res.json(risks);
+      const filters = riskFilterSchema.parse(req.query);
+      
+      // Get all user risks
+      let risks = await storage.getRisksByUserId(userId);
+      
+      // Apply filters
+      if (filters.category) {
+        risks = risks.filter(risk => risk.category === filters.category);
+      }
+      
+      if (filters.impact) {
+        risks = risks.filter(risk => risk.impact === filters.impact);
+      }
+      
+      if (filters.likelihood) {
+        risks = risks.filter(risk => risk.likelihood === filters.likelihood);
+      }
+      
+      if (filters.frameworkId) {
+        risks = risks.filter(risk => risk.frameworkId === filters.frameworkId);
+      }
+      
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        risks = risks.filter(risk => 
+          risk.title.toLowerCase().includes(searchLower) ||
+          (risk.description && risk.description.toLowerCase().includes(searchLower))
+        );
+      }
+      
+      // Apply pagination
+      const { paginatedItems, total } = applyPagination(risks, filters.limit, filters.offset);
+      const response = createPaginationResponse(paginatedItems, total, filters.limit, filters.offset);
+      
+      res.json(response);
     } catch (error) {
       console.error("Error fetching risks:", error);
       res.status(500).json({ message: "Failed to fetch risks" });
@@ -1753,17 +1819,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      const { filter, limit = 20 } = req.query;
-      const notifications = await storage.getNotificationsByUserId(userId);
+      const filters = notificationFilterSchema.parse(req.query);
       
-      let filteredNotifications = notifications;
-      if (filter === 'unread') {
-        filteredNotifications = notifications.filter(n => !n.isRead);
-      } else if (filter === 'high' || filter === 'urgent') {
-        filteredNotifications = notifications.filter(n => n.priority === filter);
+      // Get all user notifications
+      let notifications = await storage.getNotificationsByUserId(userId);
+      
+      // Apply filters
+      if (filters.filter === 'unread') {
+        notifications = notifications.filter(n => !n.isRead);
+      } else if (filters.filter === 'high' || filters.filter === 'urgent') {
+        notifications = notifications.filter(n => n.priority === filters.filter);
       }
       
-      res.json(filteredNotifications.slice(0, parseInt(limit)));
+      if (filters.priority) {
+        notifications = notifications.filter(n => n.priority === filters.priority);
+      }
+      
+      // Apply pagination
+      const { paginatedItems, total } = applyPagination(notifications, filters.limit, filters.offset);
+      const response = createPaginationResponse(paginatedItems, total, filters.limit, filters.offset);
+      
+      res.json(response);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       res.status(500).json({ error: 'Failed to fetch notifications' });
@@ -1893,19 +1969,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Learning Hub API Routes
+  // Learning Hub API Routes with pagination
   app.get('/api/learning-resources', async (req, res) => {
     try {
-      const { frameworkId, resourceType, category, search } = req.query;
+      const filters = learningResourceFilterSchema.parse(req.query);
       
-      const resources = await storage.getLearningResources({
-        frameworkId: frameworkId as string,
-        resourceType: resourceType as string,
-        category: category as string,
-        search: search as string,
+      // Get learning resources with filters applied
+      let resources = await storage.getLearningResources({
+        frameworkId: filters.frameworkId,
+        resourceType: filters.resourceType,
+        category: filters.category,
+        search: filters.search,
       });
       
-      res.json(resources);
+      // Apply additional filters
+      if (filters.difficulty) {
+        resources = resources.filter(resource => resource.difficulty === filters.difficulty);
+      }
+      
+      // Apply pagination
+      const { paginatedItems, total } = applyPagination(resources, filters.limit, filters.offset);
+      const response = createPaginationResponse(paginatedItems, total, filters.limit, filters.offset);
+      
+      res.json(response);
     } catch (error) {
       console.error("Error fetching learning resources:", error);
       res.status(500).json({ message: "Failed to fetch learning resources" });
