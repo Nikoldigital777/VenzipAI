@@ -162,7 +162,7 @@ Respond in JSON format:
         messages: [{ role: 'user', content: prompt }],
       });
 
-      const result = JSON.parse(response.content[0].text);
+      const result = JSON.parse((response.content[0] as any).text);
       return result;
     } catch (error) {
       console.error('Error analyzing document:', error);
@@ -360,7 +360,7 @@ Mapping types:
         messages: [{ role: 'user', content: prompt }],
       });
 
-      return JSON.parse(response.content[0].text);
+      return JSON.parse((response.content[0] as any).text);
     } catch (error) {
       console.error('Error calculating similarity:', error);
       return {
