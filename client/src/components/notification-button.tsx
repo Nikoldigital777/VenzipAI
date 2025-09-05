@@ -39,7 +39,7 @@ export default function NotificationButton() {
   });
 
   // Fetch notifications when popover opens
-  const { data: notifications, isLoading } = useQuery<Notification[]>({
+  const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ['/api/notifications'],
     enabled: isOpen,
   });
@@ -146,7 +146,7 @@ export default function NotificationButton() {
         <div className="p-4 border-b border-white/10">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Notifications</h3>
-            {notifications && notifications.some(n => !n.isRead) && (
+            {notifications && notifications.length > 0 && notifications.some(n => !n.isRead) && (
               <Button
                 variant="ghost"
                 size="sm"
