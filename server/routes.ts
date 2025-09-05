@@ -847,6 +847,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         analysisResult = await analyzeDocument(fileContent, frameworkId);
       } catch (error) {
+
+
+  // Compliance status check - "What's left to be compliant?"
+  app.post('/api/compliance/status-check', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const company = await storage.getCompanyByUserId(userId);
+      const tasks = await storage.getTasksByUserId(userId);
+      const risks = await storage.getRisksByUserId(userId);
+      const documents = await storage.getDocumentsByUserId(userId);
+      
+      if (!company) {
+        return res.status(400).json({ message: "Company profile required for compliance check" });
+      }
+      
+      // Analyze current compliance state
+      const completedTasks = tasks.filter(t => t.status === 'completed').length;
+      const totalTasks = tasks.length;
+      const openHighRisks = risks.filter(r => r.status === 'open' && r.impact === 'high').length;
+      const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+      
+      // Get comprehensive compliance analysis
+      const statusAnalysis = await detectComplianceGaps({
+        frameworks: company.selectedFrameworks,
+        completedTasks,
+        totalTasks,
+        openRisks: risks.filter(r => r.status === 'open').length,
+        uploadedDocuments: documents.length
+      }, company.industry, company.size);
+      
+      // Generate prioritized action plan
+      const actionPlan = await generateComplianceRecommendations(
+        company.selectedFrameworks,
+        company.size,
+        company.industry,
+        tasks.map(t => ({ status: t.status, priority: t.priority })),
+        {
+          openRisks: risks.filter(r => r.status === 'open').length,
+          criticalGaps: statusAnalysis.critical_gaps.filter(g => g.severity === 'critical').length,
+          documentsUploaded: documents.length
+        }
+      );
+      
+      res.json({
+        currentStatus: {
+          completionRate: Math.round(completionRate),
+          complianceScore: statusAnalysis.compliance_score,
+          frameworksInProgress: company.selectedFrameworks,
+          tasksRemaining: totalTasks - completedTasks,
+          risksToAddress: openHighRisks
+        },
+        gaps: statusAnalysis.critical_gaps,
+        actionPlan: actionPlan,
+        nextSteps: statusAnalysis.next_steps,
+        estimatedTimeToCompliance: actionPlan.timeline
+      });
+    } catch (error) {
+      console.error("Error checking compliance status:", error);
+      res.status(500).json({ message: "Failed to check compliance status" });
+    }
+  });
+
         console.error("Error analyzing document:", error);
         // Continue without analysis if Claude fails
       }
@@ -1086,7 +1148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/chat', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      const { message } = req.body;
+      const { message, context } = req.body;
       
       // Save user message
       await storage.createChatMessage(
@@ -1097,8 +1159,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
       
-      // Get Claude response
-      const response = await chatWithClaude(message);
+      // Get user context for enhanced Claude response
+      const company = await storage.getCompanyByUserId(userId);
+      const tasks = await storage.getTasksByUserId(userId);
+      const risks = await storage.getRisksByUserId(userId);
+      const documents = await storage.getDocumentsByUserId(userId);
+      
+      // Build comprehensive context for Claude
+      const userProfile = company ? {
+        frameworks: company.selectedFrameworks,
+        industry: company.industry,
+        companySize: company.size,
+        currentProgress: context?.summary?.compliancePercent || 0
+      } : undefined;
+      
+      const complianceContext = {
+        totalTasks: tasks.length,
+        completedTasks: tasks.filter(t => t.status === 'completed').length,
+        highPriorityTasks: tasks.filter(t => t.priority === 'high').length,
+        openRisks: risks.filter(r => r.status === 'open').length,
+        documentsUploaded: documents.length,
+        recentGaps: context?.summary?.gaps?.slice(0, 3) || []
+      };
+      
+      // Get enhanced Claude response with full context
+      const response = await chatWithClaude(message, JSON.stringify(complianceContext), userProfile);
       
       // Save Claude response
       const responseMessage = await storage.createChatMessage(

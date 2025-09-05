@@ -49,12 +49,12 @@ export default function AIChat() {
   
   // Enhanced quick action prompts with categories
   const quickPrompts = [
-    { icon: Shield, text: "How do I start SOC 2 compliance?", color: "text-blue-600", category: "Getting Started", bg: "from-blue-500/10 to-blue-600/5" },
-    { icon: FileText, text: "What documents do I need for ISO 27001?", color: "text-green-600", category: "Documentation", bg: "from-green-500/10 to-green-600/5" },
-    { icon: AlertTriangle, text: "What are the most critical risks?", color: "text-red-600", category: "Risk Assessment", bg: "from-red-500/10 to-red-600/5" },
-    { icon: Clock, text: "How long does compliance take?", color: "text-orange-600", category: "Timeline", bg: "from-orange-500/10 to-orange-600/5" },
-    { icon: TrendingUp, text: "Show me my compliance progress", color: "text-purple-600", category: "Analytics", bg: "from-purple-500/10 to-purple-600/5" },
-    { icon: Brain, text: "Suggest automation opportunities", color: "text-indigo-600", category: "AI Insights", bg: "from-indigo-500/10 to-indigo-600/5" }
+    { icon: Shield, text: "What's left to be compliant?", color: "text-blue-600", category: "Status Check", bg: "from-blue-500/10 to-blue-600/5" },
+    { icon: Target, text: "What should I prioritize next?", color: "text-green-600", category: "Next Steps", bg: "from-green-500/10 to-green-600/5" },
+    { icon: AlertTriangle, text: "What are my biggest risks?", color: "text-red-600", category: "Risk Assessment", bg: "from-red-500/10 to-red-600/5" },
+    { icon: Clock, text: "How long until I'm compliant?", color: "text-orange-600", category: "Timeline", bg: "from-orange-500/10 to-orange-600/5" },
+    { icon: TrendingUp, text: "Analyze my compliance gaps", color: "text-purple-600", category: "Gap Analysis", bg: "from-purple-500/10 to-purple-600/5" },
+    { icon: Brain, text: "Generate action plan", color: "text-indigo-600", category: "AI Strategy", bg: "from-indigo-500/10 to-indigo-600/5" }
   ];
   
   // Achievement system
@@ -86,13 +86,30 @@ export default function AIChat() {
     enabled: isOpen,
   });
 
-  // Enhanced send message mutation with typing simulation
+  // Enhanced send message mutation with context-aware compliance guidance
   const sendMessageMutation = useMutation({
     mutationFn: async (messageText: string) => {
       setIsTyping(true);
       // Simulate typing delay for better UX
       await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
-      const response = await apiRequest("POST", "/api/chat", { message: messageText });
+      
+      // Get current user context for Claude
+      const [companyResponse, summaryResponse] = await Promise.all([
+        apiRequest("GET", "/api/company").catch(() => null),
+        apiRequest("GET", "/api/summary").catch(() => null)
+      ]);
+      
+      const company = companyResponse ? await companyResponse.json() : null;
+      const summary = summaryResponse ? await summaryResponse.json() : null;
+      
+      const response = await apiRequest("POST", "/api/chat", { 
+        message: messageText,
+        context: {
+          company,
+          summary,
+          timestamp: new Date().toISOString()
+        }
+      });
       return response.json();
     },
     onSuccess: () => {
@@ -332,38 +349,56 @@ export default function AIChat() {
             </div>
             
             <div className="p-6 border-t border-gray-200/50 bg-gradient-to-r from-white/80 to-gray-50/80 relative z-10">
-              <form onSubmit={handleSubmit} className="flex space-x-4">
-                <div className="relative flex-1">
-                  <Input
-                    type="text"
-                    placeholder="Ask about compliance, frameworks, or risks..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+              <div className="space-y-3">
+                {/* Quick Status Check Button */}
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    onClick={() => handleQuickPrompt("What's left to be compliant?")}
                     disabled={sendMessageMutation.isPending || isTyping}
-                    className="text-sm focus:ring-2 focus:ring-venzip-primary focus:border-venzip-primary border-0 rounded-2xl pl-5 pr-14 h-12 shadow-lg bg-white/90 backdrop-blur-sm placeholder:text-gray-500 font-medium"
-                    data-testid="input-chat-message"
-                  />
-                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                    {message.trim() && (
-                      <ArrowUp className="h-4 w-4 text-venzip-primary animate-bounce" />
-                    )}
-                    <MessageSquare className="h-4 w-4 text-gray-400" />
-                  </div>
+                    className="bg-gradient-to-r from-success-green to-venzip-primary text-white hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-2xl px-4 py-2 text-sm font-medium group relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                    <div className="flex items-center gap-2 relative z-10">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>What's left to be compliant?</span>
+                    </div>
+                  </Button>
                 </div>
-                <Button 
-                  type="submit"
-                  disabled={sendMessageMutation.isPending || isTyping || !message.trim()}
-                  className="bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary text-white hover:shadow-xl hover:shadow-venzip-primary/25 hover:scale-110 transition-all duration-300 rounded-2xl px-6 h-12 min-w-[48px] relative overflow-hidden group"
-                  data-testid="button-send-message"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                  {sendMessageMutation.isPending || isTyping ? (
-                    <Loader2 className="h-5 w-5 animate-spin relative z-10" />
-                  ) : (
-                    <Send className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300 relative z-10" />
-                  )}
-                </Button>
-              </form>
+                
+                <form onSubmit={handleSubmit} className="flex space-x-4">
+                  <div className="relative flex-1">
+                    <Input
+                      type="text"
+                      placeholder="Ask about compliance, frameworks, or risks..."
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      disabled={sendMessageMutation.isPending || isTyping}
+                      className="text-sm focus:ring-2 focus:ring-venzip-primary focus:border-venzip-primary border-0 rounded-2xl pl-5 pr-14 h-12 shadow-lg bg-white/90 backdrop-blur-sm placeholder:text-gray-500 font-medium"
+                      data-testid="input-chat-message"
+                    />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                      {message.trim() && (
+                        <ArrowUp className="h-4 w-4 text-venzip-primary animate-bounce" />
+                      )}
+                      <MessageSquare className="h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+                  <Button 
+                    type="submit"
+                    disabled={sendMessageMutation.isPending || isTyping || !message.trim()}
+                    className="bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary text-white hover:shadow-xl hover:shadow-venzip-primary/25 hover:scale-110 transition-all duration-300 rounded-2xl px-6 h-12 min-w-[48px] relative overflow-hidden group"
+                    data-testid="button-send-message"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                    {sendMessageMutation.isPending || isTyping ? (
+                      <Loader2 className="h-5 w-5 animate-spin relative z-10" />
+                    ) : (
+                      <Send className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300 relative z-10" />
+                    )}
+                  </Button>
+                </form>
+              </div>
               
               {/* Achievement indicators */}
               {messageCount > 0 && (
