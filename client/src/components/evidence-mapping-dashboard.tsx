@@ -364,6 +364,134 @@ export default function EvidenceMappingDashboard() {
         </Card>
       </div>
 
+      {/* Cross-Framework Coverage Overview */}
+      <Card className="glass-card border-0 shadow-xl">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-venzip-primary to-venzip-accent rounded-xl flex items-center justify-center shadow-lg">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Cross-Framework Evidence Coverage</CardTitle>
+                <CardDescription>How your documents map across compliance frameworks</CardDescription>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Framework Coverage Grid */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                <Target className="h-4 w-4 text-venzip-primary" />
+                Framework Coverage
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                {['SOC2', 'ISO27001', 'HIPAA', 'GDPR'].map((framework, index) => {
+                  const frameworkMappings = mockMappings.filter(m => m.frameworkId === framework);
+                  const validatedCount = frameworkMappings.filter(m => m.validationStatus === 'validated').length;
+                  const totalRequirements = 45; // Mock total requirements per framework
+                  const coverage = Math.round((validatedCount / totalRequirements) * 100);
+                  const colors = ['from-blue-500 to-blue-600', 'from-green-500 to-green-600', 'from-purple-500 to-purple-600', 'from-orange-500 to-orange-600'];
+                  
+                  return (
+                    <div key={framework} className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-lg transition-all duration-300">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-gray-900">{framework}</span>
+                        <Badge className={`bg-gradient-to-r ${colors[index]} text-white border-0`}>
+                          {coverage}%
+                        </Badge>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div 
+                          className={`bg-gradient-to-r ${colors[index]} h-2 rounded-full transition-all duration-500`}
+                          style={{ width: `${coverage}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {validatedCount} of {totalRequirements} requirements
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Multi-Framework Documents */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-venzip-accent" />
+                Multi-Framework Documents
+              </h4>
+              <div className="space-y-3">
+                {/* Group mappings by document to show cross-framework coverage */}
+                {(() => {
+                  const documentGroups = mockMappings.reduce((groups, mapping) => {
+                    const docId = mapping.documentId;
+                    if (!groups[docId]) {
+                      groups[docId] = {
+                        documentName: mapping.documentName || 'Unknown Document',
+                        mappings: []
+                      };
+                    }
+                    groups[docId].mappings.push(mapping);
+                    return groups;
+                  }, {} as Record<string, { documentName: string; mappings: EvidenceMapping[] }>);
+
+                  return Object.values(documentGroups)
+                    .filter(group => group.mappings.length > 1) // Only show multi-framework docs
+                    .slice(0, 3)
+                    .map((group, index) => {
+                      const frameworks = [...new Set(group.mappings.map(m => m.frameworkId))];
+                      const validatedMappings = group.mappings.filter(m => m.validationStatus === 'validated').length;
+                      
+                      return (
+                        <div key={index} className="bg-gradient-to-r from-gray-50 to-white rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-venzip-secondary" />
+                              <span className="font-medium text-gray-900 text-sm truncate">
+                                {group.documentName}
+                              </span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {group.mappings.length} mappings
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {frameworks.map((framework, fIndex) => (
+                              <Badge key={fIndex} variant="secondary" className="text-xs px-2 py-0.5">
+                                {framework}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div className="text-xs text-gray-500 flex items-center gap-2">
+                            <CheckCircle className="h-3 w-3 text-green-500" />
+                            {validatedMappings} validated of {group.mappings.length} mappings
+                          </div>
+                        </div>
+                      );
+                    });
+                })()}
+              </div>
+              {Object.values(mockMappings.reduce((groups, mapping) => {
+                const docId = mapping.documentId;
+                if (!groups[docId]) groups[docId] = [];
+                groups[docId].push(mapping);
+                return groups;
+              }, {} as Record<string, EvidenceMapping[]>)).filter(group => group.length > 1).length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p>No multi-framework documents yet</p>
+                  <p className="text-sm">Upload documents to see cross-framework mapping</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Documents for Analysis */}
       <Card>
         <CardHeader>
