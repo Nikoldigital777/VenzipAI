@@ -102,7 +102,7 @@ export default function EvidenceMappingDashboard() {
   });
 
   // Fetch documents for analysis
-  const { data: documents } = useQuery<Document[]>({
+  const { data: documentsResponse } = useQuery<{items: Document[]}>({
     queryKey: ["/api/documents"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/documents");
@@ -110,6 +110,8 @@ export default function EvidenceMappingDashboard() {
       return res.json();
     },
   });
+  
+  const documents = documentsResponse?.items || [];
 
   // Analyze document mutation
   const analyzeDocumentMutation = useMutation({
