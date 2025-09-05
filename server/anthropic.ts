@@ -13,7 +13,7 @@ const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
 // </important_do_not_delete>
 
 // Validate API key on startup
-const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+const apiKey = process.env.ANTHROPIC_API_KEY;
 if (!apiKey) {
   console.error('CRITICAL: No Anthropic API key found. Claude features will not work.');
   console.log('Please set ANTHROPIC_API_KEY in Secrets with your Anthropic API key.');
