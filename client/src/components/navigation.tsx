@@ -66,7 +66,7 @@ export default function Navigation() {
           scrolled ? 'h-14' : 'h-16'
         }`}>
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center" data-testid="logo">
+          <Link href="/landing" className="flex items-center" data-testid="logo">
             <img 
               src={venzipLogo} 
               alt="Venzip Logo" 

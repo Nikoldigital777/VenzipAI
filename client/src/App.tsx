@@ -26,6 +26,9 @@ function Router() {
       {/* Allow onboarding access during auth flow */}
       <Route path="/onboarding" component={Onboarding} />
       
+      {/* Landing page accessible at /landing for both authenticated and non-authenticated users */}
+      <Route path="/landing" component={Landing} />
+      
       {!isAuthenticated && !isLoading ? (
         <Route path="/" component={Landing} />
       ) : (
