@@ -788,10 +788,10 @@ export default function Onboarding() {
                               ></div>
                             </div>
                             
-                            {/* Progress Percentage */}
-                            <div className="flex items-center space-x-2 text-white">
+                            {/* Progress Percentage and Status */}
+                            <div className="flex flex-col items-center space-y-1 text-white text-center">
                               <span className="text-base font-bold">{Math.round(generationProgress)}%</span>
-                              <span className="text-sm opacity-90">• Analyzing compliance requirements</span>
+                              <span className="text-xs opacity-90">Analyzing compliance requirements</span>
                             </div>
                           </div>
                         ) : (
