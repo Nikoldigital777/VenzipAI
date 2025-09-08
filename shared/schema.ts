@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
@@ -94,23 +95,23 @@ export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   companyId: varchar("company_id").references(() => companies.id),
   frameworkId: varchar("framework_id").references(() => frameworks.id),
-  
+
   // Basic task info
   title: varchar("title", { length: 500 }).notNull(),
   description: text("description"),
-  
+
   // Task classification
   category: taskCategoryEnum("category").notNull().default('other'),
   priority: taskPriorityEnum("priority").notNull().default('medium'),
   status: taskStatusEnum("status").notNull().default('not_started'),
-  
+
   // Assignment and ownership
   assignedToId: varchar("assigned_to_id").references(() => users.id),
   createdById: varchar("created_by_id").references(() => users.id).notNull(),
-  
+
   // Legacy userId field for backward compatibility
   userId: varchar("user_id").notNull().references(() => users.id),
-  
+
   // Dates and progress
   dueDate: timestamp("due_date"),
   startDate: timestamp("start_date"),
@@ -118,19 +119,19 @@ export const tasks = pgTable("tasks", {
   estimatedHours: integer("estimated_hours"),
   actualHours: integer("actual_hours"),
   progressPercentage: integer("progress_percentage").default(0),
-  
+
   // Compliance specific
   complianceRequirement: text("compliance_requirement"),
   evidenceRequired: boolean("evidence_required").default(false),
   blockedReason: text("blocked_reason"),
-  
+
   // Legacy assignedTo field for backward compatibility
   assignedTo: varchar("assigned_to"),
-  
+
   // Metadata
   tags: text("tags"), // JSON array as text
   dependencies: text("dependencies"), // JSON array of task IDs
-  
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
@@ -165,6 +166,7 @@ export const documents = pgTable("documents", {
   analysisResult: jsonb("analysis_result"),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   verifiedAt: timestamp("verified_at"),
+  extractedText: text("extracted_text"),
 });
 
 // Risks table

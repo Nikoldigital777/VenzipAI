@@ -199,7 +199,7 @@ const upload = multer({
     const allowedTypes = /pdf|doc|docx|xls|xlsx|png|jpg|jpeg|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
+
     if (extname && mimetype) {
       return cb(null, true);
     } else {
@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const { message } = req.body;
-      
+
       if (!message || typeof message !== "string") {
         return res.status(400).json({ error: "message is required" });
       }
@@ -283,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/summary', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      
+
       // Get real data counts using storage layer
       const documents = await storage.getDocumentsByUserId(userId);
       const chatMessagesData = await storage.getChatMessagesByUserId(userId, 1000);
@@ -459,18 +459,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai/generate-checklist', isAuthenticated, async (req: any, res) => {
     try {
       const { frameworks, industry, companySize } = req.body;
-      
+
       if (!frameworks || frameworks.length === 0) {
         return res.status(400).json({ message: "Frameworks are required" });
       }
-      
+
       if (!industry || !companySize) {
         return res.status(400).json({ message: "Industry and company size are required" });
       }
 
       // Generate AI-powered compliance checklist
       const checklist = await generateComplianceChecklist(frameworks, industry, companySize);
-      
+
       res.json({ checklist });
     } catch (error) {
       console.error("Error generating AI checklist:", error);
@@ -495,7 +495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.sub;
       const companyData = insertCompanySchema.parse({ ...req.body, userId });
       const company = await storage.upsertCompany(companyData);
-      
+
       // Store user preferences if provided
       if (req.body.preferences) {
         // Create a notification for user preferences setup
@@ -512,14 +512,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Continue even if notification creation fails
         }
       }
-      
+
       // Initialize framework progress for selected frameworks
       if (req.body.selectedFrameworks && req.body.selectedFrameworks.length > 0) {
         const frameworks = await storage.getAllFrameworks();
         const selectedFrameworks = frameworks.filter(f => 
           req.body.selectedFrameworks.includes(f.name)
         );
-        
+
         for (const framework of selectedFrameworks) {
           await storage.upsertFrameworkProgress({
             userId,
@@ -528,10 +528,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             totalControls: framework.totalControls,
             progressPercentage: '0.00'
           });
-          
+
           // Generate initial compliance tasks for each framework
           const initialTasks = getInitialTasksForFramework(framework.name, companyData.industry, companyData.size);
-          
+
           for (const taskData of initialTasks) {
             await storage.createTask({
               userId,
@@ -547,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       }
-      
+
       res.json(company);
     } catch (error) {
       console.error("Error saving company:", error);
@@ -595,7 +595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.sub;
       const taskData = insertTaskSchema.parse({ ...req.body, userId });
       const task = await storage.createTask(taskData);
-      
+
       // Create notification for new task
       if (task.priority === 'high' || task.priority === 'critical') {
         await createNotification(userId, {
@@ -624,7 +624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
-      
+
       res.json(task);
     } catch (error) {
       console.error("Error creating task:", error);
@@ -637,12 +637,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updates = req.body;
       const userId = req.user.sub;
-      
+
       // Get the task before update to check status change
       const currentTask = await storage.getTaskById(id);
-      
+
       const task = await storage.updateTask(id, updates);
-      
+
       // Create notification for task completion
       if (updates.status === 'completed' && currentTask?.status !== 'completed') {
         await createNotification(userId, {
@@ -655,7 +655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           relatedEntityId: task.id
         });
       }
-      
+
       // Create notification if task becomes overdue
       if (task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed') {
         await createNotification(userId, {
@@ -668,7 +668,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           relatedEntityId: task.id
         });
       }
-      
+
       // Trigger automatic risk score calculation if task was completed
       if (updates.status === 'completed' && currentTask?.status !== 'completed') {
         try {
@@ -677,7 +677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             storage.getRisksByUserId(userId),
             storage.getTasksByUserId(userId)
           ]);
-          
+
           // Filter by framework if task has one
           const frameworkId = task.frameworkId;
           const filteredRisks = frameworkId 
@@ -686,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const filteredTasks = frameworkId 
             ? userTasks.filter(task => task.frameworkId === frameworkId)
             : userTasks;
-          
+
           // Calculate metrics
           const totalTasks = filteredTasks.length;
           const completedTasks = filteredTasks.filter(task => task.status === 'completed').length;
@@ -694,7 +694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const mediumRisks = filteredRisks.filter(risk => risk.impact === 'medium').length;
           const lowRisks = filteredRisks.filter(risk => risk.impact === 'low').length;
           const mitigatedRisks = filteredRisks.filter(risk => risk.status === 'mitigated').length;
-          
+
           // Call AI calculation
           const scoreData = await calculateDynamicRiskScore(userId, frameworkId || undefined, {
             totalTasks,
@@ -705,7 +705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             mitigatedRisks,
             recentChanges: [`Task completed: ${task.title}`]
           });
-          
+
           // Save to history
           const historyData = insertRiskScoreHistorySchema.parse({
             userId,
@@ -720,16 +720,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             calculationFactors: scoreData.factors,
             triggeredBy: 'task_completion'
           });
-          
+
           await storage.createRiskScoreHistory(historyData);
-          
+
           console.log(`Auto-calculated risk score after task completion: ${scoreData.overallRiskScore}`);
         } catch (error) {
           console.error("Error auto-calculating risk score:", error);
           // Don't fail the task update if risk calculation fails
         }
       }
-      
+
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);
@@ -832,19 +832,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const filters = documentFilterSchema.parse(req.query);
-      
+
       // Get all user documents
       let documents = await storage.getDocumentsByUserId(userId);
-      
+
       // Apply filters
       if (filters.frameworkId) {
         documents = documents.filter(doc => doc.frameworkId === filters.frameworkId);
       }
-      
+
       if (filters.documentType) {
         documents = documents.filter(doc => doc.fileType === filters.documentType);
       }
-      
+
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         documents = documents.filter(doc => 
@@ -852,11 +852,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           doc.fileType.toLowerCase().includes(searchLower)
         );
       }
-      
+
       // Apply pagination
       const { paginatedItems, total } = applyPagination(documents, filters.limit, filters.offset);
       const response = createPaginationResponse(paginatedItems, total, filters.limit, filters.offset);
-      
+
       res.json(response);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -872,11 +872,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const userId = req.user.sub;
       const { frameworkId } = req.body;
-      
+
       // Read file content for analysis
       const filePath = req.file.path;
       const fileContent = fs.readFileSync(filePath, 'utf8');
-      
+
       // Analyze document with Claude
       let analysisResult = null;
       try {
@@ -892,17 +892,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasks = await storage.getTasksByUserId(userId);
       const risks = await storage.getRisksByUserId(userId);
       const documents = await storage.getDocumentsByUserId(userId);
-      
+
       if (!company) {
         return res.status(400).json({ message: "Company profile required for compliance check" });
       }
-      
+
       // Analyze current compliance state
       const completedTasks = tasks.filter(t => t.status === 'completed').length;
       const totalTasks = tasks.length;
       const openHighRisks = risks.filter(r => r.status === 'open' && r.impact === 'high').length;
       const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-      
+
       // Get comprehensive compliance analysis
       const statusAnalysis = await detectComplianceGaps({
         frameworks: company.selectedFrameworks,
@@ -911,7 +911,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         openRisks: risks.filter(r => r.status === 'open').length,
         uploadedDocuments: documents.length
       }, company.industry, company.size);
-      
+
       // Generate prioritized action plan
       const actionPlan = await generateComplianceRecommendations(
         company.selectedFrameworks,
@@ -924,7 +924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           documentsUploaded: documents.length
         }
       );
-      
+
       res.json({
         currentStatus: {
           completionRate: Math.round(completionRate),
@@ -947,7 +947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error analyzing document:", error);
         // Continue without analysis if Claude fails
       }
-      
+
       const documentData = insertDocumentSchema.parse({
         userId,
         frameworkId: frameworkId || null,
@@ -958,7 +958,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analysisResult,
         status: analysisResult ? 'verified' : 'pending'
       });
-      
+
       const document = await storage.createDocument(documentData);
       res.json(document);
     } catch (error) {
@@ -983,27 +983,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const filters = riskFilterSchema.parse(req.query);
-      
+
       // Get all user risks
       let risks = await storage.getRisksByUserId(userId);
-      
+
       // Apply filters
       if (filters.category) {
         risks = risks.filter(risk => risk.category === filters.category);
       }
-      
+
       if (filters.impact) {
         risks = risks.filter(risk => risk.impact === filters.impact);
       }
-      
+
       if (filters.likelihood) {
         risks = risks.filter(risk => risk.likelihood === filters.likelihood);
       }
-      
+
       if (filters.frameworkId) {
         risks = risks.filter(risk => risk.frameworkId === filters.frameworkId);
       }
-      
+
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         risks = risks.filter(risk => 
@@ -1011,11 +1011,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           (risk.description && risk.description.toLowerCase().includes(searchLower))
         );
       }
-      
+
       // Apply pagination
       const { paginatedItems, total } = applyPagination(risks, filters.limit, filters.offset);
       const response = createPaginationResponse(paginatedItems, total, filters.limit, filters.offset);
-      
+
       res.json(response);
     } catch (error) {
       console.error("Error fetching risks:", error);
@@ -1026,10 +1026,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/risks', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      
+
       // Use Claude to assess the risk if description is provided
       let riskData = { ...req.body, userId };
-      
+
       if (req.body.description && req.body.frameworkId) {
         try {
           const assessment = await assessRisk(
@@ -1037,7 +1037,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             req.body.frameworkId,
             req.body.category
           );
-          
+
           riskData = {
             ...riskData,
             impact: assessment.impact,
@@ -1050,10 +1050,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Continue without AI assessment
         }
       }
-      
+
       const validatedData = insertRiskSchema.parse(riskData);
       const risk = await storage.createRisk(validatedData);
-      
+
       // Create notification for high-impact risks
       if (risk.impact === 'high') {
         await createNotification(userId, {
@@ -1080,7 +1080,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           relatedEntityId: risk.id
         });
       }
-      
+
       res.json(risk);
     } catch (error) {
       console.error("Error creating risk:", error);
@@ -1116,13 +1116,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const { frameworkId } = req.body;
-      
+
       // Get current data for calculation
       const [risks, userTasks] = await Promise.all([
         storage.getRisksByUserId(userId),
         storage.getTasksByUserId(userId)
       ]);
-      
+
       // Filter by framework if specified
       const filteredRisks = frameworkId 
         ? risks.filter(risk => risk.frameworkId === frameworkId)
@@ -1130,7 +1130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filteredTasks = frameworkId 
         ? userTasks.filter(task => task.frameworkId === frameworkId)
         : userTasks;
-      
+
       // Calculate metrics
       const totalTasks = filteredTasks.length;
       const completedTasks = filteredTasks.filter(task => task.status === 'completed').length;
@@ -1138,7 +1138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const mediumRisks = filteredRisks.filter(risk => risk.impact === 'medium').length;
       const lowRisks = filteredRisks.filter(risk => risk.impact === 'low').length;
       const mitigatedRisks = filteredRisks.filter(risk => risk.status === 'mitigated').length;
-      
+
       // Call AI calculation
       const scoreData = await calculateDynamicRiskScore(userId, frameworkId, {
         totalTasks,
@@ -1149,7 +1149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mitigatedRisks,
         recentChanges: [] // Could be enhanced to track recent changes
       });
-      
+
       // Save to history
       const historyData = insertRiskScoreHistorySchema.parse({
         userId,
@@ -1164,9 +1164,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         calculationFactors: scoreData.factors,
         triggeredBy: 'manual_calculation'
       });
-      
+
       await storage.createRiskScoreHistory(historyData);
-      
+
       res.json(scoreData);
     } catch (error) {
       console.error("Error calculating dynamic risk score:", error);
@@ -1178,7 +1178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const { frameworkId } = req.query;
-      
+
       const history = await storage.getRiskScoreHistoryByUserId(userId, frameworkId as string);
       res.json(history);
     } catch (error) {
@@ -1191,7 +1191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const { frameworkId } = req.query;
-      
+
       const latestScore = await storage.getLatestRiskScore(userId, frameworkId as string);
       res.json(latestScore);
     } catch (error) {
@@ -1217,7 +1217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const { message, context } = req.body;
-      
+
       // Save user message
       await storage.createChatMessage(
         insertChatMessageSchema.parse({
@@ -1226,13 +1226,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           messageType: 'user'
         })
       );
-      
+
       // Get user context for enhanced Claude response
       const company = await storage.getCompanyByUserId(userId);
       const tasks = await storage.getTasksByUserId(userId);
       const risks = await storage.getRisksByUserId(userId);
       const documents = await storage.getDocumentsByUserId(userId);
-      
+
       // Build comprehensive context for Claude
       const userProfile = company ? {
         frameworks: company.selectedFrameworks,
@@ -1240,7 +1240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         companySize: company.size,
         currentProgress: context?.summary?.compliancePercent || 0
       } : undefined;
-      
+
       const complianceContext = {
         totalTasks: tasks.length,
         completedTasks: tasks.filter(t => t.status === 'completed').length,
@@ -1249,10 +1249,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         documentsUploaded: documents.length,
         recentGaps: context?.summary?.gaps?.slice(0, 3) || []
       };
-      
+
       // Get enhanced Claude response with full context
       const response = await chatWithClaude(message, JSON.stringify(complianceContext), userProfile);
-      
+
       // Save Claude response
       const responseMessage = await storage.createChatMessage(
         insertChatMessageSchema.parse({
@@ -1261,7 +1261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           messageType: 'assistant'
         })
       );
-      
+
       res.json({ response: responseMessage });
     } catch (error) {
       console.error("Error chatting with Claude:", error);
@@ -1275,18 +1275,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.sub;
       const company = await storage.getCompanyByUserId(userId);
       const progress = await storage.getFrameworkProgressByUserId(userId);
-      
+
       if (!company) {
         return res.status(400).json({ message: "Company profile not found" });
       }
-      
+
       const recommendations = await generateComplianceRecommendations(
         company.selectedFrameworks,
         company.size,
         company.industry,
         progress
       );
-      
+
       res.json(recommendations);
     } catch (error) {
       console.error("Error generating recommendations:", error);
@@ -1304,7 +1304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10));
 
       let tasks = await storage.getTasksByUserId(userId);
-      
+
       // Apply filters
       if (framework) {
         tasks = tasks.filter(task => task.frameworkId?.includes(framework));
@@ -1339,7 +1339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const body = req.body ?? {};
-      
+
       if (!body.title) {
         return res.status(400).json({ error: "title is required" });
       }
@@ -1416,7 +1416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10));
 
       let risks = await storage.getRisksByUserId(userId);
-      
+
       // Apply filters
       if (category) {
         risks = risks.filter(risk => risk.category === category);
@@ -1451,7 +1451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const body = req.body ?? {};
-      
+
       if (!body.title || !body.description || !body.category) {
         return res.status(400).json({ error: "title, description, and category are required" });
       }
@@ -1517,7 +1517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const risk = await storage.updateRisk(id, updates);
-      
+
       // Create notification for risk mitigation
       if (updates.status === 'mitigated' && currentRisk?.status !== 'mitigated') {
         await createNotification(req.user.claims.sub, {
@@ -1530,7 +1530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           relatedEntityId: risk.id
         });
       }
-      
+
       // Create notification for risk escalation
       if (updates.impact === 'high' && currentRisk?.impact !== 'high') {
         await createNotification(req.user.claims.sub, {
@@ -1563,18 +1563,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Enhanced AI endpoints for intelligent compliance management
-  
+
   // Intelligent task prioritization endpoint
   app.post('/api/tasks/prioritize', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
       const company = await storage.getCompanyByUserId(userId);
       const tasks = await storage.getTasksByUserId(userId);
-      
+
       if (!company) {
         return res.status(400).json({ message: "Company profile not found" });
       }
-      
+
       const prioritization = await prioritizeTasks(tasks.map(task => ({
         id: task.id,
         title: task.title,
@@ -1588,14 +1588,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         industry: company.industry,
         size: company.size
       });
-      
+
       res.json(prioritization);
     } catch (error) {
       console.error("Error prioritizing tasks:", error);
       res.status(500).json({ message: "Failed to prioritize tasks" });
     }
   });
-  
+
   // Compliance gap detection endpoint
   app.post('/api/compliance/gaps', isAuthenticated, async (req: any, res) => {
     try {
@@ -1604,14 +1604,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasks = await storage.getTasksByUserId(userId);
       const documents = await storage.getDocumentsByUserId(userId);
       const risks = await storage.getRisksByUserId(userId);
-      
+
       if (!company) {
         return res.status(400).json({ message: "Company profile not found" });
       }
-      
+
       const completedTasks = tasks.filter(t => t.status === 'completed').length;
       const openRisks = risks.filter(r => r.status === 'open').length;
-      
+
       const gapAnalysis = await detectComplianceGaps(
         {
           frameworks: company.selectedFrameworks,
@@ -1623,45 +1623,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         company.industry,
         company.size
       );
-      
+
       res.json(gapAnalysis);
     } catch (error) {
       console.error("Error detecting compliance gaps:", error);
       res.status(500).json({ message: "Failed to detect compliance gaps" });
     }
   });
-  
+
   // Advanced document analysis endpoint
   app.post('/api/documents/:id/analyze-advanced', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
       const documentId = req.params.id;
       const { framework } = req.body;
-      
+
       // Get document details
       const documents = await storage.getDocumentsByUserId(userId);
       const document = documents.find(d => d.id === documentId);
-      
+
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       // Read file content
       const filePath = path.join('uploads', document.filePath.split('/').pop() || '');
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({ message: "File not found" });
       }
-      
+
       const fileContent = fs.readFileSync(filePath, 'utf8');
       const existingDocs = documents.map(d => d.fileName);
-      
+
       const analysis = await analyzeDocumentAdvanced(
         fileContent,
         document.fileName,
         framework,
         existingDocs
       );
-      
+
       res.json(analysis);
     } catch (error) {
       console.error("Error in advanced document analysis:", error);
@@ -1699,7 +1699,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { documentId, frameworkId } = req.body;
-      
+
       // Import and use evidence mapping service
       const { evidenceMappingService } = await import('./evidenceMapping');
       const mappings = await evidenceMappingService.analyzeDocumentForCompliance(
@@ -1766,7 +1766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { frameworkId } = req.body;
-      
+
       // Import and use evidence mapping service
       const { evidenceMappingService } = await import('./evidenceMapping');
       const gaps = await evidenceMappingService.identifyComplianceGaps(userId, frameworkId);
@@ -1792,7 +1792,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/evidence/create-cross-mappings", isAuthenticated, async (req, res) => {
     try {
       const { primaryRequirementId } = req.body;
-      
+
       // Import and use evidence mapping service
       const { evidenceMappingService } = await import('./evidenceMapping');
       await evidenceMappingService.createCrossFrameworkMappings(primaryRequirementId);
@@ -1820,25 +1820,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const filters = notificationFilterSchema.parse(req.query);
-      
+
       // Get all user notifications
       let notifications = await storage.getNotificationsByUserId(userId);
-      
+
       // Apply filters
       if (filters.filter === 'unread') {
         notifications = notifications.filter(n => !n.isRead);
       } else if (filters.filter === 'high' || filters.filter === 'urgent') {
         notifications = notifications.filter(n => n.priority === filters.filter);
       }
-      
+
       if (filters.priority) {
         notifications = notifications.filter(n => n.priority === filters.priority);
       }
-      
+
       // Apply pagination
       const { paginatedItems, total } = applyPagination(notifications, filters.limit, filters.offset);
       const response = createPaginationResponse(paginatedItems, total, filters.limit, filters.offset);
-      
+
       res.json(response);
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -1862,19 +1862,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const userId = req.user.sub;
-      
+
       // Verify notification belongs to user
       const notifications = await storage.getNotificationsByUserId(userId);
       const notification = notifications.find(n => n.id === id);
-      
+
       if (!notification) {
         return res.status(404).json({ error: 'Notification not found' });
       }
-      
+
       const updatedNotification = await storage.updateNotification(id, {
         isRead: true
       });
-      
+
       res.json(updatedNotification);
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -1887,13 +1887,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.sub;
       const notifications = await storage.getNotificationsByUserId(userId);
       const unreadNotifications = notifications.filter(n => !n.isRead);
-      
+
       for (const notification of unreadNotifications) {
         await storage.updateNotification(notification.id, {
           isRead: true
         });
       }
-      
+
       res.json({ marked: unreadNotifications.length });
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -1905,15 +1905,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const userId = req.user.sub;
-      
+
       // Verify notification belongs to user
       const notifications = await storage.getNotificationsByUserId(userId);
       const notification = notifications.find(n => n.id === id);
-      
+
       if (!notification) {
         return res.status(404).json({ error: 'Notification not found' });
       }
-      
+
       await storage.deleteNotification(id);
       res.json({ success: true });
     } catch (error) {
@@ -1949,11 +1949,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const preferences = req.body;
-      
+
       // In a real implementation, you'd save to a user_preferences table
       // For now, just acknowledge the update
       console.log(`Updated preferences for user ${userId}:`, preferences);
-      
+
       // Create notification for preferences update
       await createNotification(userId, {
         title: "Preferences Updated",
@@ -1961,7 +1961,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'preferences_updated',
         priority: 'low'
       });
-      
+
       res.json({ success: true, preferences });
     } catch (error) {
       console.error("Error updating user preferences:", error);
@@ -1973,7 +1973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/learning-resources', async (req, res) => {
     try {
       const filters = learningResourceFilterSchema.parse(req.query);
-      
+
       // Get learning resources with filters applied
       let resources = await storage.getLearningResources({
         frameworkId: filters.frameworkId,
@@ -1981,16 +1981,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category: filters.category,
         search: filters.search,
       });
-      
+
       // Apply additional filters
       if (filters.difficulty) {
         resources = resources.filter(resource => resource.difficulty === filters.difficulty);
       }
-      
+
       // Apply pagination
       const { paginatedItems, total } = applyPagination(resources, filters.limit, filters.offset);
       const response = createPaginationResponse(paginatedItems, total, filters.limit, filters.offset);
-      
+
       res.json(response);
     } catch (error) {
       console.error("Error fetching learning resources:", error);
@@ -2002,7 +2002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const { resourceId } = req.query;
-      
+
       const progress = await storage.getLearningProgress(userId, resourceId as string);
       res.json(progress);
     } catch (error) {
@@ -2018,7 +2018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         userId
       });
-      
+
       const progress = await storage.upsertLearningProgress(progressData);
       res.json(progress);
     } catch (error) {

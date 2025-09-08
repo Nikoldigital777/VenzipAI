@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Upload, 
   File, 
@@ -20,7 +21,9 @@ import {
   Tag,
   Calendar,
   User,
-  Shield
+  Shield,
+  ZoomIn,
+  ZoomOut
 } from "lucide-react";
 
 type UploadResult = { 
@@ -47,6 +50,11 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
   const [tags, setTags] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [pdfText, setPdfText] = useState<string>("");
+  const [pdfPageCount, setPdfPageCount] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Fetch uploaded documents
   const { data: documentsResponse } = useQuery<{items: UploadResult[]}>({
@@ -95,6 +103,10 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
       setCategory("");
       setTags("");
       setDescription("");
+      setPdfText("");
+      setPdfPageCount(0);
+      setCurrentPage(1);
+      setZoomLevel(1);
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
       onUploadComplete?.(data);
     },
@@ -103,16 +115,32 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
     }
   });
 
-  const handleFiles = useCallback((files: FileList | null) => {
+  const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     
     const file = files[0];
     setSelectedFile(file);
     
-    // Generate preview for images and PDFs
+    // Generate preview for images
     if (file.type.startsWith('image/')) {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+    }
+    
+    // Handle PDF files
+    if (file.type === 'application/pdf') {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      
+      // Extract text from PDF (basic implementation)
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        // For now, we'll just set a placeholder - in production you'd use pdf.js
+        setPdfText("PDF content analysis will be available after upload");
+        setPdfPageCount(1);
+      } catch (error) {
+        console.error('Error processing PDF:', error);
+      }
     }
   }, []);
 
@@ -125,6 +153,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
     if (category) formData.append("category", category);
     if (tags) formData.append("tags", tags);
     if (description) formData.append("description", description);
+    if (pdfText) formData.append("extractedText", pdfText);
     
     mutation.mutate(formData);
   };
@@ -210,6 +239,10 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                     onClick={() => {
                       setSelectedFile(null);
                       setPreviewUrl(null);
+                      setPdfText("");
+                      setPdfPageCount(0);
+                      setCurrentPage(1);
+                      setZoomLevel(1);
                     }}
                   >
                     <X className="h-4 w-4" />
@@ -217,13 +250,52 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                 </div>
                 
                 {/* File Preview */}
-                {previewUrl && (
+                {previewUrl && selectedFile && (
                   <div className="mt-4">
-                    <img 
-                      src={previewUrl} 
-                      alt="Preview" 
-                      className="max-w-full max-h-40 mx-auto rounded-lg border"
-                    />
+                    {selectedFile.type.startsWith('image/') ? (
+                      <img 
+                        src={previewUrl} 
+                        alt="Preview" 
+                        className="max-w-full max-h-40 mx-auto rounded-lg border"
+                      />
+                    ) : selectedFile.type === 'application/pdf' ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                          <span className="text-sm font-medium">PDF Preview</span>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.25))}>
+                              <ZoomOut className="h-4 w-4" />
+                            </Button>
+                            <span className="text-sm">{Math.round(zoomLevel * 100)}%</span>
+                            <Button variant="ghost" size="sm" onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.25))}>
+                              <ZoomIn className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="border rounded-lg p-4 bg-white">
+                          <embed
+                            src={previewUrl}
+                            type="application/pdf"
+                            width="100%"
+                            height="300px"
+                            className="rounded border"
+                          />
+                        </div>
+                        
+                        {pdfText && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <h4 className="text-sm font-medium mb-2">Extracted Content Preview</h4>
+                            <p className="text-xs text-gray-600 line-clamp-3">{pdfText}</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <File className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600">File ready for upload</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -350,10 +422,38 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
+                    {doc.fileType === 'application/pdf' ? (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[80vh]">
+                          <DialogHeader>
+                            <DialogTitle>{doc.fileName}</DialogTitle>
+                          </DialogHeader>
+                          <div className="flex-1 overflow-auto">
+                            <embed
+                              src={`/api/documents/${doc.id}/view`}
+                              type="application/pdf"
+                              width="100%"
+                              height="600px"
+                              className="rounded border"
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ) : (
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                    >
                       <Download className="h-4 w-4" />
                     </Button>
                   </div>
