@@ -27,6 +27,12 @@ interface Task {
     email: string;
   };
   tags: string[];
+  
+  // AI-powered insights
+  aiPriorityScore?: number;
+  aiReasoning?: string;
+  aiNextAction?: string;
+  aiAnalyzedAt?: string;
 }
 
 interface TaskCardProps {
@@ -107,6 +113,11 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
               <Badge className={`${priorityColors[task.priority]} font-medium group-hover:scale-105 transition-transform duration-300`} variant="secondary" data-testid={`task-priority-${task.id}`}>
                 {task.priority.toUpperCase()}
               </Badge>
+              {task.aiPriorityScore && (
+                <Badge className="bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 border border-purple-200/50 font-medium group-hover:scale-105 transition-transform duration-300" variant="secondary" data-testid={`task-ai-score-${task.id}`}>
+                  🤖 AI Score: {task.aiPriorityScore}/100
+                </Badge>
+              )}
               <Badge className={`${statusColors[task.status]} font-medium group-hover:scale-105 transition-transform duration-300`} variant="secondary" data-testid={`task-status-${task.id}`}>
                 {task.status.replace('_', ' ').toUpperCase()}
               </Badge>
@@ -184,6 +195,43 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
             </div>
           )}
         </div>
+        
+        {/* AI Insights Section */}
+        {(task.aiReasoning || task.aiNextAction) && (
+          <div className="bg-gradient-to-r from-purple-50/80 to-blue-50/80 rounded-xl p-4 mb-4 border border-purple-200/30">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">🤖</span>
+              </div>
+              <h4 className="font-semibold text-purple-700 text-sm">AI Intelligence</h4>
+              {task.aiAnalyzedAt && (
+                <span className="text-xs text-purple-600 ml-auto">
+                  Analyzed {format(new Date(task.aiAnalyzedAt), 'MMM dd')}
+                </span>
+              )}
+            </div>
+            
+            {task.aiReasoning && (
+              <div className="mb-3">
+                <p className="text-sm text-purple-800 font-medium mb-1">Priority Reasoning:</p>
+                <p className="text-xs text-purple-700 leading-relaxed" data-testid={`task-ai-reasoning-${task.id}`}>
+                  {task.aiReasoning}
+                </p>
+              </div>
+            )}
+            
+            {task.aiNextAction && (
+              <div className="bg-white/60 rounded-lg p-3 border border-purple-200/40">
+                <p className="text-sm text-blue-800 font-medium mb-1 flex items-center gap-1">
+                  <span>🎯</span> Suggested Next Action:
+                </p>
+                <p className="text-xs text-blue-700 leading-relaxed" data-testid={`task-ai-next-action-${task.id}`}>
+                  {task.aiNextAction}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Tags */}
         {task.tags.length > 0 && (
