@@ -36,7 +36,8 @@ import {
   prioritizeTasks,
   detectComplianceGaps,
   analyzeDocumentAdvanced,
-  generateComplianceChecklist
+  generateComplianceChecklist,
+  analyzeTaskPriority
 } from "./anthropic";
 import multer from 'multer';
 import path from 'path';
@@ -475,6 +476,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating AI checklist:", error);
       res.status(500).json({ message: "Failed to generate compliance checklist" });
+    }
+  });
+
+  // AI Task Priority Analysis Route
+  app.post('/api/ai/analyze-tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      
+      // Get user's tasks
+      const tasks = await storage.getTasksByUserId(userId);
+      
+      // Get company info for context
+      let companyInfo = {};
+      try {
+        const company = await storage.getCompanyByUserId(userId);
+        companyInfo = {
+          industry: company?.industry,
+          size: company?.size,
+          frameworks: company?.selectedFrameworks
+        };
+      } catch (error) {
+        console.log("Company info not available for task analysis");
+      }
+
+      // Analyze tasks with AI
+      const analysis = await analyzeTaskPriority(tasks, companyInfo);
+
+      // Update tasks with AI insights
+      for (const analyzedTask of analysis.analyzedTasks) {
+        try {
+          await storage.updateTask(analyzedTask.id, {
+            aiPriorityScore: analyzedTask.aiPriorityScore,
+            aiReasoning: analyzedTask.aiReasoning,
+            aiNextAction: analyzedTask.aiNextAction,
+            aiAnalyzedAt: new Date()
+          });
+        } catch (updateError) {
+          console.error("Error updating task with AI insights:", updateError);
+        }
+      }
+
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error analyzing tasks:", error);
+      res.status(500).json({ message: "Failed to analyze tasks" });
+    }
+  });
+
+  // AI Weekly Recommendations Route
+  app.get('/api/ai/weekly-recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      
+      // Get user's tasks (only incomplete ones)
+      const allTasks = await storage.getTasksByUserId(userId);
+      const incompleteTasks = allTasks.filter(task => task.status !== 'completed');
+      
+      // Get company info
+      let companyInfo = {};
+      try {
+        const company = await storage.getCompanyByUserId(userId);
+        companyInfo = {
+          industry: company?.industry,
+          size: company?.size,
+          frameworks: company?.selectedFrameworks
+        };
+      } catch (error) {
+        console.log("Company info not available");
+      }
+
+      // Get AI analysis for current week recommendations
+      const analysis = await analyzeTaskPriority(incompleteTasks, companyInfo);
+
+      res.json({
+        weeklyRecommendations: analysis.weeklyRecommendations,
+        nextActionSuggestions: analysis.nextActionSuggestions,
+        overdueTasks: analysis.overdueTasks,
+        topPriorityTasks: analysis.analyzedTasks
+          .sort((a, b) => b.aiPriorityScore - a.aiPriorityScore)
+          .slice(0, 5)
+      });
+    } catch (error) {
+      console.error("Error getting weekly recommendations:", error);
+      res.status(500).json({ message: "Failed to get weekly recommendations" });
+    }
+  });
+
+  // Deadline Intelligence Route
+  app.get('/api/ai/deadline-intelligence', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const tasks = await storage.getTasksByUserId(userId);
+      
+      const now = new Date();
+      
+      // Overdue tasks
+      const overdueTasks = tasks
+        .filter(task => task.dueDate && new Date(task.dueDate) < now && task.status !== 'completed')
+        .map(task => {
+          const daysOverdue = Math.ceil((now.getTime() - new Date(task.dueDate!).getTime()) / (1000 * 60 * 60 * 24));
+          return {
+            ...task,
+            daysOverdue,
+            urgencyLevel: daysOverdue > 14 ? 'critical' : daysOverdue > 7 ? 'high' : 'medium'
+          };
+        })
+        .sort((a, b) => b.daysOverdue - a.daysOverdue);
+
+      // Tasks due soon (within 7 days)
+      const tasksDueSoon = tasks
+        .filter(task => {
+          if (!task.dueDate || task.status === 'completed') return false;
+          const daysUntilDue = Math.ceil((new Date(task.dueDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          return daysUntilDue >= 0 && daysUntilDue <= 7;
+        })
+        .map(task => {
+          const daysUntilDue = Math.ceil((new Date(task.dueDate!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          return {
+            ...task,
+            daysUntilDue,
+            urgencyLevel: daysUntilDue <= 2 ? 'high' : 'medium'
+          };
+        })
+        .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+
+      // High-impact tasks without deadlines
+      const highImpactTasks = tasks
+        .filter(task => 
+          task.status !== 'completed' && 
+          !task.dueDate && 
+          (task.priority === 'high' || task.priority === 'critical')
+        )
+        .slice(0, 5);
+
+      res.json({
+        overdueTasks,
+        tasksDueSoon,
+        highImpactTasks,
+        deadlineAlerts: [
+          ...overdueTasks.map(task => ({
+            type: 'overdue',
+            taskId: task.id,
+            title: task.title,
+            message: `${task.daysOverdue} days overdue`,
+            severity: task.urgencyLevel
+          })),
+          ...tasksDueSoon.map(task => ({
+            type: 'due_soon',
+            taskId: task.id,
+            title: task.title,
+            message: task.daysUntilDue === 0 ? 'Due today' : `Due in ${task.daysUntilDue} day${task.daysUntilDue !== 1 ? 's' : ''}`,
+            severity: task.urgencyLevel
+          }))
+        ]
+      });
+    } catch (error) {
+      console.error("Error getting deadline intelligence:", error);
+      res.status(500).json({ message: "Failed to get deadline intelligence" });
     }
   });
 

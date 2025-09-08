@@ -853,3 +853,170 @@ function generateFallbackChecklist(frameworks: string[], industry: string, compa
     }
   ];
 }
+
+// AI-powered task analysis with priority ranking and next action suggestions
+export async function analyzeTaskPriority(
+  tasks: any[],
+  companyInfo?: { industry?: string; size?: string; frameworks?: string[] }
+): Promise<{
+  analyzedTasks: Array<{
+    id: string;
+    aiPriorityScore: number;
+    aiReasoning: string;
+    aiNextAction: string;
+    urgencyFactors: string[];
+    impactFactors: string[];
+  }>;
+  weeklyRecommendations: string[];
+  overdueTasks: Array<{ id: string; daysOverdue: number; urgencyLevel: 'critical' | 'high' | 'medium' }>;
+  nextActionSuggestions: string[];
+}> {
+  if (!apiKey) {
+    throw new Error('Anthropic API key not configured');
+  }
+
+  // Basic deadline intelligence - identify overdue tasks
+  const now = new Date();
+  const overdueTasks = tasks
+    .filter(task => task.dueDate && new Date(task.dueDate) < now && task.status !== 'completed')
+    .map(task => {
+      const daysOverdue = Math.ceil((now.getTime() - new Date(task.dueDate).getTime()) / (1000 * 60 * 60 * 24));
+      const urgencyLevel = daysOverdue > 14 ? 'critical' : daysOverdue > 7 ? 'high' : 'medium';
+      return { id: task.id, daysOverdue, urgencyLevel };
+    });
+
+  try {
+
+    const prompt = `You are an AI compliance consultant specializing in task prioritization for ${companyInfo?.industry || 'business'} companies (${companyInfo?.size || 'medium size'}) working on ${companyInfo?.frameworks?.join(', ') || 'compliance frameworks'}.
+
+Analyze these compliance tasks and provide intelligent priority ranking based on urgency + impact:
+
+TASKS TO ANALYZE:
+${tasks.map(task => `
+ID: ${task.id}
+Title: ${task.title}
+Description: ${task.description || 'No description'}
+Current Priority: ${task.priority}
+Status: ${task.status}
+Due Date: ${task.dueDate || 'No due date'}
+Framework: ${task.frameworkId || 'General'}
+Category: ${task.category || 'other'}
+Estimated Hours: ${task.estimatedHours || 'Unknown'}
+`).join('\n---\n')}
+
+ANALYSIS REQUIREMENTS:
+1. Calculate AI Priority Score (0-100) based on:
+   - Compliance impact and regulatory risk (40%)
+   - Deadline urgency and business criticality (30%) 
+   - Framework dependencies and prerequisites (20%)
+   - Resource availability and effort estimate (10%)
+
+2. Provide clear reasoning for each priority score
+3. Suggest specific next actions for each task
+4. Identify urgency and impact factors
+
+OUTPUT FORMAT (valid JSON only):
+{
+  "analyzedTasks": [
+    {
+      "id": "task-id",
+      "aiPriorityScore": 85,
+      "aiReasoning": "Critical foundation requirement for SOC 2 compliance. Blocks 3 dependent tasks. High regulatory impact.",
+      "aiNextAction": "Schedule policy review meeting with security team this week. Draft initial policy framework.",
+      "urgencyFactors": ["Regulatory deadline", "Blocking dependencies"],
+      "impactFactors": ["Compliance foundation", "High audit visibility"]
+    }
+  ],
+  "weeklyRecommendations": [
+    "Focus on completing information security policy (blocks other tasks)",
+    "Schedule risk assessment before month-end deadline",
+    "Complete overdue documentation tasks this week"
+  ],
+  "nextActionSuggestions": [
+    "Start with highest AI priority score tasks",
+    "Complete overdue tasks immediately", 
+    "Focus on framework foundation tasks first"
+  ]
+}
+
+Prioritize tasks that:
+- Are overdue or approaching deadlines
+- Block other compliance tasks
+- Have high regulatory impact
+- Are foundation requirements for frameworks
+- Present significant business risk if delayed
+
+Provide actionable, specific recommendations that help achieve compliance efficiently.`;
+
+    const response = await anthropic.messages.create({
+      model: DEFAULT_MODEL_STR,
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
+    
+    // Parse JSON response
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const analysis = JSON.parse(jsonMatch[0]);
+      return {
+        ...analysis,
+        overdueTasks
+      };
+    } else {
+      // Fallback analysis
+      return generateFallbackTaskAnalysis(tasks, overdueTasks);
+    }
+  } catch (error) {
+    console.error('Error analyzing task priority:', error);
+    return generateFallbackTaskAnalysis(tasks, overdueTasks);
+  }
+}
+
+// Fallback task analysis when AI fails
+function generateFallbackTaskAnalysis(tasks: any[], overdueTasks: any[]): any {
+  const analyzedTasks = tasks.map(task => {
+    let score = 50; // Base score
+    
+    // Priority scoring
+    if (task.priority === 'critical') score += 30;
+    else if (task.priority === 'high') score += 20;
+    else if (task.priority === 'medium') score += 10;
+    
+    // Due date urgency
+    if (task.dueDate) {
+      const daysUntilDue = Math.ceil((new Date(task.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      if (daysUntilDue < 0) score += 25; // Overdue
+      else if (daysUntilDue <= 7) score += 15; // Due soon
+      else if (daysUntilDue <= 30) score += 5; // Due this month
+    }
+    
+    // Framework importance
+    if (task.frameworkId) score += 10;
+    
+    return {
+      id: task.id,
+      aiPriorityScore: Math.min(100, Math.max(0, score)),
+      aiReasoning: `Task prioritized based on ${task.priority} priority level and deadline proximity.`,
+      aiNextAction: `Review task requirements and begin execution. Ensure all prerequisites are met.`,
+      urgencyFactors: task.dueDate ? ['Due date proximity'] : ['No specific deadline'],
+      impactFactors: ['Compliance requirement']
+    };
+  });
+
+  return {
+    analyzedTasks,
+    weeklyRecommendations: [
+      'Focus on high-priority compliance tasks',
+      'Complete overdue items immediately',
+      'Review upcoming deadlines'
+    ],
+    overdueTasks,
+    nextActionSuggestions: [
+      'Start with highest priority tasks',
+      'Address overdue items first',
+      'Plan week around critical deadlines'
+    ]
+  };
+}

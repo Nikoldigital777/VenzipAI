@@ -128,6 +128,12 @@ export const tasks = pgTable("tasks", {
   // Legacy assignedTo field for backward compatibility
   assignedTo: varchar("assigned_to"),
 
+  // AI-powered insights
+  aiPriorityScore: integer("ai_priority_score"), // 0-100 AI calculated urgency + impact score
+  aiReasoning: text("ai_reasoning"), // Claude's reasoning for priority and recommendations
+  aiNextAction: text("ai_next_action"), // AI suggestion for next steps
+  aiAnalyzedAt: timestamp("ai_analyzed_at"), // When AI last analyzed this task
+
   // Metadata
   tags: text("tags"), // JSON array as text
   dependencies: text("dependencies"), // JSON array of task IDs
