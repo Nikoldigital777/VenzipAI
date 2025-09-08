@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Filter } from "lucide-react";
+import { Search, Plus, Filter, Brain, Zap } from "lucide-react";
 import TaskCard from "./TaskCard";
+import { WeeklyRecommendations } from "./WeeklyRecommendations";
+import { DeadlineIntelligence } from "./DeadlineIntelligence";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -41,6 +43,12 @@ interface Task {
     email: string;
   };
   tags: string[];
+  
+  // AI-powered insights
+  aiPriorityScore?: number;
+  aiReasoning?: string;
+  aiNextAction?: string;
+  aiAnalyzedAt?: string;
 }
 
 interface TasksResponse {
@@ -67,6 +75,32 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // AI Analysis mutation
+  const aiAnalysisMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('/api/tasks/ai-analysis/analyze', {
+        method: 'POST'
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/ai-recommendations/weekly'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/ai-analysis/deadlines'] });
+      toast({
+        title: "AI Analysis Complete",
+        description: "Tasks have been analyzed with AI insights and recommendations.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to complete AI analysis. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Fetch tasks with filters
   const { data: tasksData, isLoading, error } = useQuery({
@@ -166,15 +200,32 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
             </h1>
             <p className="text-xl text-gray-600 leading-relaxed">Manage your compliance tasks efficiently with AI-powered insights</p>
           </div>
-          <Button 
-            onClick={onCreateTask} 
-            className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 font-medium px-6 py-3 text-lg group"
-            data-testid="button-create-task"
-          >
-            <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-            Create Task
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => aiAnalysisMutation.mutate()}
+              disabled={aiAnalysisMutation.isPending}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-lg hover:shadow-purple-500/25 hover:-translate-y-1 transform transition-all duration-300 font-medium px-6 py-3 text-lg group"
+              data-testid="button-ai-analysis"
+            >
+              <Brain className={`h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-300 ${aiAnalysisMutation.isPending ? 'animate-pulse' : ''}`} />
+              {aiAnalysisMutation.isPending ? 'Analyzing...' : 'AI Analysis'}
+            </Button>
+            <Button 
+              onClick={onCreateTask} 
+              className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 font-medium px-6 py-3 text-lg group"
+              data-testid="button-create-task"
+            >
+              <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+              Create Task
+            </Button>
+          </div>
         </div>
+      </div>
+
+      {/* AI Intelligence Dashboard */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 animate-fadeInUp" style={{animationDelay: '0.1s'}}>
+        <WeeklyRecommendations />
+        <DeadlineIntelligence />
       </div>
 
       {/* Enhanced Filters */}
