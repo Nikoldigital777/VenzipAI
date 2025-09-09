@@ -2,10 +2,127 @@
 import { Router } from "express";
 import { storage } from "../storage";
 import { isAuthenticated } from "../replitAuth";
-import { insertTaskSchema } from "@shared/schema";
+import { insertTaskSchema, insertRiskScoreHistorySchema, insertNotificationSchema } from "@shared/schema";
 import { z } from "zod";
+import { calculateDynamicRiskScore } from "../anthropic";
 
 const router = Router();
+
+// Helper function to trigger automatic risk recalculation
+async function triggerRiskRecalculation(userId: string, frameworkId?: string | null, triggeredBy = 'task_completion') {
+  try {
+    // Get current data for calculation
+    const [risks, userTasks] = await Promise.all([
+      storage.getRisksByUserId(userId),
+      storage.getTasksByUserId(userId)
+    ]);
+
+    // Filter by framework if specified
+    const filteredRisks = frameworkId 
+      ? risks.filter(risk => risk.frameworkId === frameworkId)
+      : risks;
+    const filteredTasks = frameworkId 
+      ? userTasks.filter(task => task.frameworkId === frameworkId)
+      : userTasks;
+
+    // Add overdue task detection
+    const now = new Date();
+    const overdueTasks = filteredTasks.filter(task => 
+      task.dueDate && 
+      new Date(task.dueDate) < now && 
+      task.status !== 'completed'
+    );
+
+    // Calculate metrics with overdue weighting
+    const totalTasks = filteredTasks.length;
+    const completedTasks = filteredTasks.filter(task => task.status === 'completed').length;
+    const highRisks = filteredRisks.filter(risk => risk.impact === 'high').length;
+    const mediumRisks = filteredRisks.filter(risk => risk.impact === 'medium').length;
+    const lowRisks = filteredRisks.filter(risk => risk.impact === 'low').length;
+    const mitigatedRisks = filteredRisks.filter(risk => risk.status === 'mitigated').length;
+
+    // Add overdue context for AI analysis
+    const recentChanges = [];
+    if (overdueTasks.length > 0) {
+      recentChanges.push(`${overdueTasks.length} tasks are overdue`);
+    }
+    recentChanges.push(`Task completion triggered recalculation`);
+
+    // Call AI calculation with overdue context
+    const scoreData = await calculateDynamicRiskScore(userId, frameworkId || undefined, {
+      totalTasks,
+      completedTasks,
+      highRisks,
+      mediumRisks,
+      lowRisks,
+      mitigatedRisks,
+      recentChanges
+    });
+
+    // Save to history
+    const historyData = insertRiskScoreHistorySchema.parse({
+      userId,
+      frameworkId: frameworkId || undefined,
+      overallRiskScore: scoreData.overallRiskScore.toString(),
+      highRisks,
+      mediumRisks,
+      lowRisks,
+      mitigatedRisks,
+      totalTasks,
+      completedTasks,
+      calculationFactors: scoreData.factors,
+      triggeredBy
+    });
+
+    await storage.createRiskScoreHistory(historyData);
+
+    // Check for critical threshold alerts (80%+)
+    if (scoreData.overallRiskScore >= 80) {
+      const alertNotification = insertNotificationSchema.parse({
+        userId,
+        type: 'risk_alert',
+        title: 'Critical Risk Score Alert',
+        message: `Your risk score has reached ${scoreData.overallRiskScore.toFixed(1)}/100, requiring immediate attention.`,
+        severity: 'critical',
+        metadata: {
+          riskScore: scoreData.overallRiskScore,
+          frameworkId: frameworkId || undefined,
+          triggeredBy
+        }
+      });
+      
+      await storage.createNotification(alertNotification);
+    }
+
+    // Generate overdue task alerts
+    if (overdueTasks.length > 0) {
+      const overdueHighPriority = overdueTasks.filter(task => 
+        task.priority === 'high' || task.priority === 'critical'
+      );
+      
+      if (overdueHighPriority.length > 0) {
+        const overdueNotification = insertNotificationSchema.parse({
+          userId,
+          type: 'task_alert',
+          title: 'High Priority Tasks Overdue',
+          message: `${overdueHighPriority.length} high-priority compliance tasks are overdue and affecting your risk score.`,
+          severity: 'high',
+          metadata: {
+            overdueCount: overdueHighPriority.length,
+            frameworkId: frameworkId || undefined
+          }
+        });
+        
+        await storage.createNotification(overdueNotification);
+      }
+    }
+
+    return scoreData;
+  } catch (error) {
+    console.error('Error in automatic risk recalculation:', error);
+    throw error;
+  }
+}
 
 // Enhanced task filter schema
 const taskFilterSchema = z.object({
@@ -151,6 +268,17 @@ router.put("/:id", isAuthenticated, async (req, res) => {
     }
     
     const updatedTask = await storage.updateTask(id, updates);
+    
+    // Auto-trigger risk recalculation if task was completed
+    if (updates.status === 'completed' && existingTask.status !== 'completed') {
+      try {
+        await triggerRiskRecalculation(userId, existingTask.frameworkId, 'task_completion');
+      } catch (error) {
+        console.error('Error auto-calculating risk score:', error);
+        // Don't fail the task update if risk calculation fails
+      }
+    }
+    
     res.json(updatedTask);
 
   } catch (error) {

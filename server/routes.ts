@@ -42,6 +42,7 @@ import {
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { format } from 'date-fns';
 
 // Import modular route handlers
 import taskRoutes from './routes/tasks';
@@ -838,22 +839,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
 
           // Calculate new risk score
-          const riskScore = await calculateDynamicRiskScore(userId, task.frameworkId, riskContext);
+          const riskScore = await calculateDynamicRiskScore(userId, task.frameworkId || undefined, riskContext);
           
           // Save risk score to history
-          await storage.createRiskScoreHistory({
+          const historyData = insertRiskScoreHistorySchema.parse({
             userId,
-            frameworkId: task.frameworkId,
-            riskScore: riskScore.overallRiskScore,
-            riskTrend: riskScore.riskTrend,
-            taskCompletion: riskScore.factors.taskCompletion,
-            riskMitigation: riskScore.factors.riskMitigation,
-            timelyCompletion: riskScore.factors.timelyCompletion,
-            overallHealth: riskScore.factors.overallHealth,
-            recommendations: riskScore.recommendations,
-            alerts: riskScore.alerts,
-            nextActions: riskScore.nextActions
+            frameworkId: task.frameworkId || undefined,
+            overallRiskScore: riskScore.overallRiskScore.toString(),
+            totalTasks,
+            completedTasks,
+            highRisks,
+            mediumRisks,
+            lowRisks,
+            mitigatedRisks,
+            calculationFactors: riskScore.factors,
+            triggeredBy: 'task_completion'
           });
+          await storage.createRiskScoreHistory(historyData);
 
           // Create notification if risk improvement is significant
           if (riskScore.riskTrend === 'improving') {
@@ -864,7 +866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               priority: 'medium',
               actionUrl: '/dashboard',
               relatedEntityType: 'risk',
-              relatedEntityId: null
+              relatedEntityId: undefined
             });
           }
           
