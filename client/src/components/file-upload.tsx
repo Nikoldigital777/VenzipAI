@@ -132,14 +132,34 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
       
-      // Extract text from PDF (basic implementation)
+      // Extract text from PDF using pdfjs-dist
       try {
         const arrayBuffer = await file.arrayBuffer();
-        // For now, we'll just set a placeholder - in production you'd use pdf.js
-        setPdfText("PDF content analysis will be available after upload");
-        setPdfPageCount(1);
+        
+        // Import pdfjs-dist dynamically
+        const pdfjsLib = await import('pdfjs-dist');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        setPdfPageCount(pdf.numPages);
+        
+        let fullText = '';
+        
+        // Extract text from each page (limit to first 10 pages for performance)
+        for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(' ');
+          fullText += pageText + '\n\n';
+        }
+        
+        setPdfText(fullText.trim());
+        
       } catch (error) {
         console.error('Error processing PDF:', error);
+        setPdfText("PDF text extraction failed. Upload will proceed with filename analysis only.");
       }
     }
   }, []);
@@ -406,7 +426,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                 <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                   <div className="flex items-center gap-3">
                     {getFileIcon(doc.fileType)}
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">{doc.fileName}</p>
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <span>{formatFileSize(doc.fileSize)}</span>
@@ -417,7 +437,60 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                         <Badge variant={doc.status === 'verified' ? 'default' : 'secondary'}>
                           {doc.status}
                         </Badge>
+                        {doc.analysisResult && (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                            AI Analyzed
+                          </Badge>
+                        )}
                       </div>
+                      
+                      {/* AI Analysis Results */}
+                      {doc.analysisResult && (
+                        <div className="mt-2 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200/30">
+                          <div className="flex items-start gap-2">
+                            <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 space-y-2">
+                              <div className="text-sm">
+                                <span className="font-medium text-blue-800">AI Analysis:</span>
+                                <span className="text-blue-700 ml-2">{doc.analysisResult.summary}</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-4 text-xs">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">Risk Level:</span>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={
+                                      doc.analysisResult.risk_level === 'high' ? 'border-red-300 bg-red-50 text-red-700' :
+                                      doc.analysisResult.risk_level === 'medium' ? 'border-orange-300 bg-orange-50 text-orange-700' :
+                                      'border-green-300 bg-green-50 text-green-700'
+                                    }
+                                  >
+                                    {doc.analysisResult.risk_level}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">Type:</span>
+                                  <span className="text-blue-800 font-medium">{doc.analysisResult.document_type}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <span className="text-blue-600">Completeness:</span>
+                                  <span className="text-blue-800 font-medium">{doc.analysisResult.completeness_score}%</span>
+                                </div>
+                              </div>
+                              
+                              {doc.analysisResult.compliance_gaps && doc.analysisResult.compliance_gaps.length > 0 && (
+                                <div className="text-xs">
+                                  <span className="text-red-600 font-medium">Gaps Found:</span>
+                                  <span className="text-red-700 ml-1">{doc.analysisResult.compliance_gaps.length} compliance gap(s)</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   

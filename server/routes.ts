@@ -1030,18 +1030,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = req.user.sub;
-      const { frameworkId } = req.body;
+      const { frameworkId, extractedText, category, tags, description } = req.body;
 
-      // Read file content for analysis
-      const filePath = req.file.path;
-      const fileContent = fs.readFileSync(filePath, 'utf8');
+      // Get document content for analysis
+      let documentContent = extractedText || '';
+      
+      // If no extracted text provided, try to extract based on file type
+      if (!documentContent) {
+        const filePath = req.file.path;
+        
+        try {
+          if (req.file.mimetype === 'application/pdf') {
+            // For PDFs, we should have extracted text on the frontend
+            // If not available, we could implement server-side PDF extraction here
+            documentContent = `PDF file: ${req.file.originalname}`;
+          } else if (req.file.mimetype.startsWith('text/') || 
+                     req.file.mimetype === 'application/json' ||
+                     req.file.mimetype.includes('xml')) {
+            // For text-based files, read directly
+            documentContent = fs.readFileSync(filePath, 'utf8');
+          } else {
+            // For other file types, use filename and metadata for analysis
+            documentContent = `Document: ${req.file.originalname}\nType: ${req.file.mimetype}\nSize: ${req.file.size} bytes`;
+            if (category) documentContent += `\nCategory: ${category}`;
+            if (description) documentContent += `\nDescription: ${description}`;
+            if (tags) documentContent += `\nTags: ${tags}`;
+          }
+        } catch (error) {
+          console.error("Error reading file content:", error);
+          documentContent = `Document: ${req.file.originalname} (content extraction failed)`;
+        }
+      }
 
       // Analyze document with Claude
       let analysisResult = null;
       try {
-        analysisResult = await analyzeDocument(fileContent, frameworkId);
+        if (documentContent.trim().length > 10) { // Only analyze if we have meaningful content
+          analysisResult = await analyzeDocument(
+            documentContent, 
+            frameworkId, 
+            req.file.originalname
+          );
+        }
       } catch (error) {
+        console.error("Error analyzing document:", error);
+        // Continue without analysis if Claude fails
+      }
 
+      const documentData = insertDocumentSchema.parse({
+        userId,
+        frameworkId: frameworkId || null,
+        fileName: req.file.originalname,
+        fileType: req.file.mimetype,
+        fileSize: req.file.size,
+        filePath: req.file.path,
+        analysisResult,
+        status: analysisResult ? 'verified' : 'pending'
+      });
+
+      const document = await storage.createDocument(documentData);
+      res.json(document);
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      res.status(500).json({ message: "Failed to upload document" });
+    }
+  });
 
   // Compliance status check - "What's left to be compliant?"
   app.post('/api/compliance/status-check', isAuthenticated, async (req: any, res) => {
@@ -1100,29 +1153,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking compliance status:", error);
       res.status(500).json({ message: "Failed to check compliance status" });
-    }
-  });
-
-        console.error("Error analyzing document:", error);
-        // Continue without analysis if Claude fails
-      }
-
-      const documentData = insertDocumentSchema.parse({
-        userId,
-        frameworkId: frameworkId || null,
-        fileName: req.file.originalname,
-        fileType: req.file.mimetype,
-        fileSize: req.file.size,
-        filePath: req.file.path,
-        analysisResult,
-        status: analysisResult ? 'verified' : 'pending'
-      });
-
-      const document = await storage.createDocument(documentData);
-      res.json(document);
-    } catch (error) {
-      console.error("Error uploading document:", error);
-      res.status(500).json({ message: "Failed to upload document" });
     }
   });
 
