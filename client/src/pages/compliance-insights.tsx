@@ -1,5 +1,6 @@
 import { GapDetection } from '@/components/compliance/GapDetection';
 import { ProgressTracking } from '@/components/compliance/ProgressTracking';
+import { ReportGenerator } from '@/components/reports/ReportGenerator';
 
 export default function ComplianceInsights() {
   return (
@@ -26,6 +27,11 @@ export default function ComplianceInsights() {
       {/* Gap Detection */}
       <div className="animate-fadeInUp" style={{animationDelay: '0.2s'}}>
         <GapDetection />
+      </div>
+
+      {/* Report Generation */}
+      <div className="animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+        <ReportGenerator />
       </div>
     </div>
   );

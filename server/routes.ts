@@ -2256,6 +2256,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PDF Report Generation Routes
+  app.post('/api/reports/generate', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const { reportType } = req.body;
+      
+      if (!['compliance_summary', 'task_status', 'executive_summary', 'gap_analysis'].includes(reportType)) {
+        return res.status(400).json({ message: "Invalid report type" });
+      }
+      
+      // Gather all data needed for report
+      const company = await storage.getCompanyByUserId(userId);
+      const tasks = await storage.getTasksByUserId(userId);
+      const risks = await storage.getRisksByUserId(userId);
+      const documents = await storage.getDocumentsByUserId(userId);
+      const allFrameworks = await storage.getAllFrameworks();
+      
+      // Get gap analysis data
+      const frameworkGaps = [];
+      let totalTasks = 0;
+      let totalCompleted = 0;
+      let totalCriticalGaps = 0;
+      
+      for (const framework of allFrameworks) {
+        const frameworkTasks = tasks.filter(task => task.frameworkId === framework.id);
+        const completedTasks = frameworkTasks.filter(task => task.status === 'completed');
+        const incompleteTasks = frameworkTasks.filter(task => task.status !== 'completed');
+        
+        const completionPercentage = frameworkTasks.length > 0 
+          ? Math.round((completedTasks.length / frameworkTasks.length) * 100) 
+          : 0;
+        
+        const missingRequirements = incompleteTasks.map(task => {
+          const priority = task.priority === 'critical' ? '🔴 Critical: ' : 
+                          task.priority === 'high' ? '🟠 High: ' : 
+                          task.priority === 'medium' ? '🟡 Medium: ' : 
+                          '🟢 Low: ';
+          
+          let requirement = `${priority}${task.title}`;
+          
+          if (task.dueDate) {
+            const dueDate = new Date(task.dueDate);
+            const now = new Date();
+            const daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntilDue < 0) {
+              requirement += ` (${Math.abs(daysUntilDue)} days overdue)`;
+            } else if (daysUntilDue <= 7) {
+              requirement += ` (due in ${daysUntilDue} days)`;
+            }
+          }
+          
+          return requirement;
+        });
+        
+        let status: 'excellent' | 'good' | 'needs_attention' | 'critical';
+        if (completionPercentage >= 90) status = 'excellent';
+        else if (completionPercentage >= 70) status = 'good';
+        else if (completionPercentage >= 50) status = 'needs_attention';
+        else status = 'critical';
+        
+        const criticalGaps = incompleteTasks.filter(task => task.priority === 'critical').length;
+        
+        frameworkGaps.push({
+          frameworkId: framework.id,
+          frameworkName: framework.name,
+          displayName: framework.displayName,
+          totalTasks: frameworkTasks.length,
+          completedTasks: completedTasks.length,
+          completionPercentage,
+          missingRequirements,
+          criticalGaps,
+          status
+        });
+        
+        totalTasks += frameworkTasks.length;
+        totalCompleted += completedTasks.length;
+        totalCriticalGaps += criticalGaps;
+      }
+      
+      const overallCompletion = totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0;
+      
+      // Get velocity data
+      const now = new Date();
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      const fourWeeksAgo = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000);
+      
+      const tasksCompletedThisWeek = tasks.filter(task => 
+        task.status === 'completed' && 
+        task.completedAt && 
+        new Date(task.completedAt) > oneWeekAgo
+      ).length;
+      
+      const tasksCompletedLastWeek = tasks.filter(task => 
+        task.status === 'completed' && 
+        task.completedAt && 
+        new Date(task.completedAt) > twoWeeksAgo && 
+        new Date(task.completedAt) <= oneWeekAgo
+      ).length;
+      
+      const tasksCompletedLast4Weeks = tasks.filter(task => 
+        task.status === 'completed' && 
+        task.completedAt && 
+        new Date(task.completedAt) > fourWeeksAgo
+      ).length;
+      
+      const averageWeeklyVelocity = tasksCompletedLast4Weeks / 4;
+      const remainingTasks = tasks.filter(task => task.status !== 'completed').length;
+      const weeksToCompletion = averageWeeklyVelocity > 0 ? Math.ceil(remainingTasks / averageWeeklyVelocity) : null;
+      const velocityTrend = tasksCompletedThisWeek > tasksCompletedLastWeek ? 'improving' : 
+                          tasksCompletedThisWeek < tasksCompletedLastWeek ? 'declining' : 'stable';
+      
+      // Import and generate report
+      const { ReportGenerator } = await import('./reportGenerator');
+      const reportGenerator = new ReportGenerator();
+      
+      const reportData = {
+        company,
+        frameworks: allFrameworks,
+        tasks,
+        risks,
+        documents,
+        gapAnalysis: {
+          frameworks: frameworkGaps,
+          overallCompletion,
+          totalGaps: totalTasks - totalCompleted,
+          criticalGaps: totalCriticalGaps
+        },
+        velocityData: {
+          currentVelocity: tasksCompletedThisWeek,
+          averageVelocity: averageWeeklyVelocity,
+          velocityTrend,
+          remainingTasks,
+          weeksToCompletion
+        }
+      };
+      
+      const pdfBuffer = await reportGenerator.generateReport({
+        type: reportType,
+        data: reportData,
+        generatedBy: req.user.name || req.user.email || 'System User'
+      });
+      
+      // Set headers for PDF download
+      const reportTypeNames = {
+        'compliance_summary': 'Compliance Summary',
+        'task_status': 'Task Status Report',
+        'executive_summary': 'Executive Summary',
+        'gap_analysis': 'Gap Analysis Report'
+      };
+      
+      const filename = `${reportTypeNames[reportType as keyof typeof reportTypeNames]}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      res.send(pdfBuffer);
+      
+    } catch (error) {
+      console.error("Error generating report:", error);
+      res.status(500).json({ message: "Failed to generate report" });
+    }
+  });
+
   // User preferences endpoints
   app.get('/api/user/preferences', isAuthenticated, async (req: any, res) => {
     try {
