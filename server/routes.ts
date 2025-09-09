@@ -802,7 +802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const task = await storage.updateTask(id, updates);
 
-      // Create notification for task completion
+      // Create notification for task completion and trigger risk recalculation
       if (updates.status === 'completed' && currentTask?.status !== 'completed') {
         await createNotification(userId, {
           title: 'Task Completed',
@@ -813,6 +813,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
           relatedEntityType: 'task',
           relatedEntityId: task.id
         });
+
+        // Auto-trigger risk recalculation on task completion
+        try {
+          const allUserTasks = await storage.getTasksByUserId(userId);
+          const allUserRisks = await storage.getRisksByUserId(userId);
+          const company = await storage.getCompanyByUserId(userId);
+          
+          const totalTasks = allUserTasks.length;
+          const completedTasks = allUserTasks.filter(t => t.status === 'completed').length;
+          const highRisks = allUserRisks.filter(r => r.impact === 'high' && r.status === 'open').length;
+          const mediumRisks = allUserRisks.filter(r => r.impact === 'medium' && r.status === 'open').length;
+          const lowRisks = allUserRisks.filter(r => r.impact === 'low' && r.status === 'open').length;
+          const mitigatedRisks = allUserRisks.filter(r => r.status === 'mitigated').length;
+
+          const riskContext = {
+            totalTasks,
+            completedTasks,
+            highRisks,
+            mediumRisks,
+            lowRisks,
+            mitigatedRisks,
+            recentChanges: [`Completed task: ${task.title}`]
+          };
+
+          // Calculate new risk score
+          const riskScore = await calculateDynamicRiskScore(userId, task.frameworkId, riskContext);
+          
+          // Save risk score to history
+          await storage.createRiskScoreHistory({
+            userId,
+            frameworkId: task.frameworkId,
+            riskScore: riskScore.overallRiskScore,
+            riskTrend: riskScore.riskTrend,
+            taskCompletion: riskScore.factors.taskCompletion,
+            riskMitigation: riskScore.factors.riskMitigation,
+            timelyCompletion: riskScore.factors.timelyCompletion,
+            overallHealth: riskScore.factors.overallHealth,
+            recommendations: riskScore.recommendations,
+            alerts: riskScore.alerts,
+            nextActions: riskScore.nextActions
+          });
+
+          // Create notification if risk improvement is significant
+          if (riskScore.riskTrend === 'improving') {
+            await createNotification(userId, {
+              title: 'Risk Profile Improved',
+              message: `Task completion improved your compliance risk score to ${riskScore.overallRiskScore}`,
+              type: 'risk_improved',
+              priority: 'medium',
+              actionUrl: '/dashboard',
+              relatedEntityType: 'risk',
+              relatedEntityId: null
+            });
+          }
+          
+        } catch (riskError) {
+          console.error("Error recalculating risk score on task completion:", riskError);
+          // Don't fail the task update if risk calculation fails
+        }
       }
 
       // Create notification if task becomes overdue
