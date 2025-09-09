@@ -2081,6 +2081,181 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gap Analysis Route - Simple framework comparison
+  app.get('/api/compliance/gap-analysis', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      
+      // Get all frameworks for the user's company
+      const allFrameworks = await storage.getAllFrameworks();
+      
+      // Get all tasks for the user
+      const allTasks = await storage.getTasksByUserId(userId);
+      
+      const frameworkGaps = [];
+      let totalTasks = 0;
+      let totalCompleted = 0;
+      let totalCriticalGaps = 0;
+      
+      for (const framework of allFrameworks) {
+        const frameworkTasks = allTasks.filter(task => task.frameworkId === framework.id);
+        const completedTasks = frameworkTasks.filter(task => task.status === 'completed');
+        const incompleteTasks = frameworkTasks.filter(task => task.status !== 'completed');
+        
+        const completionPercentage = frameworkTasks.length > 0 
+          ? Math.round((completedTasks.length / frameworkTasks.length) * 100) 
+          : 0;
+        
+        // Generate missing requirements in plain English
+        const missingRequirements = incompleteTasks.map(task => {
+          const priority = task.priority === 'critical' ? '🔴 Critical: ' : 
+                          task.priority === 'high' ? '🟠 High: ' : 
+                          task.priority === 'medium' ? '🟡 Medium: ' : 
+                          '🟢 Low: ';
+          
+          let requirement = `${priority}${task.title}`;
+          
+          if (task.dueDate) {
+            const dueDate = new Date(task.dueDate);
+            const now = new Date();
+            const daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntilDue < 0) {
+              requirement += ` (${Math.abs(daysUntilDue)} days overdue)`;
+            } else if (daysUntilDue <= 7) {
+              requirement += ` (due in ${daysUntilDue} days)`;
+            }
+          }
+          
+          if (task.description) {
+            requirement += ` - ${task.description.substring(0, 100)}${task.description.length > 100 ? '...' : ''}`;
+          }
+          
+          return requirement;
+        });
+        
+        // Determine status based on completion percentage
+        let status: 'excellent' | 'good' | 'needs_attention' | 'critical';
+        if (completionPercentage >= 90) status = 'excellent';
+        else if (completionPercentage >= 70) status = 'good';
+        else if (completionPercentage >= 50) status = 'needs_attention';
+        else status = 'critical';
+        
+        const criticalGaps = incompleteTasks.filter(task => task.priority === 'critical').length;
+        
+        frameworkGaps.push({
+          frameworkId: framework.id,
+          frameworkName: framework.name,
+          displayName: framework.displayName,
+          totalTasks: frameworkTasks.length,
+          completedTasks: completedTasks.length,
+          completionPercentage,
+          missingRequirements,
+          criticalGaps,
+          status
+        });
+        
+        totalTasks += frameworkTasks.length;
+        totalCompleted += completedTasks.length;
+        totalCriticalGaps += criticalGaps;
+      }
+      
+      const overallCompletion = totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0;
+      const totalGaps = totalTasks - totalCompleted;
+      
+      // Generate AI summary
+      let summary = '';
+      if (overallCompletion >= 90) {
+        summary = 'Excellent compliance posture! Most requirements are satisfied across all frameworks.';
+      } else if (overallCompletion >= 70) {
+        summary = 'Good progress on compliance. Focus on completing remaining requirements to strengthen your security posture.';
+      } else if (overallCompletion >= 50) {
+        summary = 'Moderate compliance coverage. Prioritize critical and high-priority requirements to reduce compliance gaps.';
+      } else {
+        summary = 'Significant compliance gaps identified. Immediate attention required for critical requirements to meet regulatory standards.';
+      }
+      
+      if (totalCriticalGaps > 0) {
+        summary += ` ${totalCriticalGaps} critical requirements need immediate attention.`;
+      }
+      
+      res.json({
+        frameworks: frameworkGaps,
+        overallCompletion,
+        totalGaps,
+        criticalGaps: totalCriticalGaps,
+        summary
+      });
+      
+    } catch (error) {
+      console.error("Error getting gap analysis:", error);
+      res.status(500).json({ message: "Failed to get gap analysis" });
+    }
+  });
+
+  // Progress Tracking with Velocity Calculation
+  app.get('/api/progress/velocity', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const allTasks = await storage.getTasksByUserId(userId);
+      
+      // Calculate completion velocity (tasks completed per week)
+      const now = new Date();
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      const fourWeeksAgo = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000);
+      
+      const tasksCompletedThisWeek = allTasks.filter(task => 
+        task.status === 'completed' && 
+        task.completedAt && 
+        new Date(task.completedAt) > oneWeekAgo
+      ).length;
+      
+      const tasksCompletedLastWeek = allTasks.filter(task => 
+        task.status === 'completed' && 
+        task.completedAt && 
+        new Date(task.completedAt) > twoWeeksAgo && 
+        new Date(task.completedAt) <= oneWeekAgo
+      ).length;
+      
+      const tasksCompletedLast4Weeks = allTasks.filter(task => 
+        task.status === 'completed' && 
+        task.completedAt && 
+        new Date(task.completedAt) > fourWeeksAgo
+      ).length;
+      
+      const averageWeeklyVelocity = tasksCompletedLast4Weeks / 4;
+      const remainingTasks = allTasks.filter(task => task.status !== 'completed').length;
+      
+      // Basic timeline estimate
+      const weeksToCompletion = averageWeeklyVelocity > 0 ? Math.ceil(remainingTasks / averageWeeklyVelocity) : null;
+      const estimatedCompletionDate = weeksToCompletion ? 
+        new Date(now.getTime() + weeksToCompletion * 7 * 24 * 60 * 60 * 1000) : null;
+      
+      // Gap trend calculation
+      const velocityTrend = tasksCompletedThisWeek > tasksCompletedLastWeek ? 'improving' : 
+                          tasksCompletedThisWeek < tasksCompletedLastWeek ? 'declining' : 'stable';
+      
+      res.json({
+        currentVelocity: tasksCompletedThisWeek,
+        averageVelocity: Math.round(averageWeeklyVelocity * 10) / 10,
+        velocityTrend,
+        remainingTasks,
+        weeksToCompletion,
+        estimatedCompletionDate: estimatedCompletionDate?.toISOString(),
+        weeklyProgress: {
+          thisWeek: tasksCompletedThisWeek,
+          lastWeek: tasksCompletedLastWeek,
+          fourWeekAverage: Math.round(averageWeeklyVelocity * 10) / 10
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error calculating velocity:", error);
+      res.status(500).json({ message: "Failed to calculate progress velocity" });
+    }
+  });
+
   // User preferences endpoints
   app.get('/api/user/preferences', isAuthenticated, async (req: any, res) => {
     try {

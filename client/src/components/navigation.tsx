@@ -15,7 +15,8 @@ import {
   X,
   MapPin,
   Calendar,
-  GraduationCap
+  GraduationCap,
+  Target
 } from "lucide-react";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 import NotificationButton from "./notification-button";
@@ -29,6 +30,7 @@ export default function Navigation() {
     { path: "/onboarding", label: "Onboarding", icon: Rocket },
     { path: "/dashboard", label: "Dashboard", icon: BarChart3 },
     { path: "/tasks", label: "Tasks", icon: CheckSquare },
+    { path: "/compliance-insights", label: "Compliance Insights", icon: Target },
     { path: "/audit-calendar", label: "Audit Calendar", icon: Calendar },
     { path: "/documents", label: "Evidence", icon: FileText },
     { path: "/risks", label: "Risks", icon: AlertTriangle },
