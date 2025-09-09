@@ -60,6 +60,13 @@ export default function DynamicRiskDashboard() {
   const [selectedFramework, setSelectedFramework] = useState<string | undefined>();
   const [isAutoUpdating, setIsAutoUpdating] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
+  const [scoreImpact, setScoreImpact] = useState<{
+    before: number;
+    after: number;
+    change: number;
+    trigger: string;
+    visible: boolean;
+  } | null>(null);
 
   // Fetch risk score history for trend analysis with auto-refresh
   const { data: riskHistory, isLoading: historyLoading } = useQuery<RiskScoreHistory[]>({
@@ -131,26 +138,59 @@ export default function DynamicRiskDashboard() {
     // Listen for task updates in the query cache
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
       if (event.query.queryKey[0] === '/api/tasks' && event.type === 'updated') {
+        // Capture current score before refresh
+        const currentScore = latestScore ? parseFloat(latestScore.overallRiskScore) : 0;
+        
         // Task data changed, might be a completion - refresh risk scores
         setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ["/api/risks/score-history"] });
           queryClient.invalidateQueries({ queryKey: ["/api/risks/latest-score"] });
           setIsAutoUpdating(true);
-          setTimeout(() => setIsAutoUpdating(false), 2000);
+          
+          // Show impact after refresh
+          setTimeout(() => {
+            setIsAutoUpdating(false);
+            showScoreImpact(currentScore, 'task_completion');
+          }, 3000);
         }, 1000); // Small delay to allow backend processing
       }
     });
     
     return unsubscribe;
-  }, []);
+  }, [latestScore]);
+
+  // Show score impact comparison
+  const showScoreImpact = (beforeScore: number, trigger: string) => {
+    setTimeout(() => {
+      const afterScore = latestScore ? parseFloat(latestScore.overallRiskScore) : 0;
+      if (Math.abs(afterScore - beforeScore) > 0.1) { // Only show if meaningful change
+        setScoreImpact({
+          before: beforeScore,
+          after: afterScore,
+          change: afterScore - beforeScore,
+          trigger,
+          visible: true
+        });
+        
+        // Hide after 5 seconds
+        setTimeout(() => {
+          setScoreImpact(prev => prev ? { ...prev, visible: false } : null);
+        }, 5000);
+      }
+    }, 500); // Wait for data to update
+  };
 
   // Manual refresh function
   const handleManualRefresh = () => {
+    const currentScore = latestScore ? parseFloat(latestScore.overallRiskScore) : 0;
     setIsAutoUpdating(true);
     queryClient.invalidateQueries({ queryKey: ["/api/risks/score-history"] });
     queryClient.invalidateQueries({ queryKey: ["/api/risks/latest-score"] });
     setLastUpdateTime(new Date());
-    setTimeout(() => setIsAutoUpdating(false), 2000);
+    setTimeout(() => {
+      setIsAutoUpdating(false);
+      showScoreImpact(currentScore, 'manual_refresh');
+    }, 2000);
   };
 
   // Risk distribution data for pie chart
@@ -186,6 +226,74 @@ export default function DynamicRiskDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Score Impact Notification */}
+      {scoreImpact?.visible && (
+        <Card className={`border-2 transition-all duration-500 ${
+          scoreImpact.change < 0 
+            ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+            : scoreImpact.change > 0 
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+        }`}>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`p-2 rounded-full ${
+                  scoreImpact.change < 0 
+                    ? 'bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-300' 
+                    : scoreImpact.change > 0 
+                      ? 'bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-300'
+                      : 'bg-blue-100 text-blue-600 dark:bg-blue-800 dark:text-blue-300'
+                }`}>
+                  {scoreImpact.change < 0 ? (
+                    <TrendingDown className="h-5 w-5" />
+                  ) : scoreImpact.change > 0 ? (
+                    <TrendingUp className="h-5 w-5" />
+                  ) : (
+                    <Activity className="h-5 w-5" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    Risk Score {scoreImpact.change < 0 ? 'Improved' : scoreImpact.change > 0 ? 'Increased' : 'Updated'}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {scoreImpact.trigger === 'task_completion' && 'Task completion triggered automatic recalculation'}
+                    {scoreImpact.trigger === 'manual_refresh' && 'Manual refresh completed'}
+                    {scoreImpact.trigger === 'ai_calculation' && 'AI recalculation completed'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">Before</div>
+                  <div className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                    {scoreImpact.before.toFixed(1)}
+                  </div>
+                </div>
+                <div className="text-2xl text-gray-400">→</div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">After</div>
+                  <div className={`text-lg font-bold ${
+                    scoreImpact.change < 0 ? 'text-green-600' : scoreImpact.change > 0 ? 'text-red-600' : 'text-blue-600'
+                  }`}>
+                    {scoreImpact.after.toFixed(1)}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">Change</div>
+                  <div className={`text-lg font-bold ${
+                    scoreImpact.change < 0 ? 'text-green-600' : scoreImpact.change > 0 ? 'text-red-600' : 'text-blue-600'
+                  }`}>
+                    {scoreImpact.change > 0 ? '+' : ''}{scoreImpact.change.toFixed(1)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header with Controls */}
       <div className="flex justify-between items-center">
         <div>
