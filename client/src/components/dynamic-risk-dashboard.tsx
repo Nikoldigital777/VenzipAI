@@ -58,8 +58,10 @@ type DynamicRiskScore = {
 export default function DynamicRiskDashboard() {
   const { toast } = useToast();
   const [selectedFramework, setSelectedFramework] = useState<string | undefined>();
+  const [isAutoUpdating, setIsAutoUpdating] = useState(false);
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
 
-  // Fetch risk score history for trend analysis
+  // Fetch risk score history for trend analysis with auto-refresh
   const { data: riskHistory, isLoading: historyLoading } = useQuery<RiskScoreHistory[]>({
     queryKey: ["/api/risks/score-history", selectedFramework],
     queryFn: async () => {
@@ -69,10 +71,13 @@ export default function DynamicRiskDashboard() {
       if (!res.ok) throw new Error("Failed to load risk history");
       return res.json();
     },
+    // Auto-refresh every 30 seconds to catch risk score updates
+    refetchInterval: 30000,
+    refetchIntervalInBackground: true,
   });
 
-  // Fetch latest risk score
-  const { data: latestScore } = useQuery<RiskScoreHistory | null>({
+  // Fetch latest risk score with auto-refresh
+  const { data: latestScore, isRefetching: scoreRefetching } = useQuery<RiskScoreHistory | null>({
     queryKey: ["/api/risks/latest-score", selectedFramework],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -81,6 +86,9 @@ export default function DynamicRiskDashboard() {
       if (!res.ok) throw new Error("Failed to load latest score");
       return res.json();
     },
+    // Auto-refresh every 30 seconds to catch new scores
+    refetchInterval: 30000,
+    refetchIntervalInBackground: true,
   });
 
   // Calculate new risk score mutation
@@ -93,6 +101,7 @@ export default function DynamicRiskDashboard() {
     onSuccess: (data: DynamicRiskScore) => {
       queryClient.invalidateQueries({ queryKey: ["/api/risks/score-history"] });
       queryClient.invalidateQueries({ queryKey: ["/api/risks/latest-score"] });
+      setLastUpdateTime(new Date());
       toast({
         title: "Risk Score Updated",
         description: `New risk score: ${data.overallRiskScore.toFixed(1)}/100`,
@@ -116,6 +125,33 @@ export default function DynamicRiskDashboard() {
     timelyCompletion: entry.calculationFactors?.timelyCompletion || 0,
     overallHealth: entry.calculationFactors?.overallHealth || 0,
   })) || [];
+
+  // Auto-detect task completion and refresh dashboard
+  useEffect(() => {
+    // Listen for task updates in the query cache
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (event.query.queryKey[0] === '/api/tasks' && event.type === 'updated') {
+        // Task data changed, might be a completion - refresh risk scores
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/risks/score-history"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/risks/latest-score"] });
+          setIsAutoUpdating(true);
+          setTimeout(() => setIsAutoUpdating(false), 2000);
+        }, 1000); // Small delay to allow backend processing
+      }
+    });
+    
+    return unsubscribe;
+  }, []);
+
+  // Manual refresh function
+  const handleManualRefresh = () => {
+    setIsAutoUpdating(true);
+    queryClient.invalidateQueries({ queryKey: ["/api/risks/score-history"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/risks/latest-score"] });
+    setLastUpdateTime(new Date());
+    setTimeout(() => setIsAutoUpdating(false), 2000);
+  };
 
   // Risk distribution data for pie chart
   const riskDistributionData = latestScore ? [
@@ -153,10 +189,38 @@ export default function DynamicRiskDashboard() {
       {/* Header with Controls */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Dynamic Risk Scoring Dashboard</h2>
-          <p className="text-gray-600 dark:text-gray-300">AI-powered risk analysis with real-time updates</p>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Dynamic Risk Scoring Dashboard</h2>
+            {(isAutoUpdating || scoreRefetching) && (
+              <Badge variant="outline" className="text-xs animate-pulse">
+                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                Auto-updating
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <span>AI-powered risk analysis with real-time updates</span>
+            {lastUpdateTime && (
+              <span className="text-xs">
+                • Last updated: {format(lastUpdateTime, 'HH:mm:ss')}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex gap-3">
+          <Button
+            onClick={handleManualRefresh}
+            disabled={isAutoUpdating || scoreRefetching}
+            variant="outline"
+            size="sm"
+          >
+            {isAutoUpdating || scoreRefetching ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Refresh
+          </Button>
           <Button
             onClick={() => calculateScoreMutation.mutate(selectedFramework)}
             disabled={calculateScoreMutation.isPending}
