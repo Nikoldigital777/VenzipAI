@@ -22,19 +22,31 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
+        <div className="glass-card p-8 rounded-2xl">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-venzip-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Switch>
       {/* Allow onboarding access during auth flow */}
       <Route path="/onboarding" component={Onboarding} />
       
-      {/* Landing page accessible at /landing for both authenticated and non-authenticated users */}
+      {/* Landing page is always the root - accessible for everyone */}
+      <Route path="/" component={Landing} />
       <Route path="/landing" component={Landing} />
       
-      {!isAuthenticated && !isLoading ? (
-        <Route path="/" component={Landing} />
-      ) : (
+      {/* Protected routes - only show if authenticated */}
+      {isAuthenticated && (
         <>
-          <Route path="/" component={Home} />
+          <Route path="/home" component={Home} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/tasks" component={Tasks} />
           <Route path="/audit-calendar" component={AuditCalendar} />
@@ -47,6 +59,7 @@ function Router() {
           <Route path="/test-notifications" component={TestNotifications} />
         </>
       )}
+      
       <Route component={NotFound} />
     </Switch>
   );

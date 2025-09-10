@@ -35,10 +35,21 @@ import {
   Facebook
 } from "lucide-react";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Landing() {
+  const { isAuthenticated, user } = useAuth();
+
   const handleLogin = () => {
     window.location.href = "/api/login";
+  };
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      window.location.href = "/dashboard";
+    } else {
+      window.location.href = "/onboarding";
+    }
   };
 
   const scrollToSection = (id: string) => {
@@ -75,9 +86,18 @@ export default function Landing() {
             <button onClick={() => scrollToSection('frameworks')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Compliance</button>
             <button onClick={() => scrollToSection('enterprise')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Enterprise</button>
             <button onClick={() => scrollToSection('roi-metrics')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">ROI</button>
-            <Button onClick={handleLogin} className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold">
-              Start Free Trial
-            </Button>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">Welcome back, {(user as any)?.firstName || user?.email || 'User'}!</span>
+                <Button onClick={() => window.location.href = "/dashboard"} className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold">
+                  Dashboard
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={handleLogin} className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold">
+                Start Free Trial
+              </Button>
+            )}
           </div>
         </div>
       </nav>
@@ -109,16 +129,29 @@ export default function Landing() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
-              <Button 
-                onClick={handleLogin}
-                size="lg"
-                className="bg-gradient-hero hover:scale-110 text-white hover:shadow-2xl hover:shadow-venzip-primary/40 hover:-translate-y-3 transform transition-all duration-500 px-12 py-6 rounded-2xl text-xl font-bold shadow-2xl group relative overflow-hidden animate-glow-pulse"
-                data-testid="button-login-hero"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                <Rocket className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
-                <span className="relative z-10">Start Your Compliance Journey</span>
-              </Button>
+              {isAuthenticated ? (
+                <Button 
+                  onClick={handleGetStarted}
+                  size="lg"
+                  className="bg-gradient-hero hover:scale-110 text-white hover:shadow-2xl hover:shadow-venzip-primary/40 hover:-translate-y-3 transform transition-all duration-500 px-12 py-6 rounded-2xl text-xl font-bold shadow-2xl group relative overflow-hidden animate-glow-pulse"
+                  data-testid="button-dashboard-hero"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                  <BarChart3 className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+                  <span className="relative z-10">Go to Dashboard</span>
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleLogin}
+                  size="lg"
+                  className="bg-gradient-hero hover:scale-110 text-white hover:shadow-2xl hover:shadow-venzip-primary/40 hover:-translate-y-3 transform transition-all duration-500 px-12 py-6 rounded-2xl text-xl font-bold shadow-2xl group relative overflow-hidden animate-glow-pulse"
+                  data-testid="button-login-hero"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                  <Rocket className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+                  <span className="relative z-10">Start Your Compliance Journey</span>
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 size="lg"
