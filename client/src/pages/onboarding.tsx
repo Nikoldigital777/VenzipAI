@@ -107,9 +107,12 @@ export default function Onboarding() {
     }
   });
 
-  // Check for existing company profile
+  // Check for existing company profile with better error handling
   const { data: existingCompany } = useQuery<CompanyData>({
     queryKey: ["/api/company"],
+    retry: 1,
+    refetchOnMount: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   // Prefill form if company exists
@@ -164,6 +167,21 @@ export default function Onboarding() {
   const createCompanyMutation = useMutation({
     mutationFn: async (data: CompanyData & { preferences: UserPreferences }) => {
       console.log("Submitting company data:", data);
+      
+      // Validate required fields before submission
+      if (!data.name?.trim()) {
+        throw new Error("Company name is required");
+      }
+      if (!data.contactEmail?.trim()) {
+        throw new Error("Contact email is required");
+      }
+      if (!data.industry?.trim()) {
+        throw new Error("Industry selection is required");
+      }
+      if (!data.size?.trim()) {
+        throw new Error("Company size is required");
+      }
+      
       const response = await apiRequest("POST", "/api/company", data);
       if (!response.ok) {
         const errorData = await response.json();

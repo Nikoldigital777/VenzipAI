@@ -95,12 +95,21 @@ export default function CompanyProfile() {
     darkMode: false
   });
 
-  // Fetch current company data
-  const { data: existingCompany, isLoading } = useQuery({
+  // Fetch current company data with better error handling
+  const { data: existingCompany, isLoading, error: companyError } = useQuery({
     queryKey: ["/api/company"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/company");
       return response.json();
+    },
+    retry: 2,
+    refetchOnMount: true,
+    staleTime: 0, // Always fetch fresh data
+    onError: (error: any) => {
+      console.error("Error fetching company data:", error);
+      if (error.message?.includes('401')) {
+        console.warn("User not authenticated - company data unavailable");
+      }
     }
   });
 
@@ -184,6 +193,27 @@ export default function CompanyProfile() {
   });
 
   const handleSave = () => {
+    console.log("Saving company data:", companyData);
+    
+    // Validate required fields
+    if (!companyData.name?.trim()) {
+      toast({
+        title: "❌ Company Name Required",
+        description: "Please enter your company name",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!companyData.contactEmail?.trim()) {
+      toast({
+        title: "❌ Email Required",
+        description: "Please enter a contact email",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     updateCompanyMutation.mutate(companyData);
   };
 
