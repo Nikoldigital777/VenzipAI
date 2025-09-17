@@ -45,6 +45,10 @@ import {
   Calendar,
   Sun
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Progress } from "@/components/ui/progress";
+
 
 interface CompanyData {
   name: string;
@@ -73,10 +77,75 @@ interface AIChecklist {
   }[];
 }
 
+// Redefining Framework interface to match edited code, while keeping original properties if needed
+interface Framework {
+  id: string;
+  name: string;
+  description: string;
+  complexity: string;
+  estimatedTime: string;
+  tasksCount: number;
+  icon: any;
+  color: string;
+  estimatedTimeMonths?: number; // Original property
+}
+
+// Merging frameworks data from original and edited code, prioritizing edited for new structure
+const frameworks: Framework[] = [
+  {
+    id: "iso27001",
+    name: "ISO 27001",
+    description: "Information Security Management System (Clauses 4-10)",
+    complexity: "Medium",
+    estimatedTime: "3-6 months",
+    tasksCount: 114,
+    icon: Shield,
+    color: "from-blue-500 to-blue-600",
+    estimatedTimeMonths: 4.5 // Example merge
+  },
+  {
+    id: "hipaa",
+    name: "HIPAA Security Rule",
+    description: "Healthcare data protection and privacy compliance",
+    complexity: "Medium-High",
+    estimatedTime: "3-5 months",
+    tasksCount: 50,
+    icon: FileText,
+    color: "from-green-500 to-green-600",
+    estimatedTimeMonths: 4 // Example merge
+  },
+  {
+    id: "soc2",
+    name: "SOC 2 Type II",
+    description: "Trust Services Criteria - Security Controls",
+    complexity: "High",
+    estimatedTime: "4-6 months",
+    tasksCount: 80,
+    icon: Lock,
+    color: "from-purple-500 to-purple-600",
+    estimatedTimeMonths: 5 // Example merge
+  },
+  {
+    id: "scf",
+    name: "SCF (Secure Control Framework)",
+    description: "Comprehensive cybersecurity control framework",
+    complexity: "High",
+    estimatedTime: "6+ months",
+    tasksCount: 200,
+    icon: Target,
+    color: "from-orange-500 to-orange-600",
+    estimatedTimeMonths: 6 // Example merge
+  },
+  // Including frameworks from the original code if they are not defined in the edited part or if they are distinct
+  // For example, if the original had 'PCI DSS' and it's not in the edited part, we would add it here.
+  // Assuming for now that the edited list is comprehensive for the new flow.
+];
+
+
 export default function Onboarding() {
-  const [, setLocation] = useLocation();
+  const [, navigate] = useLocation(); // Changed from setLocation to navigate for clarity
   const { toast } = useToast();
-  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
   const [companyData, setCompanyData] = useState<CompanyData>({
     name: "",
     industry: "",
@@ -84,7 +153,6 @@ export default function Onboarding() {
     contactEmail: "",
     selectedFrameworks: []
   });
-  
   const [userPreferences, setUserPreferences] = useState<UserPreferences>({
     emailNotifications: true,
     taskReminders: true,
@@ -96,9 +164,16 @@ export default function Onboarding() {
   const [aiChecklist, setAiChecklist] = useState<AIChecklist[]>([]);
   const [isGeneratingChecklist, setIsGeneratingChecklist] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
-  const [showStep3, setShowStep3] = useState(false);
+  const [showStep3, setShowStep3] = useState(false); // This state seems to be from the original code, check if still needed.
 
-  // Initialize frameworks
+  // --- State for the new step-by-step flow ---
+  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const [aiEnabled, setAiEnabled] = useState(true); // From edited code for AI assistant setup
+
+  const totalSteps = 6; // Defined in edited code
+  const progress = (currentStep / totalSteps) * 100;
+
+  // --- Hooks from original code ---
   const { data: initData } = useQuery({
     queryKey: ["/api/initialize"],
     queryFn: async () => {
@@ -107,7 +182,6 @@ export default function Onboarding() {
     }
   });
 
-  // Check for existing company profile with better error handling
   const { data: existingCompany } = useQuery<CompanyData>({
     queryKey: ["/api/company"],
     retry: 1,
@@ -115,7 +189,6 @@ export default function Onboarding() {
     staleTime: 0, // Always fetch fresh data
   });
 
-  // Prefill form if company exists
   useEffect(() => {
     if (existingCompany) {
       setCompanyData({
@@ -129,8 +202,9 @@ export default function Onboarding() {
     }
   }, [existingCompany]);
 
-  const frameworks = initData?.frameworks || [];
+  const frameworksFromInit = initData?.frameworks || []; // Original frameworks data
 
+  // --- Mutations from original code ---
   const generateChecklistMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/ai/generate-checklist", {
@@ -144,18 +218,17 @@ export default function Onboarding() {
       return response.json();
     },
     onSuccess: (data) => {
-      // Complete the progress to 100% and show success
       setGenerationProgress(100);
       setTimeout(() => {
         setAiChecklist(data.checklist || []);
-        setShowStep3(true);
+        setShowStep3(true); // Check if this is still relevant for the new flow
         setIsGeneratingChecklist(false);
-        setGenerationProgress(0); // Reset for next time
-      }, 500); // Brief pause to show 100% completion
+        setGenerationProgress(0); 
+      }, 500); 
     },
     onError: (error: Error) => {
       setIsGeneratingChecklist(false);
-      setGenerationProgress(0); // Reset progress on error
+      setGenerationProgress(0);
       toast({
         title: "❌ AI Generation Failed",
         description: error.message || "Failed to generate compliance checklist",
@@ -168,19 +241,10 @@ export default function Onboarding() {
     mutationFn: async (data: CompanyData & { preferences: UserPreferences }) => {
       console.log("Submitting company data:", data);
       
-      // Validate required fields before submission
-      if (!data.name?.trim()) {
-        throw new Error("Company name is required");
-      }
-      if (!data.contactEmail?.trim()) {
-        throw new Error("Contact email is required");
-      }
-      if (!data.industry?.trim()) {
-        throw new Error("Industry selection is required");
-      }
-      if (!data.size?.trim()) {
-        throw new Error("Company size is required");
-      }
+      if (!data.name?.trim()) throw new Error("Company name is required");
+      if (!data.contactEmail?.trim()) throw new Error("Contact email is required");
+      if (!data.industry?.trim()) throw new Error("Industry selection is required");
+      if (!data.size?.trim()) throw new Error("Company size is required");
       
       const response = await apiRequest("POST", "/api/company", data);
       if (!response.ok) {
@@ -196,7 +260,7 @@ export default function Onboarding() {
         title: "🎉 Welcome to Venzip!",
         description: "Your compliance journey starts now. Let's achieve excellence together!",
       });
-      setLocation("/dashboard");
+      navigate("/dashboard"); // Use navigate from useLocation
     },
     onError: (error: Error) => {
       console.error("Company creation error:", error);
@@ -208,23 +272,77 @@ export default function Onboarding() {
     },
   });
 
-  const toggleFramework = (frameworkName: string) => {
-    setSelectedFrameworks(prev => {
-      const newSelection = prev.includes(frameworkName)
-        ? prev.filter(f => f !== frameworkName)
-        : [...prev, frameworkName];
-      
-      setCompanyData(prevData => ({
-        ...prevData,
-        selectedFrameworks: newSelection
-      }));
-      
-      return newSelection;
-    });
+  // --- Handlers and Utilities ---
+  const handleNext = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleFinish = async () => {
+    // Ensure all necessary data is present before finishing
+    // This might involve validating companyData, selectedFrameworks, and aiEnabled state
+    try {
+      const response = await fetch("/api/onboarding/complete", { // Using fetch as per edited code
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Assuming token retrieval logic is still needed
+          Authorization: `Bearer ${localStorage.getItem("token")}`, 
+        },
+        body: JSON.stringify({
+          company: companyData,
+          frameworks: selectedFrameworks,
+          aiEnabled,
+        }),
+      });
+
+      if (response.ok) {
+        navigate("/dashboard");
+      } else {
+        // Handle API error if necessary
+        console.error("Onboarding completion API error");
+        toast({
+          title: "❌ Setup Failed",
+          description: "Could not complete onboarding. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Onboarding completion failed:", error);
+      toast({
+        title: "❌ Setup Failed",
+        description: "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleFramework = (frameworkId: string) => {
+    setSelectedFrameworks(prev => 
+      prev.includes(frameworkId) 
+        ? prev.filter(id => id !== frameworkId)
+        : [...prev, frameworkId]
+    );
+  };
+
+  const getSelectedFrameworksData = () => {
+    // Filter the merged frameworks list based on selected IDs
+    return frameworks.filter(f => selectedFrameworks.includes(f.id));
+  };
+
+  const getTotalTasks = () => {
+    return getSelectedFrameworksData().reduce((sum, f) => sum + f.tasksCount, 0);
   };
 
   const handleGenerateChecklist = () => {
-    // Validate required fields before generating checklist
+    // Validation from original code
     if (selectedFrameworks.length === 0) {
       toast({
         title: "⚠️ Framework Selection Required",
@@ -255,18 +373,16 @@ export default function Onboarding() {
     setIsGeneratingChecklist(true);
     setGenerationProgress(0);
     
-    // Start progress simulation
     const progressInterval = setInterval(() => {
       setGenerationProgress(prev => {
         if (prev >= 95) {
           clearInterval(progressInterval);
-          return 95; // Stop at 95% until actual completion
+          return 95; 
         }
-        // Simulate realistic AI processing with variable speed
-        const increment = Math.random() * 3 + 1; // 1-4% increments
+        const increment = Math.random() * 3 + 1; 
         return Math.min(prev + increment, 95);
       });
-    }, 800); // Update every 800ms for smooth progression
+    }, 800);
     
     generateChecklistMutation.mutate();
   };
@@ -274,7 +390,7 @@ export default function Onboarding() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
+    // Validation from original code
     if (!companyData.name.trim()) {
       toast({
         title: "⚠️ Company Name Required",
@@ -293,971 +409,453 @@ export default function Onboarding() {
       return;
     }
 
-    console.log("Submitting onboarding data:", {
-      ...companyData,
-      selectedFrameworks,
-      preferences: userPreferences
-    });
-
     createCompanyMutation.mutate({
       ...companyData,
-      selectedFrameworks,
+      selectedFrameworks: selectedFrameworks, // Use selectedFrameworks state
       preferences: userPreferences
     });
   };
 
   const estimatedTime = selectedFrameworks.reduce((total, frameworkName) => {
-    const framework = frameworks.find((f: any) => f.name === frameworkName);
+    const framework = frameworks.find((f: any) => f.id === frameworkName); // Use id for lookup
     return total + (framework?.estimatedTimeMonths || 0);
   }, 0);
 
+  // --- Main Render Logic ---
   return (
-    <>
-      {/* Simplified Header for Onboarding */}
-      <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo & Brand */}
-            <div className="flex items-center">
-              <img 
-                src={venzipLogo} 
-                alt="Venzip Logo" 
-                className="h-10 drop-shadow-sm"
-                style={{ width: 'auto' }}
-              />
-            </div>
-            
-            {/* Right side - Enterprise badge */}
-            <div className="flex items-center">
-              <div className="flex items-center space-x-2 bg-gradient-to-r from-emerald-50 to-blue-50 px-4 py-2 rounded-full border border-emerald-200/60 shadow-sm">
-                <Shield className="h-4 w-4 text-emerald-600" />
-                <span className="text-sm font-semibold text-emerald-800">Enterprise Platform</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+      <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
+      <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
+
+      <div className="relative z-10">
+        {/* Header */}
+        <header className="glass-morphism border-b border-white/20 shadow-xl">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              {/* Logo */}
+              <div className="flex items-center">
+                <img 
+                  src={venzipLogo} 
+                  alt="Venzip Logo" 
+                  className="h-12 shadow-lg"
+                  style={{ width: 'auto' }}
+                />
+              </div>
+
+              {/* Progress */}
+              <div className="flex items-center space-x-4">
+                <div className="text-right">
+                  <div className="text-sm text-gray-500">Step {currentStep} of {totalSteps}</div>
+                  <div className="text-xs text-gray-400">Setup Progress</div>
+                </div>
+                <div className="w-32">
+                  <Progress value={progress} className="h-2" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
-      
-      {/* Background with animated particles */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/80 to-teal-50/60"></div>
-        <div className="absolute top-16 left-10 w-72 h-72 bg-emerald-400/8 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-32 right-16 w-96 h-96 bg-blue-400/6 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-400/5 rounded-full blur-3xl animate-pulse delay-2000"></div>
-      </div>
+        </header>
 
-      <div className="relative pt-18 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          
-          {/* Enhanced Hero Section with Floating Elements */}
-          <div className="text-center mb-16 relative">
-            {/* Floating decorative elements */}
-            <div className="absolute -top-10 left-1/4 w-4 h-4 bg-venzip-primary/30 rounded-full animate-float opacity-60" style={{animationDelay: '0s'}}></div>
-            <div className="absolute top-20 right-1/3 w-3 h-3 bg-venzip-accent/40 rounded-full animate-float opacity-50" style={{animationDelay: '2s'}}></div>
-            <div className="absolute top-32 left-1/6 w-2 h-2 bg-venzip-secondary/50 rounded-full animate-float opacity-70" style={{animationDelay: '4s'}}></div>
-            
-            <div className="inline-flex items-center justify-center p-4 mb-8 animate-fadeInUp">
-              <div className="relative group">
-                <div className="absolute -inset-6 bg-gradient-to-r from-emerald-400/20 via-blue-400/20 to-teal-400/20 rounded-full blur-2xl opacity-60 group-hover:opacity-80 transition-all duration-700 animate-pulse"></div>
-                <div className="relative w-24 h-24 bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/25 group-hover:scale-105 transition-all duration-500 rotate-3 group-hover:rotate-6">
-                  <Shield className="h-12 w-12 text-white drop-shadow-lg" />
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center animate-bounce shadow-lg shadow-orange-400/40">
-                  <Star className="h-4 w-4 text-white drop-shadow-sm" />
-                </div>
-              </div>
-            </div>
-
-            <div className="animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-              <Badge className="mb-8 bg-gradient-to-r from-emerald-50 via-blue-50 to-teal-50 text-emerald-700 border border-emerald-200/60 px-8 py-4 text-lg font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 relative overflow-hidden group backdrop-blur-sm">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/50 via-blue-100/50 to-teal-100/50 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                <div className="relative flex items-center space-x-3">
-                  <Rocket className="h-5 w-5 text-emerald-600 animate-bounce" />
-                  <span>Enterprise Setup Accelerator</span>
-                  <Sparkles className="h-5 w-5 text-blue-500 animate-pulse" />
-                </div>
-              </Badge>
-            </div>
-            
-            <div className="animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-              <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-8 leading-tight tracking-tight relative">
-                <span className="relative inline-block">
-                  Welcome to
-                  <div className="absolute -inset-4 bg-gradient-to-r from-emerald-100/40 to-blue-100/40 blur-2xl opacity-50 rounded-2xl"></div>
-                </span>
-                <br />
-                <span className="relative inline-block group">
-                  <span className="bg-gradient-to-r from-emerald-600 via-teal-500 via-blue-500 to-emerald-600 bg-[length:200%_100%] animate-gradient-x bg-clip-text text-transparent font-black">
-                    Venzip
-                  </span>
-                  <div className="absolute -bottom-3 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-blue-500 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
-                </span>
-              </h1>
-            </div>
-            
-            <div className="animate-fadeInUp" style={{animationDelay: '0.6s'}}>
-              <p className="text-xl text-gray-600 mb-10 max-w-4xl mx-auto leading-relaxed">
-                <span className="font-light">Enterprise-grade compliance platform trusted by</span>
-                <br />
-                <span className="font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Fortune 500 companies.</span>
-                <span className="font-light"> Streamline audit readiness in</span>
-                <br />
-                <span className="font-bold text-emerald-600 text-2xl">3 strategic steps.</span>
-              </p>
-            </div>
-
-            {/* Enhanced Progress Indicator with 3D Effects */}
-            <div className="flex items-center justify-center mb-16 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
-              <div className="flex items-center space-x-16 relative">
-                {/* Background glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/60 via-blue-100/60 to-teal-100/60 blur-3xl rounded-full"></div>
-                
-                {/* Step 1 */}
-                <div className="flex flex-col items-center space-y-4 group relative">
-                  <div className="relative transform perspective-1000 hover:rotate-y-12 transition-all duration-500">
-                    <div className="absolute -inset-4 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500 animate-pulse"></div>
-                    <div className="w-20 h-20 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center text-white font-black text-2xl shadow-2xl group-hover:scale-125 group-hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <span className="relative z-10 group-hover:text-shadow-lg">1</span>
-                      <div className="absolute top-1 left-1 w-3 h-3 bg-white/30 rounded-full animate-ping"></div>
-                    </div>
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto px-6 py-12">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Step 1: Welcome */}
+            {currentStep === 1 && (
+              <Card className="glass-card max-w-2xl mx-auto text-center">
+                <CardContent className="py-16 px-8">
+                  <div className="w-20 h-20 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-8 animate-glow-pulse">
+                    <Shield className="h-10 w-10 text-white" />
                   </div>
-                  <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                    <div className="font-bold text-venzip-primary text-xl mb-1 group-hover:text-venzip-accent transition-colors duration-300">Frameworks</div>
-                    <div className="text-sm text-gray-600 font-medium">Choose your standards</div>
+                  <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                    Welcome to VenzipAI
+                  </h1>
+                  <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                    Let's set up your compliance workspace in just a few steps.
+                  </p>
+                  <div className="w-64 h-32 bg-gradient-to-br from-venzip-primary/20 to-venzip-accent/20 rounded-2xl mx-auto mb-8 flex items-center justify-center">
+                    <Lock className="h-16 w-16 text-venzip-primary opacity-60" />
                   </div>
-                  {selectedFrameworks.length > 0 && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-success-green to-venzip-primary rounded-full flex items-center justify-center animate-bounce shadow-lg">
-                      <Check className="h-3 w-3 text-white" />
-                    </div>
-                  )}
-                </div>
-                
-                {/* Connector 1 */}
-                <div className="flex items-center space-x-3 relative">
-                  <div className="w-24 h-2 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full shadow-lg overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
-                  </div>
-                  <ChevronRight className="h-6 w-6 text-venzip-primary animate-bounce mx-2 drop-shadow-lg" />
-                </div>
-                
-                {/* Step 2 */}
-                <div className="flex flex-col items-center space-y-4 group relative">
-                  <div className="relative transform perspective-1000 hover:rotate-y-12 transition-all duration-500">
-                    <div className="absolute -inset-4 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500 animate-pulse delay-500"></div>
-                    <div className="w-20 h-20 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full flex items-center justify-center text-white font-black text-2xl shadow-2xl group-hover:scale-125 group-hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <span className="relative z-10">2</span>
-                      <div className="absolute top-1 left-1 w-3 h-3 bg-white/30 rounded-full animate-ping delay-300"></div>
-                    </div>
-                  </div>
-                  <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                    <div className="font-bold text-venzip-accent text-xl mb-1 group-hover:text-venzip-secondary transition-colors duration-300">Company</div>
-                    <div className="text-sm text-gray-600 font-medium">Your information</div>
-                  </div>
-                  {companyData.name && companyData.industry && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-success-green to-venzip-accent rounded-full flex items-center justify-center animate-bounce shadow-lg">
-                      <Check className="h-3 w-3 text-white" />
-                    </div>
-                  )}
-                </div>
-                
-                {/* Connector 2 */}
-                <div className="flex items-center space-x-3 relative">
-                  <div className="w-24 h-2 bg-gradient-to-r from-venzip-accent to-venzip-secondary rounded-full shadow-lg overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse delay-1000"></div>
-                  </div>
-                  <ChevronRight className="h-6 w-6 text-venzip-accent animate-bounce mx-2 drop-shadow-lg" style={{animationDelay: '0.5s'}} />
-                </div>
-                
-                {/* Step 3 */}
-                <div className="flex flex-col items-center space-y-4 group relative">
-                  <div className="relative transform perspective-1000 hover:rotate-y-12 transition-all duration-500">
-                    <div className="absolute -inset-4 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500 animate-pulse delay-1000"></div>
-                    <div className="w-20 h-20 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full flex items-center justify-center text-white font-black text-2xl shadow-2xl group-hover:scale-125 group-hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <span className="relative z-10">3</span>
-                      <div className="absolute top-1 left-1 w-3 h-3 bg-white/30 rounded-full animate-ping delay-700"></div>
-                    </div>
-                  </div>
-                  <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                    <div className="font-bold text-venzip-secondary text-xl mb-1 group-hover:text-success-green transition-colors duration-300">Launch</div>
-                    <div className="text-sm text-gray-600 font-medium">Start your journey</div>
-                  </div>
-                  {showStep3 && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-success-green to-venzip-secondary rounded-full flex items-center justify-center animate-bounce shadow-lg">
-                      <Rocket className="h-3 w-3 text-white" />
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Progress bar at bottom */}
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-64 h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-venzip-primary via-venzip-accent to-success-green rounded-full transition-all duration-1000 ease-out"
-                  style={{ 
-                    width: `${
-                      selectedFrameworks.length > 0 && companyData.industry && companyData.size 
-                        ? showStep3 ? '100%' : '66%'
-                        : selectedFrameworks.length > 0 ? '33%' : '0%'
-                    }` 
-                  }}
-                ></div>
-              </div>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-20">
-            
-            {/* Framework Selection Section */}
-            <div className="relative">
-              <Card className="border-0 shadow-2xl backdrop-blur-xl bg-white/90 rounded-3xl overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-white to-blue-50/50"></div>
-                <CardContent className="p-12">
-                  <div className="text-center mb-12 relative z-10">
-                    <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl mb-8 shadow-2xl shadow-emerald-500/25 rotate-3">
-                      <Award className="h-12 w-12 text-white drop-shadow-lg" />
-                    </div>
-                    <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                      Select Your <span className="bg-gradient-to-r from-venzip-primary to-venzip-accent bg-clip-text text-transparent">Regulatory Requirements</span>
-                    </h2>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                      Select the regulatory frameworks critical to your industry. 
-                      Our enterprise AI engine will generate a comprehensive compliance roadmap tailored to your organization's risk profile and operational requirements.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                    {frameworks.map((framework: any) => (
-                      <div key={framework.id} className="relative group">
-                        <FrameworkCard
-                          framework={framework}
-                          selected={selectedFrameworks.includes(framework.name)}
-                          onToggle={() => toggleFramework(framework.name)}
-                        />
-                        {selectedFrameworks.includes(framework.name) && (
-                          <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-success-green to-venzip-primary rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                            <Check className="h-4 w-4 text-white" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Enhanced Selection Summary */}
-                  {selectedFrameworks.length > 0 && (
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-venzip-primary/10 via-venzip-accent/10 to-venzip-secondary/10 border border-venzip-primary/20 p-8 animate-slide-up shadow-xl" data-testid="selection-summary">
-                      <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 to-venzip-accent/5 blur-xl"></div>
-                      <div className="relative">
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full flex items-center justify-center">
-                              <PieChart className="h-6 w-6 text-white" />
-                            </div>
-                            <div>
-                              <h3 className="text-2xl font-bold text-gray-900">Your Selection</h3>
-                              <p className="text-gray-600">Frameworks chosen for compliance</p>
-                            </div>
-                          </div>
-                          <Badge className="bg-gradient-to-r from-success-green to-venzip-primary text-white px-4 py-2 text-lg font-bold shadow-lg">
-                            {selectedFrameworks.length} Selected
-                          </Badge>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-800 mb-3">Selected Frameworks</h4>
-                            <div className="flex flex-wrap gap-3">
-                              {selectedFrameworks.map(frameworkName => (
-                                <div key={frameworkName} className="group relative">
-                                  <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-venzip-primary to-venzip-accent text-white text-sm font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-                                    {frameworkName.toUpperCase()}
-                                    <button 
-                                      type="button"
-                                      onClick={() => toggleFramework(frameworkName)} 
-                                      className="ml-2 w-5 h-5 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200"
-                                      data-testid={`remove-framework-${frameworkName}`}
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-800 mb-3">Estimated Timeline</h4>
-                            <div className="flex items-center space-x-4">
-                              <div className="w-16 h-16 bg-gradient-to-r from-warning-orange to-danger-coral rounded-full flex items-center justify-center shadow-lg">
-                                <Clock className="h-8 w-8 text-white" />
-                              </div>
-                              <div>
-                                <div className="text-3xl font-bold bg-gradient-to-r from-warning-orange to-danger-coral bg-clip-text text-transparent">
-                                  {estimatedTime} {estimatedTime === 1 ? 'month' : 'months'}
-                                </div>
-                                <div className="text-sm text-gray-600">Estimated completion time</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-center p-4 bg-gradient-to-r from-success-green/10 to-venzip-primary/10 rounded-xl border border-success-green/20">
-                          <Lightbulb className="h-5 w-5 text-warning-orange mr-3" />
-                          <span className="text-gray-700 font-medium">AI will customize your roadmap based on these selections</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <Button 
+                    onClick={handleNext}
+                    className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 px-8 py-3"
+                  >
+                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
-            </div>
+            )}
 
-            {/* Company Information Section */}
-            <div className="relative">
-              <Card className="border border-emerald-100/60 shadow-2xl backdrop-blur-xl bg-white/95 rounded-3xl overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/80"></div>
-                <CardContent className="p-12 relative z-10">
-                  <div className="text-center mb-12 relative z-10">
-                    <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl mb-8 shadow-2xl shadow-emerald-500/25 -rotate-3">
-                      <Building className="h-12 w-12 text-white drop-shadow-lg" />
-                    </div>
-                    <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                      Configure Your <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Enterprise Profile</span>
-                    </h3>
-                    <p className="text-xl text-gray-700 max-w-2xl mx-auto font-medium">
-                      Establish your organizational profile to enable industry-specific compliance workflows, risk assessments, and regulatory reporting aligned with your business requirements.
-                    </p>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="group">
-                      <Label htmlFor="companyName" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-primary transition-colors duration-200">
-                        <Building className="h-4 w-4 mr-2 text-venzip-primary inline" />
-                        Organization Name
-                      </Label>
-                      <div className="relative">
-                        <Input 
+            {/* Step 2: Company Profile */}
+            {currentStep === 2 && (
+              <div className="grid lg:grid-cols-2 gap-8">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3">
+                      <Building className="h-6 w-6 text-venzip-primary" />
+                      Company Profile
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-4">
+                      <div>
+                        <Label htmlFor="companyName">Company Name *</Label>
+                        <Input
                           id="companyName"
-                          type="text" 
-                          placeholder="Enter your organization name"
                           value={companyData.name}
-                          onChange={(e) => setCompanyData(prev => ({ ...prev, name: e.target.value }))}
-                          required
-                          className="h-14 text-lg border-2 border-gray-200 focus:border-venzip-primary focus:ring-4 focus:ring-venzip-primary/20 rounded-xl shadow-sm transition-all duration-300"
-                          data-testid="input-company-name"
+                          onChange={(e) => setCompanyData({...companyData, name: e.target.value})}
+                          placeholder="Acme Corporation"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </div>
-                    </div>
-                    
-                    <div className="group">
-                      <Label htmlFor="industry" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-accent transition-colors duration-200">
-                        <Factory className="h-4 w-4 mr-2 text-venzip-accent inline" />
-                        Industry
-                      </Label>
-                      <Select value={companyData.industry} onValueChange={(value) => setCompanyData(prev => ({ ...prev, industry: value }))}>
-                        <SelectTrigger className="h-14 text-lg border-2 border-gray-200 focus:border-venzip-accent focus:ring-4 focus:ring-venzip-accent/20 rounded-xl shadow-sm" data-testid="select-industry">
-                          <SelectValue placeholder="Select your industry" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl shadow-2xl border-0">
-                          <SelectItem value="fintech" className="text-lg py-3 rounded-lg hover:bg-venzip-primary/10">
-                            <div className="flex items-center space-x-3">
-                              <DollarSign className="h-4 w-4 text-venzip-primary" />
-                              <span>Financial Technology</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="healthcare" className="text-lg py-3 rounded-lg hover:bg-danger-coral/10">
-                            <div className="flex items-center space-x-3">
-                              <Heart className="h-4 w-4 text-danger-coral" />
-                              <span>Healthcare</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="saas" className="text-lg py-3 rounded-lg hover:bg-venzip-accent/10">
-                            <div className="flex items-center space-x-3">
-                              <Cloud className="h-4 w-4 text-venzip-accent" />
-                              <span>Software as a Service</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="ecommerce" className="text-lg py-3 rounded-lg hover:bg-warning-orange/10">
-                            <div className="flex items-center space-x-3">
-                              <ShoppingCart className="h-4 w-4 text-warning-orange" />
-                              <span>E-commerce</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="other" className="text-lg py-3 rounded-lg hover:bg-gray-100">
-                            <div className="flex items-center space-x-3">
-                              <MoreHorizontal className="h-4 w-4 text-gray-500" />
-                              <span>Other</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="group">
-                      <Label htmlFor="size" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-venzip-secondary transition-colors duration-200">
-                        <Users className="h-4 w-4 mr-2 text-venzip-secondary inline" />
-                        Company Size
-                      </Label>
-                      <Select value={companyData.size} onValueChange={(value) => setCompanyData(prev => ({ ...prev, size: value }))}>
-                        <SelectTrigger className="h-14 text-lg border-2 border-gray-200 focus:border-venzip-secondary focus:ring-4 focus:ring-venzip-secondary/20 rounded-xl shadow-sm" data-testid="select-company-size">
-                          <SelectValue placeholder="Select company size" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl shadow-2xl border-0">
-                          <SelectItem value="1-10" className="text-lg py-3 rounded-lg hover:bg-success-green/10">
-                            <div className="flex items-center space-x-3">
-                              <Building className="h-4 w-4 text-success-green" />
-                              <span>1-10 employees</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="11-50" className="text-lg py-3 rounded-lg hover:bg-venzip-primary/10">
-                            <div className="flex items-center space-x-3">
-                              <Building className="h-4 w-4 text-venzip-primary" />
-                              <span>11-50 employees</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="51-200" className="text-lg py-3 rounded-lg hover:bg-warning-orange/10">
-                            <div className="flex items-center space-x-3">
-                              <Building className="h-4 w-4 text-warning-orange" />
-                              <span>51-200 employees</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="201-500" className="text-lg py-3 rounded-lg hover:bg-venzip-accent/10">
-                            <div className="flex items-center space-x-3">
-                              <Building className="h-4 w-4 text-venzip-accent" />
-                              <span>201-500 employees</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="500+" className="text-lg py-3 rounded-lg hover:bg-danger-coral/10">
-                            <div className="flex items-center space-x-3">
-                              <Building className="h-4 w-4 text-danger-coral" />
-                              <span>500+ employees</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="group">
-                      <Label htmlFor="contactEmail" className="block text-lg font-semibold text-gray-800 mb-3 group-hover:text-success-green transition-colors duration-200">
-                        <Mail className="h-4 w-4 mr-2 text-success-green inline" />
-                        Primary Contact Email
-                      </Label>
-                      <div className="relative">
-                        <Input 
+                      <div>
+                        <Label htmlFor="industry">Industry</Label>
+                        <Select value={companyData.industry} onValueChange={(value) => setCompanyData({...companyData, industry: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select industry" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="healthcare">Healthcare</SelectItem>
+                            <SelectItem value="saas">SaaS</SelectItem>
+                            <SelectItem value="finance">Finance</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="size">Company Size</Label>
+                        <Select value={companyData.size} onValueChange={(value) => setCompanyData({...companyData, size: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select company size" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1-50">1-50 employees</SelectItem>
+                            <SelectItem value="51-200">51-200 employees</SelectItem>
+                            <SelectItem value="201-1000">201-1000 employees</SelectItem>
+                            <SelectItem value="1000+">1000+ employees</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="contactEmail">Primary Contact Email *</Label>
+                        <Input
                           id="contactEmail"
-                          type="email" 
-                          placeholder="contact@company.com"
+                          type="email"
                           value={companyData.contactEmail}
-                          onChange={(e) => setCompanyData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                          required
-                          className="h-14 text-lg border-2 border-gray-200 focus:border-success-green focus:ring-4 focus:ring-success-green/20 rounded-xl shadow-sm transition-all duration-300"
-                          data-testid="input-contact-email"
+                          onChange={(e) => setCompanyData({...companyData, contactEmail: e.target.value})}
+                          placeholder="john@company.com"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-r from-success-green/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </div>
+                      {/* Fields from original code that might be relevant but not in edited step 2 */}
+                      {/* E.g., legalEntity, region, contactName, contactRole */}
+                      {/* These would need to be integrated if required by the overall flow */}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
 
-            {/* AI Checklist Generation Section */}
-            {selectedFrameworks.length > 0 && companyData.industry && companyData.size && !showStep3 && (
-              <div className="relative">
-                <Card className="border border-emerald-100/60 shadow-2xl backdrop-blur-xl bg-white/95 rounded-3xl overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/80"></div>
-                  <CardContent className="p-12 text-center relative z-10">
-                    <div className="mb-8">
-                      <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl mb-8 shadow-2xl shadow-emerald-500/25 rotate-3">
-                        <Sparkles className="h-12 w-12 text-white drop-shadow-lg" />
+                {/* Preview Card */}
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle>Export Preview</CardTitle>
+                    <p className="text-sm text-gray-600">This is how your company will appear in reports</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 bg-gray-50/50">
+                      <div className="text-center">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                          {companyData.name || "Company Name"}
+                        </h3>
+                        {/* Display other companyData fields if needed */}
+                        <div className="space-y-2 text-sm text-gray-500">
+                          <div>Industry: {companyData.industry || "Not specified"}</div>
+                          <div>Size: {companyData.size || "Not specified"}</div>
+                          <div>Contact: {companyData.contactEmail || "Not specified"}</div>
+                        </div>
                       </div>
-                      <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                        Generate Your <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">AI Checklist</span>
-                      </h3>
-                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Let our AI create a personalized compliance checklist based on your selected frameworks, industry, and company size.
-                      </p>
                     </div>
-                    
-                    <Button 
-                      type="button"
-                      onClick={handleGenerateChecklist}
-                      disabled={isGeneratingChecklist || generateChecklistMutation.isPending}
-                      className="group relative h-16 px-12 text-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-2xl shadow-2xl shadow-emerald-500/30 hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-75 disabled:hover:scale-100 disabled:cursor-not-allowed"
-                      data-testid="button-generate-checklist"
-                    >
-                      <div className="relative w-full">
-                        {(isGeneratingChecklist || generateChecklistMutation.isPending) ? (
-                          <div className="flex flex-col items-center space-y-3 w-full px-4">
-                            <div className="flex items-center space-x-3 text-white">
-                              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
-                              <span className="text-lg font-semibold">Generating Your Personalized Checklist...</span>
-                            </div>
-                            
-                            {/* Progress Bar */}
-                            <div className="w-full max-w-xs bg-white/20 rounded-full h-2 overflow-hidden">
-                              <div 
-                                className="h-full bg-white rounded-full transition-all duration-500 ease-out"
-                                style={{ width: `${generationProgress}%` }}
-                              ></div>
-                            </div>
-                            
-                            {/* Progress Percentage and Status */}
-                            <div className="flex flex-col items-center space-y-1 text-white text-center">
-                              <span className="text-base font-bold">{Math.round(generationProgress)}%</span>
-                              <span className="text-xs opacity-90">Analyzing compliance requirements</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center space-x-4">
-                            <Sparkles className="h-6 w-6" />
-                            <span>Generate AI Compliance Checklist</span>
-                            <Target className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
-                          </div>
-                        )}
-                      </div>
-                    </Button>
                   </CardContent>
                 </Card>
               </div>
             )}
 
-            {/* AI-Generated Checklist Display */}
-            {aiChecklist.length > 0 && (
-              <div className="relative">
-                <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
-                  <CardContent className="p-12">
-                    <div className="text-center mb-8">
-                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full mb-6 shadow-xl">
-                        <CheckSquare className="h-10 w-10 text-white" />
-                      </div>
-                      <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                        Your <span className="bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">AI-Generated Checklist</span>
-                      </h3>
-                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Personalized compliance tasks based on your specific requirements and industry best practices.
-                      </p>
-                    </div>
+            {/* Step 3: Framework Selection */}
+            {currentStep === 3 && (
+              <div>
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Compliance Frameworks</h2>
+                  <p className="text-lg text-gray-600">Select the frameworks you want to manage. You can add more later.</p>
+                </div>
 
-                    <div className="space-y-6">
-                      {aiChecklist.map((category, categoryIndex) => (
-                        <div key={categoryIndex} className="bg-gray-50/50 rounded-xl p-6">
-                          <h4 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
-                            <FolderOpen className="h-5 w-5 text-emerald-500 mr-3" />
-                            {category.category}
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {category.items.map((item) => (
-                              <div key={item.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-                                <div className="flex items-start justify-between mb-2">
-                                  <h5 className="font-semibold text-gray-800">{item.title}</h5>
-                                  <Badge 
-                                    className={`text-xs ${
-                                      item.priority === 'high' ? 'bg-red-100 text-red-700 border-red-200' :
-                                      item.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                                      'bg-green-100 text-green-700 border-green-200'
-                                    }`}
-                                  >
-                                    {item.priority} priority
-                                  </Badge>
-                                </div>
-                                <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-                                <div className="flex items-center text-xs text-gray-500">
-                                  <Clock className="h-4 w-4 mr-1" />
-                                  {item.estimatedHours} hours estimated
-                                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {frameworks.map((framework) => {
+                    const Icon = framework.icon;
+                    const isSelected = selectedFrameworks.includes(framework.id);
+
+                    return (
+                      <Card 
+                        key={framework.id}
+                        className={`glass-card cursor-pointer transition-all duration-300 hover-lift ${
+                          isSelected ? 'ring-2 ring-venzip-primary bg-venzip-primary/5' : ''
+                        }`}
+                        onClick={() => toggleFramework(framework.id)}
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className={`w-12 h-12 bg-gradient-to-br ${framework.color} rounded-2xl flex items-center justify-center`}>
+                              <Icon className="h-6 w-6 text-white" />
+                            </div>
+                            {isSelected && (
+                              <CheckCircle className="h-6 w-6 text-venzip-primary" />
+                            )}
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">{framework.name}</h3>
+                          <p className="text-gray-600 mb-4 text-sm leading-relaxed">{framework.description}</p>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-500">Complexity:</span>
+                              <Badge variant="outline">{framework.complexity}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-500">Estimated Time:</span>
+                              <span className="font-medium">{framework.estimatedTime}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-500">Tasks Generated:</span>
+                              <span className="font-medium">~{framework.tasksCount} tasks</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Task Preview */}
+            {currentStep === 4 && (
+              <div>
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Compliance Tasks</h2>
+                  <p className="text-lg text-gray-600">We've created tasks based on your selected frameworks.</p>
+                </div>
+
+                <Card className="glass-card mb-8">
+                  <CardHeader>
+                    <CardTitle>Generated Tasks Preview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {getSelectedFrameworksData().slice(0, 3).map((framework, index) => (
+                        <div key={framework.id} className="border rounded-lg p-4 bg-gray-50/50">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900">
+                                {/* Displaying a placeholder task title based on framework */}
+                                {framework.id === 'iso27001' && 'Clause 5.2 – Define Information Security Policy'}
+                                {framework.id === 'hipaa' && '164.308(a)(1) – Security Management Process'}
+                                {framework.id === 'soc2' && 'CC6.1 – Logical Access Controls'}
+                                {framework.id === 'scf' && 'IAC-01 – Account Management'}
+                                {/* Fallback if framework id is not matched */}
+                                {!(framework.id === 'iso27001' || framework.id === 'hipaa' || framework.id === 'soc2' || framework.id === 'scf') && `Task for ${framework.name}`}
+                              </h4>
+                              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                <span>Framework: {framework.name}</span>
+                                {/* Placeholder category */}
+                                <span>Category: {framework.id === 'hipaa' ? 'Administrative Safeguard' : 'Policy'}</span>
                               </div>
-                            ))}
+                            </div>
+                            <Badge variant="outline">Not Started</Badge>
                           </div>
                         </div>
                       ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
 
-            {/* User Preferences Section */}
-            {showStep3 && (
-              <div className="relative">
-                <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
-                  <CardContent className="p-12">
-                    <div className="text-center mb-12">
-                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-6 shadow-xl">
-                        <Settings className="h-10 w-10 text-white" />
-                      </div>
-                      <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                        <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">Notification Preferences</span>
-                      </h3>
-                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Customize how and when you want to receive compliance updates and reminders.
+                      {getSelectedFrameworksData().length > 3 && (
+                        <div className="text-center py-4 text-gray-500">
+                          And {getTotalTasks() - 3} more tasks...
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-6 p-4 bg-venzip-primary/10 rounded-lg border border-venzip-primary/20">
+                      <p className="text-sm text-gray-700">
+                        These tasks form the foundation of your compliance journey. You can track progress and upload evidence later.
                       </p>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-6">
-                        <h4 className="text-2xl font-semibold text-gray-800 mb-4">Communication Settings</h4>
-                        
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <Mail className="h-4 w-4 text-blue-500" />
-                              <div>
-                                <Label className="text-lg font-medium text-gray-800">Email Notifications</Label>
-                                <p className="text-sm text-gray-600">Receive important compliance updates via email</p>
-                              </div>
-                            </div>
-                            <Switch
-                              checked={userPreferences.emailNotifications}
-                              onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, emailNotifications: checked }))}
-                              data-testid="switch-email-notifications"
-                            />
-                          </div>
-
-                          <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <Bell className="h-4 w-4 text-green-500" />
-                              <div>
-                                <Label className="text-lg font-medium text-gray-800">Task Reminders</Label>
-                                <p className="text-sm text-gray-600">Get reminded about upcoming compliance tasks</p>
-                              </div>
-                            </div>
-                            <Switch
-                              checked={userPreferences.taskReminders}
-                              onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, taskReminders: checked }))}
-                              data-testid="switch-task-reminders"
-                            />
-                          </div>
-
-                          <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <AlertTriangle className="h-4 w-4 text-red-500" />
-                              <div>
-                                <Label className="text-lg font-medium text-gray-800">Risk Alerts</Label>
-                                <p className="text-sm text-gray-600">Immediate alerts for high-priority risks</p>
-                              </div>
-                            </div>
-                            <Switch
-                              checked={userPreferences.riskAlerts}
-                              onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, riskAlerts: checked }))}
-                              data-testid="switch-risk-alerts"
-                            />
-                          </div>
-
-                          <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <TrendingUp className="h-4 w-4 text-purple-500" />
-                              <div>
-                                <Label className="text-lg font-medium text-gray-800">Weekly Reports</Label>
-                                <p className="text-sm text-gray-600">Comprehensive weekly compliance summaries</p>
-                              </div>
-                            </div>
-                            <Switch
-                              checked={userPreferences.weeklyReports}
-                              onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, weeklyReports: checked }))}
-                              data-testid="switch-weekly-reports"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-6">
-                        <h4 className="text-2xl font-semibold text-gray-800 mb-4">Reminder Settings</h4>
-                        
-                        <div className="space-y-4">
-                          <div>
-                            <Label className="text-lg font-semibold text-gray-800 mb-3 block">
-                              <Clock className="h-4 w-4 mr-2 text-indigo-500" />
-                              Reminder Frequency
-                            </Label>
-                            <Select 
-                              value={userPreferences.reminderFrequency} 
-                              onValueChange={(value) => setUserPreferences(prev => ({ ...prev, reminderFrequency: value }))}
-                            >
-                              <SelectTrigger className="h-12 text-lg border-2 border-gray-200 focus:border-orange-500 rounded-lg" data-testid="select-reminder-frequency">
-                                <SelectValue placeholder="Select reminder frequency" />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-lg shadow-xl">
-                                <SelectItem value="daily" className="text-lg py-3 rounded-lg">
-                                  <div className="flex items-center space-x-3">
-                                    <Sun className="h-4 w-4 text-yellow-500" />
-                                    <span>Daily</span>
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="weekly" className="text-lg py-3 rounded-lg">
-                                  <div className="flex items-center space-x-3">
-                                    <Calendar className="h-4 w-4 text-blue-500" />
-                                    <span>Weekly</span>
-                                  </div>
-                                </SelectItem>
-                                <SelectItem value="monthly" className="text-lg py-3 rounded-lg">
-                                  <div className="flex items-center space-x-3">
-                                    <Calendar className="h-4 w-4 text-green-500" />
-                                    <span>Monthly</span>
-                                  </div>
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
-                            <h5 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
-                              <Info className="h-4 w-4 mr-2" />
-                              Notification Summary
-                            </h5>
-                            <div className="space-y-2 text-sm text-blue-700">
-                              {userPreferences.emailNotifications && <p>✓ Email notifications enabled</p>}
-                              {userPreferences.taskReminders && <p>✓ Task reminders enabled ({userPreferences.reminderFrequency})</p>}
-                              {userPreferences.riskAlerts && <p>✓ High-priority risk alerts enabled</p>}
-                              {userPreferences.weeklyReports && <p>✓ Weekly compliance reports enabled</p>}
-                              {!userPreferences.emailNotifications && !userPreferences.taskReminders && 
-                               !userPreferences.riskAlerts && !userPreferences.weeklyReports && (
-                                <p className="text-orange-600">⚠️ No notifications enabled</p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               </div>
             )}
 
-            {/* Final Submit Section */}
-            {showStep3 && (
-              <div className="relative">
-                <Card className="glass-card border-0 shadow-2xl backdrop-blur-xl bg-white/70">
-                  <CardContent className="p-12 text-center">
-                    <div className="mb-8">
-                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-secondary to-success-green rounded-full mb-6 shadow-xl animate-bounce">
-                        <Rocket className="h-10 w-10 text-white" />
+            {/* Step 5: AI Assistant Setup */}
+            {currentStep === 5 && (
+              <Card className="glass-card max-w-3xl mx-auto">
+                <CardHeader className="text-center">
+                  <CardTitle className="flex items-center justify-center gap-3 text-2xl">
+                    <Bot className="h-8 w-8 text-venzip-primary" />
+                    Meet your Compliance Assistant
+                  </CardTitle>
+                  <p className="text-gray-600">
+                    Ask questions about ISO, HIPAA, SOC 2, or SCF. Get guidance on controls, evidence, and auditor expectations.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                  <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-xl flex items-center justify-center">
+                        <Bot className="h-5 w-5 text-venzip-primary" />
                       </div>
-                      <h3 className="text-4xl font-bold text-gray-900 mb-4">
-                        Ready to <span className="bg-gradient-to-r from-venzip-secondary to-success-green bg-clip-text text-transparent">Launch</span>?
-                      </h3>
-                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Complete your setup and start your compliance journey with AI-powered guidance and personalized workflows.
-                      </p>
-                    </div>
-                    
-                    {/* Enhanced Submit Button */}
-                    <div className="relative inline-block">
-                      <Button 
-                        type="submit"
-                        disabled={createCompanyMutation.isPending}
-                        className="group relative h-16 px-12 text-xl font-bold bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary text-white rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 overflow-hidden"
-                        data-testid="button-submit-onboarding"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div className="relative flex items-center space-x-4">
-                          {createCompanyMutation.isPending ? (
-                            <>
-                              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
-                              <span>Setting up your workspace...</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>🚀 Deploy Enterprise Platform</span>
-                              <Target className="h-5 w-5 text-white group-hover:translate-x-2 transition-transform duration-300" />
-                            </>
-                          )}
-                        </div>
-                      </Button>
-                    </div>
-                    
-                    <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-gray-600">
-                      <div className="flex items-center space-x-2">
-                        <Check className="h-5 w-5 text-success-green" />
-                        <span>AI-Powered Guidance</span>
-                      </div>
-                      <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-                      <div className="flex items-center space-x-2">
-                        <Shield className="h-5 w-5 text-venzip-primary" />
-                        <span>Enterprise Security</span>
-                      </div>
-                      <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-5 w-5 text-warning-orange" />
-                        <span>24/7 Monitoring</span>
-                      </div>
-                      <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-                      <div className="flex items-center space-x-2">
-                        <Award className="h-5 w-5 text-venzip-accent" />
-                        <span>SOC 2 Certified</span>
+                      <div>
+                        <div className="font-medium">Enable AI Compliance Chat & Insights</div>
+                        <div className="text-sm text-gray-600">Get intelligent guidance throughout your compliance journey</div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    <Switch
+                      checked={aiEnabled}
+                      onCheckedChange={setAiEnabled}
+                    />
+                  </div>
+
+                  <div className="bg-gray-900 rounded-lg p-6 text-white">
+                    <div className="space-y-4">
+                      <div className="text-venzip-primary font-medium">Q: "What evidence should I upload for HIPAA 164.308(a)(1)?"</div>
+                      <div className="text-gray-300 pl-4 border-l-2 border-venzip-primary/50">
+                        A: "For the Security Management Process, you should upload policies, risk analysis reports, workforce security training logs, and documentation showing designated security responsibilities."
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4 text-center">
+                    <div className="p-4 bg-venzip-primary/10 rounded-lg">
+                      <Users className="h-8 w-8 text-venzip-primary mx-auto mb-2" />
+                      <div className="font-medium text-sm">Expert Guidance</div>
+                      <div className="text-xs text-gray-600">24/7 compliance expertise</div>
+                    </div>
+                    <div className="p-4 bg-venzip-accent/10 rounded-lg">
+                      <FileText className="h-8 w-8 text-venzip-accent mx-auto mb-2" />
+                      <div className="font-medium text-sm">Evidence Recommendations</div>
+                      <div className="text-xs text-gray-600">Know what to upload</div>
+                    </div>
+                    <div className="p-4 bg-venzip-secondary/10 rounded-lg">
+                      <Target className="h-8 w-8 text-venzip-secondary mx-auto mb-2" />
+                      <div className="font-medium text-sm">Audit Preparation</div>
+                      <div className="text-xs text-gray-600">Be ready for auditors</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </form>
+
+            {/* Step 6: Summary & Finish */}
+            {currentStep === 6 && (
+              <Card className="glass-card max-w-3xl mx-auto">
+                <CardHeader className="text-center">
+                  <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                    Your compliance workspace is ready!
+                  </CardTitle>
+                  <p className="text-gray-600">Everything is set up and ready to go.</p>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                  <div className="bg-gradient-to-br from-venzip-primary/10 to-venzip-accent/10 rounded-2xl p-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">Setup Summary</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <div className="text-sm text-gray-600">Company</div>
+                          <div className="font-semibold">{companyData.name || "Not specified"}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-600">Frameworks</div>
+                          <div className="font-semibold">
+                            {getSelectedFrameworksData().map(f => f.name).join(", ") || "None selected"}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-600">Tasks Created</div>
+                          <div className="font-semibold">{getTotalTasks()}</div>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="text-sm text-gray-600">AI Chat</div>
+                          <div className="font-semibold">{aiEnabled ? "Enabled" : "Disabled"}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-600">Status</div>
+                          <Badge className="bg-success-green text-white">Ready to Go</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50/50 rounded-2xl p-6 border-2 border-dashed border-gray-200">
+                    <div className="flex items-center justify-center gap-6">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mb-2">
+                          <BarChart3 className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-sm font-medium">Dashboard Preview</div>
+                        <div className="text-xs text-gray-500">0% Complete</div>
+                      </div>
+                      <div className="text-4xl text-gray-300">→</div>
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-gradient-success rounded-full flex items-center justify-center mb-2">
+                          <CheckCircle className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-sm font-medium">Compliance Ready</div>
+                        <div className="text-xs text-gray-500">Your goal</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <Button 
+                      onClick={handleFinish}
+                      className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 px-8 py-3 text-lg"
+                    >
+                      Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </motion.div>
+
+          {/* Navigation Buttons */}
+          {currentStep > 1 && (
+            <div className="flex justify-between items-center mt-8">
+              <Button 
+                variant="outline" 
+                onClick={handleBack}
+                className="glass-card border-0 hover:shadow-lg transition-all duration-300"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              </Button>
+
+              {currentStep < totalSteps && (
+                <Button 
+                  onClick={handleNext}
+                  className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300"
+                  disabled={
+                    // Validation logic for enabling Next button
+                    (currentStep === 2 && (!companyData.name || !companyData.contactEmail)) || 
+                    (currentStep === 3 && selectedFrameworks.length === 0)
+                    // Add more conditions if other steps have mandatory fields
+                  }
+                >
+                  Next {currentStep === 3 ? "→ Tasks" : currentStep === 4 ? "→ AI Assistant" : currentStep === 5 ? "→ Summary" : "→"} <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
-        
-        {/* Professional Corporate Footer */}
-        <footer className="relative mt-16 bg-gradient-to-b from-slate-900 to-slate-950 text-white">
-          {/* Top decorative element */}
-          <div className="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary"></div>
-          
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              
-              {/* Company Information */}
-              <div className="md:col-span-1">
-                <div className="flex items-center mb-6">
-                  <div className="w-10 h-10 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-lg flex items-center justify-center mr-3">
-                    <Shield className="h-6 w-6 text-white" />
-                  </div>
-                  <span className="text-2xl font-bold">Venzip</span>
-                </div>
-                <p className="text-gray-300 mb-4 leading-relaxed text-sm">
-                  Enterprise compliance automation platform trusted by leading organizations worldwide.
-                </p>
-                <div className="flex space-x-4">
-                  <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-venzip-primary transition-colors cursor-pointer">
-                    <Mail className="h-4 w-4" />
-                  </div>
-                  <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-venzip-primary transition-colors cursor-pointer">
-                    <Building className="h-4 w-4" />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Compliance Frameworks */}
-              <div>
-                <h3 className="text-base font-semibold mb-4 text-gray-100">Supported Frameworks</h3>
-                <ul className="space-y-2 text-gray-300 text-sm">
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
-                    <span>SOC 2 Type II</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
-                    <span>ISO 27001</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
-                    <span>HIPAA</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
-                    <span>GDPR</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-venzip-accent mr-3" />
-                    <span>PCI DSS</span>
-                  </li>
-                </ul>
-              </div>
-              
-              {/* Solutions */}
-              <div>
-                <h3 className="text-lg font-semibold mb-6 text-gray-100">Enterprise Solutions</h3>
-                <ul className="space-y-2 text-gray-300 text-sm">
-                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Automated Risk Assessment</li>
-                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Continuous Monitoring</li>
-                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Evidence Management</li>
-                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Audit Coordination</li>
-                  <li className="hover:text-venzip-accent cursor-pointer transition-colors">Executive Reporting</li>
-                </ul>
-              </div>
-              
-              {/* Contact & Support */}
-              <div>
-                <h3 className="text-lg font-semibold mb-6 text-gray-100">Enterprise Support</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <Mail className="h-5 w-5 text-venzip-accent mt-1 mr-3 flex-shrink-0" />
-                    <div>
-                      <div className="text-gray-200 font-medium">enterprise@venzip.com</div>
-                      <div className="text-gray-400 text-sm">Sales & Implementation</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <Users className="h-5 w-5 text-venzip-accent mt-1 mr-3 flex-shrink-0" />
-                    <div>
-                      <div className="text-gray-200 font-medium">24/7 Support</div>
-                      <div className="text-gray-400 text-sm">Dedicated Success Manager</div>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <Settings className="h-5 w-5 text-venzip-accent mt-1 mr-3 flex-shrink-0" />
-                    <div>
-                      <div className="text-gray-200 font-medium">Custom Integration</div>
-                      <div className="text-gray-400 text-sm">API & SSO Available</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Trust Indicators & Certifications */}
-            <div className="border-t border-gray-800 pt-6 mb-6">
-              <div className="text-center mb-8">
-                <h3 className="text-base font-semibold text-gray-100 mb-4">Trusted by Enterprise Leaders</h3>
-                <div className="flex flex-wrap justify-center items-center gap-8">
-                  {/* Security Badges */}
-                  <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-                    <Shield className="h-5 w-5 text-venzip-accent" />
-                    <span className="text-sm font-medium text-gray-200">SOC 2 Certified</span>
-                  </div>
-                  <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-                    <Award className="h-5 w-5 text-venzip-accent" />
-                    <span className="text-sm font-medium text-gray-200">ISO 27001 Compliant</span>
-                  </div>
-                  <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-                    <Cloud className="h-5 w-5 text-venzip-accent" />
-                    <span className="text-sm font-medium text-gray-200">GDPR Ready</span>
-                  </div>
-                  <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-                    <Users className="h-5 w-5 text-venzip-accent" />
-                    <span className="text-sm font-medium text-gray-200">Enterprise SSO</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Enterprise Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-venzip-accent mb-1">500+</div>
-                  <div className="text-gray-300 text-xs">Enterprise Clients</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-venzip-accent mb-1">99.9%</div>
-                  <div className="text-gray-300 text-xs">Uptime SLA</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-venzip-accent mb-1">60%</div>
-                  <div className="text-gray-300 text-xs">Faster Audit Prep</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-venzip-accent mb-1">24/7</div>
-                  <div className="text-gray-300 text-xs">Expert Support</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Bottom Footer */}
-            <div className="border-t border-gray-800 pt-4">
-              <div className="flex flex-col md:flex-row justify-between items-center">
-                <div className="text-gray-400 text-sm mb-4 md:mb-0">
-                  © 2025 Venzip. All rights reserved. Enterprise Compliance Platform.
-                </div>
-                <div className="flex space-x-6 text-sm text-gray-400">
-                  <a href="#" className="hover:text-venzip-accent transition-colors">Privacy Policy</a>
-                  <a href="#" className="hover:text-venzip-accent transition-colors">Terms of Service</a>
-                  <a href="#" className="hover:text-venzip-accent transition-colors">Security</a>
-                  <a href="#" className="hover:text-venzip-accent transition-colors">Status</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
       </div>
-    </>
+    </div>
   );
 }

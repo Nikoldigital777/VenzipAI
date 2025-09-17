@@ -31,32 +31,38 @@ export const sessions = pgTable(
 // User storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  id: uuid("id").primaryKey(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
+  fullName: varchar("full_name", { length: 255 }),
+  profilePicture: text("profile_picture"),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  aiEnabled: boolean("ai_enabled").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Company profile table
 export const companies = pgTable("companies", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().unique().references(() => users.id),
-  name: varchar("name").notNull(),
-  industry: varchar("industry").notNull(),
-  size: varchar("size").notNull(),
-  contactEmail: varchar("contact_email").notNull(),
-  selectedFrameworks: text("selected_frameworks").array().notNull().default(sql`'{}'::text[]`),
-  description: text("description"),
-  website: varchar("website"),
-  address: text("address"),
-  phone: varchar("phone"),
-  complianceContact: varchar("compliance_contact"),
-  securityContact: varchar("security_contact"),
+  id: uuid("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  legalEntity: varchar("legal_entity", { length: 255 }),
+  industry: varchar("industry", { length: 100 }),
+  region: varchar("region", { length: 100 }),
+  size: varchar("size", { length: 50 }),
+  contactName: varchar("contact_name", { length: 255 }),
+  contactEmail: varchar("contact_email", { length: 255 }),
+  contactRole: varchar("contact_role", { length: 100 }),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Frameworks linked to companies
+export const frameworksCompanies = pgTable("frameworks_companies", {
+  id: uuid("id").primaryKey(),
+  frameworkId: varchar("framework_id", { length: 100 }).notNull(),
+  companyId: uuid("company_id").references(() => companies.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Compliance frameworks table
@@ -92,54 +98,19 @@ export const taskCategoryEnum = pgEnum('task_category', ['policy', 'procedure', 
 
 // Enhanced tasks table
 export const tasks = pgTable("tasks", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  companyId: varchar("company_id").references(() => companies.id),
-  frameworkId: varchar("framework_id").references(() => frameworks.id),
-
-  // Basic task info
-  title: varchar("title", { length: 500 }).notNull(),
+  id: uuid("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-
-  // Task classification
-  category: taskCategoryEnum("category").notNull().default('other'),
-  priority: taskPriorityEnum("priority").notNull().default('medium'),
-  status: taskStatusEnum("status").notNull().default('not_started'),
-
-  // Assignment and ownership
-  assignedToId: varchar("assigned_to_id").references(() => users.id),
-  createdById: varchar("created_by_id").references(() => users.id).notNull(),
-
-  // Legacy userId field for backward compatibility
-  userId: varchar("user_id").notNull().references(() => users.id),
-
-  // Dates and progress
+  category: varchar("category", { length: 100 }),
+  priority: varchar("priority", { length: 20 }).default("medium"),
+  status: varchar("status", { length: 50 }).default("not_started"),
+  framework: varchar("framework", { length: 100 }),
   dueDate: timestamp("due_date"),
-  startDate: timestamp("start_date"),
   completedAt: timestamp("completed_at"),
-  estimatedHours: integer("estimated_hours"),
-  actualHours: integer("actual_hours"),
-  progressPercentage: integer("progress_percentage").default(0),
-
-  // Compliance specific
-  complianceRequirement: text("compliance_requirement"),
-  evidenceRequired: boolean("evidence_required").default(false),
-  blockedReason: text("blocked_reason"),
-
-  // Legacy assignedTo field for backward compatibility
-  assignedTo: varchar("assigned_to"),
-
-  // AI-powered insights
-  aiPriorityScore: integer("ai_priority_score"), // 0-100 AI calculated urgency + impact score
-  aiReasoning: text("ai_reasoning"), // Claude's reasoning for priority and recommendations
-  aiNextAction: text("ai_next_action"), // AI suggestion for next steps
-  aiAnalyzedAt: timestamp("ai_analyzed_at"), // When AI last analyzed this task
-
-  // Metadata
-  tags: text("tags"), // JSON array as text
-  dependencies: text("dependencies"), // JSON array of task IDs
-
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  companyId: uuid("company_id").references(() => companies.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Task comments for collaboration
@@ -229,17 +200,13 @@ export const vendorAssessments = pgTable("vendor_assessments", {
 
 // Notifications table
 export const notifications = pgTable("notifications", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  title: varchar("title").notNull(),
+  id: uuid("id").primaryKey(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
-  type: varchar("type").notNull(), // 'info', 'warning', 'error', 'success', 'task_due', 'risk_alert', 'document_expiry'
-  priority: varchar("priority").notNull().default('medium'), // 'low', 'medium', 'high', 'urgent'
-  isRead: boolean("is_read").notNull().default(false),
-  actionUrl: varchar("action_url"), // URL to navigate to when clicked
-  relatedEntityType: varchar("related_entity_type"), // 'task', 'risk', 'document', 'vendor'
-  relatedEntityId: varchar("related_entity_id"),
-  expiresAt: timestamp("expires_at"), // Auto-delete after this date
+  type: varchar("type", { length: 50 }).notNull(), // 'task_due', 'risk_alert', 'audit_reminder', etc.
+  priority: varchar("priority", { length: 20 }).default("medium"),
+  isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   readAt: timestamp("read_at"),
 });
