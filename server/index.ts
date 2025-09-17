@@ -1,5 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { sql } from "@vercel/postgres"; // Assuming you use Vercel Postgres or similar
+import { sql } from "drizzle-orm";
 import { setupAuth } from "./replitAuth";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -41,6 +41,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  const { db } = await import("./db");
+  
   // Test database connection
   try {
     await db.execute(sql`SELECT 1`);
