@@ -22,6 +22,26 @@ import ComplianceInsights from "@/pages/compliance-insights";
 import NotFound from "@/pages/not-found";
 import { useAuth } from "@/hooks/useAuth";
 
+// Component to wrap authenticated routes with sidebar
+function AuthenticatedLayout({ children, title }: { children: React.ReactNode; title: string }) {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold">{title}</h1>
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          {children}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -39,176 +59,82 @@ function Router() {
 
   return (
     <Switch>
-      {/* Allow onboarding access during auth flow */}
-      <Route path="/onboarding" component={Onboarding} />
-
-      {/* Landing page is always the root - accessible for everyone */}
+      {/* Public routes */}
       <Route path="/" component={Landing} />
       <Route path="/landing" component={Landing} />
+      
+      {/* Onboarding - accessible during auth flow */}
+      <Route path="/onboarding" component={Onboarding} />
 
       {/* Protected routes - only show if authenticated */}
       {isAuthenticated && (
         <>
-          <Route path="/home" component={Home} />
+          {/* Home route redirects to dashboard */}
+          <Route path="/home">
+            <AuthenticatedLayout title="Home">
+              <Home />
+            </AuthenticatedLayout>
+          </Route>
+
+          {/* Main app routes with sidebar */}
           <Route path="/dashboard">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Dashboard</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <Dashboard />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
+            <AuthenticatedLayout title="Dashboard">
+              <Dashboard />
+            </AuthenticatedLayout>
           </Route>
+
           <Route path="/tasks">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Tasks</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <Tasks />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
+            <AuthenticatedLayout title="Tasks">
+              <Tasks />
+            </AuthenticatedLayout>
           </Route>
-          <Route path="/audit-calendar">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Audit Calendar</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <AuditCalendar />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
-          </Route>
-          <Route path="/documents">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Documents</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <Documents />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
-          </Route>
-          <Route path="/risks">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Risks</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <Risks />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
-          </Route>
+
           <Route path="/evidence">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Evidence</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <Evidence />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
+            <AuthenticatedLayout title="Evidence">
+              <Evidence />
+            </AuthenticatedLayout>
           </Route>
-          <Route path="/learning-hub">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Learning Hub</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <LearningHub />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
-          </Route>
+
           <Route path="/compliance-insights">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Frameworks</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <ComplianceInsights />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
+            <AuthenticatedLayout title="Frameworks">
+              <ComplianceInsights />
+            </AuthenticatedLayout>
           </Route>
+
+          <Route path="/risks">
+            <AuthenticatedLayout title="Risks">
+              <Risks />
+            </AuthenticatedLayout>
+          </Route>
+
+          <Route path="/documents">
+            <AuthenticatedLayout title="Documents">
+              <Documents />
+            </AuthenticatedLayout>
+          </Route>
+
+          <Route path="/audit-calendar">
+            <AuthenticatedLayout title="Audit Calendar">
+              <AuditCalendar />
+            </AuthenticatedLayout>
+          </Route>
+
+          <Route path="/learning-hub">
+            <AuthenticatedLayout title="Learning Hub">
+              <LearningHub />
+            </AuthenticatedLayout>
+          </Route>
+
           <Route path="/company-profile">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Company Profile</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <CompanyProfile />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
+            <AuthenticatedLayout title="Company Profile">
+              <CompanyProfile />
+            </AuthenticatedLayout>
           </Route>
+
           <Route path="/test-notifications">
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold">Test Notifications</h1>
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                  <TestNotifications />
-                </div>
-              </SidebarInset>
-            </SidebarProvider>
+            <AuthenticatedLayout title="Test Notifications">
+              <TestNotifications />
+            </AuthenticatedLayout>
           </Route>
         </>
       )}

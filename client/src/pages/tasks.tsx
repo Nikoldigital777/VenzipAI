@@ -70,8 +70,8 @@ export default function TasksPage() {
   return (
     <>
       {/* <Navigation /> */} {/* Removed Navigation component */}
-      <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
-        <div className="container mx-auto py-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
+        <div className="container mx-auto">
           <TaskList
             onCreateTask={handleCreateTask}
             onEditTask={handleEditTask}
