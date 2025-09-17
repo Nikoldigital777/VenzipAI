@@ -1,0 +1,47 @@
+Database Migration Issue Analysis
+The error is caused by a foreign key type mismatch between your Drizzle schema and the actual database structure. Here's what's happening:
+
+The Problem
+Your Drizzle schema defines frameworks_companies.company_id as UUID
+But in the actual database, frameworks_companies.company_id exists as VARCHAR
+The migration tries to create a foreign key between incompatible types
+Root Cause
+Looking at your migration add-onboarding-tables.sql, it's trying to:
+
+Create frameworks_companies table with company_id UUID
+Add foreign key constraint to companies(id) which is also UUID
+But the database already has a frameworks_companies table where company_id is VARCHAR, causing the constraint creation to fail.
+
+Solution Options
+Option 1: Use Drizzle's Built-in Schema Sync (Recommended)
+Instead of manual SQL migrations, use Drizzle's push feature:
+
+npm run db:push --force
+This will:
+
+Compare your schema with the database
+Generate safe DDL statements
+Handle type mismatches properly
+Option 2: Fix the Migration (If you want to keep manual migrations)
+
+You'd need to either:
+
+Drop and recreate the frameworks_companies table with correct types
+Or alter the existing column type to UUID
+Schema Consistency Check
+Your current Drizzle schema looks correct:
+
+// companies table
+export const companies = pgTable("companies", {
+  id: uuid("id").primaryKey(), // ✅ UUID
+// frameworks_companies table  
+export const frameworksCompanies = pgTable("frameworks_companies", {
+  id: uuid("id").primaryKey(), // ✅ UUID
+  companyId: uuid("company_id").references(() => companies.id, { onDelete: "cascade" }), // ✅ UUID referencing UUID
+Recommended Action
+Stop the failing migration by removing or commenting out the problematic constraint
+Use npm run db:push --force to sync your Drizzle schema with the database
+Remove manual SQL migrations and rely on Drizzle's built-in schema management
+This approach is safer and prevents type mismatch issues like this one.
+
+Would you like me to help you implement the fix by updating the migration files or would you prefer to switch to using npm run db:push --force for schema management?

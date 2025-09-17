@@ -1,0 +1,60 @@
+> rest-express@1.0.0 dev
+✅ Anthropic API key found and configureds
+🔄 Background scheduler started
+✅ Database connected successfully
+🔄 Starting database migrations...
+🔄 Running migration: fix-user-columns.sql
+✅ Migration fix-user-columns.sql completed successfully
+🔄 Running migration: add-onboarding-tables.sql
+❌ Migration add-onboarding-tables.sql failed: error: foreign key constraint "frameworks_companies_company_id_fkey" cannot be implemented
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async runMigrations (/home/runner/workspace/server/runMigrations.ts:66:7)
+    at async <anonymous> (/home/runner/workspace/server/index.ts:53:5) {
+  length: 487,
+  severity: 'ERROR',
+  code: '42804',
+  detail: 'Key columns "company_id" and "id" are of incompatible types: uuid and character varying.',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: 'SQL statement "ALTER TABLE frameworks_companies \n' +
+    '    ADD CONSTRAINT frameworks_companies_company_id_fkey \n' +
+    '    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE"\n' +
+    'PL/pgSQL function inline_code_block line 7 at SQL statement',
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'tablecmds.c',
+  line: '9520',
+  routine: 'ATAddForeignKeyConstraint'
+}
+❌ Database connection failed: error: foreign key constraint "frameworks_companies_company_id_fkey" cannot be implemented
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async runMigrations (/home/runner/workspace/server/runMigrations.ts:66:7)
+    at async <anonymous> (/home/runner/workspace/server/index.ts:53:5) {
+  length: 487,
+  severity: 'ERROR',
+  code: '42804',
+  detail: 'Key columns "company_id" and "id" are of incompatible types: uuid and character varying.',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: 'SQL statement "ALTER TABLE frameworks_companies \n' +
+    '    ADD CONSTRAINT frameworks_companies_company_id_fkey \n' +
+    '    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE"\n' +
+    'PL/pgSQL function inline_code_block line 7 at SQL statement',
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'tablecmds.c',
+  line: '9520',
+  routine: 'ATAddForeignKeyConstraint'
+}
