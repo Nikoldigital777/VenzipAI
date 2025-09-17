@@ -1,7 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { sql } from "@vercel/postgres"; // Assuming you use Vercel Postgres or similar
+import { setupAuth } from "./replitAuth";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import "./background-scheduler.js"; // Auto-start background scheduler
+import { runSeeds } from "./seedData";
 
 const app = express();
 app.use(express.json());
@@ -38,6 +41,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Test database connection
+  try {
+    await db.execute(sql`SELECT 1`);
+    console.log("✅ Database connected successfully");
+
+    // Run seed data
+    await runSeeds();
+  } catch (error) {
+    console.error("❌ Database connection failed:", error);
+    process.exit(1);
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -58,10 +73,10 @@ app.use((req, res, next) => {
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 3001 if not specified.
+  // Other ports are firewalled. Default to 3000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '3001', 10);
+  const port = parseInt(process.env.PORT ?? "3000", 10);
   server.listen({
     port,
     host: "0.0.0.0",
