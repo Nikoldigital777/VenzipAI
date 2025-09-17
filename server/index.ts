@@ -4,7 +4,6 @@ import { setupAuth } from "./replitAuth";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import "./background-scheduler.js"; // Auto-start background scheduler
-import { runSeeds } from "./seedData";
 
 const app = express();
 app.use(express.json());
@@ -52,9 +51,11 @@ app.use((req, res, next) => {
     console.log("🔄 Starting database schema sync...");
     console.log("✅ Database schema sync completed - using Drizzle's built-in schema management");
 
-    // Run seed data with proper error handling
+    // Run comprehensive seed data with proper error handling
     try {
-      await runSeeds();
+      const { seedComplianceData } = await import("./seedComplianceData");
+      await seedComplianceData();
+      console.log("✅ Comprehensive compliance data seeding completed");
     } catch (seedError) {
       console.warn("⚠️ Database seeding warning:", seedError);
       // Don't exit on seeding failure - continue with server startup
