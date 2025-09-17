@@ -301,6 +301,66 @@ export async function registerRoutes(app: Express) {
   // Register enhanced task routes
   app.use('/api/tasks', taskRoutes);
 
+  // Dashboard progress endpoint
+  app.get('/api/dashboard/progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      
+      // Get all user tasks
+      const tasks = await storage.getTasksByUserId(userId);
+      
+      if (tasks.length === 0) {
+        return res.json({ percentComplete: 0, totalTasks: 0, completedTasks: 0 });
+      }
+      
+      // Calculate completion percentage
+      const completedTasks = tasks.filter(task => task.status === 'completed').length;
+      const totalTasks = tasks.length;
+      const percentComplete = Math.round((completedTasks / totalTasks) * 100);
+      
+      res.json({
+        percentComplete,
+        totalTasks,
+        completedTasks
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard progress:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard progress" });
+    }
+  });
+
+  // Dashboard recent tasks endpoint
+  app.get('/api/dashboard/recent-tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      
+      // Get all user tasks, sorted by creation date (most recent first)
+      const allTasks = await storage.getTasksByUserId(userId);
+      
+      // Sort by creation date and take the 5 most recent
+      const recentTasks = allTasks
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5)
+        .map(task => ({
+          id: task.id,
+          title: task.title,
+          status: task.status,
+          priority: task.priority,
+          frameworkId: task.frameworkId,
+          dueDate: task.dueDate,
+          createdAt: task.createdAt,
+          progressPercentage: task.status === 'completed' ? 100 : 
+                              task.status === 'in_progress' ? 50 :
+                              task.status === 'under_review' ? 75 : 0
+        }));
+      
+      res.json(recentTasks);
+    } catch (error) {
+      console.error("Error fetching recent tasks:", error);
+      res.status(500).json({ message: "Failed to fetch recent tasks" });
+    }
+  });
+
   // --- Dashboard summary (data-driven gaps from tasks + risks) ---
   app.get('/api/summary', isAuthenticated, async (req: any, res) => {
     try {

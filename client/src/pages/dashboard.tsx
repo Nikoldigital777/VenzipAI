@@ -1,6 +1,7 @@
 // client/src/pages/dashboard.tsx
 import { useSummary } from "@/hooks/useSummary";
 import ProgressRing from "@/components/progress-ring";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AIChat from "@/components/ai-chat";
 import { ReportGenerator } from "@/components/reports/ReportGenerator";
@@ -50,6 +51,30 @@ type Summary = {
 
 export default function Dashboard() {
   const { data, isLoading, isError, error, refetch } = useSummary();
+  
+  // Dashboard progress data
+  const { data: progressData } = useQuery({
+    queryKey: ['/api/dashboard/progress'],
+    queryFn: async () => {
+      const response = await fetch('/api/dashboard/progress');
+      if (!response.ok) throw new Error('Failed to fetch progress');
+      return response.json();
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 30000
+  });
+
+  // Recent tasks data
+  const { data: recentTasks } = useQuery({
+    queryKey: ['/api/dashboard/recent-tasks'],
+    queryFn: async () => {
+      const response = await fetch('/api/dashboard/recent-tasks');
+      if (!response.ok) throw new Error('Failed to fetch recent tasks');
+      return response.json();
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 30000
+  });
 
   if (isLoading && !data) {
     return (
@@ -170,12 +195,17 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="flex items-center justify-center py-12 relative z-10">
                 <ProgressRing 
-                  percentage={compliancePercent} 
+                  percentage={progressData?.percentComplete || compliancePercent} 
                   size={140}
                   strokeWidth={12}
                   showGlow={true}
                   label="Complete"
                 />
+                {progressData && (
+                  <div className="absolute bottom-4 text-center text-xs text-gray-500">
+                    {progressData.completedTasks} of {progressData.totalTasks} tasks
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -487,16 +517,103 @@ export default function Dashboard() {
             </Card>
           </div>
 
+          {/* Recent Tasks Section */}
+          <Card className="lg:col-span-2 glass-card animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-gray-900">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-indigo-600" />
+                </div>
+                <div>
+                  <div className="text-lg font-semibold">Recent Tasks</div>
+                  <div className="text-sm text-gray-500 font-normal">Latest compliance activities</div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {recentTasks && recentTasks.length > 0 ? (
+                <div className="space-y-3">
+                  {recentTasks.map((task: any, index: number) => (
+                    <Card key={task.id} className="glass-card border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 truncate">{task.title}</div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge 
+                                variant="outline" 
+                                className={
+                                  task.status === 'completed' ? 'border-green-200 text-green-700 bg-green-50' :
+                                  task.status === 'in_progress' ? 'border-blue-200 text-blue-700 bg-blue-50' :
+                                  task.status === 'under_review' ? 'border-purple-200 text-purple-700 bg-purple-50' :
+                                  'border-gray-200 text-gray-700 bg-gray-50'
+                                }
+                              >
+                                {task.status.replace('_', ' ')}
+                              </Badge>
+                              <Badge 
+                                variant="outline"
+                                className={
+                                  task.priority === 'critical' ? 'border-red-200 text-red-700 bg-red-50' :
+                                  task.priority === 'high' ? 'border-orange-200 text-orange-700 bg-orange-50' :
+                                  task.priority === 'medium' ? 'border-yellow-200 text-yellow-700 bg-yellow-50' :
+                                  'border-gray-200 text-gray-700 bg-gray-50'
+                                }
+                              >
+                                {task.priority}
+                              </Badge>
+                              {task.frameworkId && (
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                  {task.frameworkId.toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                            {task.dueDate && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Due: {new Date(task.dueDate).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-3 flex-shrink-0">
+                            <div className="w-12 h-12 relative">
+                              <div className="w-full h-full bg-gray-200 rounded-full"></div>
+                              <div 
+                                className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
+                                style={{
+                                  clipPath: `polygon(50% 50%, 50% 0%, ${50 + Math.cos((task.progressPercentage / 100) * 2 * Math.PI - Math.PI/2) * 50}% ${50 + Math.sin((task.progressPercentage / 100) * 2 * Math.PI - Math.PI/2) * 50}%, 50% 50%)`
+                                }}
+                              ></div>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-bold text-gray-700">
+                                  {task.progressPercentage}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Clock className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm">No tasks created yet</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Reports Section */}
-          <Card className="lg:col-span-3 glass-card animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+          <Card className="lg:col-span-1 glass-card animate-fadeInUp" style={{animationDelay: '0.7s'}}>
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-gray-900">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center">
                   <FileText className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <div className="text-lg font-semibold">Report Generation</div>
-                  <div className="text-sm text-gray-500 font-normal">Export compliance reports and analytics</div>
+                  <div className="text-lg font-semibold">Reports</div>
+                  <div className="text-sm text-gray-500 font-normal">Export compliance analytics</div>
                 </div>
               </CardTitle>
             </CardHeader>
