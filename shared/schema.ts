@@ -240,6 +240,7 @@ export const complianceRequirements = pgTable("compliance_requirements", {
   category: varchar("category").notNull(), // e.g., "access_control", "data_protection"
   priority: varchar("priority").notNull().default('medium'), // 'low', 'medium', 'high', 'critical'
   evidenceTypes: text("evidence_types").array().default(sql`'{}'::text[]`), // Expected evidence types
+  requiredEvidenceType: varchar("required_evidence_type"), // Primary evidence type for auto-suggestions
   controlObjective: text("control_objective"),
   implementationGuidance: text("implementation_guidance"),
   createdAt: timestamp("created_at").defaultNow(),

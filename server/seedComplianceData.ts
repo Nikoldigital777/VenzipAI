@@ -12,6 +12,7 @@ const hipaaControls = [
     category: "administrative_safeguard",
     priority: "high",
     evidenceTypes: ["policy", "procedure", "documentation"],
+    requiredEvidenceType: "policy",
     controlObjective: "Establish security management processes for protecting ePHI",
     implementationGuidance: "Designate a security officer and implement security policies covering all workforce members."
   },
@@ -24,6 +25,7 @@ const hipaaControls = [
     category: "administrative_safeguard",
     priority: "high",
     evidenceTypes: ["training_records", "policy", "certification"],
+    requiredEvidenceType: "training_records",
     controlObjective: "Ensure workforce receives appropriate security training",
     implementationGuidance: "Conduct periodic security updates and implement training for new workforce members."
   },
@@ -36,6 +38,7 @@ const hipaaControls = [
     category: "physical_safeguard",
     priority: "medium",
     evidenceTypes: ["access_logs", "policy", "physical_security"],
+    requiredEvidenceType: "log",
     controlObjective: "Control physical access to systems containing ePHI",
     implementationGuidance: "Implement access controls, visitor logs, and workstation security measures."
   },
@@ -48,6 +51,7 @@ const hipaaControls = [
     category: "technical_safeguard",
     priority: "critical",
     evidenceTypes: ["access_logs", "user_management", "authentication"],
+    requiredEvidenceType: "log",
     controlObjective: "Ensure only authorized personnel can access ePHI",
     implementationGuidance: "Implement unique user identification, emergency access procedures, and role-based access controls."
   },
@@ -60,6 +64,7 @@ const hipaaControls = [
     category: "technical_safeguard",
     priority: "high",
     evidenceTypes: ["audit_logs", "monitoring", "reporting"],
+    requiredEvidenceType: "log",
     controlObjective: "Track and monitor access to ePHI systems",
     implementationGuidance: "Implement logging mechanisms and regular review of audit logs for unauthorized access."
   },
@@ -74,6 +79,7 @@ const hipaaControls = [
     category: "administrative_safeguard",
     priority: "critical",
     evidenceTypes: ["policy", "job_description", "assignment_documentation"],
+    requiredEvidenceType: "policy",
     controlObjective: "Ensure clear security responsibility assignment",
     implementationGuidance: "Designate a security official responsible for developing and implementing security policies."
   },
@@ -86,6 +92,7 @@ const hipaaControls = [
     category: "administrative_safeguard",
     priority: "high",
     evidenceTypes: ["authorization_procedures", "supervision_procedures", "termination_procedures"],
+    requiredEvidenceType: "policy",
     controlObjective: "Ensure appropriate workforce access and security procedures",
     implementationGuidance: "Implement procedures for authorization, supervision, clearance procedures, and termination procedures."
   },
@@ -98,6 +105,7 @@ const hipaaControls = [
     category: "administrative_safeguard",
     priority: "critical",
     evidenceTypes: ["access_policy", "authorization_procedure", "access_logs"],
+    requiredEvidenceType: "policy",
     controlObjective: "Control and manage access to ePHI",
     implementationGuidance: "Establish procedures for granting access to ePHI through access management."
   },
@@ -110,6 +118,7 @@ const hipaaControls = [
     category: "administrative_safeguard",
     priority: "high",
     evidenceTypes: ["contingency_plan", "backup_procedures", "recovery_testing"],
+    requiredEvidenceType: "policy",
     controlObjective: "Ensure business continuity and data recovery",
     implementationGuidance: "Develop data backup plan, disaster recovery plan, and emergency mode operation procedures."
   },
@@ -122,6 +131,7 @@ const hipaaControls = [
     category: "administrative_safeguard",
     priority: "critical",
     evidenceTypes: ["incident_procedures", "response_plan", "incident_documentation"],
+    requiredEvidenceType: "policy",
     controlObjective: "Respond to and document security incidents",
     implementationGuidance: "Implement procedures to identify, respond to, document, and mitigate security incidents."
   },
@@ -134,6 +144,7 @@ const hipaaControls = [
     category: "administrative_safeguard",
     priority: "high",
     evidenceTypes: ["risk_assessment", "security_evaluation", "documentation"],
+    requiredEvidenceType: "log",
     controlObjective: "Regularly evaluate security measures effectiveness",
     implementationGuidance: "Perform periodic technical and non-technical evaluations of security measures."
   },
@@ -148,6 +159,7 @@ const hipaaControls = [
     category: "physical_safeguard",
     priority: "medium",
     evidenceTypes: ["facility_security_plan", "physical_access_procedures", "monitoring"],
+    requiredEvidenceType: "policy",
     controlObjective: "Safeguard facility and equipment from unauthorized access",
     implementationGuidance: "Develop and implement a facility security plan to prevent unauthorized physical access to facilities."
   },
@@ -160,6 +172,7 @@ const hipaaControls = [
     category: "physical_safeguard",
     priority: "medium",
     evidenceTypes: ["workstation_policy", "usage_procedures", "monitoring"],
+    requiredEvidenceType: "policy",
     controlObjective: "Control workstation access and proper usage",
     implementationGuidance: "Define proper workstation functions and restrict access to authorized users only."
   },
@@ -172,6 +185,7 @@ const hipaaControls = [
     category: "physical_safeguard",
     priority: "medium",
     evidenceTypes: ["physical_security", "workstation_controls", "access_restrictions"],
+    requiredEvidenceType: "log",
     controlObjective: "Protect workstations from unauthorized physical access",
     implementationGuidance: "Restrict physical access to workstations and implement security measures to prevent unauthorized use."
   },
@@ -184,6 +198,7 @@ const hipaaControls = [
     category: "physical_safeguard",
     priority: "high",
     evidenceTypes: ["media_policy", "disposal_procedures", "inventory_logs"],
+    requiredEvidenceType: "policy",
     controlObjective: "Control access to and disposal of ePHI media",
     implementationGuidance: "Control hardware and media containing ePHI into and out of a facility and within the facility."
   },
@@ -198,6 +213,7 @@ const hipaaControls = [
     category: "technical_safeguard",
     priority: "high",
     evidenceTypes: ["integrity_controls", "verification_procedures", "monitoring"],
+    requiredEvidenceType: "log",
     controlObjective: "Ensure ePHI is not improperly altered or destroyed",
     implementationGuidance: "Implement electronic mechanisms to confirm ePHI has not been improperly altered."
   },
@@ -208,6 +224,7 @@ const hipaaControls = [
     title: "Person or Entity Authentication",
     description: "Implement procedures to verify that a person or entity seeking access to ePHI is the one claimed.",
     category: "technical_safeguard",
+    requiredEvidenceType: "encryption_config",
     priority: "critical",
     evidenceTypes: ["authentication_systems", "identity_verification", "access_logs"],
     controlObjective: "Verify identity before granting access to ePHI",
@@ -222,6 +239,7 @@ const hipaaControls = [
     category: "technical_safeguard",
     priority: "critical",
     evidenceTypes: ["encryption", "network_security", "transmission_logs"],
+    requiredEvidenceType: "encryption",
     controlObjective: "Protect ePHI during transmission",
     implementationGuidance: "Implement end-to-end encryption and network controls to protect ePHI during transmission."
   },
@@ -234,6 +252,7 @@ const hipaaControls = [
     category: "technical_safeguard",
     priority: "critical",
     evidenceTypes: ["encryption_policy", "transmission_encryption", "key_management"],
+    requiredEvidenceType: "encryption_policy",
     controlObjective: "Protect ePHI during transmission through encryption",
     implementationGuidance: "Implement encryption mechanisms to protect ePHI transmitted over networks."
   }
@@ -250,6 +269,7 @@ const soc2Controls = [
     category: "governance",
     priority: "high",
     evidenceTypes: ["policy", "code_of_conduct", "training"],
+    requiredEvidenceType: "policy",
     controlObjective: "Establish tone at the top for integrity and ethical behavior",
     implementationGuidance: "Implement code of conduct, ethics training, and disciplinary measures for violations."
   },
@@ -262,6 +282,7 @@ const soc2Controls = [
     category: "information_communication",
     priority: "medium",
     evidenceTypes: ["documentation", "reporting", "communication"],
+    requiredEvidenceType: "policy",
     controlObjective: "Ensure effective information flow for control activities",
     implementationGuidance: "Establish communication channels and reporting mechanisms for control-related information."
   },
@@ -274,6 +295,7 @@ const soc2Controls = [
     category: "risk_assessment",
     priority: "high",
     evidenceTypes: ["risk_assessment", "documentation", "procedures"],
+    requiredEvidenceType: "log",
     controlObjective: "Identify and assess risks to achieving control objectives",
     implementationGuidance: "Conduct regular risk assessments and document risk management procedures."
   },
@@ -285,6 +307,7 @@ const soc2Controls = [
     description: "The entity selects, develops, and performs ongoing evaluations to ascertain whether components of internal control are present and functioning.",
     category: "monitoring",
     priority: "medium",
+    requiredEvidenceType: "log",
     evidenceTypes: ["monitoring_reports", "testing", "documentation"],
     controlObjective: "Monitor effectiveness of internal controls",
     implementationGuidance: "Implement ongoing monitoring activities and periodic separate evaluations."
@@ -298,6 +321,7 @@ const soc2Controls = [
     category: "control_activities",
     priority: "high",
     evidenceTypes: ["procedures", "documentation", "testing"],
+    requiredEvidenceType: "policy",
     controlObjective: "Implement control activities to mitigate identified risks",
     implementationGuidance: "Design and implement control activities aligned with risk assessment results."
   },
@@ -312,6 +336,7 @@ const soc2Controls = [
     category: "access_control",
     priority: "critical",
     evidenceTypes: ["access_controls", "authentication_systems", "authorization_procedures"],
+    requiredEvidenceType: "log",
     controlObjective: "Protect against unauthorized access from external sources",
     implementationGuidance: "Implement robust authentication, authorization, and physical access controls."
   },
@@ -324,6 +349,7 @@ const soc2Controls = [
     category: "access_control",
     priority: "high",
     evidenceTypes: ["user_provisioning", "authorization_procedures", "access_reviews"],
+    requiredEvidenceType: "policy",
     controlObjective: "Ensure proper authorization before granting access",
     implementationGuidance: "Implement user registration and authorization processes before granting system access."
   },
@@ -336,6 +362,7 @@ const soc2Controls = [
     category: "access_control",
     priority: "high",
     evidenceTypes: ["access_reviews", "role_definitions", "access_modifications"],
+    requiredEvidenceType: "log",
     controlObjective: "Manage user access based on roles and responsibilities",
     implementationGuidance: "Regularly review and update user access based on role changes and business needs."
   },
@@ -348,6 +375,7 @@ const soc2Controls = [
     category: "system_operations",
     priority: "high",
     evidenceTypes: ["monitoring_procedures", "security_events", "detection_systems"],
+    requiredEvidenceType: "log",
     controlObjective: "Detect and monitor security events",
     implementationGuidance: "Implement comprehensive monitoring and detection procedures for security events."
   },
@@ -360,6 +388,7 @@ const soc2Controls = [
     category: "incident_response",
     priority: "critical",
     evidenceTypes: ["incident_procedures", "response_plans", "monitoring_systems"],
+    requiredEvidenceType: "policy",
     controlObjective: "Respond effectively to security incidents",
     implementationGuidance: "Establish and maintain incident response procedures and monitoring capabilities."
   },
@@ -374,6 +403,7 @@ const soc2Controls = [
     category: "security_program",
     priority: "critical",
     evidenceTypes: ["security_program", "policies", "procedures"],
+    requiredEvidenceType: "policy",
     controlObjective: "Establish comprehensive information security program",
     implementationGuidance: "Develop and implement a formal information security program covering all aspects of security."
   },
@@ -386,6 +416,7 @@ const soc2Controls = [
     category: "risk_management", 
     priority: "high",
     evidenceTypes: ["risk_assessments", "threat_analysis", "vulnerability_scans"],
+    requiredEvidenceType: "log",
     controlObjective: "Identify and assess security risks systematically",
     implementationGuidance: "Conduct regular risk assessments to identify threats, vulnerabilities, and potential impacts."
   },
@@ -398,6 +429,7 @@ const soc2Controls = [
     category: "training",
     priority: "high",
     evidenceTypes: ["training_programs", "awareness_materials", "training_records"],
+    requiredEvidenceType: "training_records",
     controlObjective: "Ensure personnel understand security responsibilities",
     implementationGuidance: "Provide regular security awareness training to all personnel with access to systems."
   },
@@ -412,6 +444,7 @@ const soc2Controls = [
     category: "availability",
     priority: "high",
     evidenceTypes: ["capacity_monitoring", "performance_metrics", "availability_reports"],
+    requiredEvidenceType: "log",
     controlObjective: "Manage system capacity and availability",
     implementationGuidance: "Monitor system capacity and performance to ensure availability commitments are met."
   },
@@ -424,6 +457,7 @@ const soc2Controls = [
     category: "business_continuity",
     priority: "critical",
     evidenceTypes: ["backup_procedures", "recovery_plans", "business_continuity_plans"],
+    requiredEvidenceType: "policy",
     controlObjective: "Ensure business continuity and disaster recovery capabilities",
     implementationGuidance: "Implement comprehensive backup, recovery, and business continuity procedures."
   },
@@ -438,6 +472,7 @@ const soc2Controls = [
     category: "processing_integrity",
     priority: "high",
     evidenceTypes: ["input_controls", "processing_controls", "output_controls"],
+    requiredEvidenceType: "log",
     controlObjective: "Ensure accurate and complete data processing",
     implementationGuidance: "Implement controls to ensure data is processed completely, accurately, and in a timely manner."
   },
@@ -452,6 +487,7 @@ const soc2Controls = [
     category: "confidentiality",
     priority: "critical",
     evidenceTypes: ["data_classification", "confidentiality_policies", "access_controls"],
+    requiredEvidenceType: "policy",
     controlObjective: "Protect confidential information appropriately",
     implementationGuidance: "Classify data based on confidentiality requirements and implement appropriate protection measures."
   },
@@ -464,6 +500,7 @@ const soc2Controls = [
     category: "confidentiality",
     priority: "high",
     evidenceTypes: ["disposal_procedures", "destruction_policies", "disposal_logs"],
+    requiredEvidenceType: "policy",
     controlObjective: "Securely dispose of confidential information",
     implementationGuidance: "Implement secure disposal procedures for confidential information when no longer needed."
   },
@@ -478,6 +515,7 @@ const soc2Controls = [
     category: "privacy",
     priority: "high", 
     evidenceTypes: ["privacy_notices", "privacy_policies", "consent_procedures"],
+    requiredEvidenceType: "policy",
     controlObjective: "Provide transparent privacy notices to data subjects",
     implementationGuidance: "Develop and maintain clear privacy notices that inform data subjects about data collection and use practices."
   },
@@ -490,6 +528,7 @@ const soc2Controls = [
     category: "privacy",
     priority: "high",
     evidenceTypes: ["consent_mechanisms", "choice_options", "opt_out_procedures"],
+    requiredEvidenceType: "policy",
     controlObjective: "Provide meaningful choices regarding personal information",
     implementationGuidance: "Implement mechanisms for obtaining and managing consent and providing choices about personal information use."
   }
