@@ -1,5 +1,6 @@
 
 import "./index.css";
+import * as React from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -47,11 +48,33 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
 }
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, error } = useAuth();
   const [location, navigate] = useLocation();
+  const [loadingTimeout, setLoadingTimeout] = React.useState(false);
 
-  // Show loading state while checking authentication
-  if (isLoading) {
+  // Set a timeout to prevent infinite loading
+  React.useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        setLoadingTimeout(true);
+      }, 5000); // 5 second timeout
+      
+      return () => clearTimeout(timer);
+    } else {
+      setLoadingTimeout(false);
+    }
+  }, [isLoading]);
+
+  // If loading times out or there's an error, assume not authenticated
+  if (loadingTimeout || error) {
+    console.log('Auth loading timeout or error, redirecting to landing');
+    if (location !== '/landing' && location !== '/') {
+      navigate('/landing');
+    }
+  }
+
+  // Show loading state while checking authentication (with timeout)
+  if (isLoading && !loadingTimeout) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
         <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg">

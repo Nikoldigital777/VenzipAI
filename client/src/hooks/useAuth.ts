@@ -6,13 +6,20 @@ export function useAuth() {
   
   const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
-    retry: false,
-    refetchOnMount: false,
-    staleTime: 5 * 60 * 1000,
+    retry: (failureCount, error) => {
+      // Don't retry on 401 errors (not authenticated)
+      if (error && error.message.includes('401')) {
+        return false;
+      }
+      return failureCount < 1;
+    },
+    refetchOnMount: 'always',
+    staleTime: 30 * 1000, // 30 seconds
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    gcTime: 1 * 60 * 1000, // Keep in cache for 1 minute
     enabled: true,
+    networkMode: 'online',
   });
 
   const logout = async () => {
