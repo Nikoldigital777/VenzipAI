@@ -1,163 +1,204 @@
 import { storage } from './storage';
 
-// Sample compliance requirements data for different frameworks
-const sampleComplianceRequirements = [
-  // ISO 27001 Requirements
+// HIPAA Security Rule Controls
+const hipaaControls = [
   {
-    frameworkId: 'ISO27001',
-    requirementId: 'A.9.1.2',
-    title: 'Access to networks and network services',
-    description: 'Users shall only be provided with access to the network and network services that they have been specifically authorized to use.',
-    category: 'Access Control',
-    priority: 'high' as const,
-    evidenceTypes: ['network_policies', 'access_logs', 'authorization_procedures'],
-    controlObjective: 'To prevent unauthorized access to networks and network services'
+    id: "hipaa-164-308a1",
+    frameworkId: "hipaa",
+    requirementId: "164.308(a)(1)",
+    title: "Security Management Process",
+    description: "Implement policies and procedures to prevent, detect, contain, and correct security violations.",
+    category: "administrative_safeguard",
+    priority: "high",
+    evidenceTypes: ["policy", "procedure", "documentation"],
+    controlObjective: "Establish security management processes for protecting ePHI",
+    implementationGuidance: "Designate a security officer and implement security policies covering all workforce members."
   },
   {
-    frameworkId: 'ISO27001',
-    requirementId: 'A.8.2.3',
-    title: 'Handling of assets',
-    description: 'Procedures for handling assets shall be developed and implemented in accordance with the information classification scheme adopted by the organization.',
-    category: 'Asset Management',
-    priority: 'medium' as const,
-    evidenceTypes: ['asset_inventory', 'handling_procedures', 'classification_scheme'],
-    controlObjective: 'To ensure appropriate handling of assets in accordance with classification'
+    id: "hipaa-164-308a5",
+    frameworkId: "hipaa",
+    requirementId: "164.308(a)(5)",
+    title: "Security Awareness and Training",
+    description: "Implement a security awareness and training program for all members of the workforce.",
+    category: "administrative_safeguard",
+    priority: "high",
+    evidenceTypes: ["training_records", "policy", "certification"],
+    controlObjective: "Ensure workforce receives appropriate security training",
+    implementationGuidance: "Conduct periodic security updates and implement training for new workforce members."
   },
   {
-    frameworkId: 'ISO27001',
-    requirementId: 'A.16.1.2',
-    title: 'Reporting information security events',
-    description: 'Information security events shall be reported through appropriate management channels as quickly as possible.',
-    category: 'Incident Management',
-    priority: 'critical' as const,
-    evidenceTypes: ['incident_procedures', 'reporting_channels', 'response_plan'],
-    controlObjective: 'To ensure information security events are communicated in a timely manner'
+    id: "hipaa-164-310a1",
+    frameworkId: "hipaa",
+    requirementId: "164.310(a)(1)",
+    title: "Facility Access Controls",
+    description: "Implement policies and procedures to limit physical access to electronic information systems.",
+    category: "physical_safeguard",
+    priority: "medium",
+    evidenceTypes: ["access_logs", "policy", "physical_security"],
+    controlObjective: "Control physical access to systems containing ePHI",
+    implementationGuidance: "Implement access controls, visitor logs, and workstation security measures."
   },
   {
-    frameworkId: 'ISO27001',
-    requirementId: 'A.12.6.1',
-    title: 'Management of technical vulnerabilities',
-    description: 'Information about technical vulnerabilities of information systems being used shall be obtained in a timely fashion, the organizations exposure to such vulnerabilities evaluated and appropriate measures taken to address the associated risk.',
-    category: 'Systems Security',
-    priority: 'high' as const,
-    evidenceTypes: ['vulnerability_scans', 'patch_management', 'risk_assessments'],
-    controlObjective: 'To prevent exploitation of technical vulnerabilities'
-  },
-
-  // SOC 2 Requirements
-  {
-    frameworkId: 'SOC2',
-    requirementId: 'CC6.1',
-    title: 'Logical and Physical Access Controls',
-    description: 'The entity implements logical and physical access controls to restrict unauthorized access to system resources, data, and vendor credentials.',
-    category: 'Common Criteria',
-    priority: 'critical' as const,
-    evidenceTypes: ['access_controls', 'authentication_systems', 'physical_security'],
-    controlObjective: 'To restrict access to authorized personnel only'
+    id: "hipaa-164-312a1",
+    frameworkId: "hipaa",
+    requirementId: "164.312(a)(1)",
+    title: "Access Control",
+    description: "Implement technical policies and procedures for electronic information systems that maintain ePHI to allow access only to authorized persons.",
+    category: "technical_safeguard",
+    priority: "critical",
+    evidenceTypes: ["access_logs", "user_management", "authentication"],
+    controlObjective: "Ensure only authorized personnel can access ePHI",
+    implementationGuidance: "Implement unique user identification, emergency access procedures, and role-based access controls."
   },
   {
-    frameworkId: 'SOC2',
-    requirementId: 'CC7.2',
-    title: 'System Monitoring',
-    description: 'The entity monitors system components and the operation of controls to detect anomalies that are indicative of malicious acts, natural disasters, and errors.',
-    category: 'Common Criteria',
-    priority: 'high' as const,
-    evidenceTypes: ['monitoring_systems', 'log_analysis', 'alert_procedures'],
-    controlObjective: 'To detect and respond to anomalous activities'
-  },
-  {
-    frameworkId: 'SOC2',
-    requirementId: 'A1.1',
-    title: 'Availability Monitoring',
-    description: 'The entity maintains, monitors, and evaluates current processing capacity and use of system components to manage capacity demand and to enable the implementation of additional capacity.',
-    category: 'Availability',
-    priority: 'medium' as const,
-    evidenceTypes: ['capacity_monitoring', 'performance_metrics', 'scaling_procedures'],
-    controlObjective: 'To ensure system availability meets commitments'
-  },
-
-  // GDPR Requirements
-  {
-    frameworkId: 'GDPR',
-    requirementId: 'Art.32',
-    title: 'Security of processing',
-    description: 'The controller and processor shall implement appropriate technical and organisational measures to ensure a level of security appropriate to the risk.',
-    category: 'Security',
-    priority: 'critical' as const,
-    evidenceTypes: ['security_measures', 'risk_assessments', 'encryption_policies'],
-    controlObjective: 'To ensure appropriate security of personal data'
-  },
-  {
-    frameworkId: 'GDPR',
-    requirementId: 'Art.33',
-    title: 'Notification of a personal data breach to the supervisory authority',
-    description: 'In the case of a personal data breach, the controller shall without undue delay and, where feasible, not later than 72 hours after having become aware of it, notify the personal data breach to the competent supervisory authority.',
-    category: 'Breach Notification',
-    priority: 'critical' as const,
-    evidenceTypes: ['breach_procedures', 'notification_processes', 'incident_logs'],
-    controlObjective: 'To ensure timely notification of data breaches'
-  },
-  {
-    frameworkId: 'GDPR',
-    requirementId: 'Art.25',
-    title: 'Data protection by design and by default',
-    description: 'The controller shall implement appropriate technical and organisational measures designed to implement data-protection principles in an effective manner.',
-    category: 'Privacy by Design',
-    priority: 'high' as const,
-    evidenceTypes: ['privacy_policies', 'design_documentation', 'default_settings'],
-    controlObjective: 'To ensure privacy protection is built into systems'
-  },
-
-  // HIPAA Requirements
-  {
-    frameworkId: 'HIPAA',
-    requirementId: '164.312(a)(1)',
-    title: 'Access Control',
-    description: 'Implement technical policies and procedures for electronic information systems that maintain electronic protected health information to allow access only to those persons or software programs that have been granted access rights.',
-    category: 'Technical Safeguards',
-    priority: 'critical' as const,
-    evidenceTypes: ['access_control_policies', 'user_authentication', 'audit_logs'],
-    controlObjective: 'To control access to electronic PHI'
-  },
-  {
-    frameworkId: 'HIPAA',
-    requirementId: '164.312(b)',
-    title: 'Audit controls',
-    description: 'Implement hardware, software, and/or procedural mechanisms that record and examine activity in information systems that contain or use electronic protected health information.',
-    category: 'Technical Safeguards',
-    priority: 'high' as const,
-    evidenceTypes: ['audit_systems', 'log_monitoring', 'review_procedures'],
-    controlObjective: 'To monitor access and activity involving PHI'
-  },
-  {
-    frameworkId: 'HIPAA',
-    requirementId: '164.308(a)(1)(i)',
-    title: 'Conduct an accurate and thorough assessment',
-    description: 'Conduct an accurate and thorough assessment of the potential risks and vulnerabilities to the confidentiality, integrity, and availability of electronic protected health information held by the covered entity.',
-    category: 'Administrative Safeguards',
-    priority: 'high' as const,
-    evidenceTypes: ['risk_assessments', 'vulnerability_assessments', 'security_evaluations'],
-    controlObjective: 'To identify and assess security risks to PHI'
+    id: "hipaa-164-312b",
+    frameworkId: "hipaa",
+    requirementId: "164.312(b)",
+    title: "Audit Controls",
+    description: "Implement mechanisms to record and examine activity in systems that contain or use ePHI.",
+    category: "technical_safeguard",
+    priority: "high",
+    evidenceTypes: ["audit_logs", "monitoring", "reporting"],
+    controlObjective: "Track and monitor access to ePHI systems",
+    implementationGuidance: "Implement logging mechanisms and regular review of audit logs for unauthorized access."
   }
 ];
 
-export async function seedComplianceRequirements() {
-  console.log('Seeding compliance requirements...');
-  
-  try {
-    for (const requirement of sampleComplianceRequirements) {
-      await storage.createComplianceRequirement(requirement);
-    }
-    console.log(`Seeded ${sampleComplianceRequirements.length} compliance requirements successfully.`);
-  } catch (error) {
-    console.error('Error seeding compliance requirements:', error);
+// SOC 2 Trust Services Criteria Controls
+const soc2Controls = [
+  {
+    id: "soc2-cc1-1",
+    frameworkId: "soc2",
+    requirementId: "CC1.1",
+    title: "Control Environment - Integrity and Ethical Values",
+    description: "The entity demonstrates a commitment to integrity and ethical values.",
+    category: "governance",
+    priority: "high",
+    evidenceTypes: ["policy", "code_of_conduct", "training"],
+    controlObjective: "Establish tone at the top for integrity and ethical behavior",
+    implementationGuidance: "Implement code of conduct, ethics training, and disciplinary measures for violations."
+  },
+  {
+    id: "soc2-cc2-1",
+    frameworkId: "soc2",
+    requirementId: "CC2.1",
+    title: "Communication and Information",
+    description: "The entity obtains or generates and uses relevant, quality information to support internal control objectives.",
+    category: "information_communication",
+    priority: "medium",
+    evidenceTypes: ["documentation", "reporting", "communication"],
+    controlObjective: "Ensure effective information flow for control activities",
+    implementationGuidance: "Establish communication channels and reporting mechanisms for control-related information."
+  },
+  {
+    id: "soc2-cc3-1",
+    frameworkId: "soc2",
+    requirementId: "CC3.1",
+    title: "Risk Assessment",
+    description: "The entity specifies objectives with sufficient clarity to enable the identification and assessment of risks.",
+    category: "risk_assessment",
+    priority: "high",
+    evidenceTypes: ["risk_assessment", "documentation", "procedures"],
+    controlObjective: "Identify and assess risks to achieving control objectives",
+    implementationGuidance: "Conduct regular risk assessments and document risk management procedures."
+  },
+  {
+    id: "soc2-cc4-1",
+    frameworkId: "soc2",
+    requirementId: "CC4.1",
+    title: "Monitoring Activities",
+    description: "The entity selects, develops, and performs ongoing evaluations to ascertain whether components of internal control are present and functioning.",
+    category: "monitoring",
+    priority: "medium",
+    evidenceTypes: ["monitoring_reports", "testing", "documentation"],
+    controlObjective: "Monitor effectiveness of internal controls",
+    implementationGuidance: "Implement ongoing monitoring activities and periodic separate evaluations."
+  },
+  {
+    id: "soc2-cc5-1",
+    frameworkId: "soc2",
+    requirementId: "CC5.1",
+    title: "Control Activities",
+    description: "The entity selects and develops control activities that contribute to the mitigation of risks.",
+    category: "control_activities",
+    priority: "high",
+    evidenceTypes: ["procedures", "documentation", "testing"],
+    controlObjective: "Implement control activities to mitigate identified risks",
+    implementationGuidance: "Design and implement control activities aligned with risk assessment results."
   }
-}
+];
 
-// Call this function when the server starts to populate sample data
-if (require.main === module) {
-  seedComplianceRequirements().then(() => {
-    console.log('Compliance requirements seeding completed.');
-    process.exit(0);
-  });
+export async function seedComplianceData() {
+  try {
+    console.log('🌱 Starting compliance data seeding...');
+
+    // First, check if frameworks already exist
+    const existingFrameworks = await db.select().from(frameworks);
+    if (existingFrameworks.length > 0) {
+      console.log('📊 Frameworks already seeded, skipping...');
+      return;
+    }
+
+    // Seed frameworks
+    await db.insert(frameworks).values([
+      {
+        id: "iso27001",
+        name: "iso27001",
+        displayName: "ISO 27001",
+        description: "International standard for information security management systems",
+        complexity: "high",
+        estimatedTimeMonths: 12,
+        totalControls: 114,
+        icon: "🛡️",
+        color: "#3B82F6"
+      },
+      {
+        id: "scf",
+        name: "scf",
+        displayName: "Secure Controls Framework (SCF)",
+        description: "Comprehensive cybersecurity framework",
+        complexity: "high",
+        estimatedTimeMonths: 18,
+        totalControls: 200,
+        icon: "🔒",
+        color: "#8B5CF6"
+      },
+      {
+        id: "hipaa",
+        name: "hipaa",
+        displayName: "HIPAA Security Rule",
+        description: "Administrative, Physical, and Technical Safeguards for protecting ePHI",
+        complexity: "medium",
+        estimatedTimeMonths: 8,
+        totalControls: 18,
+        icon: "🏥",
+        color: "#10B981"
+      },
+      {
+        id: "soc2",
+        name: "soc2",
+        displayName: "SOC 2 Type II",
+        description: "Trust Services Criteria for Security, Availability, Processing Integrity, Confidentiality, and Privacy",
+        complexity: "high",
+        estimatedTimeMonths: 10,
+        totalControls: 64,
+        icon: "✅",
+        color: "#F59E0B"
+      }
+    ]);
+
+    // Seed compliance requirements for each framework
+    const allRequirements = [
+      ...isoRequirements,
+      ...scfRequirements,
+      ...hipaaControls,
+      ...soc2Controls
+    ];
+
+    await db.insert(complianceRequirements).values(allRequirements);
+
+    console.log('✅ Compliance data seeded successfully.');
+  } catch (error) {
+    console.error('❌ Error seeding compliance data:', error);
+  }
 }
