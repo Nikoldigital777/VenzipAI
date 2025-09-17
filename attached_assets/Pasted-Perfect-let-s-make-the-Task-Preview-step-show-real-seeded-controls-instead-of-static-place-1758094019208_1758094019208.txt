@@ -1,0 +1,137 @@
+Perfect ✅ — let’s make the **Task Preview step** show *real seeded controls* instead of static placeholders.
+We’ll hook it directly into the frameworks the user picked in onboarding.
+
+---
+
+# 🧩 Frontend Update: `onboarding.tsx`
+
+### Step 4: Task Preview (updated)
+
+```tsx
+// inside Onboarding.tsx
+
+import { useEffect, useState } from "react";
+
+type Control = {
+  id: string;
+  frameworkId: string;
+  clause: string;
+  title: string;
+  description: string;
+  category: string;
+};
+
+function TaskPreview({ selectedFrameworks }: { selectedFrameworks: string[] }) {
+  const [sampleTasks, setSampleTasks] = useState<Control[]>([]);
+
+  useEffect(() => {
+    async function fetchSampleTasks() {
+      const res = await fetch("/api/onboarding/preview-tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ frameworks: selectedFrameworks }),
+      });
+      const data = await res.json();
+      setSampleTasks(data.tasks);
+    }
+    fetchSampleTasks();
+  }, [selectedFrameworks]);
+
+  return (
+    <div className="p-6">
+      <h2 className="text-2xl font-semibold mb-2">Preview of Your Tasks</h2>
+      <p className="text-gray-600 mb-4">
+        We’ve created tasks based on your selected frameworks. Here’s a sample of
+        what you’ll be working on:
+      </p>
+
+      <div className="space-y-4">
+        {sampleTasks.map((task) => (
+          <div
+            key={task.id}
+            className="p-4 rounded-xl border bg-white shadow-sm hover:shadow-md transition"
+          >
+            <h3 className="font-medium text-gray-800">
+              {task.clause} — {task.title}
+            </h3>
+            <p className="text-gray-600 text-sm">{task.description}</p>
+            <span className="inline-block mt-2 text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded">
+              {task.category}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6">
+        <p className="text-gray-700 font-semibold">
+          Total Tasks Generated:{" "}
+          <span className="text-indigo-600">{sampleTasks.length * 20}+ </span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default TaskPreview;
+```
+
+---
+
+# 🛠️ Backend Update: `server/routes.ts`
+
+Add a preview route that returns **5 random controls** from each selected framework:
+
+```ts
+app.post("/api/onboarding/preview-tasks", async (req, res) => {
+  try {
+    const { frameworks } = req.body;
+
+    const tasks: any[] = [];
+
+    for (const fwId of frameworks) {
+      const fwControls = await db
+        .select()
+        .from(controls)
+        .where(eq(controls.frameworkId, fwId));
+
+      // shuffle & take 5
+      const sample = fwControls.sort(() => 0.5 - Math.random()).slice(0, 5);
+      tasks.push(...sample);
+    }
+
+    res.json({ tasks });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch preview tasks" });
+  }
+});
+```
+
+---
+
+# 📊 Result in Onboarding Flow
+
+* If the user selects **ISO 27001 + HIPAA** → they’ll see \~10 sample tasks like:
+
+  * *“Clause 5.2 – Define Information Security Policy”*
+  * *“164.312(a)(1) – Access Control”*
+
+* Task Preview page shows:
+
+  * Clause number + title
+  * Description (what the control means)
+  * Category badge (e.g., “Administrative Safeguard”)
+  * “Total Tasks Generated: 160+” (rough estimate for context)
+
+---
+
+# ✅ Why This Is Better
+
+* Feels **real** → client instantly sees “HIPAA 164.308(a)(1)” instead of placeholders.
+* Shows **cross-framework coverage** (mix of ISO, HIPAA, SOC 2, SCF).
+* Builds trust before the dashboard by previewing actual compliance obligations.
+
+---
+
+⚡ Next Step:
+Do you want me to also **extend the Summary (Step 6)** so it shows a **mini dashboard preview** (progress rings at 0% for each framework chosen) to match what they’ll see on the full dashboard? That way onboarding ends with a live glimpse of their compliance workspace.
