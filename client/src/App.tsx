@@ -50,31 +50,14 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
 function Router() {
   const { isAuthenticated, isLoading, error } = useAuth();
   const [location, navigate] = useLocation();
-  const [loadingTimeout, setLoadingTimeout] = React.useState(false);
 
-  // Set a timeout to prevent infinite loading
-  React.useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => {
-        setLoadingTimeout(true);
-      }, 5000); // 5 second timeout
-      
-      return () => clearTimeout(timer);
-    } else {
-      setLoadingTimeout(false);
-    }
-  }, [isLoading]);
-
-  // If loading times out or there's an error, assume not authenticated
-  if (loadingTimeout || error) {
-    console.log('Auth loading timeout or error, redirecting to landing');
-    if (location !== '/landing' && location !== '/') {
-      navigate('/landing');
-    }
+  // If there's an error, treat as unauthenticated
+  if (error) {
+    console.log('Auth error detected, treating as unauthenticated');
   }
 
-  // Show loading state while checking authentication (with timeout)
-  if (isLoading && !loadingTimeout) {
+  // Show loading state only briefly while checking authentication
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
         <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg">
