@@ -1,7 +1,7 @@
 import { HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTour } from '@/hooks/useTour';
-import { mainTourSteps } from './tourSteps.js';
+import { mainTourSteps } from './tourSteps';
 
 export function TourButton() {
   const { startTour, state } = useTour();

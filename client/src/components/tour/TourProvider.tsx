@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, ReactNode } from 'react';
+import { useLocation } from 'wouter';
 import { TourContext, TourState, TourStep, TourContextType } from '@/hooks/useTour';
 
 interface TourProviderProps {
@@ -21,8 +22,10 @@ const initialState: TourState = {
 };
 
 export function TourProvider({ children }: TourProviderProps) {
+  const [location, setLocation] = useLocation();
   const [state, setState] = useState<TourState>(initialState);
   const [currentSteps, setCurrentSteps] = useState<TourStep[]>([]);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // Load tour data from localStorage on mount
   useEffect(() => {
@@ -73,7 +76,30 @@ export function TourProvider({ children }: TourProviderProps) {
     }));
   }, [state.userPreferences.skipTutorials, state.completedTours]);
 
-  const nextStep = useCallback(() => {
+  const nextStep = useCallback(async () => {
+    const currentStep = currentSteps[state.currentStep];
+    
+    // Handle navigation if the current step requires it
+    if (currentStep?.navigateTo && location !== currentStep.navigateTo) {
+      setIsNavigating(true);
+      setLocation(currentStep.navigateTo);
+      
+      // Wait for route stabilization
+      await new Promise<void>(resolve => {
+        const checkRoute = () => {
+          if (window.location.pathname === currentStep.navigateTo) {
+            // Wait additional time for DOM to settle
+            setTimeout(resolve, 200);
+          } else {
+            setTimeout(checkRoute, 50);
+          }
+        };
+        checkRoute();
+      });
+      
+      setIsNavigating(false);
+    }
+    
     setState(prev => {
       const nextStepIndex = prev.currentStep + 1;
       
@@ -98,7 +124,7 @@ export function TourProvider({ children }: TourProviderProps) {
         currentStep: nextStepIndex,
       };
     });
-  }, []);
+  }, [location, setLocation, state.currentStep, currentSteps]);
 
   const previousStep = useCallback(() => {
     setState(prev => ({
@@ -166,7 +192,7 @@ export function TourProvider({ children }: TourProviderProps) {
   }, [state.isActive, state.currentStep, currentSteps]);
 
   const contextValue: TourContextType = {
-    state,
+    state: { ...state, isNavigating },
     startTour,
     nextStep,
     previousStep,

@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ChevronLeft, ChevronRight, SkipForward } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, SkipForward, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useTour } from '@/hooks/useTour';
 
 interface TourStepProps {
@@ -41,16 +42,47 @@ export function TourStep({
   const { state, nextStep, previousStep, skipTour, endTour } = useTour();
   const [targetPosition, setTargetPosition] = useState<Position | null>(null);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(true);
   const popoverRef = useRef<HTMLDivElement>(null);
-
-  // Handle navigation if specified
-  useEffect(() => {
-    if (navigateTo) {
-      // Use navigate from wouter - navigate function doesn't exist in wouter
-      // We'll handle navigation through the tour provider instead
-      console.log(`Tour step requesting navigation to: ${navigateTo}`);
-    }
+  
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Ignore keyboard events when user is typing in input fields
+    const target = event.target as HTMLElement;
+    const isInputField = target.tagName === 'INPUT' || 
+                        target.tagName === 'TEXTAREA' || 
+                        target.contentEditable === 'true' ||
+                        target.isContentEditable;
     
+    if (isInputField) {
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowRight':
+      case ' ': // Fixed: use ' ' instead of 'Space'
+      case 'Enter':
+        event.preventDefault();
+        nextStep();
+        break;
+      case 'ArrowLeft':
+        event.preventDefault();
+        if (state.currentStep > 0) previousStep();
+        break;
+      case 'Escape':
+        event.preventDefault();
+        if (showSkip) {
+          setShowSkipConfirm(true);
+        } else {
+          endTour();
+        }
+        break;
+    }
+  }, [nextStep, previousStep, endTour, showSkip, state.currentStep]);
+
+  // Handle step lifecycle callbacks
+  useEffect(() => {
     // Execute before step callback
     onBeforeStep?.();
     
@@ -58,7 +90,19 @@ export function TourStep({
       // Execute after step callback on cleanup
       onAfterStep?.();
     };
-  }, [navigateTo, onBeforeStep, onAfterStep]);
+  }, [onBeforeStep, onAfterStep]);
+  
+  // Setup keyboard navigation
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+  
+  // Animation control
+  useEffect(() => {
+    const timer = setTimeout(() => setIsAnimating(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Calculate target element position and highlight
   useEffect(() => {
@@ -72,11 +116,11 @@ export function TourStep({
     
     if (!targetElement) {
       console.warn(`Tour target not found: ${target}${fallbackTarget ? ` (fallback: ${fallbackTarget})` : ''}`);
-      // Auto-advance tour after a timeout if target is missing
+      // Auto-advance tour after a longer timeout to allow for slower renders
       const timeout = setTimeout(() => {
         console.log(`Auto-advancing tour due to missing target: ${target}`);
         nextStep();
-      }, 2000);
+      }, 4000); // Increased from 2000ms to 4000ms
       return () => clearTimeout(timeout);
     }
 
@@ -154,29 +198,6 @@ export function TourStep({
 
   const progress = ((state.currentStep + 1) / state.totalSteps) * 100;
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case 'Escape':
-        endTour();
-        break;
-      case 'ArrowRight':
-      case ' ':
-        e.preventDefault();
-        nextStep();
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        if (state.currentStep > 0) {
-          previousStep();
-        }
-        break;
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [state.currentStep]);
 
   if (!state.isActive || !targetPosition) {
     return null;
@@ -218,7 +239,9 @@ export function TourStep({
       {/* Tour popover */}
       <Card
         ref={popoverRef}
-        className="absolute glass-card border-2 border-venzip-primary/20 shadow-2xl max-w-sm w-full mx-4"
+        className={`absolute glass-card border-2 border-venzip-primary/20 shadow-2xl max-w-sm w-full mx-4 transition-all duration-300 ${
+          isAnimating ? 'opacity-0 scale-95 translate-y-4' : 'opacity-100 scale-100 translate-y-0'
+        }`}
         style={{
           top: popoverPosition.top,
           left: popoverPosition.left,
@@ -278,7 +301,7 @@ export function TourStep({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={skipTour}
+                  onClick={() => setShowSkipConfirm(true)}
                   className="flex items-center gap-2 text-gray-500 hover:text-gray-700"
                   data-testid="tour-skip-button"
                 >
@@ -300,6 +323,39 @@ export function TourStep({
           </div>
         </CardContent>
       </Card>
+
+      {/* Skip Confirmation Dialog */}
+      <AlertDialog open={showSkipConfirm} onOpenChange={setShowSkipConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Skip Tour?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to skip this tour? You can always restart it later from the help menu.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => setShowSkipConfirm(false)}
+              data-testid="skip-cancel-button"
+            >
+              Continue Tour
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                setShowSkipConfirm(false);
+                skipTour();
+              }}
+              className="bg-red-600 hover:bg-red-700"
+              data-testid="skip-confirm-button"
+            >
+              Skip Tour
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>,
     document.body
   );

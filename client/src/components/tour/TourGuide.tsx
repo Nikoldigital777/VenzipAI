@@ -21,6 +21,10 @@ export function TourGuide() {
       placement={currentStep.placement}
       showSkip={currentStep.showSkip}
       offset={currentStep.offset}
+      navigateTo={currentStep.navigateTo}
+      fallbackTarget={currentStep.fallbackTarget}
+      onBeforeStep={currentStep.onBeforeStep}
+      onAfterStep={currentStep.onAfterStep}
     />
   );
 }

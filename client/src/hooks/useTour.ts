@@ -24,6 +24,7 @@ export interface TourState {
   totalSteps: number;
   completedTours: string[];
   currentTourId: string | null;
+  isNavigating?: boolean;
   userPreferences: {
     autoStart: boolean;
     skipTutorials: boolean;
