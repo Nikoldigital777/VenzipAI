@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { User } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -20,32 +20,58 @@ import {
 
 export default function Home() {
   const { user } = useAuth() as { user: User | undefined, isLoading: boolean, isAuthenticated: boolean };
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const hasRedirected = useRef(false);
 
   // Check if user has company profile
-  const { data: company, isLoading: companyLoading } = useQuery({
+  const { data: company, isLoading: companyLoading, isError: companyError } = useQuery({
     queryKey: ["/api/company"],
+    retry: 1,
   });
 
-  // Smart routing based on user's setup status
+  // Smart routing based on user's setup status - with redirect guards
   useEffect(() => {
-    if (!companyLoading && company) {
-      // If company exists, check if they've completed onboarding
+    // Prevent multiple redirects
+    if (hasRedirected.current || companyLoading) return;
+    
+    // Don't redirect if we're already on the target route
+    if (location === "/dashboard" || location === "/onboarding") return;
+
+    // Handle different scenarios
+    if (companyError || (!companyLoading && !company)) {
+      // No company profile exists - redirect to onboarding
+      console.log("No company profile found, redirecting to onboarding");
+      hasRedirected.current = true;
+      setLocation("/onboarding");
+      return;
+    }
+
+    if (company) {
+      // Company exists - check if onboarding is complete
       const hasSelectedFrameworks = company.selectedFrameworks && company.selectedFrameworks.length > 0;
       
       if (!hasSelectedFrameworks) {
-        // Company exists but no frameworks selected - continue onboarding
+        // Company exists but onboarding incomplete
+        console.log("Company profile incomplete, continuing onboarding");
+        hasRedirected.current = true;
         setLocation("/onboarding");
       } else {
         // Fully set up - go to dashboard
+        console.log("Company profile complete, redirecting to dashboard");
+        hasRedirected.current = true;
         setLocation("/dashboard");
       }
-    } else if (!companyLoading && !company) {
-      // No company profile - start onboarding
-      setLocation("/onboarding");
     }
-  }, [companyLoading, company, setLocation]);
+  }, [companyLoading, company, companyError, location, setLocation]);
 
+  // Reset redirect flag when location changes (for back navigation)
+  useEffect(() => {
+    if (location !== "/home") {
+      hasRedirected.current = false;
+    }
+  }, [location]);
+
+  // Show loading state while checking company status
   if (companyLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
@@ -57,7 +83,29 @@ export default function Home() {
     );
   }
 
-  // Fallback UI (should rarely be seen due to redirects)
+  // Show error state if company query failed
+  if (companyError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
+        <div className="glass-card p-8 rounded-2xl text-center">
+          <Shield className="w-12 h-12 mx-auto mb-4 text-red-500" />
+          <h2 className="text-xl font-semibold mb-2">Setup Required</h2>
+          <p className="text-gray-600 mb-4">We need to set up your company profile first.</p>
+          <Button 
+            onClick={() => {
+              hasRedirected.current = true;
+              setLocation("/onboarding");
+            }}
+            className="bg-gradient-primary text-white"
+          >
+            Start Setup <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback UI (should rarely be seen due to redirects, but prevents blank screen)
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
       <div className="max-w-4xl mx-auto p-6">
@@ -104,7 +152,10 @@ export default function Home() {
             
             <div className="flex justify-center space-x-4">
               <Button 
-                onClick={() => setLocation("/onboarding")}
+                onClick={() => {
+                  hasRedirected.current = true;
+                  setLocation("/onboarding");
+                }}
                 className="bg-gradient-primary hover:shadow-xl hover:scale-105 transition-all duration-300 text-white font-semibold px-8 py-3 rounded-xl flex items-center"
               >
                 <Settings className="h-4 w-4 mr-2" />
@@ -113,7 +164,10 @@ export default function Home() {
               </Button>
               
               <Button 
-                onClick={() => setLocation("/dashboard")}
+                onClick={() => {
+                  hasRedirected.current = true;
+                  setLocation("/dashboard");
+                }}
                 variant="outline"
                 className="hover:shadow-lg hover:scale-105 transition-all duration-300 font-semibold px-8 py-3 rounded-xl flex items-center"
               >
