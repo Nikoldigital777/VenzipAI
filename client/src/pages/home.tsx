@@ -27,11 +27,13 @@ export default function Home() {
   // Show loading state while checking company status
   if (companyLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
-        <div className="glass-card p-8 rounded-2xl">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-venzip-primary" />
-          <p className="text-gray-600">Setting up your workspace...</p>
-        </div>
+      <div className="max-w-4xl mx-auto p-6 pt-20">
+        <Card className="bg-white/80 backdrop-blur-sm">
+          <CardContent className="p-8 text-center">
+            <div className="w-6 h-6 border-2 border-venzip-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Setting up your workspace...</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }

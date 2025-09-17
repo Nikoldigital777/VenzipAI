@@ -54,9 +54,9 @@ function Router() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
-        <div className="glass-card p-8 rounded-2xl">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-venzip-primary border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+        <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg">
+          <div className="w-8 h-8 border-3 border-venzip-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-center">Loading...</p>
         </div>
       </div>
     );

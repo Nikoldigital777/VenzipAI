@@ -7,10 +7,12 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     retry: false,
-    refetchOnMount: false, // Only fetch once
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnMount: false,
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-    enabled: true, // Always run the query
+    refetchOnReconnect: false,
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    enabled: true,
   });
 
   const logout = async () => {
