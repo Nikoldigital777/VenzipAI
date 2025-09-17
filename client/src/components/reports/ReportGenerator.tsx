@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Download, Loader2, CheckCircle2 } from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 interface ReportType {
@@ -46,9 +45,12 @@ export function ReportGenerator() {
   const [lastGenerated, setLastGenerated] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // Fallback toast function in case hook fails
+  const safeToast = toast || (() => console.warn('Toast not available'));
+
   const handleGenerateReport = async () => {
     if (!selectedReport) {
-      toast({
+      safeToast({
         title: "Select Report Type",
         description: "Please select a report type before generating.",
         variant: "destructive"
@@ -71,7 +73,8 @@ export function ReportGenerator() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate report');
+        const errorText = await response.text();
+        throw new Error(`Failed to generate report: ${response.status} ${errorText}`);
       }
 
       // Get the filename from the response headers
@@ -88,23 +91,29 @@ export function ReportGenerator() {
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      
+      // Cleanup
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        if (document.body.contains(a)) {
+          document.body.removeChild(a);
+        }
+      }, 100);
 
       // Update UI
       const reportName = reportTypes.find(r => r.id === selectedReport)?.name;
       setLastGenerated(reportName || selectedReport);
 
-      toast({
+      safeToast({
         title: "Report Generated",
-        description: `Your ${reportName} has been downloaded successfully.`,
+        description: `Your ${reportName || 'report'} has been downloaded successfully.`,
       });
 
     } catch (error) {
       console.error('Error generating report:', error);
-      toast({
+      safeToast({
         title: "Generation Failed",
-        description: "Unable to generate report. Please try again.",
+        description: error instanceof Error ? error.message : "Unable to generate report. Please try again.",
         variant: "destructive"
       });
     } finally {
