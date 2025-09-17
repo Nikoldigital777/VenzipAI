@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import {
   BarChart3,
@@ -276,7 +275,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
           </button>
         </div>
-        
+
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
