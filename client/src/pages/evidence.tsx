@@ -1,5 +1,5 @@
 import EvidenceMappingDashboard from "@/components/evidence-mapping-dashboard";
-import AIChat from "@/components/ai-chat";
+import LazyAIChat from "@/components/LazyAIChat";
 import { Shield, Brain, MapPin, Target, CheckCircle } from "lucide-react";
 
 export default function Evidence() {
@@ -57,7 +57,7 @@ export default function Evidence() {
           </div>
         </div>
       </div>
-      <AIChat />
+      <LazyAIChat />
     </>
   );
 }

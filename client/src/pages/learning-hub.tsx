@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 // import Navigation from "@/components/navigation"; // Removed Navigation import
-import AIChat from "@/components/ai-chat";
+import LazyAIChat from "@/components/LazyAIChat";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -606,7 +606,7 @@ export default function LearningHub() {
           )}
         </div>
       </div>
-      <AIChat />
+      <LazyAIChat />
     </>
   );
 }

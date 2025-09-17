@@ -1,7 +1,7 @@
 // client/src/pages/documents.tsx
 import FileUpload from "@/components/file-upload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AIChat from "@/components/ai-chat";
+import LazyAIChat from "@/components/LazyAIChat";
 import { FileText, Upload } from "lucide-react";
 
 export default function Documents() {
@@ -31,7 +31,7 @@ export default function Documents() {
           </Card>
         </div>
       </div>
-      <AIChat />
+      <LazyAIChat />
     </>
   );
 }

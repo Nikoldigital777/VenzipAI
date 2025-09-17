@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import AIChat from "@/components/ai-chat";
+import LazyAIChat from "@/components/LazyAIChat";
 import DynamicRiskDashboard from "@/components/dynamic-risk-dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -747,7 +747,7 @@ export default function RisksPage() {
           )}
         </div>
       </div>
-      <AIChat />
+      <LazyAIChat />
     </>
   );
 }

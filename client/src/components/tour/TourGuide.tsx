@@ -1,7 +1,8 @@
 import { useTour } from '@/hooks/useTour';
 import { TourStep } from './TourStep';
+import { memo } from 'react';
 
-export function TourGuide() {
+function TourGuideComponent() {
   const { state, getCurrentStep } = useTour();
   
   if (!state.isActive) {
@@ -28,3 +29,6 @@ export function TourGuide() {
     />
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export const TourGuide = memo(TourGuideComponent);

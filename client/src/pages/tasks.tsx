@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 // import Navigation from "@/components/navigation"; // Removed import
-import AIChat from "@/components/ai-chat";
+import LazyAIChat from "@/components/LazyAIChat";
 import TaskList from "@/components/tasks/TaskList";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskDetails from "@/components/tasks/TaskDetails";
@@ -119,7 +119,7 @@ export default function TasksPage() {
           </Dialog>
         </div>
       </div>
-      <AIChat />
+      <LazyAIChat />
     </>
   );
 }

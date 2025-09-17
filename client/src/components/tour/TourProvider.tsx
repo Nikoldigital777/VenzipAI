@@ -27,7 +27,7 @@ export function TourProvider({ children }: TourProviderProps) {
   const [currentSteps, setCurrentSteps] = useState<TourStep[]>([]);
   const [isNavigating, setIsNavigating] = useState(false);
 
-  // Load tour data from localStorage on mount
+  // Load tour data from localStorage on mount (only once)
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -47,17 +47,26 @@ export function TourProvider({ children }: TourProviderProps) {
     }
   }, []);
 
-  // Save tour data to localStorage whenever state changes
+  // Save tour data to localStorage with debouncing to prevent excessive writes
   useEffect(() => {
-    try {
-      const dataToSave = {
-        completedTours: state.completedTours,
-        userPreferences: state.userPreferences,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-    } catch (error) {
-      console.warn('Failed to save tour data to localStorage:', error);
+    // Skip saving on initial load
+    if (state.completedTours.length === 0 && !state.userPreferences.hasSeenWelcome) {
+      return;
     }
+    
+    const timeoutId = setTimeout(() => {
+      try {
+        const dataToSave = {
+          completedTours: state.completedTours,
+          userPreferences: state.userPreferences,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+      } catch (error) {
+        console.warn('Failed to save tour data to localStorage:', error);
+      }
+    }, 300); // Debounce saves by 300ms
+
+    return () => clearTimeout(timeoutId);
   }, [state.completedTours, state.userPreferences]);
 
   const startTour = useCallback((tourId: string, steps: TourStep[]) => {

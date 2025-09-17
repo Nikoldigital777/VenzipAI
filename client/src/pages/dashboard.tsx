@@ -3,7 +3,8 @@ import { useSummary } from "@/hooks/useSummary";
 import ProgressRing from "@/components/progress-ring";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AIChat from "@/components/ai-chat";
+import { Badge } from "@/components/ui/badge";
+import LazyAIChat from "@/components/LazyAIChat";
 import { ReportGenerator } from "@/components/reports/ReportGenerator";
 import { 
   Upload, 
@@ -100,7 +101,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        <AIChat />
+        <LazyAIChat />
       </>
     );
   }
@@ -140,7 +141,7 @@ export default function Dashboard() {
             </Card>
           </div>
         </div>
-        <AIChat />
+        <LazyAIChat />
       </>
     );
   }
