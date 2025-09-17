@@ -2,7 +2,8 @@
 import "./index.css";
 import * as React from "react";
 import { Switch, Route, useLocation } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TourProvider } from "@/components/tour/TourProvider";
@@ -164,20 +165,6 @@ function Router() {
 }
 
 function App() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: (failureCount, error) => {
-          if (error instanceof Error && error.message.includes('Unauthorized')) {
-            return false;
-          }
-          return failureCount < 3;
-        },
-        refetchOnWindowFocus: false,
-        staleTime: 1000 * 60 * 5, // 5 minutes
-      },
-    },
-  });
   return (
     <QueryClientProvider client={queryClient}>
       <TourProvider>
