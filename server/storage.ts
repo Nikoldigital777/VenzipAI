@@ -230,40 +230,61 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertFrameworkProgress(progressData: InsertFrameworkProgress): Promise<FrameworkProgress> {
-    // First try to find existing record
-    const existing = await db
-      .select()
-      .from(frameworkProgress)
-      .where(
-        and(
-          eq(frameworkProgress.userId, progressData.userId),
-          eq(frameworkProgress.frameworkId, progressData.frameworkId)
+    try {
+      // First try to find existing record
+      const existing = await db
+        .select()
+        .from(frameworkProgress)
+        .where(
+          and(
+            eq(frameworkProgress.userId, progressData.userId),
+            eq(frameworkProgress.frameworkId, progressData.frameworkId)
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
 
-    if (existing.length > 0) {
-      // Update existing record
-      const [progress] = await db
-        .update(frameworkProgress)
-        .set({
-          ...progressData,
-          updatedAt: new Date(),
-        })
-        .where(eq(frameworkProgress.id, existing[0].id))
-        .returning();
-      return progress;
-    } else {
-      // Insert new record
-      const [progress] = await db
-        .insert(frameworkProgress)
-        .values({
-          ...progressData,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
-      return progress;
+      if (existing.length > 0) {
+        // Update existing record
+        const [progress] = await db
+          .update(frameworkProgress)
+          .set({
+            ...progressData,
+            updatedAt: new Date(),
+          })
+          .where(eq(frameworkProgress.id, existing[0].id))
+          .returning();
+        return progress;
+      } else {
+        // Insert new record
+        const [progress] = await db
+          .insert(frameworkProgress)
+          .values({
+            ...progressData,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .returning();
+        return progress;
+      }
+    } catch (error) {
+      console.error("Error upserting framework progress:", error);
+      // If there's a conflict error, try to get the existing record
+      const existing = await db
+        .select()
+        .from(frameworkProgress)
+        .where(
+          and(
+            eq(frameworkProgress.userId, progressData.userId),
+            eq(frameworkProgress.frameworkId, progressData.frameworkId)
+          )
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        return existing[0];
+      } else {
+        throw error;
+      }
     }
   }
 

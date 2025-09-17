@@ -2864,7 +2864,17 @@ export async function registerRoutes(app: Express) {
             console.log("Framework progress initialized for:", framework.name);
           } catch (progressError) {
             console.error("Error initializing framework progress for", framework.name, ":", progressError);
-            // Continue with other frameworks if one fails - this is not critical for onboarding completion
+            // Try to get existing progress if it exists
+            try {
+              const existingProgress = await storage.getFrameworkProgressByUserId(userId);
+              const hasProgress = existingProgress.some(p => p.frameworkId === framework.id);
+              if (hasProgress) {
+                console.log("Framework progress already exists for:", framework.name);
+              }
+            } catch (checkError) {
+              console.error("Error checking existing progress:", checkError);
+            }
+            // Continue with other frameworks - this is not critical for onboarding completion
           }
 
           // Generate initial compliance tasks for each framework
