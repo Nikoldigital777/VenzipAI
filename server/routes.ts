@@ -484,10 +484,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai/analyze-tasks', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      
+
       // Get user's tasks
       const tasks = await storage.getTasksByUserId(userId);
-      
+
       // Get company info for context
       let companyInfo = {};
       try {
@@ -529,11 +529,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/ai/weekly-recommendations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      
+
       // Get user's tasks (only incomplete ones)
       const allTasks = await storage.getTasksByUserId(userId);
       const incompleteTasks = allTasks.filter(task => task.status !== 'completed');
-      
+
       // Get company info
       let companyInfo = {};
       try {
@@ -569,9 +569,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const tasks = await storage.getTasksByUserId(userId);
-      
+
       const now = new Date();
-      
+
       // Overdue tasks
       const overdueTasks = tasks
         .filter(task => task.dueDate && new Date(task.dueDate) < now && task.status !== 'completed')
@@ -726,11 +726,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/framework-progress', isAuthenticated, async (req: any, res) => {
+  // Framework progress route
+  app.get("/api/framework-progress", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      const progress = await storage.getFrameworkProgressByUserId(userId);
-      res.json(progress);
+
+      // Get user's framework progress
+      const frameworkProgress = await storage.getFrameworkProgressByUserId(userId);
+
+      // Get all frameworks for display names
+      const frameworks = await storage.getAllFrameworks();
+
+      // Combine progress data with framework details
+      const progressWithDetails = frameworkProgress.map(progress => {
+        const framework = frameworks.find(f => f.id === progress.frameworkId);
+        return {
+          frameworkId: progress.frameworkId,
+          frameworkName: framework?.name || 'Unknown',
+          displayName: framework?.displayName || framework?.name || 'Unknown',
+          completionPercentage: progress.progressPercentage ? parseFloat(progress.progressPercentage) : 0,
+          totalTasks: progress.totalTasks || 0,
+          completedTasks: progress.completedTasks || 0,
+          status: progress.progressPercentage && parseFloat(progress.progressPercentage) >= 80 ? 'excellent' :
+                  progress.progressPercentage && parseFloat(progress.progressPercentage) >= 60 ? 'good' :
+                  progress.progressPercentage && parseFloat(progress.progressPercentage) >= 40 ? 'needs_attention' : 'critical',
+        };
+      });
+
+      res.json(progressWithDetails);
     } catch (error) {
       console.error("Error fetching framework progress:", error);
       res.status(500).json({ message: "Failed to fetch framework progress" });
@@ -820,7 +843,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const allUserTasks = await storage.getTasksByUserId(userId);
           const allUserRisks = await storage.getRisksByUserId(userId);
           const company = await storage.getCompanyByUserId(userId);
-          
+
           const totalTasks = allUserTasks.length;
           const completedTasks = allUserTasks.filter(t => t.status === 'completed').length;
           const highRisks = allUserRisks.filter(r => r.impact === 'high' && r.status === 'open').length;
@@ -840,7 +863,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Calculate new risk score
           const riskScore = await calculateDynamicRiskScore(userId, task.frameworkId || undefined, riskContext);
-          
+
           // Save risk score to history
           const historyData = insertRiskScoreHistorySchema.parse({
             userId,
@@ -869,7 +892,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               relatedEntityId: undefined
             });
           }
-          
+
         } catch (riskError) {
           console.error("Error recalculating risk score on task completion:", riskError);
           // Don't fail the task update if risk calculation fails
@@ -1095,11 +1118,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get document content for analysis
       let documentContent = extractedText || '';
-      
+
       // If no extracted text provided, try to extract based on file type
       if (!documentContent) {
         const filePath = req.file.path;
-        
+
         try {
           if (req.file.mimetype === 'application/pdf') {
             // For PDFs, we should have extracted text on the frontend
@@ -2176,64 +2199,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/compliance/gap-analysis', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      
+
       // Get all frameworks for the user's company
       const allFrameworks = await storage.getAllFrameworks();
-      
+
       // Get all tasks for the user
       const allTasks = await storage.getTasksByUserId(userId);
-      
+
       const frameworkGaps = [];
       let totalTasks = 0;
       let totalCompleted = 0;
       let totalCriticalGaps = 0;
-      
+
       for (const framework of allFrameworks) {
         const frameworkTasks = allTasks.filter(task => task.frameworkId === framework.id);
         const completedTasks = frameworkTasks.filter(task => task.status === 'completed');
         const incompleteTasks = frameworkTasks.filter(task => task.status !== 'completed');
-        
+
         const completionPercentage = frameworkTasks.length > 0 
           ? Math.round((completedTasks.length / frameworkTasks.length) * 100) 
           : 0;
-        
+
         // Generate missing requirements in plain English
         const missingRequirements = incompleteTasks.map(task => {
           const priority = task.priority === 'critical' ? '🔴 Critical: ' : 
                           task.priority === 'high' ? '🟠 High: ' : 
                           task.priority === 'medium' ? '🟡 Medium: ' : 
                           '🟢 Low: ';
-          
+
           let requirement = `${priority}${task.title}`;
-          
+
           if (task.dueDate) {
             const dueDate = new Date(task.dueDate);
             const now = new Date();
             const daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-            
+
             if (daysUntilDue < 0) {
               requirement += ` (${Math.abs(daysUntilDue)} days overdue)`;
             } else if (daysUntilDue <= 7) {
               requirement += ` (due in ${daysUntilDue} days)`;
             }
           }
-          
+
           if (task.description) {
             requirement += ` - ${task.description.substring(0, 100)}${task.description.length > 100 ? '...' : ''}`;
           }
-          
+
           return requirement;
         });
-        
+
         // Determine status based on completion percentage
         let status: 'excellent' | 'good' | 'needs_attention' | 'critical';
         if (completionPercentage >= 90) status = 'excellent';
         else if (completionPercentage >= 70) status = 'good';
         else if (completionPercentage >= 50) status = 'needs_attention';
         else status = 'critical';
-        
+
         const criticalGaps = incompleteTasks.filter(task => task.priority === 'critical').length;
-        
+
         frameworkGaps.push({
           frameworkId: framework.id,
           frameworkName: framework.name,
@@ -2245,15 +2268,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           criticalGaps,
           status
         });
-        
+
         totalTasks += frameworkTasks.length;
         totalCompleted += completedTasks.length;
         totalCriticalGaps += criticalGaps;
       }
-      
+
       const overallCompletion = totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0;
       const totalGaps = totalTasks - totalCompleted;
-      
+
       // Generate AI summary
       let summary = '';
       if (overallCompletion >= 90) {
@@ -2265,11 +2288,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         summary = 'Significant compliance gaps identified. Immediate attention required for critical requirements to meet regulatory standards.';
       }
-      
+
       if (totalCriticalGaps > 0) {
         summary += ` ${totalCriticalGaps} critical requirements need immediate attention.`;
       }
-      
+
       res.json({
         frameworks: frameworkGaps,
         overallCompletion,
@@ -2277,7 +2300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         criticalGaps: totalCriticalGaps,
         summary
       });
-      
+
     } catch (error) {
       console.error("Error getting gap analysis:", error);
       res.status(500).json({ message: "Failed to get gap analysis" });
@@ -2289,44 +2312,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const allTasks = await storage.getTasksByUserId(userId);
-      
+
       // Calculate completion velocity (tasks completed per week)
       const now = new Date();
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
       const fourWeeksAgo = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000);
-      
+
       const tasksCompletedThisWeek = allTasks.filter(task => 
         task.status === 'completed' && 
         task.completedAt && 
         new Date(task.completedAt) > oneWeekAgo
       ).length;
-      
+
       const tasksCompletedLastWeek = allTasks.filter(task => 
         task.status === 'completed' && 
         task.completedAt && 
         new Date(task.completedAt) > twoWeeksAgo && 
         new Date(task.completedAt) <= oneWeekAgo
       ).length;
-      
+
       const tasksCompletedLast4Weeks = allTasks.filter(task => 
         task.status === 'completed' && 
         task.completedAt && 
         new Date(task.completedAt) > fourWeeksAgo
       ).length;
-      
+
       const averageWeeklyVelocity = tasksCompletedLast4Weeks / 4;
       const remainingTasks = allTasks.filter(task => task.status !== 'completed').length;
-      
+
       // Basic timeline estimate
       const weeksToCompletion = averageWeeklyVelocity > 0 ? Math.ceil(remainingTasks / averageWeeklyVelocity) : null;
       const estimatedCompletionDate = weeksToCompletion ? 
         new Date(now.getTime() + weeksToCompletion * 7 * 24 * 60 * 60 * 1000) : null;
-      
+
       // Gap trend calculation
       const velocityTrend = tasksCompletedThisWeek > tasksCompletedLastWeek ? 'improving' : 
                           tasksCompletedThisWeek < tasksCompletedLastWeek ? 'declining' : 'stable';
-      
+
       res.json({
         currentVelocity: tasksCompletedThisWeek,
         averageVelocity: Math.round(averageWeeklyVelocity * 10) / 10,
@@ -2340,7 +2363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           fourWeekAverage: Math.round(averageWeeklyVelocity * 10) / 10
         }
       });
-      
+
     } catch (error) {
       console.error("Error calculating velocity:", error);
       res.status(500).json({ message: "Failed to calculate progress velocity" });
@@ -2352,64 +2375,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
       const { reportType } = req.body;
-      
+
       if (!['compliance_summary', 'task_status', 'executive_summary', 'gap_analysis'].includes(reportType)) {
         return res.status(400).json({ message: "Invalid report type" });
       }
-      
+
       // Gather all data needed for report
       const company = await storage.getCompanyByUserId(userId);
       const tasks = await storage.getTasksByUserId(userId);
       const risks = await storage.getRisksByUserId(userId);
       const documents = await storage.getDocumentsByUserId(userId);
       const allFrameworks = await storage.getAllFrameworks();
-      
+
       // Get gap analysis data
       const frameworkGaps = [];
       let totalTasks = 0;
       let totalCompleted = 0;
       let totalCriticalGaps = 0;
-      
+
       for (const framework of allFrameworks) {
         const frameworkTasks = tasks.filter(task => task.frameworkId === framework.id);
         const completedTasks = frameworkTasks.filter(task => task.status === 'completed');
         const incompleteTasks = frameworkTasks.filter(task => task.status !== 'completed');
-        
+
         const completionPercentage = frameworkTasks.length > 0 
           ? Math.round((completedTasks.length / frameworkTasks.length) * 100) 
           : 0;
-        
+
         const missingRequirements = incompleteTasks.map(task => {
           const priority = task.priority === 'critical' ? '🔴 Critical: ' : 
                           task.priority === 'high' ? '🟠 High: ' : 
                           task.priority === 'medium' ? '🟡 Medium: ' : 
                           '🟢 Low: ';
-          
+
           let requirement = `${priority}${task.title}`;
-          
+
           if (task.dueDate) {
             const dueDate = new Date(task.dueDate);
             const now = new Date();
             const daysUntilDue = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-            
+
             if (daysUntilDue < 0) {
               requirement += ` (${Math.abs(daysUntilDue)} days overdue)`;
             } else if (daysUntilDue <= 7) {
               requirement += ` (due in ${daysUntilDue} days)`;
             }
           }
-          
+
           return requirement;
         });
-        
+
         let status: 'excellent' | 'good' | 'needs_attention' | 'critical';
         if (completionPercentage >= 90) status = 'excellent';
         else if (completionPercentage >= 70) status = 'good';
         else if (completionPercentage >= 50) status = 'needs_attention';
         else status = 'critical';
-        
+
         const criticalGaps = incompleteTasks.filter(task => task.priority === 'critical').length;
-        
+
         frameworkGaps.push({
           frameworkId: framework.id,
           frameworkName: framework.name,
@@ -2421,49 +2444,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
           criticalGaps,
           status
         });
-        
+
         totalTasks += frameworkTasks.length;
         totalCompleted += completedTasks.length;
         totalCriticalGaps += criticalGaps;
       }
-      
+
       const overallCompletion = totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0;
-      
+
       // Get velocity data
       const now = new Date();
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
       const fourWeeksAgo = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000);
-      
+
       const tasksCompletedThisWeek = tasks.filter(task => 
         task.status === 'completed' && 
         task.completedAt && 
         new Date(task.completedAt) > oneWeekAgo
       ).length;
-      
+
       const tasksCompletedLastWeek = tasks.filter(task => 
         task.status === 'completed' && 
         task.completedAt && 
         new Date(task.completedAt) > twoWeeksAgo && 
         new Date(task.completedAt) <= oneWeekAgo
       ).length;
-      
+
       const tasksCompletedLast4Weeks = tasks.filter(task => 
         task.status === 'completed' && 
         task.completedAt && 
         new Date(task.completedAt) > fourWeeksAgo
       ).length;
-      
+
       const averageWeeklyVelocity = tasksCompletedLast4Weeks / 4;
       const remainingTasks = tasks.filter(task => task.status !== 'completed').length;
       const weeksToCompletion = averageWeeklyVelocity > 0 ? Math.ceil(remainingTasks / averageWeeklyVelocity) : null;
       const velocityTrend = tasksCompletedThisWeek > tasksCompletedLastWeek ? 'improving' : 
                           tasksCompletedThisWeek < tasksCompletedLastWeek ? 'declining' : 'stable';
-      
+
       // Import and generate report
       const { ReportGenerator } = await import('./reportGenerator');
       const reportGenerator = new ReportGenerator();
-      
+
       const reportData = {
         company,
         frameworks: allFrameworks,
@@ -2484,13 +2507,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           weeksToCompletion
         }
       };
-      
+
       const pdfBuffer = await reportGenerator.generateReport({
         type: reportType,
         data: reportData,
         generatedBy: req.user.name || req.user.email || 'System User'
       });
-      
+
       // Set headers for PDF download
       const reportTypeNames = {
         'compliance_summary': 'Compliance Summary',
@@ -2498,15 +2521,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'executive_summary': 'Executive Summary',
         'gap_analysis': 'Gap Analysis Report'
       };
-      
+
       const filename = `${reportTypeNames[reportType as keyof typeof reportTypeNames]}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-      
+
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Content-Length', pdfBuffer.length);
-      
+
       res.send(pdfBuffer);
-      
+
     } catch (error) {
       console.error("Error generating report:", error);
       res.status(500).json({ message: "Failed to generate report" });

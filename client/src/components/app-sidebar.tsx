@@ -17,6 +17,7 @@ import {
   ChevronUp,
 } from "lucide-react"
 import { useLocation } from "wouter"
+import { useQuery } from "@tanstack/react-query"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -39,7 +40,19 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/useAuth"
+
+interface FrameworkProgress {
+  frameworkId: string;
+  frameworkName: string;
+  displayName: string;
+  completionPercentage: number;
+  totalTasks: number;
+  completedTasks: number;
+  status: 'excellent' | 'good' | 'needs_attention' | 'critical';
+}
 
 // Navigation data
 const data = {
@@ -121,6 +134,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [location, navigate] = useLocation()
   const { user, logout } = useAuth()
 
+  // Fetch framework progress data
+  const { data: frameworkProgress = [] } = useQuery({
+    queryKey: ["/api/framework-progress"],
+    queryFn: async () => {
+      const response = await fetch("/api/framework-progress", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
   const handleLogout = async () => {
     try {
       await logout()
@@ -152,6 +180,60 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {/* Framework Progress Section */}
+        {frameworkProgress.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Framework Progress</SidebarGroupLabel>
+            <div className="px-2 space-y-3">
+              {frameworkProgress.map((framework: FrameworkProgress) => {
+                const getStatusColor = (status: string) => {
+                  switch (status) {
+                    case 'excellent': return 'text-green-600 bg-green-50 border-green-200';
+                    case 'good': return 'text-blue-600 bg-blue-50 border-blue-200';
+                    case 'needs_attention': return 'text-orange-600 bg-orange-50 border-orange-200';
+                    case 'critical': return 'text-red-600 bg-red-50 border-red-200';
+                    default: return 'text-gray-600 bg-gray-50 border-gray-200';
+                  }
+                };
+
+                const getProgressColor = (percentage: number) => {
+                  if (percentage >= 80) return 'bg-green-500';
+                  if (percentage >= 60) return 'bg-blue-500';
+                  if (percentage >= 40) return 'bg-orange-500';
+                  return 'bg-red-500';
+                };
+
+                return (
+                  <div key={framework.frameworkId} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-gray-700 truncate">
+                        {framework.displayName}
+                      </span>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs px-1.5 py-0.5 ${getStatusColor(framework.status)}`}
+                      >
+                        {Math.round(framework.completionPercentage)}%
+                      </Badge>
+                    </div>
+                    <div className="relative">
+                      <Progress 
+                        value={framework.completionPercentage} 
+                        className="h-2"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>{framework.completedTasks}</span>
+                        <span>{framework.totalTasks}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </SidebarGroup>
+        )}
+
+        {/* Navigation Groups */}
         {data.navMain.map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
