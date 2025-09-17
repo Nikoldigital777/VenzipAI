@@ -1,0 +1,65 @@
+That’s a really good instinct — right now your flow jumps around (landing → checklist → dashboard → random tabs), which feels confusing to both auditors and business users.
+What you need is a clear information architecture (IA):
+🧭 Recommended Page Organization (MVP)
+0. Landing / Marketing (Public)
+Landing.tsx
+Purpose: explain product, pricing, contact.
+CTA: “Start Onboarding” (goes to /onboarding).
+This should not directly dump into compliance tasks/checklists.
+1. Onboarding (Private Workspace Setup)
+OnboardingWizard.tsx (multi-step as we designed above).
+Steps: Welcome → Company Profile → Frameworks → Task Preview → AI Assistant → Summary.
+On completion: redirect to /dashboard.
+2. Main App (After Onboarding)
+Use sidebar nav (left tabs) with a fixed order:
+Dashboard (Dashboard.tsx)
+High-level metrics, progress rings, risk heatmap.
+Entry point after onboarding.
+Tasks (Tasks.tsx)
+List all framework-linked tasks.
+Filters: framework, status, category.
+Evidence (Evidence.tsx)
+Uploaded docs linked to tasks/controls.
+Status: pending/verified.
+Frameworks (Frameworks.tsx)
+List of frameworks selected in onboarding.
+Progress per framework (% tasks completed).
+Risks (Risks.tsx)
+Heatmap + risk register.
+Pulls from task statuses for MVP.
+Documents (Documents.tsx)
+Central repository of all uploaded files.
+Linked back to Evidence.
+Audit Calendar (AuditCalendar.tsx)
+Simple event view: deadlines, renewals, audits.
+AI Chat (AIChat.tsx)
+Conversational assistant.
+Compliance Insights (ComplianceInsights.tsx)
+Automated gap analysis & narrative generation.
+Company Profile (CompanyProfile.tsx)
+Settings page with editable company details.
+3. Reporting & Exports
+Reports.tsx
+Generate PDF exports (company profile, frameworks, tasks, evidence, dashboards).
+Place this under Dashboard’s “Export” button.
+🔄 Flow (User Journey)
+Visitor → Landing Page
+Reads about product → clicks “Start Onboarding.”
+Onboarding Wizard (Guided Setup)
+Company info → Frameworks → Tasks → AI → Done.
+Redirect to Dashboard
+See compliance health instantly (0% filled, but real data structure created).
+From Dashboard → Explore Tabs
+Evidence, Risks, AI Chat, etc.
+📊 Why This Works
+Landing = Marketing
+Onboarding = Guided Setup
+Dashboard = Hub (no more dropping users into a checklist randomly).
+Sidebar Nav = Orderly IA → dashboards → workflows → intelligence → settings.
+🛠️ Implementation To-Dos
+Move checklist.tsx content → integrate into Tasks.tsx.
+Create Sidebar.tsx layout → wrap all app routes after onboarding.
+Redirect:
+/ → Landing
+/onboarding → Wizard
+/dashboard → Authenticated app hub.
