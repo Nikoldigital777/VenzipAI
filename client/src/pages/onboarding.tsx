@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import venzipLogo from "@assets/image_1758096374686.png";
+import venzipLogo from "@assets/venzip-logo.png";
 import FrameworkCard from "@/components/framework-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -592,7 +592,7 @@ export default function Onboarding() {
                 <img 
                   src={venzipLogo} 
                   alt="Venzip Logo" 
-                  className="h-12 shadow-lg"
+                  className="h-10"
                   style={{ width: 'auto' }}
                 />
               </div>
