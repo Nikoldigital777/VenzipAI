@@ -1,0 +1,116 @@
+🎉 Step 1: Welcome Screen
+Purpose: Set expectations, tone, and make it feel premium.
+Layout:
+Header:
+Logo (top left)
+Progress bar (top right, 0% filled)
+Body (centered card):
+Title: “Welcome to VenzipAI”
+Subtitle: “Let’s set up your compliance workspace in just a few steps.”
+Graphic/Illustration: abstract security lock / compliance icon.
+CTA button (primary): “Get Started →”
+🏢 Step 2: Company Profile
+Purpose: Collect company metadata that flows into dashboards & PDF exports.
+Layout:
+Left side: Form fields in a vertical stack.
+Right side: Preview card (“This is how your company will appear in exports”).
+Fields:
+Company Name (text input, required)
+Legal Entity (text input, optional)
+Industry (dropdown: Healthcare, SaaS, Finance, Other)
+Region / Jurisdiction (dropdown: US, EU, Global, Other)
+Company Size (radio: 1–50, 51–200, 201–1000, 1000+)
+Primary Contact Name (text input)
+Primary Contact Email (email input, required)
+Primary Contact Role (dropdown: CISO, IT Manager, Compliance Lead, Other)
+Buttons:
+“Back” (secondary)
+“Next → Frameworks” (primary)
+📚 Step 3: Framework Selection
+Purpose: Choose which compliance frameworks apply.
+Layout:
+Grid of cards (FrameworkCard.tsx):
+ISO 27001 (Clauses 4–10)
+Complexity: Medium
+Estimated Time: 3–6 months
+~114 tasks generated
+HIPAA Security Rule
+Complexity: Medium–High
+Estimated Time: 3–5 months
+~50 tasks generated
+SOC 2 (Trust Services Criteria – Security only for MVP)
+Complexity: High
+Estimated Time: 4–6 months
+~80 tasks generated
+SCF (Secure Control Framework)
+Complexity: High
+Estimated Time: 6+ months
+~200 tasks generated
+Card design:
+Title (big, bold)
+Subtitle (complexity + time)
+Checklist icon when selected
+Hover glow (glassmorphic effect)
+Instruction text (top):
+“Select the frameworks you want to manage. You can add more later.”
+Buttons:
+“Back” (secondary)
+“Next → Tasks” (primary)
+✅ Step 4: Task Preview
+Purpose: Show immediate value — tasks auto-generated from frameworks.
+Layout:
+Header text: “We’ve created tasks based on your selected frameworks.”
+Table / List (use TaskCard.tsx):
+Example row:
+Title: “Clause 5.2 – Define Information Security Policy”
+Framework: ISO 27001
+Category: Policy
+Status: Not Started
+Another row:
+“164.308(a)(1) – Security Management Process”
+Framework: HIPAA
+Category: Administrative Safeguard
+Status: Not Started
+Instruction text (below table):
+“These tasks form the foundation of your compliance journey. You can track progress and upload evidence later.”
+Buttons:
+“Back” (secondary)
+“Next → AI Assistant” (primary)
+🤖 Step 5: AI Assistant Setup
+Purpose: Enable the AI guidance your client insisted on.
+Layout:
+Header text: “Meet your Compliance Assistant”
+Subtext: “Ask questions about ISO, HIPAA, SOC 2, or SCF. Get guidance on controls, evidence, and auditor expectations.”
+Toggle: [✔] Enable AI Compliance Chat & Insights (default ON).
+Example prompt box:
+Q: “What evidence should I upload for HIPAA 164.308(a)(1)?”
+A: “Policies, risk analysis reports, workforce security training logs.”
+Buttons:
+“Back” (secondary)
+“Next → Summary” (primary)
+🎯 Step 6: Summary & Finish
+Purpose: Confirm setup and transition into dashboards.
+Layout:
+Header text: “Your compliance workspace is ready.”
+Summary box:
+Company: Acme Health Inc.
+Frameworks: ISO 27001, HIPAA
+Tasks Created: 163
+Evidence Uploaded: 0 (so far)
+AI Chat: Enabled
+Graphic: dashboard preview mini-card (progress rings at 0%).
+CTA button (primary): “Go to Dashboard”
+🛠️ Implementation Notes
+Use Stepper component (progress bar at top, step X of 6).
+Persist answers in React state, only POST once on “Finish.”
+Endpoint /api/onboarding/complete:
+Save company → companies table.
+Save frameworks → frameworks_companies join table.
+Seed tasks → tasks table.
+🔐 Compliance Value at Each Step
+Company Profile → populates audit export header.
+Framework Selection → generates task library (ISO, HIPAA, SOC 2, SCF).
+Task Preview → tangible value (client sees compliance work generated).
+AI Assistant → differentiator (interactive knowledge).
+Summary → immediate dashboards → instant ROI.
+⚡ With this wording + layout, onboarding feels like a guided audit prep, not a form.
