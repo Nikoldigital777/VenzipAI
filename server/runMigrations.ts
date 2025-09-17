@@ -65,9 +65,10 @@ export async function runMigrations() {
       // Execute the migration
       await db.execute(sql.raw(migration.content));
       
-      // Record successful execution
+      // Record successful execution with conflict handling
       await db.execute(sql`
         INSERT INTO schema_migrations (migration_name) VALUES (${migration.name})
+        ON CONFLICT (migration_name) DO NOTHING
       `);
       
       console.log(`✅ Migration ${migration.name} completed successfully`);
