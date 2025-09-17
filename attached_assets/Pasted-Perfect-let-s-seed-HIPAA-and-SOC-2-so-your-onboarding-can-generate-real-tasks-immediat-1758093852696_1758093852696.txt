@@ -1,0 +1,147 @@
+Perfect ✅ — let’s seed **HIPAA** and **SOC 2** so your onboarding can generate *real tasks* immediately.
+I’ll give you **starter JSON** that matches the style of your existing `seedComplianceData.ts` for ISO/SCF.
+
+---
+
+# 📚 HIPAA Security Rule (starter seed JSON)
+
+The HIPAA Security Rule is organized around **Administrative, Physical, and Technical Safeguards**.
+Here’s a lean starter set (you can expand later).
+
+```ts
+// server/seedComplianceData.ts
+
+export const hipaaControls = [
+  {
+    id: "hipaa-164-308a1",
+    frameworkId: "hipaa",
+    clause: "164.308(a)(1)",
+    title: "Security Management Process",
+    description: "Implement policies and procedures to prevent, detect, contain, and correct security violations.",
+    category: "Administrative Safeguard",
+  },
+  {
+    id: "hipaa-164-308a5",
+    frameworkId: "hipaa",
+    clause: "164.308(a)(5)",
+    title: "Security Awareness and Training",
+    description: "Implement a security awareness and training program for all members of the workforce.",
+    category: "Administrative Safeguard",
+  },
+  {
+    id: "hipaa-164-310a1",
+    frameworkId: "hipaa",
+    clause: "164.310(a)(1)",
+    title: "Facility Access Controls",
+    description: "Implement policies and procedures to limit physical access to electronic information systems.",
+    category: "Physical Safeguard",
+  },
+  {
+    id: "hipaa-164-312a1",
+    frameworkId: "hipaa",
+    clause: "164.312(a)(1)",
+    title: "Access Control",
+    description: "Implement technical policies and procedures for electronic information systems that maintain ePHI to allow access only to authorized persons.",
+    category: "Technical Safeguard",
+  },
+  {
+    id: "hipaa-164-312b",
+    frameworkId: "hipaa",
+    clause: "164.312(b)",
+    title: "Audit Controls",
+    description: "Implement mechanisms to record and examine activity in systems that contain or use ePHI.",
+    category: "Technical Safeguard",
+  },
+];
+```
+
+---
+
+# 📚 SOC 2 – Trust Services Criteria (Security)
+
+SOC 2 is built around **CC (Common Criteria)**. For MVP, seed the **Security (CC1–CC7)**.
+
+```ts
+export const soc2Controls = [
+  {
+    id: "soc2-cc1",
+    frameworkId: "soc2",
+    clause: "CC1.1",
+    title: "Control Environment",
+    description: "The entity demonstrates a commitment to integrity and ethical values.",
+    category: "Governance",
+  },
+  {
+    id: "soc2-cc2",
+    frameworkId: "soc2",
+    clause: "CC2.1",
+    title: "Communication and Information",
+    description: "The entity obtains or generates and uses relevant, quality information to support internal control objectives.",
+    category: "Information & Communication",
+  },
+  {
+    id: "soc2-cc3",
+    frameworkId: "soc2",
+    clause: "CC3.1",
+    title: "Risk Assessment",
+    description: "The entity specifies objectives with sufficient clarity to enable the identification and assessment of risks.",
+    category: "Risk Assessment",
+  },
+  {
+    id: "soc2-cc4",
+    frameworkId: "soc2",
+    clause: "CC4.1",
+    title: "Monitoring Activities",
+    description: "The entity selects, develops, and performs ongoing evaluations to ascertain whether the components of internal control are present and functioning.",
+    category: "Monitoring",
+  },
+  {
+    id: "soc2-cc5",
+    frameworkId: "soc2",
+    clause: "CC5.1",
+    title: "Control Activities",
+    description: "The entity selects and develops control activities that contribute to the mitigation of risks.",
+    category: "Control Activities",
+  },
+];
+```
+
+---
+
+# 🛠️ Hook Into Seeding
+
+In your **`seedComplianceData.ts`**:
+
+```ts
+import { hipaaControls, soc2Controls } from "./hipaaSoc2Seeds";
+
+// When seeding frameworks
+await db.insert(frameworks).values([
+  { id: "iso27001", name: "ISO 27001", description: "ISO 27001 Clauses 4–10" },
+  { id: "scf", name: "Secure Control Framework", description: "SCF library" },
+  { id: "hipaa", name: "HIPAA Security Rule", description: "Administrative, Physical, and Technical Safeguards" },
+  { id: "soc2", name: "SOC 2 (Security)", description: "Trust Services Criteria for Security" },
+]);
+
+// Then insert controls
+await db.insert(controls).values([
+  ...isoControls,
+  ...scfControls,
+  ...hipaaControls,
+  ...soc2Controls,
+]);
+```
+
+---
+
+# ✅ Why This Helps
+
+* Task Preview step in onboarding now shows *real HIPAA & SOC 2 tasks*.
+* Framework cards can display “\~50 HIPAA controls” / “\~80 SOC 2 controls” automatically.
+* Dashboards will immediately have meaningful % complete data.
+* AI Chat can pull from these seeded clauses for contextual answers.
+
+---
+
+⚡ Next Step:
+Do you want me to also **extend your Task Preview component** so that it pulls a *random subset of 5 controls* from whichever frameworks were selected? That way users see real clause names like *“164.312(a)(1) Access Control”* in the preview, not placeholders.
