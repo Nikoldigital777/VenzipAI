@@ -240,10 +240,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     isActive={location === item.url}
                     tooltip={item.title}
                   >
-                    <a href={item.url} onClick={(e) => {
-                      e.preventDefault()
-                      navigate(item.url)
-                    }}>
+                    <a 
+                      href={item.url} 
+                      onClick={(e) => {
+                        e.preventDefault()
+                        navigate(item.url)
+                      }}
+                      data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </a>
@@ -260,6 +264,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('toggle-ai-chat'))}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105 transition-all duration-300 group"
+            data-testid="ai-chat-button"
           >
             <div className="relative">
               <Bot className="h-4 w-4 group-hover:animate-pulse" />
@@ -282,7 +287,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage
-                      src={user?.profilePicture}
+                      src={user?.profilePicture || undefined}
                       alt={user?.fullName || "User"}
                     />
                     <AvatarFallback className="rounded-lg">
@@ -310,7 +315,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
-                        src={user?.profilePicture}
+                        src={user?.profilePicture || undefined}
                         alt={user?.fullName || "User"}
                       />
                       <AvatarFallback className="rounded-lg">

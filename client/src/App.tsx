@@ -4,6 +4,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { TourProvider } from "@/components/tour/TourProvider";
+import { TourGuide } from "@/components/tour/TourGuide";
+import { TourButton } from "@/components/tour/TourButton";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import Landing from "@/pages/landing";
@@ -30,9 +33,10 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1">
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
+          <TourButton />
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           {children}
@@ -147,10 +151,13 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <TourProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+          <TourGuide />
+        </TooltipProvider>
+      </TourProvider>
     </QueryClientProvider>
   );
 }
