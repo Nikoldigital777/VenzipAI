@@ -2708,7 +2708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Find the framework
         const allFrameworks = await storage.getAllFrameworks();
         const framework = allFrameworks.find(f => f.id === frameworkId || f.name === frameworkId);
-        
+
         if (framework) {
           // Initialize framework progress
           await storage.upsertFrameworkProgress({
@@ -2754,7 +2754,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+  // Preview tasks for onboarding
+  app.post('/api/onboarding/preview-tasks', async (req, res) => {
+    try {
+      const { frameworks } = req.body;
+
+      if (!frameworks || !Array.isArray(frameworks)) {
+        return res.status(400).json({ error: 'frameworks array is required' });
+      }
+
+      const tasks: any[] = [];
+
+      for (const fwId of frameworks) {
+        // Get controls for this framework
+        const fwControls = await storage.getComplianceRequirements(fwId);
+
+        // Shuffle and take 5 random samples
+        const shuffled = fwControls.sort(() => 0.5 - Math.random());
+        const sample = shuffled.slice(0, 5);
+        tasks.push(...sample);
+      }
+
+      res.json({ tasks });
+    } catch (error) {
+      console.error('Error fetching preview tasks:', error);
+      res.status(500).json({ error: 'Failed to fetch preview tasks' });
+    }
+  });
+
+  // Chat with AI assistant
+  app.post('/api/chat', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const { message, context } = req.body;
+
+      // Save user message
+      await storage.createChatMessage(
+        insertChatMessageSchema.parse({
+          userId,
+          message,
+          messageType: 'user'
+        })
+      );
+
+      // Get user context for enhanced Claude response
+      const company = await storage.getCompanyByUserId(userId);
+      const tasks = await storage.getTasksByUserId(userId);
+      const risks = await storage.getRisksByUserId(userId);
+      const documents = await storage.getDocumentsByUserId(userId);
+
+      // Build comprehensive context for Claude
+      const userProfile = company ? {
+        frameworks: company.selectedFrameworks,
+        industry: company.industry,
+        companySize: company.size,
+        currentProgress: context?.summary?.compliancePercent || 0
+      } : undefined;
+
+      const complianceContext = {
+        totalTasks: tasks.length,
+        completedTasks: tasks.filter(t => t.status === 'completed').length,
+        highPriorityTasks: tasks.filter(t => t.priority === 'high').length,
+        openRisks: risks.filter(r => r.status === 'open').length,
+        documentsUploaded: documents.length,
+        recentGaps: context?.summary?.gaps?.slice(0, 3) || []
+      };
+
+      // Get enhanced Claude response with full context
+      const response = await chatWithClaude(message, JSON.stringify(complianceContext), userProfile);
+
+      // Save Claude response
+      const responseMessage = await storage.createChatMessage(
+        insertChatMessageSchema.parse({
+          userId,
+          message: response,
+          messageType: 'assistant'
+        })
+      );
+
+      res.json({ response: responseMessage });
+    } catch (error) {
+      console.error("Error chatting with Claude:", error);
+      res.status(500).json({ message: "Failed to get response from Claude" });
+    }
+  });
 
   return httpServer;
 }

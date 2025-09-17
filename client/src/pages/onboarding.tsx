@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
 import FrameworkCard from "@/components/framework-card";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,7 +43,13 @@ import {
   TrendingUp,
   Info,
   Calendar,
-  Sun
+  Sun,
+  FileText,
+  ArrowRight,
+  ArrowLeft,
+  Bot,
+  BarChart3,
+  CheckCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -75,19 +81,6 @@ interface AIChecklist {
     estimatedHours: number;
     description: string;
   }[];
-}
-
-// Redefining Framework interface to match edited code, while keeping original properties if needed
-interface Framework {
-  id: string;
-  name: string;
-  description: string;
-  complexity: string;
-  estimatedTime: string;
-  tasksCount: number;
-  icon: any;
-  color: string;
-  estimatedTimeMonths?: number; // Original property
 }
 
 // Merging frameworks data from original and edited code, prioritizing edited for new structure
@@ -141,6 +134,158 @@ const frameworks: Framework[] = [
   // Assuming for now that the edited list is comprehensive for the new flow.
 ];
 
+// Redefining Framework interface to match edited code, while keeping original properties if needed
+interface Framework {
+  id: string;
+  name: string;
+  description: string;
+  complexity: string;
+  estimatedTime: string;
+  tasksCount: number;
+  icon: any;
+  color: string;
+  estimatedTimeMonths?: number; // Original property
+}
+
+interface ComplianceRequirement {
+  id: string;
+  frameworkId: string;
+  requirementId: string;
+  title: string;
+  description: string;
+  category: string;
+  priority: string;
+}
+
+const TaskPreview = () => {
+    const [sampleTasks, setSampleTasks] = useState<ComplianceRequirement[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      async function fetchSampleTasks() {
+        try {
+          const res = await fetch('/api/onboarding/preview-tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ frameworks: selectedFrameworks }),
+          });
+          const data = await res.json();
+          setSampleTasks(data.tasks || []);
+        } catch (error) {
+          console.error('Failed to fetch sample tasks:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      if (selectedFrameworks.length > 0) {
+        fetchSampleTasks();
+      } else {
+        setLoading(false);
+      }
+    }, [selectedFrameworks]);
+
+    return (
+      <Card className="w-full max-w-4xl mx-auto">
+        <CardHeader className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Target className="w-8 h-8 text-white" />
+          </div>
+          <CardTitle className="text-2xl">Preview of Your Tasks</CardTitle>
+          <p className="text-gray-600">
+            We've created tasks based on your selected frameworks. Here's a sample of what you'll be working on:
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-gray-600">Loading your compliance tasks...</span>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4">
+                {sampleTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="p-4 rounded-xl border bg-white shadow-sm hover:shadow-md transition"
+                  >
+                    <h3 className="font-medium text-gray-800">
+                      {task.requirementId} — {task.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm mt-1">{task.description}</p>
+                    <div className="flex items-center gap-2 mt-3">
+                      <Badge 
+                        variant="outline" 
+                        className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 border-indigo-200"
+                      >
+                        {task.category}
+                      </Badge>
+                      <Badge 
+                        variant={task.priority === 'critical' ? 'destructive' : 
+                                task.priority === 'high' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {task.priority} priority
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border">
+                <div className="flex items-center gap-3 mb-3">
+                  <BarChart3 className="w-6 h-6 text-blue-600" />
+                  <h3 className="font-semibold text-lg">Your Complete Compliance Plan</h3>
+                </div>
+                <p className="text-gray-700 font-semibold mb-4">
+                  Total Tasks Generated: 
+                  <span className="text-indigo-600 ml-1">
+                    {selectedFrameworks.length * 20}+
+                  </span>
+                </p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Automated task generation</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Progress tracking</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Risk assessment</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">AI-powered recommendations</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentStep(currentStep - 1)}
+              className="flex-1"
+            >
+              Back
+            </Button>
+            <Button 
+              onClick={handleFinish}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              disabled={loading}
+            >
+              Complete Setup <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
 export default function Onboarding() {
   const [, navigate] = useLocation(); // Changed from setLocation to navigate for clarity
@@ -160,7 +305,7 @@ export default function Onboarding() {
     weeklyReports: true,
     reminderFrequency: 'daily'
   });
-  
+
   const [aiChecklist, setAiChecklist] = useState<AIChecklist[]>([]);
   const [isGeneratingChecklist, setIsGeneratingChecklist] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
@@ -240,12 +385,12 @@ export default function Onboarding() {
   const createCompanyMutation = useMutation({
     mutationFn: async (data: CompanyData & { preferences: UserPreferences }) => {
       console.log("Submitting company data:", data);
-      
+
       if (!data.name?.trim()) throw new Error("Company name is required");
       if (!data.contactEmail?.trim()) throw new Error("Contact email is required");
       if (!data.industry?.trim()) throw new Error("Industry selection is required");
       if (!data.size?.trim()) throw new Error("Company size is required");
-      
+
       const response = await apiRequest("POST", "/api/company", data);
       if (!response.ok) {
         const errorData = await response.json();
@@ -372,7 +517,7 @@ export default function Onboarding() {
 
     setIsGeneratingChecklist(true);
     setGenerationProgress(0);
-    
+
     const progressInterval = setInterval(() => {
       setGenerationProgress(prev => {
         if (prev >= 95) {
@@ -383,13 +528,13 @@ export default function Onboarding() {
         return Math.min(prev + increment, 95);
       });
     }, 800);
-    
+
     generateChecklistMutation.mutate();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation from original code
     if (!companyData.name.trim()) {
       toast({
@@ -640,57 +785,7 @@ export default function Onboarding() {
 
             {/* Step 4: Task Preview */}
             {currentStep === 4 && (
-              <div>
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Compliance Tasks</h2>
-                  <p className="text-lg text-gray-600">We've created tasks based on your selected frameworks.</p>
-                </div>
-
-                <Card className="glass-card mb-8">
-                  <CardHeader>
-                    <CardTitle>Generated Tasks Preview</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {getSelectedFrameworksData().slice(0, 3).map((framework, index) => (
-                        <div key={framework.id} className="border rounded-lg p-4 bg-gray-50/50">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900">
-                                {/* Displaying a placeholder task title based on framework */}
-                                {framework.id === 'iso27001' && 'Clause 5.2 – Define Information Security Policy'}
-                                {framework.id === 'hipaa' && '164.308(a)(1) – Security Management Process'}
-                                {framework.id === 'soc2' && 'CC6.1 – Logical Access Controls'}
-                                {framework.id === 'scf' && 'IAC-01 – Account Management'}
-                                {/* Fallback if framework id is not matched */}
-                                {!(framework.id === 'iso27001' || framework.id === 'hipaa' || framework.id === 'soc2' || framework.id === 'scf') && `Task for ${framework.name}`}
-                              </h4>
-                              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                                <span>Framework: {framework.name}</span>
-                                {/* Placeholder category */}
-                                <span>Category: {framework.id === 'hipaa' ? 'Administrative Safeguard' : 'Policy'}</span>
-                              </div>
-                            </div>
-                            <Badge variant="outline">Not Started</Badge>
-                          </div>
-                        </div>
-                      ))}
-
-                      {getSelectedFrameworksData().length > 3 && (
-                        <div className="text-center py-4 text-gray-500">
-                          And {getTotalTasks() - 3} more tasks...
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-6 p-4 bg-venzip-primary/10 rounded-lg border border-venzip-primary/20">
-                      <p className="text-sm text-gray-700">
-                        These tasks form the foundation of your compliance journey. You can track progress and upload evidence later.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              <TaskPreview />
             )}
 
             {/* Step 5: AI Assistant Setup */}
