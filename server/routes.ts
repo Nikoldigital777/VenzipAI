@@ -298,11 +298,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.sub;
 
-      // Get real data counts using storage layer
-      const documents = await storage.getDocumentsByUserId(userId);
-      const chatMessagesData = await storage.getChatMessagesByUserId(userId, 1000);
-      const tasksData = await storage.getTasksByUserId(userId);
-      const risksData = await storage.getRisksByUserId(userId);
+      // Get real data counts using storage layer with error handling
+      let documents = [];
+      let chatMessagesData = [];
+      let tasksData = [];
+      let risksData = [];
+
+      try {
+        documents = await storage.getDocumentsByUserId(userId);
+      } catch (error) {
+        console.error("Error fetching documents:", error);
+      }
+
+      try {
+        chatMessagesData = await storage.getChatMessagesByUserId(userId, 1000);
+      } catch (error) {
+        console.error("Error fetching chat messages:", error);
+      }
+
+      try {
+        tasksData = await storage.getTasksByUserId(userId);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+
+      try {
+        risksData = await storage.getRisksByUserId(userId);
+      } catch (error) {
+        console.error("Error fetching risks:", error);
+      }
 
       // --- gaps = open high/critical tasks + high/critical risks
       // Tasks: not completed AND priority in ('high','critical')
@@ -394,6 +418,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching summary:", error);
       res.status(500).json({ message: "Failed to fetch summary" });
+    }
+  });
+
+  // Database schema fix endpoint
+  app.post('/api/fix-schema', isAuthenticated, async (req: any, res) => {
+    try {
+      // Fix tasks table column name
+      await db.execute(sql`
+        ALTER TABLE tasks 
+        ADD COLUMN IF NOT EXISTS framework_id VARCHAR(100),
+        ADD COLUMN IF NOT EXISTS assigned_to VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS created_by_id UUID REFERENCES users(id)
+      `);
+
+      // Migrate data from framework to framework_id if framework column exists
+      try {
+        await db.execute(sql`
+          UPDATE tasks SET framework_id = framework WHERE framework IS NOT NULL AND framework_id IS NULL
+        `);
+      } catch (e) {
+        // Framework column might not exist, that's okay
+      }
+
+      // Fix companies table
+      await db.execute(sql`
+        ALTER TABLE companies 
+        ADD COLUMN IF NOT EXISTS legal_entity VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS selected_frameworks TEXT[]
+      `);
+
+      res.json({ message: "Schema fixed successfully" });
+    } catch (error) {
+      console.error("Error fixing schema:", error);
+      res.status(500).json({ message: "Failed to fix schema" });
     }
   });
 

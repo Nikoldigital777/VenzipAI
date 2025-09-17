@@ -51,7 +51,7 @@ type Summary = {
 export default function Dashboard() {
   const { data, isLoading, isError, error, refetch } = useSummary();
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <>
         <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
@@ -69,6 +69,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-xl font-medium text-gray-700">Loading your compliance dashboard...</div>
                   <div className="text-sm text-gray-500 mt-2">Analyzing your compliance data</div>
+                  <div className="text-xs text-gray-400 mt-4">Note: Database is initializing - this may take a moment</div>
                 </CardContent>
               </Card>
             </div>
