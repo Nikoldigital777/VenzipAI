@@ -5,7 +5,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS ai_enabled BOOLEAN DEFAULT TRUE;
 
 -- Create companies table
 CREATE TABLE IF NOT EXISTS companies (
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   legal_entity VARCHAR(255),
   industry VARCHAR(100),
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS companies (
 
 -- Create frameworks_companies junction table
 CREATE TABLE IF NOT EXISTS frameworks_companies (
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   framework_id VARCHAR(100) NOT NULL,
   company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
   created_at TIMESTAMP DEFAULT NOW()
