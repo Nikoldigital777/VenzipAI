@@ -17,7 +17,8 @@ import {
   BarChart3,
   Shield,
   Globe,
-  ShieldAlert
+  ShieldAlert,
+  FileText
 } from "lucide-react";
 import { motion } from "framer-motion";
 
