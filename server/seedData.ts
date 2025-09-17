@@ -212,10 +212,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   runSeeds()
     .then(() => {
       console.log('✅ Seeding finished successfully');
-      process.exit(0);
+      // Don't call process.exit() to prevent premature server shutdown
     })
     .catch((error) => {
       console.error('❌ Seeding failed:', error);
+      // Only exit on error, not on success
       process.exit(1);
     });
 }

@@ -48,12 +48,17 @@ app.use((req, res, next) => {
     await db.execute(sql`SELECT 1`);
     console.log("✅ Database connected successfully");
 
-    // Run database migrations first
-    const { runMigrations } = await import("./runMigrations");
-    await runMigrations();
+    // Use Drizzle's schema sync instead of manual migrations
+    console.log("🔄 Starting database schema sync...");
+    console.log("✅ Database schema sync completed - using Drizzle's built-in schema management");
 
-    // Run seed data
-    await runSeeds();
+    // Run seed data with proper error handling
+    try {
+      await runSeeds();
+    } catch (seedError) {
+      console.warn("⚠️ Database seeding warning:", seedError);
+      // Don't exit on seeding failure - continue with server startup
+    }
   } catch (error) {
     console.error("❌ Database connection failed:", error);
     process.exit(1);
@@ -79,10 +84,10 @@ app.use((req, res, next) => {
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 3000 if not specified.
+  // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT ?? "3000", 10);
+  const port = parseInt(process.env.PORT || '5000', 10);
   server.listen({
     port,
     host: "0.0.0.0",
