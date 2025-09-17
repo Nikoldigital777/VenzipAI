@@ -2703,6 +2703,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const companyData = insertCompanySchema.parse({ ...company, userId });
       const companyRecord = await storage.upsertCompany(companyData);
 
+      const selectedFrameworksData = [];
+      let totalTasks = 0;
+
       // Insert selected frameworks and generate initial tasks
       for (const frameworkId of frameworks) {
         // Find the framework
@@ -2710,6 +2713,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const framework = allFrameworks.find(f => f.id === frameworkId || f.name === frameworkId);
 
         if (framework) {
+          selectedFrameworksData.push({
+            id: framework.id,
+            name: framework.name,
+            displayName: framework.displayName
+          });
+
           // Initialize framework progress
           await storage.upsertFrameworkProgress({
             userId,
@@ -2721,6 +2730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Generate initial compliance tasks for each framework
           const initialTasks = getInitialTasksForFramework(framework.name, companyData.industry, companyData.size);
+          totalTasks += initialTasks.length;
 
           for (const taskData of initialTasks) {
             await storage.createTask({
@@ -2745,7 +2755,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         success: true, 
-        company: companyRecord,
+        company: {
+          id: companyRecord.id,
+          name: companyRecord.name,
+          industry: companyRecord.industry,
+          size: companyRecord.size
+        },
+        frameworks: selectedFrameworksData,
+        totalTasks,
+        aiEnabled,
         message: "Onboarding completed successfully" 
       });
     } catch (error) {

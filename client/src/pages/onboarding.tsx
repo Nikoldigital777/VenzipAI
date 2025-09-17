@@ -49,7 +49,8 @@ import {
   ArrowLeft,
   Bot,
   BarChart3,
-  CheckCircle
+  CheckCircle,
+  Lock
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -849,62 +850,130 @@ export default function Onboarding() {
 
             {/* Step 6: Summary & Finish */}
             {currentStep === 6 && (
-              <Card className="glass-card max-w-3xl mx-auto">
+              <Card className="glass-card max-w-4xl mx-auto">
                 <CardHeader className="text-center">
                   <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-                    Your compliance workspace is ready!
+                    Your workspace is ready! 🎉
                   </CardTitle>
-                  <p className="text-gray-600">Everything is set up and ready to go.</p>
+                  <p className="text-gray-600">Here's a snapshot of what we've set up for you:</p>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                  <div className="bg-gradient-to-br from-venzip-primary/10 to-venzip-accent/10 rounded-2xl p-8">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6">Setup Summary</h3>
+                  {/* Summary Details Card */}
+                  <div className="bg-white border rounded-xl shadow-sm p-6">
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <div className="text-sm text-gray-600">Company</div>
-                          <div className="font-semibold">{companyData.name || "Not specified"}</div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Company:</span>
+                          <span className="font-semibold text-gray-900">{companyData.name || "Not specified"}</span>
                         </div>
-                        <div>
-                          <div className="text-sm text-gray-600">Frameworks</div>
-                          <div className="font-semibold">
-                            {getSelectedFrameworksData().map(f => f.name).join(", ") || "None selected"}
-                          </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Industry:</span>
+                          <span className="font-semibold text-gray-900">{companyData.industry || "Not specified"}</span>
                         </div>
-                        <div>
-                          <div className="text-sm text-gray-600">Tasks Created</div>
-                          <div className="font-semibold">{getTotalTasks()}</div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Company Size:</span>
+                          <span className="font-semibold text-gray-900">{companyData.size || "Not specified"}</span>
                         </div>
                       </div>
-                      <div className="space-y-4">
-                        <div>
-                          <div className="text-sm text-gray-600">AI Chat</div>
-                          <div className="font-semibold">{aiEnabled ? "Enabled" : "Disabled"}</div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Frameworks:</span>
+                          <span className="font-semibold text-gray-900">{selectedFrameworks.length}</span>
                         </div>
-                        <div>
-                          <div className="text-sm text-gray-600">Status</div>
-                          <Badge className="bg-success-green text-white">Ready to Go</Badge>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Tasks Generated:</span>
+                          <span className="font-semibold text-venzip-primary">{getTotalTasks()}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">AI Assistant:</span>
+                          <Badge variant={aiEnabled ? "default" : "secondary"}>
+                            {aiEnabled ? "Enabled" : "Disabled"}
+                          </Badge>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50/50 rounded-2xl p-6 border-2 border-dashed border-gray-200">
-                    <div className="flex items-center justify-center gap-6">
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mb-2">
-                          <BarChart3 className="h-8 w-8 text-white" />
+                  {/* Framework Progress Preview */}
+                  <div>
+                    <h3 className="font-semibold text-lg mb-4 text-center">Framework Progress Dashboard Preview</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {getSelectedFrameworksData().map((framework) => {
+                        const Icon = framework.icon;
+                        return (
+                          <div
+                            key={framework.id}
+                            className="p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex flex-col items-center text-center hover:shadow-md transition-all duration-200"
+                          >
+                            <div className={`w-16 h-16 bg-gradient-to-br ${framework.color} rounded-2xl flex items-center justify-center mb-4`}>
+                              <Icon className="h-8 w-8 text-white" />
+                            </div>
+                            
+                            {/* Progress Ring */}
+                            <div className="relative w-20 h-20 mb-3">
+                              <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                                <path
+                                  className="stroke-gray-200"
+                                  strokeDasharray="100, 100"
+                                  strokeWidth="3"
+                                  fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                                <path
+                                  className="stroke-venzip-primary"
+                                  strokeDasharray="0, 100"
+                                  strokeWidth="3"
+                                  strokeLinecap="round"
+                                  fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                              </svg>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-lg font-bold text-gray-600">0%</span>
+                              </div>
+                            </div>
+                            
+                            <p className="text-sm font-medium text-gray-700 mb-1">{framework.name}</p>
+                            <p className="text-xs text-gray-500">{framework.tasksCount} tasks</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {selectedFrameworks.length === 0 && (
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Shield className="h-8 w-8 text-gray-400" />
                         </div>
-                        <div className="text-sm font-medium">Dashboard Preview</div>
-                        <div className="text-xs text-gray-500">0% Complete</div>
+                        <p className="text-gray-500">No frameworks selected</p>
                       </div>
-                      <div className="text-4xl text-gray-300">→</div>
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-gradient-success rounded-full flex items-center justify-center mb-2">
-                          <CheckCircle className="h-8 w-8 text-white" />
+                    )}
+                  </div>
+
+                  {/* What's Next Preview */}
+                  <div className="bg-gradient-to-r from-venzip-primary/10 to-venzip-accent/10 rounded-xl p-6">
+                    <h3 className="font-semibold text-lg mb-4 text-center">What's Waiting in Your Dashboard</h3>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                        <CheckSquare className="h-5 w-5 text-venzip-primary" />
+                        <div>
+                          <div className="text-sm font-medium">Task Management</div>
+                          <div className="text-xs text-gray-600">Track and complete compliance tasks</div>
                         </div>
-                        <div className="text-sm font-medium">Compliance Ready</div>
-                        <div className="text-xs text-gray-500">Your goal</div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                        <BarChart3 className="h-5 w-5 text-venzip-accent" />
+                        <div>
+                          <div className="text-sm font-medium">Progress Analytics</div>
+                          <div className="text-xs text-gray-600">Monitor your compliance journey</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                        <Bot className="h-5 w-5 text-venzip-secondary" />
+                        <div>
+                          <div className="text-sm font-medium">AI Assistant</div>
+                          <div className="text-xs text-gray-600">Get instant compliance guidance</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -914,7 +983,7 @@ export default function Onboarding() {
                       onClick={handleFinish}
                       className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 px-8 py-3 text-lg"
                     >
-                      Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                      Enter Your Dashboard <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </div>
                 </CardContent>
