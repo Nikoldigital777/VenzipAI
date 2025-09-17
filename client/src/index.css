@@ -118,7 +118,6 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', sans-serif;
-    padding-top: 4rem; /* Space for fixed header */
   }
 }
 

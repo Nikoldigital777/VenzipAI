@@ -77,70 +77,65 @@ function Router() {
           </Route>
 
           {/* Main app routes with sidebar */}
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-              <Route path="/dashboard">
-                <AuthenticatedLayout title="Dashboard">
-                  <Dashboard />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/dashboard">
+            <AuthenticatedLayout title="Dashboard">
+              <Dashboard />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/tasks">
-                <AuthenticatedLayout title="Tasks">
-                  <Tasks />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/tasks">
+            <AuthenticatedLayout title="Tasks">
+              <Tasks />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/evidence">
-                <AuthenticatedLayout title="Evidence">
-                  <Evidence />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/evidence">
+            <AuthenticatedLayout title="Evidence">
+              <Evidence />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/compliance-insights">
-                <AuthenticatedLayout title="Frameworks">
-                  <ComplianceInsights />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/compliance-insights">
+            <AuthenticatedLayout title="Frameworks">
+              <ComplianceInsights />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/risks">
-                <AuthenticatedLayout title="Risks">
-                  <Risks />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/risks">
+            <AuthenticatedLayout title="Risks">
+              <Risks />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/documents">
-                <AuthenticatedLayout title="Documents">
-                  <Documents />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/documents">
+            <AuthenticatedLayout title="Documents">
+              <Documents />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/audit-calendar">
-                <AuthenticatedLayout title="Audit Calendar">
-                  <AuditCalendar />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/audit-calendar">
+            <AuthenticatedLayout title="Audit Calendar">
+              <AuditCalendar />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/learning-hub">
-                <AuthenticatedLayout title="Learning Hub">
-                  <LearningHub />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/learning-hub">
+            <AuthenticatedLayout title="Learning Hub">
+              <LearningHub />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/company-profile">
-                <AuthenticatedLayout title="Company Profile">
-                  <CompanyProfile />
-                </AuthenticatedLayout>
-              </Route>
+          <Route path="/company-profile">
+            <AuthenticatedLayout title="Company Profile">
+              <CompanyProfile />
+            </AuthenticatedLayout>
+          </Route>
 
-              <Route path="/test-notifications">
-                <AuthenticatedLayout title="Test Notifications">
-                  <TestNotifications />
-                </AuthenticatedLayout>
-              </Route>
-            </SidebarInset>
-          </SidebarProvider>
+          <Route path="/test-notifications">
+            <AuthenticatedLayout title="Test Notifications">
+              <TestNotifications />
+            </AuthenticatedLayout>
+          </Route>
         </>
       )}
 
