@@ -31,9 +31,13 @@ BEGIN
       AND column_name = 'id' 
       AND data_type = 'character varying'
     ) THEN
-      -- Drop any existing foreign keys first
-      ALTER TABLE frameworks_companies DROP CONSTRAINT IF EXISTS frameworks_companies_company_id_fkey;
-      ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_company_id_fkey;
+      -- Drop foreign key constraints only if the tables exist
+      IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'frameworks_companies') THEN
+        ALTER TABLE frameworks_companies DROP CONSTRAINT IF EXISTS frameworks_companies_company_id_fkey;
+      END IF;
+      IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'tasks') THEN
+        ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_company_id_fkey;
+      END IF;
       
       -- Convert companies.id from VARCHAR to UUID
       ALTER TABLE companies ALTER COLUMN id TYPE UUID USING id::UUID;
