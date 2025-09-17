@@ -31,7 +31,7 @@ export const sessions = pgTable(
 // User storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey(),
+  id: varchar("id").primaryKey(),
   email: varchar("email", { length: 255 }).unique().notNull(),
   fullName: varchar("full_name", { length: 255 }),
   profilePicture: text("profile_picture"),
@@ -43,7 +43,7 @@ export const users = pgTable("users", {
 
 // Company profile table
 export const companies = pgTable("companies", {
-  id: uuid("id").primaryKey(),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name", { length: 255 }).notNull(),
   legalEntity: varchar("legal_entity", { length: 255 }),
   industry: varchar("industry", { length: 100 }),
@@ -52,16 +52,16 @@ export const companies = pgTable("companies", {
   contactName: varchar("contact_name", { length: 255 }),
   contactEmail: varchar("contact_email", { length: 255 }),
   contactRole: varchar("contact_role", { length: 100 }),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Frameworks linked to companies
 export const frameworksCompanies = pgTable("frameworks_companies", {
-  id: uuid("id").primaryKey(),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   frameworkId: varchar("framework_id", { length: 100 }).notNull(),
-  companyId: uuid("company_id").references(() => companies.id, { onDelete: "cascade" }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -98,7 +98,7 @@ export const taskCategoryEnum = pgEnum('task_category', ['policy', 'procedure', 
 
 // Enhanced tasks table
 export const tasks = pgTable("tasks", {
-  id: uuid("id").primaryKey(),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   category: varchar("category", { length: 100 }),
@@ -107,8 +107,8 @@ export const tasks = pgTable("tasks", {
   frameworkId: varchar("framework_id", { length: 100 }),
   dueDate: timestamp("due_date"),
   completedAt: timestamp("completed_at"),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
-  companyId: uuid("company_id").references(() => companies.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: "cascade" }),
   assignedTo: varchar("assigned_to"),
   createdById: varchar("created_by_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -202,8 +202,8 @@ export const vendorAssessments = pgTable("vendor_assessments", {
 
 // Notifications table
 export const notifications = pgTable("notifications", {
-  id: uuid("id").primaryKey(),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
   type: varchar("type", { length: 50 }).notNull(), // 'task_due', 'risk_alert', 'audit_reminder', etc.

@@ -34,7 +34,7 @@ import {
   Twitter,
   Facebook
 } from "lucide-react";
-import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
+import venzipLogo from "@assets/image_1758096374686.png";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Landing() {

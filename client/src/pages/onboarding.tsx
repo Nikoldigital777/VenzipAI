@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
+import venzipLogo from "@assets/image_1758096374686.png";
 import FrameworkCard from "@/components/framework-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -158,7 +158,14 @@ interface ComplianceRequirement {
   priority: string;
 }
 
-const TaskPreview = () => {
+interface TaskPreviewProps {
+  selectedFrameworks: string[];
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  handleFinish: () => void;
+}
+
+const TaskPreview = ({ selectedFrameworks, currentStep, setCurrentStep, handleFinish }: TaskPreviewProps) => {
     const [sampleTasks, setSampleTasks] = useState<ComplianceRequirement[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -786,7 +793,12 @@ export default function Onboarding() {
 
             {/* Step 4: Task Preview */}
             {currentStep === 4 && (
-              <TaskPreview />
+              <TaskPreview 
+                selectedFrameworks={companyData.selectedFrameworks}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                handleFinish={handleFinish}
+              />
             )}
 
             {/* Step 5: AI Assistant Setup */}

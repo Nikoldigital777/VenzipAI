@@ -1,8 +1,4 @@
 
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { migrate } from "drizzle-orm/neon-serverless/migrator";
-import { Pool } from "@neondatabase/serverless";
-
 export async function runMigrations() {
   console.log("🔄 Starting database schema sync...");
   
