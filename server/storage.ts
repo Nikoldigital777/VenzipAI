@@ -68,74 +68,75 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
-  
+  updateUser(userId: string, updates: Partial<UpsertUser>): Promise<User>;
+
   // Company operations
   getCompanyByUserId(userId: string): Promise<Company | undefined>;
   upsertCompany(company: InsertCompany): Promise<Company>;
-  
+
   // Framework operations
   getAllFrameworks(): Promise<Framework[]>;
   getFrameworksByIds(ids: string[]): Promise<Framework[]>;
-  
+
   // Framework progress operations
   getFrameworkProgressByUserId(userId: string): Promise<FrameworkProgress[]>;
   upsertFrameworkProgress(progress: InsertFrameworkProgress): Promise<FrameworkProgress>;
-  
+
   // Task operations
   getTasksByUserId(userId: string): Promise<Task[]>;
   getTasksByUserIdAndFramework(userId: string, frameworkId?: string): Promise<Task[]>;
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: string, updates: Partial<InsertTask>): Promise<Task>;
   deleteTask(id: string): Promise<void>;
-  
+
   // Task comment operations
   getTaskComments(taskId: string): Promise<TaskComment[]>;
   createTaskComment(comment: InsertTaskComment): Promise<TaskComment>;
   deleteTaskComment(id: string): Promise<void>;
-  
+
   // Task attachment operations
   getTaskAttachments(taskId: string): Promise<TaskAttachment[]>;
   createTaskAttachment(attachment: InsertTaskAttachment): Promise<TaskAttachment>;
   deleteTaskAttachment(id: string): Promise<void>;
-  
+
   // Document operations
   getDocumentsByUserId(userId: string): Promise<Document[]>;
   createDocument(document: InsertDocument): Promise<Document>;
   updateDocument(id: string, updates: Partial<InsertDocument>): Promise<Document>;
   deleteDocument(id: string): Promise<void>;
-  
+
   // Risk operations
   getRisksByUserId(userId: string): Promise<Risk[]>;
   createRisk(risk: InsertRisk): Promise<Risk>;
   updateRisk(id: string, updates: Partial<InsertRisk>): Promise<Risk>;
   deleteRisk(id: string): Promise<void>;
-  
+
   // Chat operations
   getChatMessagesByUserId(userId: string, limit?: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
-  
+
   // Vendor assessment operations
   getVendorAssessmentsByUserId(userId: string): Promise<VendorAssessment[]>;
   createVendorAssessment(vendorAssessment: InsertVendorAssessment): Promise<VendorAssessment>;
   updateVendorAssessment(id: string, updates: Partial<InsertVendorAssessment>): Promise<VendorAssessment>;
   deleteVendorAssessment(id: string): Promise<void>;
-  
+
   // Notification operations
   getNotificationsByUserId(userId: string, unreadOnly?: boolean): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(id: string): Promise<Notification>;
   deleteNotification(id: string): Promise<void>;
-  
+
   // Audit log operations
   getAuditLogsByUserId(userId: string, limit?: number): Promise<AuditLog[]>;
   createAuditLog(auditLog: InsertAuditLog): Promise<AuditLog>;
-  
+
   // Learning resource operations
   getLearningResources(params?: { frameworkId?: string; resourceType?: string; category?: string; search?: string }): Promise<LearningResource[]>;
   createLearningResource(resource: InsertLearningResource): Promise<LearningResource>;
   updateLearningResource(id: string, updates: Partial<InsertLearningResource>): Promise<LearningResource>;
   deleteLearningResource(id: string): Promise<void>;
-  
+
   // Learning progress operations
   getLearningProgress(userId: string, resourceId?: string): Promise<LearningProgress[]>;
   upsertLearningProgress(progress: InsertLearningProgress): Promise<LearningProgress>;
@@ -156,15 +157,38 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        id: userData.id,
+        email: userData.email,
+        fullName: userData.fullName,
+        profilePicture: userData.profilePicture,
+        onboardingCompleted: userData.onboardingCompleted,
+        aiEnabled: userData.aiEnabled,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          ...userData,
+          fullName: userData.fullName,
+          profilePicture: userData.profilePicture,
+          onboardingCompleted: userData.onboardingCompleted,
+          aiEnabled: userData.aiEnabled,
           updatedAt: new Date(),
-        },
+        }
       })
       .returning();
+
+    return user;
+  }
+
+  async updateUser(userId: string, updates: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+
     return user;
   }
 
@@ -356,7 +380,7 @@ export class DatabaseStorage implements IStorage {
     const conditions = frameworkId 
       ? and(eq(riskScoreHistory.userId, userId), eq(riskScoreHistory.frameworkId, frameworkId))
       : eq(riskScoreHistory.userId, userId);
-    
+
     return await db.select().from(riskScoreHistory)
       .where(conditions)
       .orderBy(desc(riskScoreHistory.createdAt));
@@ -366,12 +390,12 @@ export class DatabaseStorage implements IStorage {
     const conditions = frameworkId 
       ? and(eq(riskScoreHistory.userId, userId), eq(riskScoreHistory.frameworkId, frameworkId))
       : eq(riskScoreHistory.userId, userId);
-    
+
     const results = await db.select().from(riskScoreHistory)
       .where(conditions)
       .orderBy(desc(riskScoreHistory.createdAt))
       .limit(1);
-    
+
     return results[0] || null;
   }
 
@@ -455,7 +479,7 @@ export class DatabaseStorage implements IStorage {
     validationStatus?: string;
   }): Promise<EvidenceMapping[]> {
     const conditions = [eq(evidenceMappings.userId, params.userId)];
-    
+
     if (params.documentId) {
       conditions.push(eq(evidenceMappings.documentId, params.documentId));
     }
@@ -465,7 +489,7 @@ export class DatabaseStorage implements IStorage {
     if (params.validationStatus) {
       conditions.push(eq(evidenceMappings.validationStatus, params.validationStatus));
     }
-    
+
     return await db.select().from(evidenceMappings).where(and(...conditions));
   }
 
@@ -503,14 +527,14 @@ export class DatabaseStorage implements IStorage {
     severity?: string;
   }): Promise<EvidenceGap[]> {
     const conditions = [eq(evidenceGaps.userId, params.userId)];
-    
+
     if (params.status) {
       conditions.push(eq(evidenceGaps.status, params.status));
     }
     if (params.severity) {
       conditions.push(eq(evidenceGaps.severity, params.severity));
     }
-    
+
     return await db.select().from(evidenceGaps).where(and(...conditions));
   }
 
@@ -547,21 +571,21 @@ export class DatabaseStorage implements IStorage {
     search?: string 
   }): Promise<LearningResource[]> {
     let query = db.select().from(learningResources);
-    
+
     const conditions = [];
-    
+
     if (params?.frameworkId) {
       conditions.push(eq(learningResources.frameworkId, params.frameworkId));
     }
-    
+
     if (params?.resourceType) {
       conditions.push(eq(learningResources.resourceType, params.resourceType));
     }
-    
+
     if (params?.category) {
       conditions.push(eq(learningResources.category, params.category));
     }
-    
+
     if (params?.search) {
       conditions.push(
         or(
@@ -570,11 +594,11 @@ export class DatabaseStorage implements IStorage {
         )
       );
     }
-    
+
     if (conditions.length > 0) {
       query = query.where(and(...conditions));
     }
-    
+
     return await query.orderBy(learningResources.sortOrder, learningResources.createdAt);
   }
 
@@ -598,11 +622,11 @@ export class DatabaseStorage implements IStorage {
   // Learning progress operations
   async getLearningProgress(userId: string, resourceId?: string): Promise<LearningProgress[]> {
     const conditions = [eq(learningProgress.userId, userId)];
-    
+
     if (resourceId) {
       conditions.push(eq(learningProgress.resourceId, resourceId));
     }
-    
+
     return await db.select().from(learningProgress)
       .where(and(...conditions))
       .orderBy(desc(learningProgress.lastAccessedAt));

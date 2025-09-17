@@ -401,6 +401,23 @@ export const insertTaskAttachmentSchema = createInsertSchema(taskAttachments).om
   createdAt: true,
 });
 
+// Company relations
+export const companiesRelations = relations(companies, ({ one, many }) => ({
+  user: one(users, {
+    fields: [companies.userId],
+    references: [users.id]
+  }),
+  tasks: many(tasks),
+  frameworksCompanies: many(frameworksCompanies)
+}));
+
+export const frameworksCompaniesRelations = relations(frameworksCompanies, ({ one }) => ({
+  company: one(companies, {
+    fields: [frameworksCompanies.companyId],
+    references: [companies.id]
+  })
+}));
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -462,18 +479,6 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   company: one(companies, {
     fields: [tasks.companyId],
     references: [companies.id]
-  }),
-  framework: one(frameworks, {
-    fields: [tasks.frameworkId],
-    references: [frameworks.id]
-  }),
-  assignedTo: one(users, {
-    fields: [tasks.assignedToId],
-    references: [users.id]
-  }),
-  createdBy: one(users, {
-    fields: [tasks.createdById],
-    references: [users.id]
   }),
   // Legacy user relation for backward compatibility
   user: one(users, {

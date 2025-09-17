@@ -219,44 +219,7 @@ const upload = multer({
   }
 });
 
-// Mock database and schema objects for demonstration purposes
-// In a real application, these would be imported from your database setup
-const db = {
-  insert: (table: any) => ({
-    values: (data: any) => ({
-      returning: async (columns = ['*']) => {
-        // Mock implementation: return the inserted data
-        console.log(`Mock insert into ${table} with data:`, data);
-        return [{ ...data[0], id: `mock-${Math.random().toString(36).substr(2, 9)}` }];
-      }
-    })
-  }),
-  update: (table: any) => ({
-    set: (data: any) => ({
-      where: async (condition: any) => {
-        // Mock implementation: log the update
-        console.log(`Mock update on ${table} with data:`, data, "where:", condition);
-        return { rowsAffected: 1 };
-      }
-    })
-  }),
-  // Add other mock methods like select, delete if needed
-};
 
-const companies = { name: 'companies' } as any; // Mock table object
-const users = { name: 'users' } as any; // Mock table object
-const tasks = { name: 'tasks' } as any; // Mock table object
-const frameworksCompanies = { name: 'frameworksCompanies' } as any; // Mock table object
-
-function generateId() {
-  return Math.random().toString(36).substring(2, 15);
-}
-
-// Mock requireAuth middleware
-const requireAuth = (req: any, res: any, next: any) => {
-  req.user = { id: 'mock-user-id', name: 'Mock User' }; // Mock user object
-  next();
-};
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -2731,48 +2694,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Onboarding completion endpoint
-  app.post("/api/onboarding/complete", requireAuth, async (req, res) => {
+  app.post("/api/onboarding/complete", isAuthenticated, async (req: any, res) => {
     try {
       const { company, frameworks, aiEnabled } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user.sub;
 
       // Insert company data
-      const [companyRecord] = await db.insert(companies).values({
-        id: generateId(),
-        name: company.name,
-        legalEntity: company.legalEntity,
-        industry: company.industry,
-        region: company.region,
-        size: company.size,
-        contactName: company.contactName,
-        contactEmail: company.contactEmail,
-        contactRole: company.contactRole,
-        userId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }).returning();
+      const companyData = insertCompanySchema.parse({ ...company, userId });
+      const companyRecord = await storage.upsertCompany(companyData);
 
-      // Insert selected frameworks
+      // Insert selected frameworks and generate initial tasks
       for (const frameworkId of frameworks) {
-        await db.insert(frameworksCompanies).values({
-          id: generateId(),
-          frameworkId,
-          companyId: companyRecord.id,
-          createdAt: new Date(),
-        });
+        // Find the framework
+        const allFrameworks = await storage.getAllFrameworks();
+        const framework = allFrameworks.find(f => f.id === frameworkId || f.name === frameworkId);
+        
+        if (framework) {
+          // Initialize framework progress
+          await storage.upsertFrameworkProgress({
+            userId,
+            frameworkId: framework.id,
+            completedControls: 0,
+            totalControls: framework.totalControls,
+            progressPercentage: '0.00'
+          });
 
-        // Generate framework-specific tasks
-        await generateFrameworkTasks(frameworkId, companyRecord.id, userId);
+          // Generate initial compliance tasks for each framework
+          const initialTasks = getInitialTasksForFramework(framework.name, companyData.industry, companyData.size);
+
+          for (const taskData of initialTasks) {
+            await storage.createTask({
+              userId,
+              companyId: companyRecord.id,
+              frameworkId: framework.id,
+              title: taskData.title,
+              description: taskData.description,
+              priority: taskData.priority,
+              status: 'not_started',
+              dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
+            });
+          }
+        }
       }
 
       // Update user preferences
-      await db.update(users)
-        .set({ 
-          aiEnabled,
-          onboardingCompleted: true,
-          updatedAt: new Date()
-        })
-        .where(eq(users.id, userId));
+      await storage.updateUser(userId, {
+        aiEnabled,
+        onboardingCompleted: true,
+      });
 
       res.json({ 
         success: true, 
@@ -2785,57 +2754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Helper function to generate framework-specific tasks
-  async function generateFrameworkTasks(frameworkId: string, companyId: string, userId: string) {
-    const taskTemplates = {
-      iso27001: [
-        { title: "Clause 5.2 – Define Information Security Policy", category: "Policy", priority: "high" },
-        { title: "Clause 6.1 – Risk Assessment Process", category: "Risk Management", priority: "high" },
-        { title: "Clause 8.1 – Asset Inventory", category: "Asset Management", priority: "medium" },
-        { title: "Clause 9.1 – Access Control Policy", category: "Access Control", priority: "high" },
-        { title: "Clause 12.1 – Incident Response Plan", category: "Incident Management", priority: "medium" },
-      ],
-      hipaa: [
-        { title: "164.308(a)(1) – Security Management Process", category: "Administrative Safeguard", priority: "high" },
-        { title: "164.308(a)(3) – Workforce Training", category: "Administrative Safeguard", priority: "medium" },
-        { title: "164.312(a)(1) – Access Control", category: "Technical Safeguard", priority: "high" },
-        { title: "164.312(b) – Audit Controls", category: "Technical Safeguard", priority: "medium" },
-        { title: "164.310(a)(1) – Facility Access Controls", category: "Physical Safeguard", priority: "medium" },
-      ],
-      soc2: [
-        { title: "CC6.1 – Logical Access Controls", category: "Security", priority: "high" },
-        { title: "CC6.2 – Authentication Management", category: "Security", priority: "high" },
-        { title: "CC7.1 – System Operations", category: "Security", priority: "medium" },
-        { title: "CC8.1 – Change Management", category: "Security", priority: "medium" },
-        { title: "CC5.1 – Control Environment", category: "Security", priority: "high" },
-      ],
-      scf: [
-        { title: "IAC-01 – Account Management", category: "Identity & Access", priority: "high" },
-        { title: "SEC-01 – Security Governance", category: "Governance", priority: "high" },
-        { title: "RSK-01 – Risk Management", category: "Risk Management", priority: "high" },
-        { title: "BCR-01 – Business Continuity", category: "Business Continuity", priority: "medium" },
-        { title: "PRI-01 – Privacy Protection", category: "Privacy", priority: "medium" },
-      ],
-    };
-
-    const templates = taskTemplates[frameworkId as keyof typeof taskTemplates] || [];
-
-    for (const template of templates) {
-      await db.insert(tasks).values({
-        id: generateId(),
-        title: template.title,
-        description: `Complete ${template.title} requirements for ${frameworkId.toUpperCase()} compliance`,
-        category: template.category,
-        priority: template.priority as "low" | "medium" | "high",
-        status: "not_started",
-        framework: frameworkId,
-        userId,
-        companyId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    }
-  }
+  
 
   return httpServer;
 }
