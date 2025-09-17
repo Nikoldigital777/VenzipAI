@@ -464,16 +464,40 @@ export default function Onboarding() {
   };
 
   const handleFinish = async () => {
-    // Ensure all necessary data is present before finishing
-    // This might involve validating companyData, selectedFrameworks, and aiEnabled state
+    // Validate required data
+    if (!companyData.name || !companyData.contactEmail) {
+      toast({
+        title: "❌ Missing Information",
+        description: "Please complete your company profile before continuing.",
+        variant: "destructive",
+      });
+      setCurrentStep(2);
+      return;
+    }
+
+    if (selectedFrameworks.length === 0) {
+      toast({
+        title: "❌ No Frameworks Selected", 
+        description: "Please select at least one compliance framework.",
+        variant: "destructive",
+      });
+      setCurrentStep(3);
+      return;
+    }
+
     try {
-      const response = await fetch("/api/onboarding/complete", { // Using fetch as per edited code
+      console.log("Completing onboarding with data:", {
+        company: companyData,
+        frameworks: selectedFrameworks,
+        aiEnabled
+      });
+
+      const response = await fetch("/api/onboarding/complete", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Assuming token retrieval logic is still needed
-          Authorization: `Bearer ${localStorage.getItem("token")}`, 
         },
+        credentials: "include", // Include cookies for authentication
         body: JSON.stringify({
           company: companyData,
           frameworks: selectedFrameworks,
@@ -481,14 +505,28 @@ export default function Onboarding() {
         }),
       });
 
-      if (response.ok) {
-        navigate("/dashboard");
+      const result = await response.json();
+      console.log("Onboarding response:", result);
+
+      if (response.ok && result.success) {
+        toast({
+          title: "🎉 Setup Complete!",
+          description: `Your compliance workspace is ready with ${result.totalTasks} tasks generated.`,
+        });
+        
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ["/api/company"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        
+        // Navigate to dashboard
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
       } else {
-        // Handle API error if necessary
-        console.error("Onboarding completion API error");
+        console.error("Onboarding completion failed:", result);
         toast({
           title: "❌ Setup Failed",
-          description: "Could not complete onboarding. Please try again.",
+          description: result.details || result.error || "Could not complete onboarding. Please try again.",
           variant: "destructive",
         });
       }
@@ -496,7 +534,7 @@ export default function Onboarding() {
       console.error("Onboarding completion failed:", error);
       toast({
         title: "❌ Setup Failed",
-        description: "An error occurred. Please try again.",
+        description: "An error occurred while completing setup. Please try again.",
         variant: "destructive",
       });
     }
@@ -795,7 +833,17 @@ export default function Onboarding() {
                         className={`glass-card cursor-pointer transition-all duration-300 hover-lift ${
                           isSelected ? 'ring-2 ring-venzip-primary bg-venzip-primary/5' : ''
                         }`}
-                        onClick={() => toggleFramework(framework.id)}
+                        onClick={() => {
+                          toggleFramework(framework.id);
+                          // Also update companyData to include selectedFrameworks
+                          const newSelectedFrameworks = selectedFrameworks.includes(framework.id)
+                            ? selectedFrameworks.filter(id => id !== framework.id)
+                            : [...selectedFrameworks, framework.id];
+                          setCompanyData(prev => ({
+                            ...prev,
+                            selectedFrameworks: newSelectedFrameworks
+                          }));
+                        }}
                       >
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
@@ -827,6 +875,27 @@ export default function Onboarding() {
                     );
                   })}
                 </div>
+
+                {selectedFrameworks.length > 0 && (
+                  <div className="mt-8 p-6 bg-gradient-to-r from-venzip-primary/10 to-venzip-accent/10 rounded-xl">
+                    <div className="flex items-center gap-3 mb-4">
+                      <CheckCircle className="h-6 w-6 text-venzip-primary" />
+                      <h3 className="font-semibold text-lg">Selected Frameworks</h3>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {getSelectedFrameworksData().map(framework => (
+                        <div key={framework.id} className="flex items-center gap-2 text-sm">
+                          <div className={`w-4 h-4 bg-gradient-to-br ${framework.color} rounded`}></div>
+                          <span className="font-medium">{framework.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+                      <span>Total estimated tasks: <strong>{getTotalTasks()}</strong></span>
+                      <span>Estimated time: <strong>{Math.round(estimatedTime)} months</strong></span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

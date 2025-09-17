@@ -10,7 +10,9 @@ import {
   boolean,
   decimal,
   pgEnum,
-  uuid
+  uuid,
+  uniqueIndex,
+  unique
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -80,16 +82,23 @@ export const frameworks = pgTable("frameworks", {
 });
 
 // User framework progress table
-export const frameworkProgress = pgTable("framework_progress", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  frameworkId: varchar("framework_id").notNull().references(() => frameworks.id),
-  completedControls: integer("completed_controls").notNull().default(0),
-  totalControls: integer("total_controls").notNull(),
-  progressPercentage: decimal("progress_percentage", { precision: 5, scale: 2 }).notNull().default('0.00'),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+export const frameworkProgress = pgTable(
+  "framework_progress",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").notNull().references(() => users.id),
+    frameworkId: uuid("framework_id").notNull().references(() => frameworks.id),
+    completedControls: integer("completed_controls").default(0),
+    totalControls: integer("total_controls").default(0),
+    progressPercentage: decimal("progress_percentage", { precision: 5, scale: 2 }).default("0.00"),
+    lastUpdated: timestamp("last_updated").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    userFrameworkUnique: unique("user_framework_unique").on(table.userId, table.frameworkId),
+  })
+);
 
 // Task enums
 export const taskPriorityEnum = pgEnum('task_priority', ['low', 'medium', 'high', 'critical']);

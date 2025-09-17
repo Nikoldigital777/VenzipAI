@@ -2808,59 +2808,105 @@ export async function registerRoutes(app: Express) {
       const { company, frameworks, aiEnabled } = req.body;
       const userId = req.user.sub;
 
-      // Insert company data
-      const companyData = insertCompanySchema.parse({ ...company, userId });
+      console.log("Starting onboarding completion for user:", userId);
+      console.log("Company data:", company);
+      console.log("Selected frameworks:", frameworks);
+
+      // Validate required data
+      if (!company || !company.name || !company.contactEmail) {
+        return res.status(400).json({ error: "Company name and contact email are required" });
+      }
+
+      if (!frameworks || !Array.isArray(frameworks) || frameworks.length === 0) {
+        return res.status(400).json({ error: "At least one framework must be selected" });
+      }
+
+      // Insert company data with selected frameworks
+      const companyData = insertCompanySchema.parse({ 
+        ...company, 
+        userId,
+        selectedFrameworks: frameworks
+      });
       const companyRecord = await storage.upsertCompany(companyData);
+      console.log("Company record created/updated:", companyRecord.id);
 
       const selectedFrameworksData = [];
       let totalTasks = 0;
 
+      // Get all available frameworks first
+      const allFrameworks = await storage.getAllFrameworks();
+      console.log("Available frameworks:", allFrameworks.map(f => ({ id: f.id, name: f.name })));
+
       // Insert selected frameworks and generate initial tasks
       for (const frameworkId of frameworks) {
-        // Find the framework
-        const allFrameworks = await storage.getAllFrameworks();
+        // Find the framework by id or name
         const framework = allFrameworks.find(f => f.id === frameworkId || f.name === frameworkId);
 
         if (framework) {
+          console.log("Processing framework:", framework.name);
+          
           selectedFrameworksData.push({
             id: framework.id,
             name: framework.name,
             displayName: framework.displayName
           });
 
-          // Initialize framework progress
-          await storage.upsertFrameworkProgress({
-            userId,
-            frameworkId: framework.id,
-            completedControls: 0,
-            totalControls: framework.totalControls,
-            progressPercentage: '0.00'
-          });
+          try {
+            // Initialize framework progress with error handling
+            await storage.upsertFrameworkProgress({
+              userId,
+              frameworkId: framework.id,
+              completedControls: 0,
+              totalControls: framework.totalControls || 0,
+              progressPercentage: '0.00'
+            });
+            console.log("Framework progress initialized for:", framework.name);
+          } catch (progressError) {
+            console.error("Error initializing framework progress:", progressError);
+            // Continue with other frameworks if one fails
+          }
 
           // Generate initial compliance tasks for each framework
           const initialTasks = getInitialTasksForFramework(framework.name, companyData.industry, companyData.size);
           totalTasks += initialTasks.length;
+          console.log(`Generated ${initialTasks.length} tasks for ${framework.name}`);
 
           for (const taskData of initialTasks) {
-            await storage.createTask({
-              userId,
-              companyId: companyRecord.id,
-              frameworkId: framework.id,
-              title: taskData.title,
-              description: taskData.description,
-              priority: taskData.priority,
-              status: 'not_started',
-              dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
-            });
+            try {
+              await storage.createTask({
+                userId,
+                frameworkId: framework.id,
+                title: taskData.title,
+                description: taskData.description,
+                priority: taskData.priority,
+                status: 'not_started',
+                assignedTo: null,
+                dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
+                createdById: userId
+              });
+            } catch (taskError) {
+              console.error("Error creating task:", taskError);
+              // Continue with other tasks if one fails
+            }
           }
+        } else {
+          console.warn("Framework not found:", frameworkId);
         }
       }
 
       // Update user preferences
-      await storage.updateUser(userId, {
-        aiEnabled,
-        onboardingCompleted: true,
-      });
+      try {
+        await storage.updateUser(userId, {
+          aiEnabled: aiEnabled !== undefined ? aiEnabled : true,
+          onboardingCompleted: true,
+        });
+        console.log("User preferences updated");
+      } catch (userError) {
+        console.error("Error updating user:", userError);
+        // Don't fail the entire process if user update fails
+      }
+
+      console.log("Onboarding completed successfully");
 
       res.json({ 
         success: true, 
@@ -2872,12 +2918,15 @@ export async function registerRoutes(app: Express) {
         },
         frameworks: selectedFrameworksData,
         totalTasks,
-        aiEnabled,
+        aiEnabled: aiEnabled !== undefined ? aiEnabled : true,
         message: "Onboarding completed successfully" 
       });
     } catch (error) {
       console.error("Error completing onboarding:", error);
-      res.status(500).json({ error: "Failed to complete onboarding" });
+      res.status(500).json({ 
+        error: "Failed to complete onboarding",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
