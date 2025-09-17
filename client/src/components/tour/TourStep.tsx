@@ -46,10 +46,9 @@ export function TourStep({
   // Handle navigation if specified
   useEffect(() => {
     if (navigateTo) {
-      // Import navigate from wouter (correct import path)
-      import('wouter').then(({ navigate }) => {
-        navigate(navigateTo);
-      });
+      // Use navigate from wouter - navigate function doesn't exist in wouter
+      // We'll handle navigation through the tour provider instead
+      console.log(`Tour step requesting navigation to: ${navigateTo}`);
     }
     
     // Execute before step callback
