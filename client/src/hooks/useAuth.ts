@@ -3,7 +3,7 @@ import type { User } from "@shared/schema";
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  
+
   const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     retry: false,
@@ -20,7 +20,7 @@ export function useAuth() {
       // Clear auth cache first
       queryClient.setQueryData(["/api/auth/user"], null);
       queryClient.clear();
-      
+
       // Redirect to logout endpoint (this will handle server-side logout and redirect)
       window.location.href = "/api/logout";
     } catch (error) {

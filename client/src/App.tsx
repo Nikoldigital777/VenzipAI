@@ -49,7 +49,7 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
 }
 
 function Router() {
-  const { isAuthenticated, isLoading, error } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [location, navigate] = useLocation();
 
   // Show loading state only briefly while checking authentication
@@ -64,12 +64,10 @@ function Router() {
     );
   }
 
-  // If there's an auth error or user is not authenticated, redirect to landing
-  if (error || !isAuthenticated) {
-    if (location !== '/landing' && location !== '/') {
-      navigate('/landing');
-      return null;
-    }
+  // Handle unauthenticated users - only redirect if not already on landing/home pages
+  if (!isAuthenticated && !['/landing', '/'].includes(location)) {
+    navigate('/landing');
+    return null;
   }
 
   return (
