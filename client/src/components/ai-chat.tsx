@@ -140,7 +140,7 @@ export default function AIChat() {
     { threshold: 10, icon: Brain, text: "AI enthusiast!", unlocked: messageCount >= 10 }
   ];
 
-  // Listen for global toggle events from navbar
+  // Listen for global toggle events from navbar and sidebar
   useEffect(() => {
     const open = () => setIsOpen(true);
     const toggle = () => setIsOpen(prev => !prev);

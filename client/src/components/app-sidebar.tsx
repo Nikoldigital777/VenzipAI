@@ -106,11 +106,6 @@ const data = {
           icon: Calendar,
         },
         {
-          title: "AI Chat",
-          url: "/ai-chat",
-          icon: Bot,
-        },
-        {
           title: "Learning Hub",
           url: "/learning-hub",
           icon: Target,
@@ -260,6 +255,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
+        {/* AI Chat Button */}
+        <div className="px-2 pb-2">
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('toggle-ai-chat'))}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105 transition-all duration-300 group"
+          >
+            <div className="relative">
+              <Bot className="h-4 w-4 group-hover:animate-pulse" />
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+            <span className="font-medium text-sm">Ask Claude</span>
+            <div className="ml-auto">
+              <div className="w-2 h-2 bg-white/30 rounded-full animate-ping"></div>
+            </div>
+          </button>
+        </div>
+        
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>

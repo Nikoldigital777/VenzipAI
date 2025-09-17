@@ -3,6 +3,7 @@ import { useSummary } from "@/hooks/useSummary";
 import ProgressRing from "@/components/progress-ring";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AIChat from "@/components/ai-chat";
+import { ReportGenerator } from "@/components/reports/ReportGenerator";
 import { 
   Upload, 
   MessageSquare, 
@@ -483,6 +484,24 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Reports Section */}
+          <Card className="lg:col-span-3 glass-card animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-gray-900">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <div className="text-lg font-semibold">Report Generation</div>
+                  <div className="text-sm text-gray-500 font-normal">Export compliance reports and analytics</div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ReportGenerator />
+            </CardContent>
+          </Card>
         </div>
       </div>
       <AIChat />
