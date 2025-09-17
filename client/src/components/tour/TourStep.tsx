@@ -13,6 +13,10 @@ interface TourStepProps {
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'center';
   showSkip?: boolean;
   offset?: number;
+  navigateTo?: string;
+  fallbackTarget?: string;
+  onBeforeStep?: () => void;
+  onAfterStep?: () => void;
 }
 
 interface Position {
@@ -28,18 +32,47 @@ export function TourStep({
   content, 
   placement = 'bottom', 
   showSkip = true,
-  offset = 10 
+  offset = 10,
+  navigateTo,
+  fallbackTarget,
+  onBeforeStep,
+  onAfterStep
 }: TourStepProps) {
   const { state, nextStep, previousStep, skipTour, endTour } = useTour();
   const [targetPosition, setTargetPosition] = useState<Position | null>(null);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
   const popoverRef = useRef<HTMLDivElement>(null);
 
+  // Handle navigation if specified
+  useEffect(() => {
+    if (navigateTo) {
+      // Import navigate from wouter (correct import path)
+      import('wouter').then(({ navigate }) => {
+        navigate(navigateTo);
+      });
+    }
+    
+    // Execute before step callback
+    onBeforeStep?.();
+    
+    return () => {
+      // Execute after step callback on cleanup
+      onAfterStep?.();
+    };
+  }, [navigateTo, onBeforeStep, onAfterStep]);
+
   // Calculate target element position and highlight
   useEffect(() => {
-    const targetElement = document.querySelector(target) as HTMLElement;
+    let targetElement = document.querySelector(target) as HTMLElement;
+    
+    // Try fallback target if primary target not found
+    if (!targetElement && fallbackTarget) {
+      targetElement = document.querySelector(fallbackTarget) as HTMLElement;
+      console.log(`Primary target ${target} not found, using fallback: ${fallbackTarget}`);
+    }
+    
     if (!targetElement) {
-      console.warn(`Tour target not found: ${target}`);
+      console.warn(`Tour target not found: ${target}${fallbackTarget ? ` (fallback: ${fallbackTarget})` : ''}`);
       // Auto-advance tour after a timeout if target is missing
       const timeout = setTimeout(() => {
         console.log(`Auto-advancing tour due to missing target: ${target}`);

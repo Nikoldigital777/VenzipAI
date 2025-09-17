@@ -10,6 +10,12 @@ export interface TourStep {
   disableBeacon?: boolean;
   showSkip?: boolean;
   offset?: number;
+  // Enhanced tour functionality
+  navigateTo?: string;
+  fallbackTarget?: string;
+  skipCondition?: () => boolean;
+  onBeforeStep?: () => void;
+  onAfterStep?: () => void;
 }
 
 export interface TourState {

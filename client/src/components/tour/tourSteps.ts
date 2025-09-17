@@ -4,128 +4,237 @@ export const mainTourSteps: TourStep[] = [
   // Welcome & Orientation (Steps 1-3)
   {
     target: 'body',
-    title: 'Welcome to Venzip!',
-    content: 'Welcome to your AI-powered compliance platform! This quick tour will show you the key features that will help you manage your compliance requirements effortlessly.',
+    title: '🚀 Welcome to Venzip!',
+    content: 'Welcome to your AI-powered compliance platform! This comprehensive tour will guide you through all the key features that will transform how you manage compliance requirements. Let\'s get started!',
     placement: 'center',
     showSkip: true,
   },
   {
     target: '[data-sidebar]',
-    title: 'Navigation Sidebar',
-    content: 'This is your navigation hub. Here you can access all the main sections: Dashboard, Tasks, Evidence, Risks, and more. You can also see your framework completion progress.',
+    title: '🧭 Your Navigation Hub',
+    content: 'This sidebar is your command center. You can access all main sections, track framework progress, and see completion percentages at a glance. Notice how each section is organized for optimal workflow.',
     placement: 'right',
   },
   {
     target: '[data-testid="nav-dashboard"]',
-    title: 'Dashboard Overview',
-    content: 'Your compliance command center! The Dashboard shows your overall compliance status, risk scores, recent activities, and AI-driven insights.',
+    title: '📊 Dashboard - Your Control Center',
+    content: 'Let\'s start with the Dashboard - your compliance command center. Click here to see your overall status, risk scores, and AI-driven insights. This is where you\'ll monitor your compliance health.',
     placement: 'right',
+    navigateTo: '/dashboard',
   },
   
-  // Core Workflows (Steps 4-12)
+  // Dashboard Deep Dive (Step 4)
+  {
+    target: '[data-testid="compliance-overview-card"]',
+    title: '📈 Compliance Overview',
+    content: 'Here you can see your overall compliance status across all frameworks. The visual indicators show your progress and highlight areas that need attention. This real-time view helps you prioritize your work.',
+    placement: 'bottom',
+    fallbackTarget: '.dashboard-content',
+  },
+  
+  // Task Management (Steps 5-6)
   {
     target: '[data-testid="nav-tasks"]',
-    title: 'Task Management',
-    content: 'Manage all your compliance tasks here. Create, assign, and track progress on tasks across different frameworks like ISO 27001, SOC 2, HIPAA, and GDPR.',
+    title: '✅ Task Management',
+    content: 'Now let\'s explore task management. This is where you\'ll create, assign, and track all your compliance tasks across different frameworks. Click to navigate to the tasks section.',
     placement: 'right',
+    navigateTo: '/tasks',
   },
   {
-    target: '[data-testid="nav-evidence"]',
-    title: 'Evidence Upload',
-    content: 'Upload and manage your compliance documents here. Our AI will automatically analyze and map your documents to the relevant compliance requirements.',
-    placement: 'right',
-  },
-  {
-    target: '[data-testid="nav-frameworks"]',
-    title: 'Compliance Frameworks',
-    content: 'View detailed analytics for each compliance framework. See your progress, identify gaps, and get AI-powered recommendations for improvement.',
-    placement: 'right',
-  },
-  {
-    target: '[data-testid="nav-risks"]',
-    title: 'Risk Management',
-    content: 'Monitor and manage compliance risks with our AI-driven risk scoring system. Track mitigation progress and get early warnings about potential issues.',
-    placement: 'right',
+    target: '[data-testid="create-task-button"]',
+    title: '➕ Creating Tasks',
+    content: 'Use this button to create new compliance tasks. You can assign tasks to team members, set deadlines, link them to specific frameworks, and track progress. Tasks are the building blocks of your compliance program.',
+    placement: 'bottom',
+    fallbackTarget: '.tasks-header',
   },
   
-  // Advanced Features (Steps 8-12)
+  // Evidence Management (Steps 7-8)
   {
-    target: '[data-testid="ai-chat-button"]',
-    title: 'AI Assistant (Claude)',
-    content: 'Meet your compliance expert! Click here anytime to chat with Claude, our AI assistant who can answer questions, analyze documents, and provide tailored guidance.',
-    placement: 'top',
+    target: '[data-testid="nav-evidence"]',
+    title: '📁 Evidence Management',
+    content: 'Evidence management is crucial for compliance. This section handles all your compliance documents. Our AI will analyze and automatically map documents to relevant requirements.',
+    placement: 'right',
+    navigateTo: '/evidence',
   },
   {
-    target: '[data-testid="nav-audit-calendar"]',
-    title: 'Audit Calendar',
-    content: 'Stay on top of important deadlines and schedule your compliance activities. Plan audits, track certification renewals, and never miss a deadline.',
+    target: '[data-testid="file-upload-area"]',
+    title: '🤖 AI-Powered Document Analysis',
+    content: 'Upload documents here and watch our AI work! It automatically analyzes content, identifies compliance mappings, suggests improvements, and tracks document completeness. This saves hours of manual work.',
+    placement: 'top',
+    fallbackTarget: '.evidence-upload-section',
+  },
+  
+  // Risk Management (Steps 9-10)
+  {
+    target: '[data-testid="nav-risks"]',
+    title: '⚠️ Risk Management',
+    content: 'Risk management is key to proactive compliance. Here you\'ll monitor compliance risks with our AI-driven scoring system and track mitigation progress.',
     placement: 'right',
+    navigateTo: '/risks',
+  },
+  {
+    target: '[data-testid="risk-dashboard"]',
+    title: '🎯 Risk Scoring & Monitoring',
+    content: 'Our AI continuously evaluates your compliance risks, considering factors like overdue tasks, missing evidence, and regulatory changes. This dashboard helps you focus on the highest-priority issues first.',
+    placement: 'bottom',
+    fallbackTarget: '.risk-overview',
+  },
+  
+  // Compliance Frameworks (Steps 11-12)
+  {
+    target: '[data-testid="nav-frameworks"]',
+    title: '🛡️ Compliance Frameworks',
+    content: 'This is where you\'ll find detailed analytics for each compliance framework. View progress, identify gaps, and get AI-powered recommendations for improvement.',
+    placement: 'right',
+    navigateTo: '/compliance-insights',
+  },
+  {
+    target: '[data-testid="framework-analytics"]',
+    title: '📊 Framework Analytics & Gap Analysis',
+    content: 'Get deep insights into your compliance posture. See completion percentages, identify gaps, track trends over time, and receive AI recommendations tailored to each framework\'s requirements.',
+    placement: 'bottom',
+    fallbackTarget: '.frameworks-overview',
+  },
+  
+  // AI Assistant (Step 13)
+  {
+    target: '[data-testid="ai-chat-button"]',
+    title: '🤖 Meet Claude - Your AI Compliance Expert',
+    content: 'This is Claude, your AI assistant! Claude can answer compliance questions, analyze documents, provide regulatory guidance, and help with policy writing. Think of Claude as your 24/7 compliance consultant.',
+    placement: 'top',
+  },
+  
+  // Advanced Features (Steps 14-16)
+  {
+    target: '[data-testid="nav-audit-calendar"]',
+    title: '📅 Audit Calendar',
+    content: 'Stay ahead of deadlines with the audit calendar. Schedule compliance activities, track certification renewals, plan audits, and never miss important dates.',
+    placement: 'right',
+    navigateTo: '/audit-calendar',
   },
   {
     target: '[data-testid="nav-learning-hub"]',
-    title: 'Learning Hub',
-    content: 'Expand your compliance knowledge with curated resources, best practices, and training materials tailored to your industry and frameworks.',
+    title: '📚 Learning Hub',
+    content: 'Expand your compliance knowledge with curated resources, best practices, training materials, and industry-specific guidance. Continuous learning is key to staying compliant.',
     placement: 'right',
+    navigateTo: '/learning-hub',
   },
   {
     target: '[data-testid="nav-company-profile"]',
-    title: 'Company Settings',
-    content: 'Configure your company profile, manage team members, and customize your compliance preferences and notification settings.',
+    title: '⚙️ Company Settings',
+    content: 'Configure your company profile, manage team members, set up integrations, and customize compliance preferences. This is where you tailor Venzip to your organization\'s needs.',
     placement: 'right',
+    navigateTo: '/company-profile',
   },
   
-  // Tour Completion
+  // Tour Completion (Step 17)
   {
     target: 'body',
-    title: 'You\'re All Set!',
-    content: 'Congratulations! You now know the key features of Venzip. Start by uploading your first document or creating a task. Remember, Claude is always here to help if you have questions!',
+    title: '🎉 You\'re Ready to Achieve Compliance Excellence!',
+    content: 'Congratulations! You\'ve mastered Venzip\'s key features. Start by uploading your first document, creating a task, or asking Claude a question. Your journey to streamlined compliance begins now!',
     placement: 'center',
     showSkip: false,
   },
 ];
 
-// Feature-specific mini-tours
+// Feature-specific mini-tours for contextual help
 export const evidenceUploadTour: TourStep[] = [
   {
     target: '[data-testid="file-upload-area"]',
-    title: 'Upload Your Documents',
-    content: 'Drag and drop your compliance documents here, or click to browse. We support PDFs, Word docs, Excel files, and images.',
+    title: '📄 Upload Your Documents',
+    content: 'Drag and drop compliance documents here, or click to browse. Supported formats: PDFs, Word docs, Excel files, images. Our AI will analyze each document automatically.',
     placement: 'bottom',
   },
   {
     target: '[data-testid="evidence-mapping-results"]',
-    title: 'AI Analysis Results',
-    content: 'After upload, our AI analyzes your document and maps it to relevant compliance requirements. Review the suggestions and confirm the mappings.',
+    title: '🤖 AI Analysis Magic',
+    content: 'Watch as our AI analyzes your document content, identifies compliance mappings, suggests gap remediation, and provides completeness scores. Review and confirm the AI suggestions.',
     placement: 'top',
+  },
+  {
+    target: '[data-testid="evidence-suggestions"]',
+    title: '💡 Smart Recommendations',
+    content: 'Based on the analysis, see AI-generated suggestions for missing evidence, policy improvements, and compliance enhancements tailored to your frameworks.',
+    placement: 'bottom',
+    fallbackTarget: '.evidence-results',
   },
 ];
 
 export const taskCreationTour: TourStep[] = [
   {
     target: '[data-testid="create-task-button"]',
-    title: 'Create New Task',
-    content: 'Click here to create a new compliance task. You can assign it to team members, set deadlines, and link it to specific framework requirements.',
+    title: '➕ Create Smart Tasks',
+    content: 'Create compliance tasks with AI assistance. Tasks automatically inherit framework requirements, get priority scoring, and include completion criteria.',
     placement: 'bottom',
   },
   {
     target: '[data-testid="task-form-framework"]',
-    title: 'Select Framework',
-    content: 'Choose which compliance framework this task relates to. This helps with tracking progress and generating framework-specific reports.',
+    title: '🎯 Framework Integration',
+    content: 'Select frameworks to automatically populate relevant controls, requirements, and best practices. This ensures your tasks align with compliance standards.',
     placement: 'right',
+  },
+  {
+    target: '[data-testid="task-ai-suggestions"]',
+    title: '🤖 AI Task Enhancement',
+    content: 'Get AI-powered suggestions for task descriptions, success criteria, timeline estimates, and resource requirements based on industry best practices.',
+    placement: 'left',
+    fallbackTarget: '.task-form',
   },
 ];
 
 export const aiChatTour: TourStep[] = [
   {
     target: '[data-testid="ai-chat-interface"]',
-    title: 'Claude AI Assistant',
-    content: 'Ask Claude anything about compliance! From specific regulatory questions to document analysis, Claude provides expert guidance tailored to your needs.',
+    title: '🤖 Claude - Your Compliance Expert',
+    content: 'Claude understands your company profile, current compliance status, and industry requirements. Get personalized, contextual guidance for any compliance question.',
     placement: 'left',
   },
   {
     target: '[data-testid="chat-input"]',
-    title: 'Ask Your Questions',
-    content: 'Type your compliance questions here. Claude can help with everything from policy writing to audit preparation and risk assessment.',
+    title: '💬 Ask Anything Compliance',
+    content: 'Ask about specific regulations, policy writing, audit preparation, risk assessment, or document analysis. Claude adapts responses to your industry and frameworks.',
     placement: 'top',
+  },
+  {
+    target: '[data-testid="chat-suggestions"]',
+    title: '💡 Smart Prompts',
+    content: 'Use suggested prompts or ask custom questions. Claude can analyze your uploaded documents, recommend improvements, and provide implementation guidance.',
+    placement: 'bottom',
+    fallbackTarget: '.chat-container',
+  },
+];
+
+// Quick tours for specific workflows
+export const dashboardTour: TourStep[] = [
+  {
+    target: '[data-testid="compliance-score"]',
+    title: '📊 Your Compliance Score',
+    content: 'This AI-calculated score reflects your overall compliance posture across all frameworks. It considers task completion, evidence quality, and risk factors.',
+    placement: 'bottom',
+    fallbackTarget: '.dashboard-overview',
+  },
+  {
+    target: '[data-testid="risk-trending"]',
+    title: '📈 Risk Trends',
+    content: 'Monitor how your risk profile changes over time. Spot patterns, identify emerging issues, and track the effectiveness of your mitigation efforts.',
+    placement: 'top',
+    fallbackTarget: '.risk-trends',
+  },
+];
+
+export const riskAssessmentTour: TourStep[] = [
+  {
+    target: '[data-testid="risk-matrix"]',
+    title: '🎯 Interactive Risk Matrix',
+    content: 'Visualize risks by impact and likelihood. Click on any cell to see specific risks and their mitigation strategies. The AI continuously updates risk scores.',
+    placement: 'bottom',
+    fallbackTarget: '.risk-matrix',
+  },
+  {
+    target: '[data-testid="risk-recommendations"]',
+    title: '🔍 AI Risk Insights',
+    content: 'Get intelligent recommendations for risk mitigation, including specific actions, timelines, and resource requirements based on your industry and frameworks.',
+    placement: 'top',
+    fallbackTarget: '.risk-recommendations',
   },
 ];
