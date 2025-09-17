@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Navigation from "@/components/navigation";
 import AIChat from "@/components/ai-chat";
 import { 
   Calendar as CalendarIcon, 
@@ -105,7 +104,7 @@ export default function AuditCalendar() {
   const upcomingMilestones = useMemo(() => {
     const today = new Date();
     const thirtyDaysFromNow = addDays(today, 30);
-    
+
     return filteredTasks
       .filter(task => {
         if (!task.dueDate) return false;
@@ -120,16 +119,16 @@ export default function AuditCalendar() {
     const start = startOfMonth(selectedDate);
     const end = endOfMonth(selectedDate);
     const days = eachDayOfInterval({ start, end });
-    
+
     return days.map(day => {
       const dayTasks = filteredTasks.filter(task => 
         task.dueDate && isSameDay(new Date(task.dueDate), day)
       );
-      
+
       const priorities = dayTasks.map(t => t.priority);
       const hasHigh = priorities.includes("critical") || priorities.includes("high");
       const hasMedium = priorities.includes("medium");
-      
+
       return {
         date: day,
         taskCount: dayTasks.length,
@@ -165,7 +164,7 @@ export default function AuditCalendar() {
   if (isLoading) {
     return (
       <>
-        <Navigation />
+        
         <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
             <Card className="glass-card">
@@ -187,7 +186,7 @@ export default function AuditCalendar() {
   if (tasksError) {
     return (
       <>
-        <Navigation />
+        
         <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-danger-coral/5 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
             <Card className="glass-card border-danger-coral/20">
@@ -216,13 +215,13 @@ export default function AuditCalendar() {
 
   return (
     <>
-      <Navigation />
+      
       <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
         <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
-        
+
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           {/* Header Section */}
           <div className="mb-12 text-center animate-fadeInUp">
@@ -340,7 +339,7 @@ export default function AuditCalendar() {
                       }}
                       data-testid="audit-calendar"
                     />
-                    
+
                     {/* Calendar Legend */}
                     <div className="flex flex-wrap gap-4 text-xs">
                       <div className="flex items-center gap-2">
@@ -365,7 +364,7 @@ export default function AuditCalendar() {
                       upcomingMilestones.map((task, index) => {
                         const framework = getFrameworkById(task.frameworkId || "");
                         const daysUntilDue = Math.ceil((new Date(task.dueDate!).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                        
+
                         return (
                           <Card key={task.id} className="glass-card border-0 shadow-sm hover-lift animate-fadeInUp" style={{animationDelay: `${index * 0.1}s`}}>
                             <CardContent className="p-4">
@@ -446,7 +445,7 @@ export default function AuditCalendar() {
                   ) : (
                     tasksForSelectedDate.map((task, index) => {
                       const framework = getFrameworkById(task.frameworkId || "");
-                      
+
                       return (
                         <Card key={task.id} className="glass-card border-0 shadow-sm hover-lift animate-fadeInUp" style={{animationDelay: `${index * 0.1}s`}}>
                           <CardContent className="p-4">
@@ -459,11 +458,11 @@ export default function AuditCalendar() {
                                 {task.priority}
                               </Badge>
                             </div>
-                            
+
                             {task.description && (
                               <div className="text-xs text-gray-600 mb-2">{task.description}</div>
                             )}
-                            
+
                             <div className="flex flex-wrap gap-2 text-xs">
                               {framework && (
                                 <span className="bg-blue-50 text-blue-600 px-2 py-1 rounded">

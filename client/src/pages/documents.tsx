@@ -1,14 +1,12 @@
 // client/src/pages/documents.tsx
 import FileUpload from "@/components/file-upload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Navigation from "@/components/navigation";
 import AIChat from "@/components/ai-chat";
 import { FileText, Upload } from "lucide-react";
 
 export default function Documents() {
   return (
     <>
-      <Navigation />
       <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
         <div className="max-w-5xl mx-auto px-4 py-12 grid gap-6">
           <FileUpload />

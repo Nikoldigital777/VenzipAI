@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import Navigation from "@/components/navigation";
 import AIChat from "@/components/ai-chat";
 import DynamicRiskDashboard from "@/components/dynamic-risk-dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,7 +51,7 @@ const FRAMEWORKS = ["soc2", "iso27001", "hipaa", "gdpr"];
 export default function RisksPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'risks' | 'dashboard'>('risks');
-  
+
   // filters
   const [q, setQ] = useState("");
   const [category, setCategory] = useState<string | undefined>();
@@ -274,14 +273,13 @@ export default function RisksPage() {
 
   return (
     <>
-      <Navigation />
       <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
         <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-danger-coral/10 to-transparent rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-warning-orange/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-br from-venzip-primary/8 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '1.5s'}}></div>
-        
+
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           {/* Enhanced Header Section */}
           <div className="mb-12 text-center animate-fadeInUp">
@@ -292,7 +290,7 @@ export default function RisksPage() {
               Identify, assess, and mitigate compliance risks with AI-powered insights
             </p>
           </div>
-          
+
           {/* Enhanced Tab Navigation */}
           <div className="flex justify-center mb-8 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
             <div className="flex space-x-2 glass-card p-2 rounded-2xl border-0 shadow-xl">
@@ -345,7 +343,7 @@ export default function RisksPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="glass-card hover-lift group relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.4s'}} data-testid="summary-medium-risk">
               <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="p-8 relative z-10">
@@ -361,7 +359,7 @@ export default function RisksPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="glass-card hover-lift group relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.5s'}} data-testid="summary-low-risk">
               <div className="absolute inset-0 bg-gradient-to-br from-success-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="p-8 relative z-10">

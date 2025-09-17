@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import Navigation from "@/components/navigation";
+// import Navigation from "@/components/navigation"; // Removed Navigation import
 import AIChat from "@/components/ai-chat";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -97,12 +97,12 @@ export default function LearningHub() {
       if (selectedFramework) params.append('frameworkId', selectedFramework);
       if (selectedResourceType) params.append('resourceType', selectedResourceType);
       if (searchQuery.trim()) params.append('search', searchQuery);
-      
+
       const response = await apiRequest("GET", `/api/learning-resources?${params.toString()}`);
       return response.json();
     },
   });
-  
+
   const resources = resourcesResponse?.items || [];
 
   // Fetch user progress
@@ -186,7 +186,7 @@ export default function LearningHub() {
 
   return (
     <>
-      <Navigation />
+      {/* Navigation component removed as per changes */}
       <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
@@ -410,7 +410,7 @@ export default function LearningHub() {
                     data-testid={`resource-card-${resource.id}`}
                   >
                     <div className={`absolute inset-0 bg-gradient-to-br ${resourceTypeInfo.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                    
+
                     {/* Thumbnail/Preview */}
                     <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-50 rounded-t-3xl overflow-hidden">
                       {resource.thumbnailUrl ? (
@@ -424,7 +424,7 @@ export default function LearningHub() {
                           <ResourceIcon className={`h-16 w-16 ${resourceTypeInfo.color}`} />
                         </div>
                       )}
-                      
+
                       {/* Progress indicator */}
                       {progress > 0 && (
                         <div className="absolute top-4 right-4">

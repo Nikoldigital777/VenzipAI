@@ -1,7 +1,7 @@
 // client/src/pages/tasks.tsx
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import Navigation from "@/components/navigation";
+// import Navigation from "@/components/navigation"; // Removed import
 import AIChat from "@/components/ai-chat";
 import TaskList from "@/components/tasks/TaskList";
 import TaskForm from "@/components/tasks/TaskForm";
@@ -69,7 +69,7 @@ export default function TasksPage() {
 
   return (
     <>
-      <Navigation />
+      {/* <Navigation /> */} {/* Removed Navigation component */}
       <div className="pt-16 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50">
         <div className="container mx-auto py-8">
           <TaskList

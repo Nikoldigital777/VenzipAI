@@ -2,7 +2,6 @@
 import { useSummary } from "@/hooks/useSummary";
 import ProgressRing from "@/components/progress-ring";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Navigation from "@/components/navigation";
 import AIChat from "@/components/ai-chat";
 import { 
   Upload, 
@@ -19,6 +18,7 @@ import {
   Globe,
   ShieldAlert
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 type Gap = { 
   id: string; 
@@ -52,13 +52,12 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <>
-        <Navigation />
         <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
           {/* Loading background effects */}
           <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
           <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
           <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '2s'}}></div>
-          
+
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
             <div className="grid gap-8">
               <Card className="glass-card">
@@ -81,12 +80,11 @@ export default function Dashboard() {
   if (isError || !data) {
     return (
       <>
-        <Navigation />
         <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-danger-coral/5 relative overflow-hidden">
           {/* Error background effects */}
           <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
           <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-danger-coral/10 to-transparent rounded-full blur-3xl animate-float"></div>
-          
+
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
             <Card className="glass-card border-danger-coral/20">
               <CardHeader>
@@ -123,14 +121,13 @@ export default function Dashboard() {
 
   return (
     <>
-      <Navigation />
       <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
         <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-br from-venzip-secondary/8 to-transparent rounded-full blur-3xl animate-float" style={{animationDelay: '1.5s'}}></div>
-        
+
         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
           {/* Header Section */}
           <div className="mb-12 animate-fadeInUp">
@@ -152,7 +149,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          
+
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Enhanced Compliance Score Card */}
             <Card className="lg:col-span-1 glass-card group hover-lift relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.1s'}}>

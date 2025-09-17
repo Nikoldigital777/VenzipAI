@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import Navigation from "@/components/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,7 +81,7 @@ export default function CompanyProfile() {
     complianceContact: "",
     securityContact: ""
   });
-  
+
   const [userPreferences, setUserPreferences] = useState<UserPreferences>({
     emailNotifications: true,
     taskReminders: true,
@@ -194,7 +192,7 @@ export default function CompanyProfile() {
 
   const handleSave = () => {
     console.log("Saving company data:", companyData);
-    
+
     // Validate required fields
     if (!companyData.name?.trim()) {
       toast({
@@ -204,7 +202,7 @@ export default function CompanyProfile() {
       });
       return;
     }
-    
+
     if (!companyData.contactEmail?.trim()) {
       toast({
         title: "❌ Email Required",
@@ -213,7 +211,7 @@ export default function CompanyProfile() {
       });
       return;
     }
-    
+
     updateCompanyMutation.mutate(companyData);
   };
 
@@ -252,7 +250,6 @@ export default function CompanyProfile() {
   if (isLoading) {
     return (
       <>
-        <Navigation />
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-venzip-primary"></div>
         </div>
@@ -262,8 +259,6 @@ export default function CompanyProfile() {
 
   return (
     <>
-      <Navigation />
-      
       {/* Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/80 to-teal-50/60"></div>
@@ -273,7 +268,7 @@ export default function CompanyProfile() {
 
       <div className="relative pt-20 min-h-screen">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          
+
           {/* Header */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-full mb-6 shadow-xl">
@@ -352,7 +347,7 @@ export default function CompanyProfile() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                  
+
                   {/* Basic Information */}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -373,7 +368,7 @@ export default function CompanyProfile() {
                           placeholder="Enter company name"
                         />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="industry" className="text-sm font-semibold text-gray-700 mb-2 block">
                           Industry
@@ -574,9 +569,9 @@ export default function CompanyProfile() {
                               </div>
                             )}
                           </div>
-                          
+
                           <p className="text-gray-600 text-sm mb-4">{framework.description}</p>
-                          
+
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-500">{framework.totalControls} controls</span>
                             <span className="text-gray-500">{framework.estimatedTimeMonths} months</span>
@@ -585,7 +580,7 @@ export default function CompanyProfile() {
                       </div>
                     ))}
                   </div>
-                  
+
                   {companyData.selectedFrameworks.length > 0 && (
                     <div className="mt-8 p-6 bg-gradient-to-r from-venzip-primary/10 to-venzip-accent/10 rounded-xl border border-venzip-primary/20">
                       <h4 className="font-semibold text-gray-800 mb-3">Selected Frameworks</h4>
@@ -615,7 +610,7 @@ export default function CompanyProfile() {
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                  
+
                   {/* Notification Settings */}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Notification Types</h3>

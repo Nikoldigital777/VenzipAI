@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { CheckSquare, AlertTriangle, Calendar, FileText } from 'lucide-react';
-import Navigation from '@/components/navigation';
+// import Navigation from '@/components/navigation'; // Navigation import removed as per instructions
 
 export default function TestNotifications() {
   const [taskTitle, setTaskTitle] = useState('');
@@ -18,7 +18,7 @@ export default function TestNotifications() {
   const [riskTitle, setRiskTitle] = useState('');
   const [riskDescription, setRiskDescription] = useState('');
   const [riskImpact, setRiskImpact] = useState('medium');
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -76,20 +76,20 @@ export default function TestNotifications() {
 
   const handleCreateTask = () => {
     if (!taskTitle.trim()) return;
-    
+
     const taskData = {
       title: taskTitle,
       priority: taskPriority,
       status: 'not_started',
       ...(taskDueDate && { dueDate: new Date(taskDueDate).toISOString() }),
     };
-    
+
     createTaskMutation.mutate(taskData);
   };
 
   const handleCreateRisk = () => {
     if (!riskTitle.trim() || !riskDescription.trim()) return;
-    
+
     const riskData = {
       title: riskTitle,
       description: riskDescription,
@@ -97,7 +97,7 @@ export default function TestNotifications() {
       impact: riskImpact,
       likelihood: 'medium',
     };
-    
+
     createRiskMutation.mutate(riskData);
   };
 
@@ -115,13 +115,13 @@ export default function TestNotifications() {
 
   return (
     <>
-      <Navigation />
+      {/* <Navigation /> */} {/* Navigation component removed as per instructions */}
       <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
         <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-venzip-accent/10 to-transparent rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
-        
+
         <div className="max-w-4xl mx-auto px-6 py-16 relative z-10">
           <div className="mb-12 text-center animate-fadeInUp">
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
@@ -154,7 +154,7 @@ export default function TestNotifications() {
                 onChange={(e) => setTaskTitle(e.target.value)}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="task-priority">Priority</Label>
               <Select value={taskPriority} onValueChange={setTaskPriority}>
@@ -169,7 +169,7 @@ export default function TestNotifications() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
               <Label htmlFor="task-due-date">Due Date (Optional)</Label>
               <Input
@@ -179,7 +179,7 @@ export default function TestNotifications() {
                 onChange={(e) => setTaskDueDate(e.target.value)}
               />
             </div>
-            
+
             <div className="flex gap-2">
               <Button 
                 onClick={handleCreateTask}
@@ -189,7 +189,7 @@ export default function TestNotifications() {
                 {createTaskMutation.isPending ? 'Creating...' : 'Create Task'}
               </Button>
             </div>
-            
+
             <div className="text-sm text-gray-500 space-y-1">
               <p><strong>Quick tests:</strong></p>
               <Button
@@ -240,7 +240,7 @@ export default function TestNotifications() {
                 onChange={(e) => setRiskTitle(e.target.value)}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="risk-description">Description</Label>
               <Textarea
@@ -250,7 +250,7 @@ export default function TestNotifications() {
                 onChange={(e) => setRiskDescription(e.target.value)}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="risk-impact">Impact Level</Label>
               <Select value={riskImpact} onValueChange={setRiskImpact}>
@@ -264,7 +264,7 @@ export default function TestNotifications() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex gap-2">
               <Button 
                 onClick={handleCreateRisk}
@@ -274,7 +274,7 @@ export default function TestNotifications() {
                 {createRiskMutation.isPending ? 'Creating...' : 'Create Risk'}
               </Button>
             </div>
-            
+
             <div className="text-sm text-gray-500 space-y-1">
               <p><strong>Quick tests:</strong></p>
               <Button
