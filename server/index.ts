@@ -48,6 +48,10 @@ app.use((req, res, next) => {
     await db.execute(sql`SELECT 1`);
     console.log("✅ Database connected successfully");
 
+    // Run database migrations first
+    const { runMigrations } = await import("./runMigrations");
+    await runMigrations();
+
     // Run seed data
     await runSeeds();
   } catch (error) {
