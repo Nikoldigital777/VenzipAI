@@ -1,4 +1,5 @@
-import { storage } from './storage';
+import { db } from './db';
+import { frameworks, complianceRequirements } from '@shared/schema';
 
 // HIPAA Security Rule Controls
 const hipaaControls = [
@@ -189,8 +190,6 @@ export async function seedComplianceData() {
 
     // Seed compliance requirements for each framework
     const allRequirements = [
-      ...isoRequirements,
-      ...scfRequirements,
       ...hipaaControls,
       ...soc2Controls
     ];
