@@ -624,7 +624,7 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-      <AIChat />
+      <LazyAIChat />
     </>
   );
 }
