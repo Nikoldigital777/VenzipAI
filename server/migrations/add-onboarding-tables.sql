@@ -23,9 +23,22 @@ CREATE TABLE IF NOT EXISTS companies (
 CREATE TABLE IF NOT EXISTS frameworks_companies (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   framework_id VARCHAR(100) NOT NULL,
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  company_id UUID,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Add foreign key constraint separately to handle existing data
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'frameworks_companies_company_id_fkey'
+  ) THEN
+    ALTER TABLE frameworks_companies 
+    ADD CONSTRAINT frameworks_companies_company_id_fkey 
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 -- Add company_id to tasks table
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES companies(id) ON DELETE CASCADE;
