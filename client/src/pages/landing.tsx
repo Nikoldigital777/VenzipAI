@@ -224,9 +224,21 @@ export default function Landing() {
                 </Button>
               </div>
             ) : (
-              <Button onClick={handleLogin} className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold">
-                Start Free Trial
-              </Button>
+              <>
+                <Button
+                  onClick={handleLogin}
+                  variant="outline"
+                  className="glass-card border-0 hover:shadow-lg transition-all duration-300"
+                >
+                  Sign In
+                </Button>
+                <Button
+                  onClick={handleGetStarted}
+                  className="bg-gradient-to-r from-venzip-primary to-venzip-secondary text-white hover:shadow-lg hover:shadow-venzip-primary/25 transition-all duration-300"
+                >
+                  Get Started
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -255,38 +267,22 @@ export default function Landing() {
               The <span className="font-semibold text-venzip-primary">compliance platform of choice for Fortune 500 companies</span> seeking to reduce audit costs by 65% and achieve certification 87% faster. Transform SOC 2, ISO 27001, HIPAA, and GDPR compliance from reactive overhead into strategic competitive advantage.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
-              {isAuthenticated ? (
-                <Button
-                  onClick={handleGetStarted}
-                  size="lg"
-                  className="bg-gradient-hero hover:scale-110 text-white hover:shadow-2xl hover:shadow-venzip-primary/40 hover:-translate-y-3 transform transition-all duration-500 px-12 py-6 rounded-2xl text-xl font-bold shadow-2xl group relative overflow-hidden animate-glow-pulse"
-                  data-testid="button-dashboard-hero"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                  <BarChart3 className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
-                  <span className="relative z-10">Go to Dashboard</span>
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleLogin}
-                  size="lg"
-                  className="bg-gradient-hero hover:scale-110 text-white hover:shadow-2xl hover:shadow-venzip-primary/40 hover:-translate-y-3 transform transition-all duration-500 px-12 py-6 rounded-2xl text-xl font-bold shadow-2xl group relative overflow-hidden animate-glow-pulse"
-                  data-testid="button-login-hero"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                  <Rocket className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
-                  <span className="relative z-10">Start Your Compliance Journey</span>
-                </Button>
-              )}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={handleGetStarted}
+                className="bg-gradient-to-r from-venzip-primary to-venzip-secondary hover:from-venzip-primary/90 hover:to-venzip-secondary/90 text-white font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-2xl hover:shadow-venzip-primary/30 hover:-translate-y-1 transform transition-all duration-300 flex items-center justify-center"
+              >
+                <Rocket className="mr-2 h-5 w-5" />
+                {isAuthenticated ? "Continue Setup" : "Start Onboarding"}
+              </Button>
+
               <Button
                 variant="outline"
-                size="lg"
-                onClick={() => scrollToSection('features')}
-                className="glass-card border-2 border-venzip-primary/30 text-gray-700 hover:bg-venzip-primary/10 hover:border-venzip-primary hover:text-venzip-primary hover:shadow-xl hover:-translate-y-2 transform transition-all duration-500 px-10 py-5 rounded-2xl text-xl font-semibold group"
+                onClick={() => scrollToSection('frameworks')}
+                className="glass-card border-2 border-white/30 text-gray-700 hover:text-venzip-primary font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-lg hover:border-venzip-primary/50 hover:-translate-y-1 transform transition-all duration-300 flex items-center justify-center"
               >
-                <Play className="h-6 w-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
-                See How It Works
+                <Play className="mr-2 h-5 w-5" />
+                Learn More
               </Button>
             </div>
           </div>
@@ -315,7 +311,7 @@ export default function Landing() {
                 <Card key={key} className="glass-card hover-lift group relative overflow-hidden border-0 shadow-lg">
                   <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <CardContent className="p-8 relative z-10">
-                    <div 
+                    <div
                       className="flex items-center justify-between cursor-pointer"
                       onClick={() => toggleFramework(key)}
                     >
@@ -392,14 +388,14 @@ export default function Landing() {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100">
-                          <Button 
+                          <Button
                             onClick={handleLogin}
                             className="bg-gradient-primary text-white hover:shadow-lg transition-all duration-300 flex-1"
                           >
                             Start {framework.name} Compliance
                           </Button>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             className="border-venzip-primary/30 text-venzip-primary hover:bg-venzip-primary/10 flex-1"
                           >
                             Download {framework.name} Guide
@@ -985,61 +981,21 @@ export default function Landing() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-32 px-6 bg-gradient-hero relative overflow-hidden">
-        {/* Enhanced glassmorphism background effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/5"></div>
-        <div className="absolute inset-0 bg-dot-pattern opacity-10"></div>
-
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-10 tracking-tight animate-fadeInUp">
-            Ready to Transform Your <span className="text-white/90 animate-gradient-x">Compliance?</span>
+      <section className="py-20 bg-gradient-to-r from-venzip-primary to-venzip-secondary relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-4xl mx-auto px-6 text-center text-white">
+          <h2 className="text-4xl font-bold mb-6">
+            {isAuthenticated ? "Continue Your Compliance Journey" : "Ready to Transform Your Compliance Journey?"}
           </h2>
-          <p className="text-xl md:text-2xl text-white/90 mb-16 max-w-4xl mx-auto leading-relaxed font-light animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-            Join hundreds of companies who have streamlined their compliance process with Venzip.
-            Start your journey today and achieve compliance faster than ever before.
+          <p className="text-xl mb-8 text-white/90">
+            {isAuthenticated ? "Complete your setup and start achieving compliance excellence" : "Join hundreds of companies who trust Venzip for their compliance needs"}
           </p>
-
-          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-            <Button
-              onClick={handleLogin}
-              size="lg"
-              className="glass-morphism-enhanced text-venzip-primary hover:bg-white/90 hover:shadow-2xl hover:-translate-y-3 hover:scale-110 transform transition-all duration-500 font-bold px-12 py-6 rounded-2xl text-xl group relative overflow-hidden border border-white/30"
-              data-testid="button-login-cta"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-              <Rocket className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
-              <span className="relative z-10">Start Free Today</span>
-            </Button>
-            <Button
-              size="lg"
-              onClick={() => {
-                try {
-                  window.open('mailto:support@venzip.com', '_blank');
-                } catch (error) {
-                  console.error('Failed to open email client:', error);
-                }
-              }}
-              className="bg-white/20 backdrop-blur-xl text-white border-2 border-white/30 hover:bg-white/30 hover:shadow-2xl hover:-translate-y-3 hover:scale-110 transform transition-all duration-500 font-bold px-12 py-6 rounded-2xl text-xl group"
-            >
-              <Mail className="h-6 w-6 mr-3 group-hover:animate-bounce" />
-              Contact Sales
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap justify-center items-center gap-8 text-white/80 text-base font-medium animate-fadeInUp" style={{animationDelay: '0.6s'}}>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-white/90" />
-              <span>No credit card required</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-white/90" />
-              <span>Setup in under 5 minutes</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-white/90" />
-              <span>14-day free trial</span>
-            </div>
-          </div>
+          <Button
+            onClick={handleGetStarted}
+            className="bg-white text-venzip-primary hover:bg-gray-100 font-semibold px-12 py-4 text-lg rounded-xl hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300"
+          >
+            {isAuthenticated ? "Complete Setup" : "Start Your Free Trial Today"}
+          </Button>
         </div>
       </section>
 
