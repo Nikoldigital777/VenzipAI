@@ -39,7 +39,7 @@ interface ChatMessage {
   createdAt: string;
 }
 
-// Helper function to format messages with basic markdown support
+// Helper function to format messages with compliance citations and auditor-friendly formatting
 const formatMessage = (text: string) => {
   // Split text into paragraphs
   const paragraphs = text.split('\n\n').filter(p => p.trim());
@@ -56,11 +56,11 @@ const formatMessage = (text: string) => {
               return (
                 <div key={lineIndex} className="flex items-start gap-2">
                   <span className="text-venzip-primary mt-1">•</span>
-                  <span>{trimmed.replace(/^[•\-\*]\s/, '')}</span>
+                  <span>{formatInlineStyles(trimmed.replace(/^[•\-\*]\s/, ''))}</span>
                 </div>
               );
             }
-            return <div key={lineIndex}>{trimmed}</div>;
+            return <div key={lineIndex}>{formatInlineStyles(trimmed)}</div>;
           })}
         </div>
       );
@@ -79,29 +79,15 @@ const formatMessage = (text: string) => {
                   <span className="text-venzip-primary font-semibold min-w-[1.2rem]">
                     {trimmed.match(/^\d+/)?.[0]}.
                   </span>
-                  <span>{trimmed.replace(/^\d+\.\s/, '')}</span>
+                  <span>{formatInlineStyles(trimmed.replace(/^\d+\.\s/, ''))}</span>
                 </div>
               );
             }
-            return <div key={lineIndex}>{trimmed}</div>;
+            return <div key={lineIndex}>{formatInlineStyles(trimmed)}</div>;
           })}
         </div>
       );
     }
-    
-    // Handle bold text **text**
-    const formatInlineStyles = (text: string) => {
-      return text.split(/(\*\*.*?\*\*)/).map((part, partIndex) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return (
-            <strong key={partIndex} className="font-semibold text-venzip-primary">
-              {part.slice(2, -2)}
-            </strong>
-          );
-        }
-        return part;
-      });
-    };
     
     // Regular paragraph
     return (
@@ -110,6 +96,67 @@ const formatMessage = (text: string) => {
       </div>
     );
   });
+
+  // Enhanced inline formatting with compliance citation highlighting
+  function formatInlineStyles(text: string) {
+    return text.split(/(\*\*.*?\*\*|CC\d+\.\d+|164\.\d+\(.\)|A\.\d+\.\d+\.\d+|Art\.\s?\d+|CFR\s?\d+\.\d+)/).map((part, partIndex) => {
+      // Bold text **text**
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={partIndex} className="font-semibold text-venzip-primary">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      
+      // SOC 2 Trust Service Criteria (CC1.1, CC2.1, etc.)
+      if (part.match(/^CC\d+\.\d+$/)) {
+        return (
+          <span key={partIndex} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+            SOC 2 {part}
+          </span>
+        );
+      }
+      
+      // HIPAA CFR references (164.312(b), etc.)
+      if (part.match(/^164\.\d+\(.\)$/)) {
+        return (
+          <span key={partIndex} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+            HIPAA {part}
+          </span>
+        );
+      }
+      
+      // ISO 27001 Annex A controls (A.5.1.1, etc.)
+      if (part.match(/^A\.\d+\.\d+\.\d+$/)) {
+        return (
+          <span key={partIndex} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+            ISO 27001 {part}
+          </span>
+        );
+      }
+      
+      // GDPR Articles (Art. 25, etc.)
+      if (part.match(/^Art\.\s?\d+$/)) {
+        return (
+          <span key={partIndex} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-200">
+            GDPR {part}
+          </span>
+        );
+      }
+      
+      // CFR general references
+      if (part.match(/^CFR\s?\d+\.\d+$/)) {
+        return (
+          <span key={partIndex} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">
+            {part}
+          </span>
+        );
+      }
+      
+      return part;
+    });
+  }
 };
 
 export default function AIChat() {
@@ -123,14 +170,14 @@ export default function AIChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   
-  // Enhanced quick action prompts with categories
+  // Enhanced quick action prompts with categories including citation-focused questions
   const quickPrompts = [
     { icon: Shield, text: "What's left to be compliant?", color: "text-blue-600", category: "Status Check", bg: "from-blue-500/10 to-blue-600/5" },
-    { icon: Target, text: "What should I prioritize next?", color: "text-green-600", category: "Next Steps", bg: "from-green-500/10 to-green-600/5" },
-    { icon: AlertTriangle, text: "What are my biggest risks?", color: "text-red-600", category: "Risk Assessment", bg: "from-red-500/10 to-red-600/5" },
-    { icon: Clock, text: "How long until I'm compliant?", color: "text-orange-600", category: "Timeline", bg: "from-orange-500/10 to-orange-600/5" },
-    { icon: TrendingUp, text: "Analyze my compliance gaps", color: "text-purple-600", category: "Gap Analysis", bg: "from-purple-500/10 to-purple-600/5" },
-    { icon: Brain, text: "Generate action plan", color: "text-indigo-600", category: "AI Strategy", bg: "from-indigo-500/10 to-indigo-600/5" }
+    { icon: Target, text: "What SOC 2 CC controls need attention?", color: "text-green-600", category: "Citations", bg: "from-green-500/10 to-green-600/5" },
+    { icon: AlertTriangle, text: "Which HIPAA CFR sections am I missing?", color: "text-red-600", category: "Compliance Gaps", bg: "from-red-500/10 to-red-600/5" },
+    { icon: Clock, text: "Show me ISO 27001 control mappings", color: "text-orange-600", category: "Framework Mapping", bg: "from-orange-500/10 to-orange-600/5" },
+    { icon: TrendingUp, text: "Analyze compliance with specific citations", color: "text-purple-600", category: "Audit Prep", bg: "from-purple-500/10 to-purple-600/5" },
+    { icon: Brain, text: "Generate auditor-ready evidence list", color: "text-indigo-600", category: "Documentation", bg: "from-indigo-500/10 to-indigo-600/5" }
   ];
   
   // Achievement system

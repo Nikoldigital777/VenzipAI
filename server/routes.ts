@@ -48,7 +48,7 @@ import { format } from 'date-fns';
 import taskRoutes from './routes/tasks';
 
 // Import necessary schemas and functions for onboarding
-import { eq } from "drizzle-orm"; // Assuming eq is used in generateFrameworkTasks
+// Assuming eq is used in generateFrameworkTasks
 // Assuming generateId, users, companies, frameworksCompanies, tasks are available
 // and imported from a shared schema or utilities file.
 // For the purpose of this example, let's assume they are accessible.
@@ -259,44 +259,6 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-  app.post('/api/chat', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.sub;
-      const { message } = req.body;
-
-      if (!message || typeof message !== "string") {
-        return res.status(400).json({ error: "message is required" });
-      }
-
-      // Save user message
-      const userMessage = await storage.createChatMessage({
-        userId,
-        message,
-        messageType: 'user'
-      });
-
-      // Get Claude response
-      const response = await chatWithClaude(message);
-
-      // Save assistant message
-      const assistantMessage = await storage.createChatMessage({
-        userId,
-        message: response,
-        messageType: 'assistant'
-      });
-
-      res.json({
-        id: assistantMessage.id,
-        message: assistantMessage.message,
-        messageType: assistantMessage.messageType,
-        createdAt: assistantMessage.createdAt,
-      });
-    } catch (error) {
-      console.error("Error in chat:", error);
-      res.status(500).json({ message: "Failed to process chat message" });
-    }
-  });
-
   // Dashboard summary endpoint
   // Register enhanced task routes
   app.use('/api/tasks', taskRoutes);
@@ -305,19 +267,19 @@ export async function registerRoutes(app: Express) {
   app.get('/api/dashboard/progress', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      
+
       // Get all user tasks
       const tasks = await storage.getTasksByUserId(userId);
-      
+
       if (tasks.length === 0) {
         return res.json({ percentComplete: 0, totalTasks: 0, completedTasks: 0 });
       }
-      
+
       // Calculate completion percentage
       const completedTasks = tasks.filter(task => task.status === 'completed').length;
       const totalTasks = tasks.length;
       const percentComplete = Math.round((completedTasks / totalTasks) * 100);
-      
+
       res.json({
         percentComplete,
         totalTasks,
@@ -333,10 +295,10 @@ export async function registerRoutes(app: Express) {
   app.get('/api/dashboard/recent-tasks', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      
+
       // Get all user tasks, sorted by creation date (most recent first)
       const allTasks = await storage.getTasksByUserId(userId);
-      
+
       // Sort by creation date and take the 5 most recent
       const recentTasks = allTasks
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -353,7 +315,7 @@ export async function registerRoutes(app: Express) {
                               task.status === 'in_progress' ? 50 :
                               task.status === 'under_review' ? 75 : 0
         }));
-      
+
       res.json(recentTasks);
     } catch (error) {
       console.error("Error fetching recent tasks:", error);
@@ -1644,6 +1606,26 @@ export async function registerRoutes(app: Express) {
       const risks = await storage.getRisksByUserId(userId);
       const documents = await storage.getDocumentsByUserId(userId);
 
+      // Get compliance requirements for citation context
+      const allFrameworks = await storage.getAllFrameworks();
+      const complianceRequirements = [];
+
+      if (company?.selectedFrameworks) {
+        for (const frameworkName of company.selectedFrameworks) {
+          const framework = allFrameworks.find(f => f.name === frameworkName);
+          if (framework) {
+            const requirements = await storage.getComplianceRequirements(framework.id);
+            complianceRequirements.push(...requirements.map(req => ({
+              framework: frameworkName,
+              requirementId: req.requirementId,
+              title: req.title,
+              category: req.category,
+              priority: req.priority
+            })));
+          }
+        }
+      }
+
       // Build comprehensive context for Claude
       const userProfile = company ? {
         frameworks: company.selectedFrameworks,
@@ -1658,10 +1640,11 @@ export async function registerRoutes(app: Express) {
         highPriorityTasks: tasks.filter(t => t.priority === 'high').length,
         openRisks: risks.filter(r => r.status === 'open').length,
         documentsUploaded: documents.length,
-        recentGaps: context?.summary?.gaps?.slice(0, 3) || []
+        recentGaps: context?.summary?.gaps?.slice(0, 3) || [],
+        availableRequirements: complianceRequirements.slice(0, 20) // Include top 20 for context
       };
 
-      // Get enhanced Claude response with full context
+      // Get enhanced Claude response with full context including citations
       const response = await chatWithClaude(message, JSON.stringify(complianceContext), userProfile);
 
       // Save Claude response
@@ -2947,6 +2930,26 @@ export async function registerRoutes(app: Express) {
       const risks = await storage.getRisksByUserId(userId);
       const documents = await storage.getDocumentsByUserId(userId);
 
+      // Get compliance requirements for citation context
+      const allFrameworks = await storage.getAllFrameworks();
+      const complianceRequirements = [];
+
+      if (company?.selectedFrameworks) {
+        for (const frameworkName of company.selectedFrameworks) {
+          const framework = allFrameworks.find(f => f.name === frameworkName);
+          if (framework) {
+            const requirements = await storage.getComplianceRequirements(framework.id);
+            complianceRequirements.push(...requirements.map(req => ({
+              framework: frameworkName,
+              requirementId: req.requirementId,
+              title: req.title,
+              category: req.category,
+              priority: req.priority
+            })));
+          }
+        }
+      }
+
       // Build comprehensive context for Claude
       const userProfile = company ? {
         frameworks: company.selectedFrameworks,
@@ -2961,10 +2964,11 @@ export async function registerRoutes(app: Express) {
         highPriorityTasks: tasks.filter(t => t.priority === 'high').length,
         openRisks: risks.filter(r => r.status === 'open').length,
         documentsUploaded: documents.length,
-        recentGaps: context?.summary?.gaps?.slice(0, 3) || []
+        recentGaps: context?.summary?.gaps?.slice(0, 3) || [],
+        availableRequirements: complianceRequirements.slice(0, 20) // Include top 20 for context
       };
 
-      // Get enhanced Claude response with full context
+      // Get enhanced Claude response with full context including citations
       const response = await chatWithClaude(message, JSON.stringify(complianceContext), userProfile);
 
       // Save Claude response
