@@ -18,7 +18,7 @@ import {
   GraduationCap,
   Target
 } from "lucide-react";
-import venzipLogo from "@assets/PNG Venzip Logo _edited_1756043677282.png";
+import venzipLogo from "@assets/venzip-logo.png";
 import NotificationButton from "./notification-button";
 
 export default function Navigation() {
@@ -72,8 +72,8 @@ export default function Navigation() {
             <img 
               src={venzipLogo} 
               alt="Venzip Logo" 
-              className={`shadow-lg transition-all duration-300 ${
-                scrolled ? 'h-10' : 'h-12'
+              className={`transition-all duration-300 ${
+                scrolled ? 'h-8' : 'h-10'
               }`}
               style={{ width: 'auto' }}
             />

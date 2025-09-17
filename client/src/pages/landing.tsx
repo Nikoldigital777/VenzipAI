@@ -34,7 +34,7 @@ import {
   Twitter,
   Facebook
 } from "lucide-react";
-import venzipLogo from "@assets/image_1758096374686.png";
+import venzipLogo from "@assets/venzip-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Landing() {
@@ -74,9 +74,9 @@ export default function Landing() {
            }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center">
-            <img 
-              src={venzipLogo} 
-              alt="Venzip Logo" 
+            <img
+              src={venzipLogo}
+              alt="Venzip Logo"
               className="h-12"
               style={{ width: 'auto' }}
             />
@@ -123,14 +123,14 @@ export default function Landing() {
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto font-light">
-              The <span className="font-semibold text-venzip-primary">compliance platform of choice for Fortune 500 companies</span> seeking to reduce audit costs by 65% and achieve certification 87% faster. 
-              Our enterprise-grade AI platform transforms SOC 2, ISO 27001, HIPAA, and GDPR compliance from 
+              The <span className="font-semibold text-venzip-primary">compliance platform of choice for Fortune 500 companies</span> seeking to reduce audit costs by 65% and achieve certification 87% faster.
+              Our enterprise-grade AI platform transforms SOC 2, ISO 27001, HIPAA, and GDPR compliance from
               <span className="font-semibold text-gray-900">reactive overhead into strategic competitive advantage.</span>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.3s'}}>
               {isAuthenticated ? (
-                <Button 
+                <Button
                   onClick={handleGetStarted}
                   size="lg"
                   className="bg-gradient-hero hover:scale-110 text-white hover:shadow-2xl hover:shadow-venzip-primary/40 hover:-translate-y-3 transform transition-all duration-500 px-12 py-6 rounded-2xl text-xl font-bold shadow-2xl group relative overflow-hidden animate-glow-pulse"
@@ -141,7 +141,7 @@ export default function Landing() {
                   <span className="relative z-10">Go to Dashboard</span>
                 </Button>
               ) : (
-                <Button 
+                <Button
                   onClick={handleLogin}
                   size="lg"
                   className="bg-gradient-hero hover:scale-110 text-white hover:shadow-2xl hover:shadow-venzip-primary/40 hover:-translate-y-3 transform transition-all duration-500 px-12 py-6 rounded-2xl text-xl font-bold shadow-2xl group relative overflow-hidden animate-glow-pulse"
@@ -152,8 +152,8 @@ export default function Landing() {
                   <span className="relative z-10">Start Your Compliance Journey</span>
                 </Button>
               )}
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="lg"
                 onClick={() => scrollToSection('features')}
                 className="glass-card border-2 border-venzip-primary/30 text-gray-700 hover:bg-venzip-primary/10 hover:border-venzip-primary hover:text-venzip-primary hover:shadow-xl hover:-translate-y-2 transform transition-all duration-500 px-10 py-5 rounded-2xl text-xl font-semibold group"
@@ -263,7 +263,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-venzip-primary transition-colors duration-300">AI Document Analysis</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Upload your policies and procedures. Our advanced AI instantly identifies compliance gaps, 
+                  Upload your policies and procedures. Our advanced AI instantly identifies compliance gaps,
                   provides intelligent recommendations, and generates improvement suggestions.
                 </p>
                 <div className="text-sm text-venzip-primary font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
@@ -282,7 +282,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-warning-orange transition-colors duration-300">Real-time Progress Tracking</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Monitor your compliance journey with interactive dashboards, automated progress tracking, 
+                  Monitor your compliance journey with interactive dashboards, automated progress tracking,
                   and visual risk heatmaps that update in real-time.
                 </p>
                 <div className="text-sm text-warning-orange font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
@@ -301,7 +301,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-danger-coral transition-colors duration-300">Intelligent Risk Assessment</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Automatically identify, assess, and prioritize risks across your organization. 
+                  Automatically identify, assess, and prioritize risks across your organization.
                   Get AI-generated mitigation strategies and track remediation progress.
                 </p>
                 <div className="text-sm text-danger-coral font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
@@ -320,7 +320,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-success-green transition-colors duration-300">Smart Task Management</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Organize compliance tasks with automated prioritization, deadline tracking, 
+                  Organize compliance tasks with automated prioritization, deadline tracking,
                   and team collaboration features. Never miss critical compliance activities.
                 </p>
                 <div className="text-sm text-success-green font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
@@ -339,7 +339,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-venzip-accent transition-colors duration-300">Evidence Library</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Centralize all compliance documentation with automated categorization, 
+                  Centralize all compliance documentation with automated categorization,
                   version control, and audit-ready organization across all frameworks.
                 </p>
                 <div className="text-sm text-venzip-accent font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
@@ -358,7 +358,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-venzip-secondary transition-colors duration-300">24/7 AI Compliance Assistant</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Get instant answers to compliance questions, implementation guidance, 
+                  Get instant answers to compliance questions, implementation guidance,
                   and expert recommendations through our integrated AI chat assistant.
                 </p>
                 <div className="text-sm text-venzip-secondary font-semibold flex items-center group-hover:translate-x-2 transition-transform duration-300">
@@ -515,7 +515,7 @@ export default function Landing() {
           </div>
 
           <div className="text-center">
-            <Button 
+            <Button
               onClick={handleLogin}
               size="lg"
               className="bg-gradient-primary hover:shadow-xl hover:shadow-venzip-primary/25 hover:scale-105 transform transition-all duration-300 px-8 py-4 rounded-xl text-lg font-bold text-white group relative overflow-hidden"
@@ -605,7 +605,7 @@ export default function Landing() {
                     <span className="text-gray-700">Compliance Advisory Services</span>
                   </div>
                 </div>
-                <Button 
+                <Button
                   onClick={handleLogin}
                   className="mt-6 w-full bg-gradient-primary hover:shadow-lg transition-all duration-300"
                 >
@@ -645,7 +645,7 @@ export default function Landing() {
               <div className="glass-card p-8 group-hover:shadow-2xl transition-all duration-500 hover-lift">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 group-hover:text-venzip-primary transition-colors duration-300">Setup Your Profile</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Create your company profile, select your target frameworks, and define your compliance goals. 
+                  Create your company profile, select your target frameworks, and define your compliance goals.
                   Our AI will customize recommendations based on your industry and company size.
                 </p>
               </div>
@@ -659,7 +659,7 @@ export default function Landing() {
               <div className="glass-card p-8 group-hover:shadow-2xl transition-all duration-500 hover-lift">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 group-hover:text-warning-orange transition-colors duration-300">Upload & Analyze</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Upload your existing policies and documentation. Our AI analyzes everything, 
+                  Upload your existing policies and documentation. Our AI analyzes everything,
                   identifies gaps, and creates a personalized compliance roadmap with prioritized tasks.
                 </p>
               </div>
@@ -673,7 +673,7 @@ export default function Landing() {
               <div className="glass-card p-8 group-hover:shadow-2xl transition-all duration-500 hover-lift">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 group-hover:text-success-green transition-colors duration-300">Track & Maintain</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Follow your AI-guided roadmap, track progress in real-time, and maintain ongoing compliance 
+                  Follow your AI-guided roadmap, track progress in real-time, and maintain ongoing compliance
                   with automated monitoring and continuous improvement recommendations.
                 </p>
               </div>
@@ -929,12 +929,12 @@ export default function Landing() {
             Ready to Transform Your <span className="text-white/90 animate-gradient-x">Compliance?</span>
           </h2>
           <p className="text-xl md:text-2xl text-white/90 mb-16 max-w-4xl mx-auto leading-relaxed font-light animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-            Join hundreds of companies who have streamlined their compliance process with Venzip. 
+            Join hundreds of companies who have streamlined their compliance process with Venzip.
             Start your journey today and achieve compliance faster than ever before with AI-powered automation.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-16 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-            <Button 
+            <Button
               onClick={handleLogin}
               size="lg"
               className="glass-morphism-enhanced text-venzip-primary hover:bg-white/90 hover:shadow-2xl hover:shadow-black/30 hover:-translate-y-3 hover:scale-110 transform transition-all duration-500 font-bold px-12 py-6 rounded-2xl text-xl group relative overflow-hidden border border-white/30"
@@ -944,7 +944,7 @@ export default function Landing() {
               <Rocket className="h-6 w-6 mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
               <span className="relative z-10">Start Free Today</span>
             </Button>
-            <Button 
+            <Button
               size="lg"
               onClick={() => {
                 try {
@@ -988,15 +988,15 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-1">
               <div className="mb-6">
-                <img 
-                  src={venzipLogo} 
-                  alt="Venzip Logo" 
+                <img
+                  src={venzipLogo}
+                  alt="Venzip Logo"
                   className="h-12 hover:scale-110 transition-transform duration-300"
                   style={{ width: 'auto' }}
                 />
               </div>
               <p className="text-gray-300 text-sm leading-relaxed mb-6">
-                AI-powered compliance platform for modern businesses. 
+                AI-powered compliance platform for modern businesses.
                 Simplify SOC 2, ISO 27001, HIPAA, and GDPR compliance with intelligent automation.
               </p>
               <div className="flex space-x-4">
