@@ -52,11 +52,6 @@ function Router() {
   const { isAuthenticated, isLoading, error } = useAuth();
   const [location, navigate] = useLocation();
 
-  // If there's an error, treat as unauthenticated
-  if (error) {
-    console.log('Auth error detected, treating as unauthenticated');
-  }
-
   // Show loading state only briefly while checking authentication
   if (isLoading) {
     return (
@@ -67,6 +62,14 @@ function Router() {
         </div>
       </div>
     );
+  }
+
+  // If there's an auth error or user is not authenticated, redirect to landing
+  if (error || !isAuthenticated) {
+    if (location !== '/landing' && location !== '/') {
+      navigate('/landing');
+      return null;
+    }
   }
 
   return (

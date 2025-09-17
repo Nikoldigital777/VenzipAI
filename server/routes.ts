@@ -2832,6 +2832,7 @@ export async function registerRoutes(app: Express) {
 
       const selectedFrameworksData = [];
       let totalTasks = 0;
+      let successfulFrameworks = 0;
 
       // Get all available frameworks first
       const allFrameworks = await storage.getAllFrameworks();
@@ -2862,14 +2863,15 @@ export async function registerRoutes(app: Express) {
             });
             console.log("Framework progress initialized for:", framework.name);
           } catch (progressError) {
-            console.error("Error initializing framework progress:", progressError);
-            // Continue with other frameworks if one fails
+            console.error("Error initializing framework progress for", framework.name, ":", progressError);
+            // Continue with other frameworks if one fails - this is not critical for onboarding completion
           }
 
           // Generate initial compliance tasks for each framework
           const initialTasks = getInitialTasksForFramework(framework.name, companyData.industry, companyData.size);
-          totalTasks += initialTasks.length;
-          console.log(`Generated ${initialTasks.length} tasks for ${framework.name}`);
+          let frameworkTasksCreated = 0;
+          
+          console.log(`Generating ${initialTasks.length} tasks for ${framework.name}`);
 
           for (const taskData of initialTasks) {
             try {
@@ -2884,11 +2886,16 @@ export async function registerRoutes(app: Express) {
                 dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
                 createdById: userId
               });
+              frameworkTasksCreated++;
             } catch (taskError) {
               console.error("Error creating task:", taskError);
               // Continue with other tasks if one fails
             }
           }
+
+          totalTasks += frameworkTasksCreated;
+          successfulFrameworks++;
+          console.log(`Successfully created ${frameworkTasksCreated} tasks for ${framework.name}`);
         } else {
           console.warn("Framework not found:", frameworkId);
         }
@@ -2906,7 +2913,7 @@ export async function registerRoutes(app: Express) {
         // Don't fail the entire process if user update fails
       }
 
-      console.log("Onboarding completed successfully");
+      console.log(`Onboarding completed successfully - processed ${successfulFrameworks}/${frameworks.length} frameworks, created ${totalTasks} tasks`);
 
       res.json({ 
         success: true, 
@@ -2919,7 +2926,7 @@ export async function registerRoutes(app: Express) {
         frameworks: selectedFrameworksData,
         totalTasks,
         aiEnabled: aiEnabled !== undefined ? aiEnabled : true,
-        message: "Onboarding completed successfully" 
+        message: `Onboarding completed successfully - ${successfulFrameworks} frameworks processed, ${totalTasks} tasks created`
       });
     } catch (error) {
       console.error("Error completing onboarding:", error);
