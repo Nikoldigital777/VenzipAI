@@ -1,7 +1,6 @@
 import "./index.css";
-import { Switch, Route, Redirect } from "wouter";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/queryClient";
+import { Switch, Route, useLocation } from "wouter";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TourProvider } from "@/components/tour/TourProvider";
@@ -46,6 +45,29 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
   );
 }
 
+function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [, navigate] = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    navigate('/landing');
+    return null;
+  }
+
+  return <>{children}</>;
+}
+
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -71,77 +93,75 @@ function Router() {
       <Route path="/onboarding" component={Onboarding} />
 
       {/* Protected routes - only show if authenticated */}
-      {isAuthenticated && (
-        <>
-          {/* Home route redirects to dashboard */}
-          <Route path="/home">
-            <AuthenticatedLayout title="Home">
-              <Home />
-            </AuthenticatedLayout>
-          </Route>
+      <AuthenticatedRoute>
+        {/* Home route redirects to dashboard */}
+        <Route path="/home">
+          <AuthenticatedLayout title="Home">
+            <Home />
+          </AuthenticatedLayout>
+        </Route>
 
-          {/* Main app routes with sidebar */}
-          <Route path="/dashboard">
-            <AuthenticatedLayout title="Dashboard">
-              <Dashboard />
-            </AuthenticatedLayout>
-          </Route>
+        {/* Main app routes with sidebar */}
+        <Route path="/dashboard">
+          <AuthenticatedLayout title="Dashboard">
+            <Dashboard />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/tasks">
-            <AuthenticatedLayout title="Tasks">
-              <Tasks />
-            </AuthenticatedLayout>
-          </Route>
+        <Route path="/tasks">
+          <AuthenticatedLayout title="Tasks">
+            <Tasks />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/evidence">
-            <AuthenticatedLayout title="Evidence">
-              <Evidence />
-            </AuthenticatedLayout>
-          </Route>
+        <Route path="/evidence">
+          <AuthenticatedLayout title="Evidence">
+            <Evidence />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/compliance-insights">
-            <AuthenticatedLayout title="Frameworks">
-              <ComplianceInsights />
-            </AuthenticatedLayout>
-          </Route>
+        <Route path="/compliance-insights">
+          <AuthenticatedLayout title="Frameworks">
+            <ComplianceInsights />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/risks">
-            <AuthenticatedLayout title="Risks">
-              <Risks />
-            </AuthenticatedLayout>
-          </Route>
+        <Route path="/risks">
+          <AuthenticatedLayout title="Risks">
+            <Risks />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/documents">
-            <AuthenticatedLayout title="Documents">
-              <Documents />
-            </AuthenticatedLayout>
-          </Route>
+        <Route path="/documents">
+          <AuthenticatedLayout title="Documents">
+            <Documents />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/audit-calendar">
-            <AuthenticatedLayout title="Audit Calendar">
-              <AuditCalendar />
-            </AuthenticatedLayout>
-          </Route>
+        <Route path="/audit-calendar">
+          <AuthenticatedLayout title="Audit Calendar">
+            <AuditCalendar />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/learning-hub">
-            <AuthenticatedLayout title="Learning Hub">
-              <LearningHub />
-            </AuthenticatedLayout>
-          </Route>
+        <Route path="/learning-hub">
+          <AuthenticatedLayout title="Learning Hub">
+            <LearningHub />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/company-profile">
-            <AuthenticatedLayout title="Company Profile">
-              <CompanyProfile />
-            </AuthenticatedLayout>
-          </Route>
+        <Route path="/company-profile">
+          <AuthenticatedLayout title="Company Profile">
+            <CompanyProfile />
+          </AuthenticatedLayout>
+        </Route>
 
-          <Route path="/test-notifications">
-            <AuthenticatedLayout title="Test Notifications">
-              <TestNotifications />
-            </AuthenticatedLayout>
-          </Route>
-        </>
-      )}
+        <Route path="/test-notifications">
+          <AuthenticatedLayout title="Test Notifications">
+            <TestNotifications />
+          </AuthenticatedLayout>
+        </Route>
+      </AuthenticatedRoute>
 
       <Route component={NotFound} />
     </Switch>
@@ -149,6 +169,20 @@ function Router() {
 }
 
 function App() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: (failureCount, error) => {
+          if (error instanceof Error && error.message.includes('Unauthorized')) {
+            return false;
+          }
+          return failureCount < 3;
+        },
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+      },
+    },
+  });
   return (
     <QueryClientProvider client={queryClient}>
       <TourProvider>

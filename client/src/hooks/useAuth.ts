@@ -15,16 +15,16 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      // Clear auth cache regardless of API response
+      // Clear auth cache first
       queryClient.setQueryData(["/api/auth/user"], null);
       queryClient.clear();
+      
+      // Redirect to logout endpoint (this will handle server-side logout and redirect)
+      window.location.href = "/api/logout";
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Force redirect even if there's an error
+      window.location.href = "/api/logout";
     }
   };
 

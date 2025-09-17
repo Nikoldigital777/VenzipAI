@@ -299,6 +299,7 @@ export default function Onboarding() {
   const [, navigate] = useLocation(); // Changed from setLocation to navigate for clarity
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isReturningUser, setIsReturningUser] = useState(false);
   const [companyData, setCompanyData] = useState<CompanyData>({
     name: "",
     industry: "",
@@ -344,6 +345,30 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (existingCompany) {
+      // Check if user has already completed onboarding
+      const hasCompletedOnboarding = !!(
+        existingCompany.name && 
+        existingCompany.industry && 
+        existingCompany.size && 
+        existingCompany.contactEmail &&
+        existingCompany.selectedFrameworks &&
+        existingCompany.selectedFrameworks.length > 0
+      );
+
+      if (hasCompletedOnboarding) {
+        setIsReturningUser(true);
+        toast({
+          title: "Welcome back!",
+          description: "Your profile is already set up. Redirecting to dashboard...",
+        });
+        // Redirect to dashboard after a brief delay
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+        return;
+      }
+
+      // If not fully completed, populate existing data
       setCompanyData({
         name: existingCompany.name || "",
         industry: existingCompany.industry || "",
@@ -353,7 +378,7 @@ export default function Onboarding() {
       });
       setSelectedFrameworks(existingCompany.selectedFrameworks || []);
     }
-  }, [existingCompany]);
+  }, [existingCompany, navigate, toast]);
 
   const frameworksFromInit = initData?.frameworks || []; // Original frameworks data
 
@@ -575,6 +600,20 @@ export default function Onboarding() {
   }, 0);
 
   // --- Main Render Logic ---
+  
+  // Show loading for returning users
+  if (isReturningUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 relative overflow-hidden flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-venzip-primary mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back!</h2>
+          <p className="text-gray-600">Your profile is already configured. Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 relative overflow-hidden">
       {/* Background decoration */}

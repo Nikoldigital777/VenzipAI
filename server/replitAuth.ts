@@ -173,13 +173,33 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+    req.logout((err) => {
+      if (err) {
+        console.error("Error during logout:", err);
+      }
+      
+      // Destroy the session completely
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+        }
+        
+        // Clear the session cookie
+        res.clearCookie('connect.sid');
+        
+        // For development, just redirect to landing page
+        if (process.env.NODE_ENV === 'development') {
+          res.redirect('/landing');
+        } else {
+          // In production, use the OAuth end session URL
+          res.redirect(
+            client.buildEndSessionUrl(config, {
+              client_id: process.env.REPL_ID!,
+              post_logout_redirect_uri: `${req.protocol}://${req.hostname}/landing`,
+            }).href
+          );
+        }
+      });
     });
   });
 
