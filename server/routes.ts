@@ -3416,11 +3416,12 @@ export async function registerRoutes(app: Express) {
         });
       }
 
-      // Insert company data with selected frameworks
+      // Insert company data with selected frameworks and completion flag
       const companyData = insertCompanySchema.parse({ 
         ...company, 
         userId,
-        selectedFrameworks: frameworks
+        selectedFrameworks: frameworks,
+        onboardingCompleted: true // Mark onboarding as completed
       });
       const companyRecord = await storage.upsertCompany(companyData);
       console.log("Company record created/updated:", companyRecord.id);

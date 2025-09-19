@@ -352,7 +352,8 @@ export default function Onboarding() {
         existingCompany.size && 
         existingCompany.contactEmail &&
         existingCompany.selectedFrameworks &&
-        existingCompany.selectedFrameworks.length > 0
+        existingCompany.selectedFrameworks.length > 0 &&
+        existingCompany.onboardingCompleted !== false // Check explicit completion flag
       );
 
       if (hasCompletedOnboarding) {
@@ -361,10 +362,8 @@ export default function Onboarding() {
           title: "Welcome back!",
           description: "Your profile is already set up. Redirecting to dashboard...",
         });
-        // Redirect to dashboard after a brief delay
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 2000);
+        // Redirect immediately instead of delay
+        navigate("/dashboard");
         return;
       }
 

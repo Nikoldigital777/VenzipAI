@@ -7,8 +7,8 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     retry: false,
-    refetchOnMount: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: true, // Always check on mount for onboarding status
+    staleTime: 1 * 60 * 1000, // Reduce to 1 minute for better onboarding tracking
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes

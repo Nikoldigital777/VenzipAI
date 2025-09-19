@@ -344,6 +344,8 @@ export const insertCompanySchema = createInsertSchema(companies).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  onboardingCompleted: z.boolean().optional().default(true),
 });
 
 export const insertFrameworkProgressSchema = createInsertSchema(frameworkProgress).omit({

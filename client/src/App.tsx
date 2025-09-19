@@ -78,6 +78,12 @@ function Router() {
     return null;
   }
 
+  // For authenticated users, check if they've completed onboarding
+  if (isAuthenticated && location === '/onboarding') {
+    // Let onboarding component handle its own redirect logic
+    // Don't interfere here to avoid routing conflicts
+  }
+
   return (
     <Switch>
       {/* Public routes */}
