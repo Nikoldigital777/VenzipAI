@@ -465,7 +465,7 @@ export default function Onboarding() {
 
   const handleFinish = async () => {
     // Validate required data
-    if (!companyData.name || !companyData.contactEmail) {
+    if (!companyData.name || !companyData.contactEmail || !companyData.industry || !companyData.size) {
       toast({
         title: "❌ Missing Information",
         description: "Please complete your company profile before continuing.",
@@ -499,7 +499,10 @@ export default function Onboarding() {
         },
         credentials: "include", // Include cookies for authentication
         body: JSON.stringify({
-          company: companyData,
+          company: {
+            ...companyData,
+            selectedFrameworks: selectedFrameworks
+          },
           frameworks: selectedFrameworks,
           aiEnabled,
         }),
@@ -511,7 +514,7 @@ export default function Onboarding() {
       if (response.ok && result.success) {
         toast({
           title: "🎉 Setup Complete!",
-          description: `Your compliance workspace is ready with ${result.totalTasks} tasks generated.`,
+          description: `Your compliance workspace is ready with ${result.totalTasks || 'multiple'} tasks generated.`,
         });
         
         // Invalidate queries to refresh data
@@ -902,7 +905,7 @@ export default function Onboarding() {
             {/* Step 4: Task Preview */}
             {currentStep === 4 && (
               <TaskPreview 
-                selectedFrameworks={companyData.selectedFrameworks}
+                selectedFrameworks={selectedFrameworks}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
                 handleFinish={handleFinish}
