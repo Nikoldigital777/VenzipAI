@@ -259,7 +259,14 @@ export class DatabaseStorage implements IStorage {
 
   // Framework operations
   async getAllFrameworks(): Promise<Framework[]> {
-    return await db.select().from(frameworks);
+    try {
+      const allFrameworks = await db.select().from(frameworks);
+      console.log(`📊 Storage: Found ${allFrameworks.length} frameworks in database`);
+      return allFrameworks;
+    } catch (error) {
+      console.error('❌ Error in getAllFrameworks:', error);
+      throw error;
+    }
   }
 
   async getFrameworksByIds(ids: string[]): Promise<Framework[]> {

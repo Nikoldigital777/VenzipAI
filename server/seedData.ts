@@ -7,6 +7,87 @@ interface Framework {
   name: string;
   displayName: string;
   description: string;
+  complexity: string;
+  estimatedTimeMonths: number;
+  totalControls: number;
+  icon: string;
+  color: string;
+}
+
+const frameworksData: Framework[] = [
+  {
+    id: 'soc2',
+    name: 'soc2',
+    displayName: 'SOC 2',
+    description: 'System and Organization Controls for service organizations, focusing on security, availability, processing integrity, confidentiality, and privacy.',
+    complexity: 'medium',
+    estimatedTimeMonths: 6,
+    totalControls: 64,
+    icon: '🛡️',
+    color: '#4ECDC4'
+  },
+  {
+    id: 'iso27001',
+    name: 'iso27001',
+    displayName: 'ISO 27001',
+    description: 'International standard for information security management systems (ISMS), providing a systematic approach to managing sensitive information.',
+    complexity: 'high',
+    estimatedTimeMonths: 12,
+    totalControls: 114,
+    icon: '📜',
+    color: '#44D9E8'
+  },
+  {
+    id: 'hipaa',
+    name: 'hipaa',
+    displayName: 'HIPAA',
+    description: 'Health Insurance Portability and Accountability Act, ensuring the protection of sensitive patient health information.',
+    complexity: 'medium',
+    estimatedTimeMonths: 4,
+    totalControls: 18,
+    icon: '🏥',
+    color: '#52E5A3'
+  },
+  {
+    id: 'scf',
+    name: 'scf',
+    displayName: 'SCF (Secure Controls Framework)',
+    description: 'Comprehensive cybersecurity control framework covering multiple domains of security controls.',
+    complexity: 'high',
+    estimatedTimeMonths: 10,
+    totalControls: 200,
+    icon: '🔐',
+    color: '#FF8C42'
+  }
+];
+
+export async function seedFrameworks() {
+  try {
+    console.log('🌱 Seeding frameworks...');
+    
+    // Check if frameworks already exist
+    const existingFrameworks = await db.select().from(frameworks);
+    if (existingFrameworks.length > 0) {
+      console.log('📊 Frameworks already seeded, skipping...');
+      return existingFrameworks;
+    }
+
+    // Insert frameworks
+    const insertedFrameworks = await db.insert(frameworks).values(frameworksData).returning();
+    console.log(`✅ Successfully seeded ${insertedFrameworks.length} frameworks`);
+    
+    return insertedFrameworks;
+  } catch (error) {
+    console.error('❌ Error seeding frameworks:', error);
+    throw error;
+  }
+}
+
+interface Framework {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string;
   complexity: 'low' | 'medium' | 'high';
   estimatedTimeMonths: number;
   totalControls: number;

@@ -58,7 +58,11 @@ app.use((req, res, next) => {
       // Continue but log the error
     }
 
-    // Run comprehensive seed data with proper error handling
+    // Seed frameworks first
+    const { seedFrameworks } = await import('./seedData');
+    await seedFrameworks();
+
+    // Seed compliance data
     try {
       const { seedComplianceData } = await import("./seedComplianceData");
       await seedComplianceData();

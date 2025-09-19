@@ -85,56 +85,21 @@ interface AIChecklist {
   }[];
 }
 
-// Merging frameworks data from original and edited code, prioritizing edited for new structure
-const frameworks: Framework[] = [
-  {
-    id: "iso27001",
-    name: "ISO 27001",
-    description: "Information Security Management System (Clauses 4-10)",
-    complexity: "Medium",
-    estimatedTime: "3-6 months",
-    tasksCount: 114,
-    icon: Shield,
-    color: "from-blue-500 to-blue-600",
-    estimatedTimeMonths: 4.5 // Example merge
-  },
-  {
-    id: "hipaa",
-    name: "HIPAA Security Rule",
-    description: "Healthcare data protection and privacy compliance",
-    complexity: "Medium-High",
-    estimatedTime: "3-5 months",
-    tasksCount: 50,
-    icon: FileText,
-    color: "from-green-500 to-green-600",
-    estimatedTimeMonths: 4 // Example merge
-  },
-  {
-    id: "soc2",
-    name: "SOC 2 Type II",
-    description: "Trust Services Criteria - Security Controls",
-    complexity: "High",
-    estimatedTime: "4-6 months",
-    tasksCount: 80,
-    icon: Lock,
-    color: "from-purple-500 to-purple-600",
-    estimatedTimeMonths: 5 // Example merge
-  },
-  {
-    id: "scf",
-    name: "SCF (Secure Control Framework)",
-    description: "Comprehensive cybersecurity control framework",
-    complexity: "High",
-    estimatedTime: "6+ months",
-    tasksCount: 200,
-    icon: Target,
-    color: "from-orange-500 to-orange-600",
-    estimatedTimeMonths: 6 // Example merge
-  },
-  // Including frameworks from the original code if they are not defined in the edited part or if they are distinct
-  // For example, if the original had 'PCI DSS' and it's not in the edited part, we would add it here.
-  // Assuming for now that the edited list is comprehensive for the new flow.
-];
+// Use dynamic frameworks from API with fallback
+  const frameworks = frameworksFromAPI?.map((fw: any) => ({
+    id: fw.id,
+    name: fw.displayName,
+    description: fw.description,
+    complexity: fw.complexity,
+    estimatedTime: `${fw.estimatedTimeMonths} months`,
+    tasksCount: fw.totalControls,
+    icon: fw.name === 'soc2' ? Shield : 
+          fw.name === 'iso27001' ? FileText :
+          fw.name === 'hipaa' ? Lock :
+          fw.name === 'scf' ? Target : Shield,
+    color: fw.color || "from-blue-500 to-blue-600",
+    estimatedTimeMonths: fw.estimatedTimeMonths
+  })) || [];
 
 // Redefining Framework interface to match edited code, while keeping original properties if needed
 interface Framework {
@@ -372,7 +337,19 @@ export default function Onboarding() {
     }
   }, [existingCompany, navigate, toast]);
 
-  const frameworksFromInit = initData?.frameworks || []; // Original frameworks data
+  // Load frameworks properly from API
+  const { data: frameworksFromAPI, isLoading: frameworksLoading } = useQuery({
+    queryKey: ["/api/frameworks"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/frameworks");
+      if (!response.ok) {
+        throw new Error("Failed to fetch frameworks");
+      }
+      return response.json();
+    },
+    retry: 3,
+    retryDelay: 1000
+  });
 
   // --- Mutations from original code ---
   const generateChecklistMutation = useMutation({
@@ -672,6 +649,19 @@ export default function Onboarding() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-venzip-primary mx-auto mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back!</h2>
           <p className="text-gray-600">Your profile is already configured. Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading if frameworks are still loading
+  if (frameworksLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 relative overflow-hidden flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-venzip-primary mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Frameworks...</h2>
+          <p className="text-gray-600">Preparing your compliance options...</p>
         </div>
       </div>
     );

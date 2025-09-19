@@ -1077,7 +1077,18 @@ export async function registerRoutes(app: Express) {
   app.get('/api/frameworks', isAuthenticated, async (req: any, res) => {
     try {
       const frameworks = await storage.getAllFrameworks();
-      res.json(frameworks);
+      console.log(`📊 Returning ${frameworks.length} frameworks to client`);
+      
+      // Ensure we have frameworks, if not seed them
+      if (frameworks.length === 0) {
+        console.log('⚠️ No frameworks found, attempting to seed...');
+        const { seedFrameworks } = await import('./seedData');
+        await seedFrameworks();
+        const newFrameworks = await storage.getAllFrameworks();
+        res.json(newFrameworks);
+      } else {
+        res.json(frameworks);
+      }
     } catch (error) {
       console.error("Error fetching frameworks:", error);
       res.status(500).json({ message: "Failed to fetch frameworks" });
