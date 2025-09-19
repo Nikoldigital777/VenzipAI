@@ -1,0 +1,62 @@
+Perfect! Let me analyze the current state and plan Phase 4 implementation systematically. Based on my examination of the codebase, here's what I found:
+
+Current State Analysis:
+1. ❌ Compliance % Calculation Problem (Lines 625-642 in server/routes.ts):
+
+// Current calculation only counts uploaded documents
+const bonus = Math.min(35, documents.length * 2 + Math.floor(chatMessagesData.length / 3));
+Issue: documents.length only includes manually uploaded files
+Missing: Generated policies are NOT counted toward compliance percentage
+2. ❌ Evidence Dashboard Gap (evidence-mapping-dashboard.tsx):
+
+Fetches from /api/evidence/mappings but may not include policy mappings
+Shows uploaded files but potentially missing system-generated policies
+3. ✅ Infrastructure Ready (From Phase 2):
+
+policyEvidenceMapper creates document entries for policies ✅
+Creates evidence mappings linking policies to controls ✅
+But these aren't surfacing in compliance calculations ❌
+Phase 4: Complete Evidence Integration Plan
+Task 5a: Include Generated Policies in Compliance % Calculation
+Problem: Compliance score ignores generated policies
+Fix: Update /api/summary endpoint to include policy contributions
+
+Implementation:
+
+// Current (server/routes.ts:628)
+const bonus = documents.length * 2 + Math.floor(chatMessages.length / 3);
+// Should be:  
+const policyDocuments = await storage.getGeneratedPolicies(company.id);
+const totalEvidence = documents.length + policyDocuments.length;
+const bonus = totalEvidence * 2 + Math.floor(chatMessages.length / 3);
+Task 5b: Show Policies in Evidence Mapping Dashboard
+Problem: Evidence dashboard doesn't display policy mappings
+Fix: Update evidence mappings query to include policy-generated evidence
+
+Implementation:
+
+// Update /api/evidence/mappings to include policy mappings
+// Filter evidence_mappings table to include policy documents
+Task 5c: Update Coverage Indicators
+Problem: Framework progress doesn't count policy coverage
+Fix: Include policy evidence in coverage calculations
+
+Areas to Update:
+
+Framework progress calculations
+Evidence coverage percentages
+Control completion tracking
+Expected MVP Demo Flow After Phase 4:
+✅ Onboarding → Framework Selection (ISO 27001/HIPAA)
+✅ Auto-generate baseline policy (12-page professional document)  
+✅ Policy automatically mapped to controls as evidence
+✅ Dashboard shows "Your ISO 27001 Information Security Policy - Ready"
+✅ Documents page lists generated policies + uploaded evidence
+🎯 Compliance % includes policy coverage (NEW)
+🎯 Evidence dashboard shows policies as mapped evidence (NEW)  
+🎯 Coverage indicators reflect policy contributions (NEW)
+✅ Download policy as professional document
+Implementation Priority:
+Fix compliance calculation (highest impact - immediately shows value)
+Update evidence mappings display (visibility in evidence dashboard)
+Update coverage indicators (complete integration)
