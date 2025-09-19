@@ -142,19 +142,33 @@ router.get("/", isAuthenticated, async (req, res) => {
     
     const filters = taskFilterSchema.parse(req.query);
     
-    // Get all user tasks
+    // Get all user tasks with enhanced data
     let tasks = await storage.getTasksByUserId(userId);
     
+    // Parse JSON fields and add computed fields
+    tasks = tasks.map(task => ({
+      ...task,
+      tags: task.tags ? (typeof task.tags === 'string' ? JSON.parse(task.tags) : task.tags) : [],
+      dependencies: task.dependencies ? (typeof task.dependencies === 'string' ? JSON.parse(task.dependencies) : task.dependencies) : [],
+      progressPercentage: task.progressPercentage || 0,
+      // Add framework info if available
+      framework: {
+        id: task.frameworkId || '',
+        name: task.frameworkId || 'General',
+        displayName: task.frameworkId || 'General Tasks'
+      }
+    }));
+    
     // Apply filters
-    if (filters.status) {
+    if (filters.status && filters.status !== 'all') {
       tasks = tasks.filter(task => task.status === filters.status);
     }
     
-    if (filters.priority) {
+    if (filters.priority && filters.priority !== 'all') {
       tasks = tasks.filter(task => task.priority === filters.priority);
     }
     
-    if (filters.frameworkId) {
+    if (filters.frameworkId && filters.frameworkId !== 'all') {
       tasks = tasks.filter(task => task.frameworkId === filters.frameworkId);
     }
     
@@ -162,9 +176,52 @@ router.get("/", isAuthenticated, async (req, res) => {
       const searchLower = filters.search.toLowerCase();
       tasks = tasks.filter(task => 
         task.title.toLowerCase().includes(searchLower) ||
-        (task.description && task.description.toLowerCase().includes(searchLower))
+        (task.description && task.description.toLowerCase().includes(searchLower)) ||
+        (task.tags && task.tags.some((tag: string) => tag.toLowerCase().includes(searchLower)))
       );
     }
+    
+    // Apply sorting
+    const sortBy = filters.sortBy || 'dueDate';
+    const sortOrder = filters.sortOrder || 'asc';
+    
+    tasks.sort((a, b) => {
+      let aVal, bVal;
+      
+      switch (sortBy) {
+        case 'dueDate':
+          aVal = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+          bVal = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+          break;
+        case 'priority':
+          const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+          aVal = priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
+          bVal = priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
+          break;
+        case 'status':
+          const statusOrder = { completed: 4, under_review: 3, in_progress: 2, not_started: 1, blocked: 0 };
+          aVal = statusOrder[a.status as keyof typeof statusOrder] || 0;
+          bVal = statusOrder[b.status as keyof typeof statusOrder] || 0;
+          break;
+        case 'title':
+          aVal = a.title.toLowerCase();
+          bVal = b.title.toLowerCase();
+          break;
+        case 'createdAt':
+          aVal = new Date(a.createdAt).getTime();
+          bVal = new Date(b.createdAt).getTime();
+          break;
+        default:
+          aVal = 0;
+          bVal = 0;
+      }
+      
+      if (typeof aVal === 'string') {
+        return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      
+      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
     
     // Apply pagination
     const total = tasks.length;
@@ -192,10 +249,17 @@ router.post("/", isAuthenticated, async (req, res) => {
     const user = req.user as any;
     const userId = user.claims.sub;
     
+    // Get user's company for companyId
+    const company = await storage.getCompanyByUserId(userId);
+    
     const taskData = insertTaskSchema.parse({
       ...req.body,
       userId,
-      createdById: userId
+      companyId: company?.id,
+      createdById: userId,
+      // Handle tags and dependencies as JSON strings
+      tags: req.body.tags ? JSON.stringify(req.body.tags) : undefined,
+      dependencies: req.body.dependencies ? JSON.stringify(req.body.dependencies) : undefined,
     });
     
     const newTask = await storage.createTask(taskData);
@@ -203,6 +267,9 @@ router.post("/", isAuthenticated, async (req, res) => {
 
   } catch (error) {
     console.error("Error creating task:", error);
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ message: "Invalid task data", errors: error.errors });
+    }
     res.status(500).json({ message: "Failed to create task" });
   }
 });
@@ -351,6 +418,213 @@ router.post("/:id/attachments", isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error("Error adding attachment:", error);
     res.status(500).json({ message: "Failed to add attachment" });
+  }
+});
+
+// POST /api/tasks/ai-analysis/analyze - AI task analysis endpoint
+router.post("/ai-analysis/analyze", isAuthenticated, async (req, res) => {
+  try {
+    const user = req.user as any;
+    const userId = user.claims.sub;
+    
+    // Get user's tasks
+    const tasks = await storage.getTasksByUserId(userId);
+    
+    // Get company info for context
+    let companyInfo = {};
+    try {
+      const company = await storage.getCompanyByUserId(userId);
+      if (company) {
+        companyInfo = {
+          industry: company.industry,
+          size: company.size,
+          frameworks: [] // You might want to get this from frameworks_companies table
+        };
+      }
+    } catch (error) {
+      console.log("Company info not available for analysis");
+    }
+    
+    // Import the AI analysis function
+    const { analyzeTaskPriority } = require('../anthropic');
+    
+    // Analyze tasks with AI
+    const analysis = await analyzeTaskPriority(tasks, companyInfo);
+    
+    // Update tasks with AI insights
+    for (const analyzedTask of analysis.analyzedTasks) {
+      try {
+        await storage.updateTask(analyzedTask.id, {
+          aiPriorityScore: analyzedTask.aiPriorityScore,
+          aiReasoning: analyzedTask.aiReasoning,
+          aiNextAction: analyzedTask.aiNextAction,
+          aiAnalyzedAt: new Date()
+        });
+      } catch (updateError) {
+        console.error("Error updating task with AI insights:", updateError);
+      }
+    }
+    
+    res.json({
+      message: "Tasks analyzed successfully",
+      analyzedCount: analysis.analyzedTasks.length,
+      analysis: analysis
+    });
+
+  } catch (error) {
+    console.error("Error analyzing tasks:", error);
+    res.status(500).json({ message: "Failed to analyze tasks" });
+  }
+});
+
+// GET /api/tasks/ai-recommendations/weekly - Weekly AI recommendations
+router.get("/ai-recommendations/weekly", isAuthenticated, async (req, res) => {
+  try {
+    const user = req.user as any;
+    const userId = user.claims.sub;
+    
+    // Get user's incomplete tasks
+    const allTasks = await storage.getTasksByUserId(userId);
+    const incompleteTasks = allTasks.filter(task => task.status !== 'completed');
+    
+    // Sort by AI priority score if available
+    const prioritizedTasks = incompleteTasks
+      .filter(task => task.aiPriorityScore)
+      .sort((a, b) => (b.aiPriorityScore || 0) - (a.aiPriorityScore || 0))
+      .slice(0, 5); // Top 5 recommendations
+    
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    
+    const recommendations = prioritizedTasks.map(task => ({
+      taskId: task.id,
+      taskTitle: task.title,
+      framework: task.frameworkId || 'General',
+      priority: task.priority,
+      recommendationReason: task.aiReasoning || 'High priority task requiring attention',
+      urgencyScore: task.aiPriorityScore || 50,
+      impactScore: task.aiPriorityScore || 50,
+      estimatedHours: task.estimatedHours || 2
+    }));
+    
+    const totalEstimatedHours = recommendations.reduce((sum, rec) => sum + rec.estimatedHours, 0);
+    
+    res.json({
+      weekStart: weekStart.toISOString(),
+      weekEnd: weekEnd.toISOString(),
+      totalRecommendedHours: totalEstimatedHours,
+      recommendations,
+      summary: `Focus on ${recommendations.length} high-priority tasks this week to maintain compliance momentum.`,
+      focusAreas: [...new Set(recommendations.map(r => r.framework))]
+    });
+
+  } catch (error) {
+    console.error("Error getting weekly recommendations:", error);
+    res.status(500).json({ message: "Failed to get weekly recommendations" });
+  }
+});
+
+// GET /api/tasks/ai-analysis/deadlines - Deadline intelligence
+router.get("/ai-analysis/deadlines", isAuthenticated, async (req, res) => {
+  try {
+    const user = req.user as any;
+    const userId = user.claims.sub;
+    
+    const tasks = await storage.getTasksByUserId(userId);
+    const now = new Date();
+    
+    // Overdue tasks
+    const overdueTasks = tasks
+      .filter(task => task.dueDate && new Date(task.dueDate) < now && task.status !== 'completed')
+      .map(task => {
+        const daysOverdue = Math.ceil((now.getTime() - new Date(task.dueDate!).getTime()) / (1000 * 60 * 60 * 24));
+        return {
+          id: task.id,
+          title: task.title,
+          priority: task.priority,
+          framework: task.frameworkId || 'General',
+          dueDate: task.dueDate!,
+          status: task.status,
+          progressPercentage: task.progressPercentage || 0,
+          daysOverdue,
+          riskLevel: daysOverdue > 14 ? 'critical' : daysOverdue > 7 ? 'high' : 'medium'
+        };
+      });
+    
+    // Upcoming deadlines (next 7 days)
+    const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const upcomingDeadlines = tasks
+      .filter(task => task.dueDate && new Date(task.dueDate) <= oneWeekFromNow && new Date(task.dueDate) >= now && task.status !== 'completed')
+      .map(task => {
+        const daysUntilDue = Math.ceil((new Date(task.dueDate!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return {
+          id: task.id,
+          title: task.title,
+          priority: task.priority,
+          framework: task.frameworkId || 'General',
+          dueDate: task.dueDate!,
+          status: task.status,
+          progressPercentage: task.progressPercentage || 0,
+          daysUntilDue,
+          riskLevel: daysUntilDue <= 2 ? 'high' : daysUntilDue <= 5 ? 'medium' : 'low'
+        };
+      });
+    
+    // At risk tasks (low progress with approaching deadlines)
+    const atRiskTasks = tasks
+      .filter(task => task.dueDate && (task.progressPercentage || 0) < 50 && task.status !== 'completed')
+      .map(task => {
+        const daysUntilDue = Math.ceil((new Date(task.dueDate!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return {
+          id: task.id,
+          title: task.title,
+          priority: task.priority,
+          framework: task.frameworkId || 'General',
+          dueDate: task.dueDate!,
+          status: task.status,
+          progressPercentage: task.progressPercentage || 0,
+          daysUntilDue,
+          riskLevel: (task.progressPercentage || 0) < 25 && daysUntilDue <= 7 ? 'critical' : 'medium'
+        };
+      })
+      .filter(task => task.daysUntilDue > 0 && task.daysUntilDue <= 14);
+    
+    const criticalTasks = [...overdueTasks, ...upcomingDeadlines, ...atRiskTasks]
+      .filter(task => task.riskLevel === 'critical').length;
+    
+    const avgProgressBehind = tasks
+      .filter(task => task.dueDate && task.status !== 'completed')
+      .reduce((sum, task, _, arr) => sum + (100 - (task.progressPercentage || 0)) / arr.length, 0);
+    
+    const aiRecommendations = [];
+    if (overdueTasks.length > 0) {
+      aiRecommendations.push(`Prioritize ${overdueTasks.length} overdue tasks immediately to avoid compliance penalties.`);
+    }
+    if (upcomingDeadlines.length > 0) {
+      aiRecommendations.push(`Plan resources for ${upcomingDeadlines.length} tasks due this week.`);
+    }
+    if (atRiskTasks.length > 0) {
+      aiRecommendations.push(`Monitor ${atRiskTasks.length} at-risk tasks that may miss deadlines.`);
+    }
+    
+    res.json({
+      overdueTasks,
+      upcomingDeadlines,
+      atRiskTasks,
+      summary: {
+        totalOverdue: overdueTasks.length,
+        totalUpcoming: upcomingDeadlines.length,
+        criticalTasks,
+        averageProgressBehind: Math.round(avgProgressBehind)
+      },
+      aiRecommendations
+    });
+
+  } catch (error) {
+    console.error("Error getting deadline intelligence:", error);
+    res.status(500).json({ message: "Failed to get deadline intelligence" });
   }
 });
 
