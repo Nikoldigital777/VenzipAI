@@ -30,10 +30,14 @@ export function useAuth() {
     }
   };
 
+  // Check if user has completed onboarding
+  const hasCompletedOnboarding = user ? user.onboardingCompleted : false;
+
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
+    hasCompletedOnboarding,
     error,
     logout,
   };

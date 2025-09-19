@@ -57,7 +57,7 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
 }
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, hasCompletedOnboarding } = useAuth();
   const [location, navigate] = useLocation();
 
   // Show loading state while checking authentication
@@ -78,10 +78,19 @@ function Router() {
     return null;
   }
 
-  // For authenticated users, check if they've completed onboarding
-  if (isAuthenticated && location === '/onboarding') {
-    // Let onboarding component handle its own redirect logic
-    // Don't interfere here to avoid routing conflicts
+  // For authenticated users, handle onboarding flow
+  if (isAuthenticated) {
+    // If user has completed onboarding but is on onboarding page, redirect to dashboard
+    if (hasCompletedOnboarding && location === '/onboarding') {
+      navigate('/dashboard');
+      return null;
+    }
+    
+    // If user hasn't completed onboarding and is trying to access protected routes, redirect to onboarding
+    if (!hasCompletedOnboarding && !['/onboarding', '/landing', '/'].includes(location)) {
+      navigate('/onboarding');
+      return null;
+    }
   }
 
   return (

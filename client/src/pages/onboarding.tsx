@@ -345,16 +345,8 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (existingCompany) {
-      // Check if user has already completed onboarding
-      const hasCompletedOnboarding = !!(
-        existingCompany.name && 
-        existingCompany.industry && 
-        existingCompany.size && 
-        existingCompany.contactEmail &&
-        existingCompany.selectedFrameworks &&
-        existingCompany.selectedFrameworks.length > 0 &&
-        existingCompany.onboardingCompleted !== false // Check explicit completion flag
-      );
+      // Check if user has already completed onboarding using the explicit flag
+      const hasCompletedOnboarding = existingCompany.onboardingCompleted === true;
 
       if (hasCompletedOnboarding) {
         setIsReturningUser(true);
@@ -362,12 +354,12 @@ export default function Onboarding() {
           title: "Welcome back!",
           description: "Your profile is already set up. Redirecting to dashboard...",
         });
-        // Redirect immediately instead of delay
+        // Redirect immediately
         navigate("/dashboard");
         return;
       }
 
-      // If not fully completed, populate existing data
+      // If not fully completed, populate existing data for continuation
       setCompanyData({
         name: existingCompany.name || "",
         industry: existingCompany.industry || "",

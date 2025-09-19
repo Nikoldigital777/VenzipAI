@@ -3599,16 +3599,17 @@ export async function registerRoutes(app: Express) {
         }
       }
 
-      // Update user preferences
+      // Update user to mark onboarding as completed
       try {
         await storage.updateUser(userId, {
           aiEnabled: aiEnabled !== undefined ? aiEnabled : true,
           onboardingCompleted: true,
         });
-        console.log("User preferences updated");
+        console.log("User onboarding marked as completed");
       } catch (userError) {
-        console.error("Error updating user:", userError);
-        // Don't fail the entire process if user update fails
+        console.error("Error updating user onboarding status:", userError);
+        // Don't fail the entire process if user update fails, but log it prominently
+        console.warn("⚠️ User onboarding completion flag not set - user may need to redo onboarding");
       }
 
       console.log(`Onboarding completed successfully - processed ${successfulFrameworks}/${frameworks.length} frameworks, created ${totalTasks} tasks`);
