@@ -51,7 +51,7 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-  /* Venzip Brand Colors */
+  /* Venzip Brand Colors - Light Mode */
   --venzip-primary: hsl(177, 54%, 59%); /* #4ECDC4 */
   --venzip-primary-dark: hsl(177, 54%, 49%);
   --venzip-primary-light: hsl(177, 54%, 69%);
@@ -64,50 +64,63 @@
 }
 
 .dark {
-  --background: hsl(0, 0%, 0%);
-  --foreground: hsl(200, 6.6667%, 91.1765%);
-  --card: hsl(228, 9.8039%, 10%);
-  --card-foreground: hsl(0, 0%, 85.0980%);
-  --popover: hsl(0, 0%, 0%);
-  --popover-foreground: hsl(200, 6.6667%, 91.1765%);
+  --background: hsl(0, 0%, 3.9%); /* Slightly lighter than pure black */
+  --foreground: hsl(0, 0%, 96%); /* High contrast white */
+  --card: hsl(0, 0%, 7%); /* Dark card background */
+  --card-foreground: hsl(0, 0%, 96%);
+  --popover: hsl(0, 0%, 7%);
+  --popover-foreground: hsl(0, 0%, 96%);
   --primary: hsl(203.7736, 87.6033%, 52.5490%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(195.0000, 15.3846%, 94.9020%);
-  --secondary-foreground: hsl(210, 25%, 7.8431%);
-  --muted: hsl(0, 0%, 9.4118%);
-  --muted-foreground: hsl(210, 3.3898%, 46.2745%);
-  --accent: hsl(205.7143, 70%, 7.8431%);
-  --accent-foreground: hsl(203.7736, 87.6033%, 52.5490%);
-  --destructive: hsl(356.3033, 90.5579%, 54.3137%);
+  --secondary: hsl(0, 0%, 14.9%); /* Darker secondary */
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --muted: hsl(0, 0%, 14.9%); /* Muted elements */
+  --muted-foreground: hsl(0, 0%, 65%); /* Better readability */
+  --accent: hsl(0, 0%, 14.9%);
+  --accent-foreground: hsl(177, 54%, 65%); /* Venzip primary for dark */
+  --destructive: hsl(0, 85%, 60%); /* Adjusted for dark mode */
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(210, 5.2632%, 14.9020%);
-  --input: hsl(207.6923, 27.6596%, 18.4314%);
-  --ring: hsl(202.8169, 89.1213%, 53.1373%);
-  --chart-1: hsl(203.8863, 88.2845%, 53.1373%);
-  --chart-2: hsl(159.7826, 100%, 36.0784%);
-  --chart-3: hsl(42.0290, 92.8251%, 56.2745%);
-  --chart-4: hsl(147.1429, 78.5047%, 41.9608%);
-  --chart-5: hsl(341.4894, 75.2000%, 50.9804%);
-  --sidebar: hsl(228, 9.8039%, 10%);
-  --sidebar-foreground: hsl(0, 0%, 85.0980%);
-  --sidebar-primary: hsl(202.8169, 89.1213%, 53.1373%);
-  --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(205.7143, 70%, 7.8431%);
-  --sidebar-accent-foreground: hsl(203.7736, 87.6033%, 52.5490%);
-  --sidebar-border: hsl(205.7143, 15.7895%, 26.0784%);
-  --sidebar-ring: hsl(202.8169, 89.1213%, 53.1373%);
-  --font-sans: 'Inter', 'Open Sans', sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
-  --radius: 1.3rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169, 89.1213%, 53.1373%, 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(202.8169, 89.1213%, 53.1373%, 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(202.8169, 89.1213%, 53.1373%, 0.00), 0px 1px 2px -1px hsl(202.8169, 89.1213%, 53.1373%, 0.00);
-  --shadow: 0px 2px 0px 0px hsl(202.8169, 89.1213%, 53.1373%, 0.00), 0px 1px 2px -1px hsl(202.8169, 89.1213%, 53.1373%, 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(202.8169, 89.1213%, 53.1373%, 0.00), 0px 2px 4px -1px hsl(202.8169, 89.1213%, 53.1373%, 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(202.8169, 89.1213%, 53.1373%, 0.00), 0px 4px 6px -1px hsl(202.8169, 89.1213%, 53.1373%, 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(202.8169, 89.1213%, 53.1373%, 0.00), 0px 8px 10px -1px hsl(202.8169, 89.1213%, 53.1373%, 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(202.8169, 89.1213%, 53.1373%, 0.00);
+  --border: hsl(0, 0%, 14.9%); /* Subtle borders */
+  --input: hsl(0, 0%, 14.9%); /* Input backgrounds */
+  --ring: hsl(177, 54%, 65%); /* Focus rings with brand color */
+  
+  /* Chart colors optimized for dark mode */
+  --chart-1: hsl(177, 54%, 65%); /* Brighter venzip primary */
+  --chart-2: hsl(148, 75%, 65%); /* Brighter venzip accent */
+  --chart-3: hsl(42, 92%, 70%); /* Brighter warning */
+  --chart-4: hsl(147, 78%, 50%); /* Success green */
+  --chart-5: hsl(341, 75%, 60%); /* Pink/coral */
+  
+  /* Sidebar dark mode */
+  --sidebar: hsl(0, 0%, 7%);
+  --sidebar-foreground: hsl(0, 0%, 96%);
+  --sidebar-primary: hsl(177, 54%, 65%);
+  --sidebar-primary-foreground: hsl(0, 0%, 0%);
+  --sidebar-accent: hsl(0, 0%, 14.9%);
+  --sidebar-accent-foreground: hsl(177, 54%, 65%);
+  --sidebar-border: hsl(0, 0%, 14.9%);
+  --sidebar-ring: hsl(177, 54%, 65%);
+  
+  /* Enhanced Venzip Brand Colors - Dark Mode */
+  --venzip-primary: hsl(177, 54%, 65%); /* Brighter for dark bg */
+  --venzip-primary-dark: hsl(177, 54%, 55%);
+  --venzip-primary-light: hsl(177, 54%, 75%);
+  --venzip-secondary: hsl(187, 78%, 65%); /* Brighter secondary */
+  --venzip-accent: hsl(148, 75%, 65%); /* Brighter accent */
+  --success-green: hsl(161, 100%, 50%); /* Adjusted success */
+  --warning-orange: hsl(21, 100%, 68%); /* Brighter warning */
+  --danger-coral: hsl(0, 85%, 65%); /* Adjusted danger */
+  --info-blue: hsl(207, 88%, 70%); /* Brighter info */
+  
+  /* Shadows for dark mode */
+  --shadow-2xs: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
+  --shadow-xs: 0px 1px 3px 0px rgba(0, 0, 0, 0.8);
+  --shadow-sm: 0px 1px 2px 0px rgba(0, 0, 0, 0.8), 0px 2px 4px -1px rgba(0, 0, 0, 0.8);
+  --shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.8), 0px 4px 6px -2px rgba(0, 0, 0, 0.8);
+  --shadow-md: 0px 4px 6px -1px rgba(0, 0, 0, 0.8), 0px 2px 4px -1px rgba(0, 0, 0, 0.8);
+  --shadow-lg: 0px 10px 15px -3px rgba(0, 0, 0, 0.8), 0px 4px 6px -2px rgba(0, 0, 0, 0.8);
+  --shadow-xl: 0px 20px 25px -5px rgba(0, 0, 0, 0.8), 0px 10px 10px -5px rgba(0, 0, 0, 0.8);
+  --shadow-2xl: 0px 25px 50px -12px rgba(0, 0, 0, 0.9);
 }
 
 @layer base {
@@ -119,9 +132,24 @@
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', sans-serif;
   }
+  
+  /* Opt-in theme transitions for smooth theme switching */
+  .theme-transitioning * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
+  }
+  
+  /* Smooth transitions for commonly themed elements */
+  body, 
+  [class*="bg-"], 
+  [class*="text-"], 
+  [class*="border-"],
+  .glass-card,
+  .glass-morphism {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  }
 }
 
-/* Glassmorphism Effects */
+/* Glassmorphism Effects - Light Mode */
 .glass-morphism {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(20px);
@@ -131,26 +159,50 @@
 }
 
 .glass-morphism-enhanced {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(78, 205, 196, 0.2);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
   transform: translateY(-8px);
+}
+
+/* Glassmorphism Effects - Dark Mode */
+.dark .glass-morphism {
+  background: rgba(10, 10, 10, 0.6);
+  border: 1px solid rgba(78, 205, 196, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+.dark .glass-morphism-enhanced {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(78, 205, 196, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+.dark .glass-card {
+  background: rgba(18, 18, 18, 0.8);
+  border: 1px solid rgba(78, 205, 196, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dark .glass-card:hover {
+  background: rgba(18, 18, 18, 0.9);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
 
 /* Gradient Backgrounds */
@@ -527,22 +579,35 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Light Mode */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(240, 240, 240, 0.8);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(78, 205, 196, 0.3);
+  background: rgba(78, 205, 196, 0.4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: rgba(78, 205, 196, 0.6);
+}
+
+/* Custom scrollbar - Dark Mode */
+.dark ::-webkit-scrollbar-track {
+  background: rgba(30, 30, 30, 0.8);
+}
+
+.dark ::-webkit-scrollbar-thumb {
   background: rgba(78, 205, 196, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(78, 205, 196, 0.7);
 }
 
 /* Custom animations */

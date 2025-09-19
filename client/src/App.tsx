@@ -10,6 +10,8 @@ import { TourGuide } from "@/components/tour/TourGuide";
 import { TourButton } from "@/components/tour/TourButton";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Onboarding from "@/pages/onboarding";
@@ -36,12 +38,15 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur">
           <SidebarTrigger className="-ml-1" />
           <div className="flex items-center gap-2 flex-1">
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
-          <TourButton />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <TourButton />
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           {children}
@@ -167,16 +172,18 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TourProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-          <TourGuide />
-          <TourInitializer />
-        </TooltipProvider>
-      </TourProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="venzip-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <TourProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+            <TourGuide />
+            <TourInitializer />
+          </TooltipProvider>
+        </TourProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
