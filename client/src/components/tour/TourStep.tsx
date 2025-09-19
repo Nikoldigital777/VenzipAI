@@ -27,11 +27,11 @@ interface Position {
   height: number;
 }
 
-export function TourStep({ 
-  target, 
-  title, 
-  content, 
-  placement = 'bottom', 
+export function TourStep({
+  target,
+  title,
+  content,
+  placement = 'bottom',
   showSkip = true,
   offset = 10,
   navigateTo,
@@ -45,16 +45,16 @@ export function TourStep({
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
   const [isAnimating, setIsAnimating] = useState(true);
   const popoverRef = useRef<HTMLDivElement>(null);
-  
+
   // Keyboard navigation handler
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     // Ignore keyboard events when user is typing in input fields
     const target = event.target as HTMLElement;
-    const isInputField = target.tagName === 'INPUT' || 
-                        target.tagName === 'TEXTAREA' || 
+    const isInputField = target.tagName === 'INPUT' ||
+                        target.tagName === 'TEXTAREA' ||
                         target.contentEditable === 'true' ||
                         target.isContentEditable;
-    
+
     if (isInputField) {
       return;
     }
@@ -85,19 +85,19 @@ export function TourStep({
   useEffect(() => {
     // Execute before step callback
     onBeforeStep?.();
-    
+
     return () => {
       // Execute after step callback on cleanup
       onAfterStep?.();
     };
   }, [onBeforeStep, onAfterStep]);
-  
+
   // Setup keyboard navigation
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
-  
+
   // Animation control
   useEffect(() => {
     const timer = setTimeout(() => setIsAnimating(false), 300);
@@ -113,7 +113,7 @@ export function TourStep({
 
     const findTargetElement = (): HTMLElement | null => {
       let targetElement = document.querySelector(target) as HTMLElement;
-      
+
       // Try fallback target if primary target not found
       if (!targetElement && fallbackTarget) {
         targetElement = document.querySelector(fallbackTarget) as HTMLElement;
@@ -121,19 +121,19 @@ export function TourStep({
           console.log(`Primary target ${target} not found, using fallback: ${fallbackTarget}`);
         }
       }
-      
+
       // Try even more generic fallbacks for common cases
       if (!targetElement) {
         if (target.includes('sidebar') || target.includes('nav-')) {
-          targetElement = document.querySelector('aside') || 
+          targetElement = document.querySelector('aside') ||
                          document.querySelector('[data-sidebar="sidebar"]') ||
                          document.querySelector('nav') as HTMLElement;
         } else if (target.includes('button') || target.includes('create')) {
-          targetElement = document.querySelector('button[data-testid*="create"]') || 
+          targetElement = document.querySelector('button[data-testid*="create"]') ||
                          document.querySelector('button:contains("Create")') ||
                          document.querySelector('button:last-of-type') as HTMLElement;
         } else if (target.includes('dashboard') || target.includes('overview')) {
-          targetElement = document.querySelector('main') || 
+          targetElement = document.querySelector('main') ||
                          document.querySelector('.max-w-7xl') ||
                          document.querySelector('.container') as HTMLElement;
         } else if (target.includes('upload')) {
@@ -146,27 +146,27 @@ export function TourStep({
           targetElement = document.querySelector('[data-testid*="chat"]') ||
                          document.querySelector('button[class*="gradient"]') as HTMLElement;
         }
-        
+
         if (targetElement) {
           console.log(`Using generic fallback for ${target}`);
         }
       }
-      
+
       return targetElement;
     };
 
     const attemptTargeting = () => {
       const targetElement = findTargetElement();
-      
+
       if (!targetElement) {
         retryCount++;
-        
+
         if (retryCount < maxRetries) {
           console.log(`Tour target not found (attempt ${retryCount}/${maxRetries}): ${target}`);
           setTimeout(attemptTargeting, retryDelay);
           return;
         }
-        
+
         console.warn(`Tour target not found after ${maxRetries} attempts: ${target}${fallbackTarget ? ` (fallback: ${fallbackTarget})` : ''}`);
         // Auto-advance tour after exhausting retries
         autoAdvanceTimeout = setTimeout(() => {
@@ -188,19 +188,19 @@ export function TourStep({
       };
 
       updatePosition();
-      
+
       // Scroll target into view if it's not visible
-      targetElement.scrollIntoView({ 
-        behavior: 'smooth', 
+      targetElement.scrollIntoView({
+        behavior: 'smooth',
         block: 'center',
-        inline: 'center' 
+        inline: 'center'
       });
 
       // Update position on scroll and resize
       const handleUpdate = () => requestAnimationFrame(updatePosition);
       window.addEventListener('scroll', handleUpdate);
       window.addEventListener('resize', handleUpdate);
-      
+
       // Return cleanup function that removes the exact same listeners
       return () => {
         window.removeEventListener('scroll', handleUpdate);
@@ -270,13 +270,13 @@ export function TourStep({
   return createPortal(
     <div className="fixed inset-0 z-[9999]">
       {/* Overlay with crisp spotlight cutout effect */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/80"
         style={{
           background: `
             radial-gradient(
-              ellipse ${targetPosition.width + 40}px ${targetPosition.height + 40}px at 
-              ${targetPosition.left + targetPosition.width / 2}px 
+              ellipse ${targetPosition.width + 40}px ${targetPosition.height + 40}px at
+              ${targetPosition.left + targetPosition.width / 2}px
               ${targetPosition.top + targetPosition.height / 2}px,
               transparent 0%,
               transparent 35%,
@@ -288,7 +288,7 @@ export function TourStep({
         }}
         onClick={() => showSkip ? setShowSkipConfirm(true) : endTour()}
       />
-      
+
       {/* Highlighted target border */}
       <div
         className="absolute border-4 border-venzip-primary rounded-lg shadow-xl shadow-venzip-primary/50 animate-pulse"
@@ -333,7 +333,7 @@ export function TourStep({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          
+
           {/* Progress indicator */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -345,26 +345,48 @@ export function TourStep({
         </CardHeader>
 
         <CardContent className="pt-0">
-          <p className="text-foreground/80 leading-relaxed mb-6 text-sm">
-            {content}
-          </p>
+          <div className="text-foreground/80 leading-relaxed mb-6 text-sm">
+                    {!targetPosition || (targetPosition.top === window.innerHeight / 2 && targetPosition.left === window.innerWidth / 2) ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                          <AlertTriangle className="h-4 w-4 text-amber-600" />
+                          <span className="text-amber-800 text-sm font-medium">Element not found on this page</span>
+                        </div>
+                        <p className="text-gray-600">{content}</p>
+                        <p className="text-sm text-gray-500">This feature may not be visible on the current page or may require completing previous steps first.</p>
+                      </div>
+                    ) : (
+                      <p>{content}</p>
+                    )}
+                  </div>
 
           {/* Navigation buttons */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex gap-2">
-              {state.currentStep > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={previousStep}
-                  className="flex items-center gap-2"
-                  data-testid="tour-previous-button"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Back
-                </Button>
-              )}
-            </div>
+                {state.currentStep > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={previousStep}
+                    className="flex items-center gap-2"
+                    data-testid="tour-previous-button"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                )}
+                {(!targetPosition || (targetPosition.top === window.innerHeight / 2 && targetPosition.left === window.innerWidth / 2)) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={nextStep}
+                    className="flex items-center gap-2 text-amber-600 border-amber-300 hover:bg-amber-50"
+                    data-testid="tour-skip-step-button"
+                  >
+                    Skip Step
+                  </Button>
+                )}
+              </div>
 
             <div className="flex gap-2">
               {showSkip && (
@@ -379,7 +401,7 @@ export function TourStep({
                   Skip Tour
                 </Button>
               )}
-              
+
               <Button
                 size="sm"
                 onClick={nextStep}
@@ -396,8 +418,8 @@ export function TourStep({
 
       {/* Skip Confirmation Dialog - Elevated above tour overlay */}
       <AlertDialog open={showSkipConfirm} onOpenChange={setShowSkipConfirm}>
-        <AlertDialogContent 
-          className="z-[10000] fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]" 
+        <AlertDialogContent
+          className="z-[10000] fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]"
           style={{ zIndex: 10000 }}
         >
           <AlertDialogHeader>
@@ -410,13 +432,13 @@ export function TourStep({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel 
+            <AlertDialogCancel
               onClick={() => setShowSkipConfirm(false)}
               data-testid="skip-cancel-button"
             >
               Continue Tour
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={() => {
                 setShowSkipConfirm(false);
                 skipTour();

@@ -14,7 +14,7 @@ export const mainTourSteps: TourStep[] = [
     title: '🧭 Your Navigation Hub',
     content: 'This sidebar is your command center. You can access all main sections, track framework progress, and see completion percentages at a glance. Notice how each section is organized for optimal workflow.',
     placement: 'right',
-    fallbackTarget: 'aside',
+    fallbackTarget: '[data-sidebar="sidebar"]',
   },
   {
     target: '[data-testid="nav-dashboard"]',
@@ -31,7 +31,7 @@ export const mainTourSteps: TourStep[] = [
     title: '📈 Compliance Overview',
     content: 'Here you can see your overall compliance status across all frameworks. The visual indicators show your progress and highlight areas that need attention. This real-time view helps you prioritize your work.',
     placement: 'bottom',
-    fallbackTarget: '[data-testid="key-metrics-card"]',
+    fallbackTarget: '.glass-card',
   },
   
   // Task Management (Steps 5-6)
@@ -48,7 +48,7 @@ export const mainTourSteps: TourStep[] = [
     title: '➕ Creating Tasks',
     content: 'Use this button to create new compliance tasks. You can assign tasks to team members, set deadlines, link them to specific frameworks, and track progress. Tasks are the building blocks of your compliance program.',
     placement: 'bottom',
-    fallbackTarget: 'button[type="button"]',
+    fallbackTarget: 'button[class*="gradient"]',
   },
   
   // Evidence Management (Steps 7-8)

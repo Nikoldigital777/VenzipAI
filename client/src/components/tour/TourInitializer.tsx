@@ -23,9 +23,29 @@ export function TourInitializer() {
     // Don't start if autoStart is disabled
     if (!state.userPreferences.autoStart) return;
 
-    console.log('🎯 Tour initializer conditions met, starting tour in 2 seconds');
+    console.log('🎯 Tour initializer conditions met, checking page readiness...');
     
-    // Start tour automatically for new users after a delay to ensure page is loaded
+    // Check if essential page elements are loaded before starting tour
+    const checkPageReady = () => {
+      const essentialElements = [
+        'main', // Main content area
+        '.glass-card', // At least one card component
+        // We'll be more lenient about specific elements since tour handles missing ones gracefully
+      ];
+      
+      const elementsFound = essentialElements.every(selector => 
+        document.querySelector(selector) !== null
+      );
+      
+      if (elementsFound) {
+        console.log('🎯 Page elements ready, starting tour');
+        startTour('main-platform-tour', mainTourSteps);
+        return true;
+      }
+      return false;
+    };
+    
+    // Start tour automatically for new users after ensuring page is ready
     const timer = setTimeout(() => {
       // Double-check conditions before starting (state might have changed)
       if (
@@ -34,12 +54,21 @@ export function TourInitializer() {
         !state.isActive &&
         !isTourCompleted('main-platform-tour')
       ) {
-        console.log('🎯 Starting automatic tour for new user');
-        startTour('main-platform-tour', mainTourSteps);
+        if (!checkPageReady()) {
+          // Try again after a shorter delay
+          setTimeout(() => {
+            if (checkPageReady()) {
+              console.log('🎯 Starting tour after retry');
+            } else {
+              console.log('🎯 Page elements not ready, starting tour anyway with graceful fallbacks');
+              startTour('main-platform-tour', mainTourSteps);
+            }
+          }, 2000);
+        }
       } else {
         console.log('🎯 Tour start conditions no longer met, skipping');
       }
-    }, 5000); // 5 second delay to ensure page elements are fully rendered and data loaded
+    }, 3000); // Reduced delay since we check for readiness
 
     return () => clearTimeout(timer);
   }, [user, location, state.isActive, state.userPreferences.autoStart, state.userPreferences.hasSeenWelcome, state.userPreferences.skipTutorials, startTour, isTourCompleted]);

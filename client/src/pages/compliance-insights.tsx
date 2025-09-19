@@ -6,7 +6,7 @@ export default function ComplianceInsights() {
   return (
     <div className="container mx-auto p-6 space-y-8 max-w-7xl">
       {/* Header */}
-      <div className="glass-card p-8 animate-fadeInUp">
+      <div className="glass-card p-8 animate-fadeInUp" data-testid="framework-analytics">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
