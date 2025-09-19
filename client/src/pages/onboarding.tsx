@@ -85,22 +85,6 @@ interface AIChecklist {
   }[];
 }
 
-// Use dynamic frameworks from API with fallback
-  const frameworks = frameworksData?.map((fw: any) => ({
-    id: fw.id,
-    name: fw.displayName,
-    description: fw.description,
-    complexity: fw.complexity,
-    estimatedTime: `${fw.estimatedTimeMonths} months`,
-    tasksCount: fw.totalControls,
-    icon: fw.name === 'soc2' ? Shield : 
-          fw.name === 'iso27001' ? FileText :
-          fw.name === 'hipaa' ? Lock :
-          fw.name === 'scf' ? Target : Shield,
-    color: fw.color || "from-blue-500 to-blue-600",
-    estimatedTimeMonths: fw.estimatedTimeMonths
-  })) || [];
-
 // Redefining Framework interface to match edited code, while keeping original properties if needed
 interface Framework {
   id: string;
@@ -350,6 +334,22 @@ export default function Onboarding() {
     retry: 3,
     retryDelay: 1000
   });
+
+  // Use dynamic frameworks from API with fallback
+  const frameworks = frameworksData?.map((fw: any) => ({
+    id: fw.id,
+    name: fw.displayName,
+    description: fw.description,
+    complexity: fw.complexity,
+    estimatedTime: `${fw.estimatedTimeMonths} months`,
+    tasksCount: fw.totalControls,
+    icon: fw.name === 'soc2' ? Shield : 
+          fw.name === 'iso27001' ? FileText :
+          fw.name === 'hipaa' ? Lock :
+          fw.name === 'scf' ? Target : Shield,
+    color: fw.color || "from-blue-500 to-blue-600",
+    estimatedTimeMonths: fw.estimatedTimeMonths
+  })) || [];
 
   // --- Mutations from original code ---
   const generateChecklistMutation = useMutation({
