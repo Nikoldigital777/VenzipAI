@@ -63,6 +63,7 @@ interface CompanyData {
   size: string;
   contactEmail: string;
   selectedFrameworks: string[];
+  onboardingCompleted?: boolean;
 }
 
 interface UserPreferences {

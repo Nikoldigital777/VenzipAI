@@ -42,7 +42,6 @@ import { Label } from "@/components/ui/label";
 
 // Lazy load heavy components
 const DemoForm = lazy(() => import('@/components/DemoForm'));
-const TestimonialCarousel = lazy(() => import('@/components/TestimonialCarousel'));
 
 export default function Landing() {
   const { isAuthenticated, user } = useAuth();

@@ -28,17 +28,19 @@ export function useSummary() {
         // Validate and sanitize data structure
         const sanitizedData = {
           compliancePercent: Math.max(0, Math.min(100, data.compliancePercent || 0)),
-          gaps: Array.isArray(data.gaps) ? data.gaps.filter(gap => gap && gap.id && gap.title) : [],
+          gaps: Array.isArray(data.gaps) ? data.gaps.filter((gap: any) => gap && gap.id && gap.title) : [],
           stats: {
             uploads: Math.max(0, data.stats?.uploads || 0),
             conversations: Math.max(0, data.stats?.conversations || 0),
             tasksOpenHigh: Math.max(0, data.stats?.tasksOpenHigh || 0),
             risksHigh: Math.max(0, data.stats?.risksHigh || 0),
+            totalEvidence: Math.max(0, data.stats?.totalEvidence || 0),
+            policies: Math.max(0, data.stats?.policies || 0),
           },
           recentActivity: Array.isArray(data.recentActivity) ? 
-            data.recentActivity.filter(activity => activity && activity.id && activity.action) : [],
+            data.recentActivity.filter((activity: any) => activity && activity.id && activity.action) : [],
           hasData: data.compliancePercent > 0 || (data.gaps && data.gaps.length > 0) || 
-                   (data.stats && Object.values(data.stats).some(val => val > 0)),
+                   (data.stats && Object.values(data.stats).some((val: any) => val > 0)),
           error: data.error,
           lastUpdated: new Date().toISOString()
         };
@@ -57,6 +59,8 @@ export function useSummary() {
             conversations: 0,
             tasksOpenHigh: 0,
             risksHigh: 0,
+            totalEvidence: 0,
+            policies: 0,
           },
           recentActivity: [],
           hasData: false,

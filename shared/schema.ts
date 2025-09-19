@@ -55,6 +55,7 @@ export const companies = pgTable("companies", {
   contactEmail: varchar("contact_email", { length: 255 }),
   contactRole: varchar("contact_role", { length: 100 }),
   selectedFrameworks: text("selected_frameworks").array().default(sql`'{}'::text[]`),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
   userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -287,6 +288,7 @@ export const evidenceMappings = pgTable("evidence_mappings", {
   userId: varchar("user_id").notNull().references(() => users.id),
   documentId: varchar("document_id").notNull().references(() => documents.id),
   requirementId: varchar("requirement_id").notNull().references(() => complianceRequirements.id),
+  frameworkId: varchar("framework_id").references(() => frameworks.id),
   mappingConfidence: decimal("mapping_confidence", { precision: 3, scale: 2 }).notNull(), // 0.0 to 1.0
   qualityScore: decimal("quality_score", { precision: 3, scale: 2 }).notNull(), // 0.0 to 1.0
   mappingType: varchar("mapping_type").notNull(), // 'direct', 'partial', 'supporting', 'cross_reference'

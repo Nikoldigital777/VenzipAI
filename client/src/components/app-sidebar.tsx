@@ -251,13 +251,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* Test Notifications Link */}
         <SidebarMenuItem>
           <SidebarMenuButton asChild>
-            <a href="/test-notifications" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.pathname === '/test-notifications' ? 'bg-venzip-primary text-white' : 'text-gray-700 hover:bg-gray-100'}`} data-testid="nav-test-notifications">
+            <a href="/test-notifications" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location === '/test-notifications' ? 'bg-venzip-primary text-white' : 'text-gray-700 hover:bg-gray-100'}`} data-testid="nav-test-notifications">
               <TestTube className="h-4 w-4" />
               <span>Test Notifications</span>
             </a>
           </SidebarMenuButton>
           <SidebarMenuButton asChild>
-            <a href="/test-documents" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.pathname === '/test-documents' ? 'bg-venzip-primary text-white' : 'text-gray-700 hover:bg-gray-100'}`} data-testid="nav-test-documents">
+            <a href="/test-documents" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location === '/test-documents' ? 'bg-venzip-primary text-white' : 'text-gray-700 hover:bg-gray-100'}`} data-testid="nav-test-documents">
               <FileText className="h-4 w-4" />
               <span>Test Documents</span>
             </a>
@@ -347,7 +347,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut />
                   Log out
-                </DropdownMenuMenuItem>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
