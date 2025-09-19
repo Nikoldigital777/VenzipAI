@@ -130,6 +130,8 @@ const taskFilterSchema = z.object({
   priority: z.string().optional(),
   frameworkId: z.string().optional(),
   search: z.string().optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.string().optional(),
   limit: z.coerce.number().int().positive().max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0)
 });
@@ -177,7 +179,7 @@ router.get("/", isAuthenticated, async (req, res) => {
       tasks = tasks.filter(task => 
         task.title.toLowerCase().includes(searchLower) ||
         (task.description && task.description.toLowerCase().includes(searchLower)) ||
-        (task.tags && task.tags.some((tag: string) => tag.toLowerCase().includes(searchLower)))
+        (Array.isArray(task.tags) && task.tags.some((tag: string) => tag.toLowerCase().includes(searchLower)))
       );
     }
     
@@ -208,19 +210,23 @@ router.get("/", isAuthenticated, async (req, res) => {
           bVal = b.title.toLowerCase();
           break;
         case 'createdAt':
-          aVal = new Date(a.createdAt).getTime();
-          bVal = new Date(b.createdAt).getTime();
+          aVal = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          bVal = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           break;
         default:
           aVal = 0;
           bVal = 0;
       }
       
-      if (typeof aVal === 'string') {
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
         return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
       }
       
-      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      
+      return 0;
     });
     
     // Apply pagination
@@ -265,9 +271,9 @@ router.post("/", isAuthenticated, async (req, res) => {
     const newTask = await storage.createTask(taskData);
     res.status(201).json(newTask);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating task:", error);
-    if (error.name === 'ZodError') {
+    if (error?.name === 'ZodError') {
       return res.status(400).json({ message: "Invalid task data", errors: error.errors });
     }
     res.status(500).json({ message: "Failed to create task" });
@@ -298,8 +304,8 @@ router.get("/:id", isAuthenticated, async (req, res) => {
     // Parse JSON fields
     const enhancedTask = {
       ...task,
-      tags: task.tags ? JSON.parse(task.tags) : [],
-      dependencies: task.dependencies ? JSON.parse(task.dependencies) : [],
+      tags: task.tags ? (typeof task.tags === 'string' ? JSON.parse(task.tags) : task.tags) : [],
+      dependencies: task.dependencies ? (typeof task.dependencies === 'string' ? JSON.parse(task.dependencies) : task.dependencies) : [],
       comments,
       attachments
     };
@@ -517,7 +523,7 @@ router.get("/ai-recommendations/weekly", isAuthenticated, async (req, res) => {
       totalRecommendedHours: totalEstimatedHours,
       recommendations,
       summary: `Focus on ${recommendations.length} high-priority tasks this week to maintain compliance momentum.`,
-      focusAreas: [...new Set(recommendations.map(r => r.framework))]
+      focusAreas: Array.from(new Set(recommendations.map(r => r.framework)))
     });
 
   } catch (error) {

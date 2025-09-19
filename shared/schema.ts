@@ -164,10 +164,15 @@ export const documents = pgTable("documents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   frameworkId: varchar("framework_id").references(() => frameworks.id),
+  companyId: varchar("company_id").references(() => companies.id),
+  requirementId: varchar("requirement_id").references(() => complianceRequirements.id),
   fileName: varchar("file_name").notNull(),
   fileType: varchar("file_type").notNull(),
   fileSize: integer("file_size").notNull(),
   filePath: varchar("file_path").notNull(),
+  sha256Hash: varchar("sha256_hash", { length: 64 }).notNull(),
+  version: integer("version").notNull().default(1),
+  uploaderUserId: varchar("uploader_user_id").notNull().references(() => users.id),
   status: varchar("status").notNull().default('pending'), // 'pending', 'verified', 'rejected'
   analysisResult: jsonb("analysis_result"),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
@@ -364,6 +369,10 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 export const insertDocumentSchema = createInsertSchema(documents).omit({
   id: true,
   uploadedAt: true,
+  verifiedAt: true,
+}).extend({
+  requirementId: z.string().optional(),
+  companyId: z.string().optional(),
 });
 
 export const insertRiskSchema = createInsertSchema(risks).omit({
