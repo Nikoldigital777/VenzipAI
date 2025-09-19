@@ -1,0 +1,28 @@
+⚠️ What’s missing for functional MVP (end-to-end client demo)
+Right now, those policy features exist in isolation. To make them usable and demo-ready, you need to wire them into the workflow:
+Onboarding → Policy Generation Path
+Onboarding form already collects company name, size, industry, region (in DB as companies).
+But the onboarding UI does not yet call POST /api/policies/generate automatically after frameworks are selected.
+Fix: after onboarding, trigger baseline policies for the selected framework(s).
+Evidence & Framework Linkage
+Your workflow spec expects policies to count as evidence items for controls (e.g., ISO A.5.1.1 “Policies for information security”).
+Missing: code that maps the generated policy record → complianceRequirementId.
+Without this, policies don’t contribute to readiness % or show up in the Evidence dashboard.
+UI Surface
+Dashboard doesn’t yet show “Your ISO 27001 Policy (v1) generated on Sept 2025” with download/preview.
+Needs: PoliciesList component with “Generate New” button and status (draft vs. approved).
+Documents page only supports manual file upload — doesn’t yet list system-generated policies.
+Audit-ready Bundle
+You can generate policies, but you don’t yet have the “export all mapped evidence + policies” flow that creates a signed ZIP/manifest.
+That’s in your design doc but not coded.
+🎯 Recommendation: MVP Definition for Client
+Since your client said “at least 1 feature working end-to-end and ISO or HIPAA ready”, the lowest-risk MVP is:
+Frameworks: Seed iso27001 and hipaa (fix missing frameworks → requirements insertion).
+Policies: Auto-generate the baseline Information Security Policy (ISO) or HIPAA Privacy Policy on onboarding completion.
+Evidence Mapping: Insert those policies into the evidence (or documents) table linked to the first few controls.
+UI: Show policies in Dashboard + Documents, downloadable as PDF/Docx.
+Demo: Walk client from onboarding → framework selection → “Here is your 12-page ISO 27001 Information Security Policy, already linked to controls.”
+That’s your first end-to-end loop: onboarding → framework → policy → evidence → dashboard.
+✅ Bottom line:
+Yes, the policy generation subsystem is complete.
+❌ What’s missing: wiring it into onboarding, mapping it into evidence/controls, and surfacing it in the dashboard.
