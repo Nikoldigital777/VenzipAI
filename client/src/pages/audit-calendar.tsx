@@ -164,7 +164,7 @@ export default function AuditCalendar() {
   if (isLoading) {
     return (
       <>
-        
+
         <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
             <Card className="glass-card">
@@ -186,7 +186,7 @@ export default function AuditCalendar() {
   if (tasksError) {
     return (
       <>
-        
+
         <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-danger-coral/5 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
             <Card className="glass-card border-danger-coral/20">
@@ -215,8 +215,8 @@ export default function AuditCalendar() {
 
   return (
     <>
-      
-      <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
+
+      <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden" data-testid="nav-audit-calendar">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
         <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>

@@ -323,7 +323,9 @@ export default function RisksPage() {
 
           {/* Content based on active tab */}
           {activeTab === 'dashboard' ? (
-            <DynamicRiskDashboard />
+            <div data-testid="risk-dashboard" className="risk-overview">
+              <DynamicRiskDashboard />
+            </div>
           ) : (
             <>
               {/* Enhanced Risk Summary Cards */}
@@ -525,15 +527,6 @@ export default function RisksPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="title">Title</Label>
-                    <Input 
-                      placeholder="Risk title" 
-                      value={draft.title ?? ""} 
-                      onChange={(e) => setDraft(d => ({ ...d, title: e.target.value }))}
-                      data-testid="risk-title"
-                    />
                   </div>
                   <div>
                     <Label htmlFor="description">Description</Label>

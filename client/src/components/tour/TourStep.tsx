@@ -106,23 +106,44 @@ export function TourStep({
 
   // Calculate target element position and highlight
   useEffect(() => {
-    let targetElement = document.querySelector(target) as HTMLElement;
-    
-    // Try fallback target if primary target not found
-    if (!targetElement && fallbackTarget) {
-      targetElement = document.querySelector(fallbackTarget) as HTMLElement;
-      console.log(`Primary target ${target} not found, using fallback: ${fallbackTarget}`);
-    }
-    
-    if (!targetElement) {
-      console.warn(`Tour target not found: ${target}${fallbackTarget ? ` (fallback: ${fallbackTarget})` : ''}`);
-      // Auto-advance tour after a longer timeout to allow for slower renders
-      const timeout = setTimeout(() => {
-        console.log(`Auto-advancing tour due to missing target: ${target}`);
-        nextStep();
-      }, 4000); // Increased from 2000ms to 4000ms
-      return () => clearTimeout(timeout);
-    }
+    let retryCount = 0;
+    const maxRetries = 10;
+    const retryDelay = 500;
+
+    const findTargetElement = (): HTMLElement | null => {
+      let targetElement = document.querySelector(target) as HTMLElement;
+      
+      // Try fallback target if primary target not found
+      if (!targetElement && fallbackTarget) {
+        targetElement = document.querySelector(fallbackTarget) as HTMLElement;
+        if (targetElement) {
+          console.log(`Primary target ${target} not found, using fallback: ${fallbackTarget}`);
+        }
+      }
+      
+      return targetElement;
+    };
+
+    const attemptTargeting = () => {
+      const targetElement = findTargetElement();
+      
+      if (!targetElement) {
+        retryCount++;
+        
+        if (retryCount < maxRetries) {
+          console.log(`Tour target not found (attempt ${retryCount}/${maxRetries}): ${target}`);
+          setTimeout(attemptTargeting, retryDelay);
+          return;
+        }
+        
+        console.warn(`Tour target not found after ${maxRetries} attempts: ${target}${fallbackTarget ? ` (fallback: ${fallbackTarget})` : ''}`);
+        // Auto-advance tour after exhausting retries
+        const timeout = setTimeout(() => {
+          console.log(`Auto-advancing tour due to missing target: ${target}`);
+          nextStep();
+        }, 1000);
+        return () => clearTimeout(timeout);
+      }
 
     const updatePosition = () => {
       const rect = targetElement.getBoundingClientRect();

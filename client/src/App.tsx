@@ -25,6 +25,7 @@ import LearningHub from "@/pages/learning-hub";
 import ComplianceInsights from "@/pages/compliance-insights";
 import NotFound from "@/pages/not-found";
 import { useAuth } from "@/hooks/useAuth";
+import { TourInitializer } from '@/components/tour/TourInitializer';
 
 // Import the new TestDocuments component
 import TestDocuments from "@/pages/test-documents";
@@ -172,6 +173,7 @@ function App() {
           <Toaster />
           <Router />
           <TourGuide />
+          <TourInitializer />
         </TooltipProvider>
       </TourProvider>
     </QueryClientProvider>

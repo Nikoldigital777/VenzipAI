@@ -41,6 +41,16 @@ export function TourProvider({ children }: TourProviderProps) {
             ...parsedData.userPreferences,
           },
         }));
+      } else {
+        // First time user - mark as ready for welcome tour
+        setState(prevState => ({
+          ...prevState,
+          userPreferences: {
+            ...prevState.userPreferences,
+            autoStart: true,
+            hasSeenWelcome: false,
+          },
+        }));
       }
     } catch (error) {
       console.warn('Failed to load tour data from localStorage:', error);

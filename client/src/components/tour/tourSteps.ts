@@ -10,10 +10,11 @@ export const mainTourSteps: TourStep[] = [
     showSkip: true,
   },
   {
-    target: '[data-sidebar]',
+    target: '[data-testid="app-sidebar"]',
     title: '🧭 Your Navigation Hub',
     content: 'This sidebar is your command center. You can access all main sections, track framework progress, and see completion percentages at a glance. Notice how each section is organized for optimal workflow.',
     placement: 'right',
+    fallbackTarget: '.sidebar',
   },
   {
     target: '[data-testid="nav-dashboard"]',
@@ -21,6 +22,7 @@ export const mainTourSteps: TourStep[] = [
     content: 'Let\'s start with the Dashboard - your compliance command center. Click here to see your overall status, risk scores, and AI-driven insights. This is where you\'ll monitor your compliance health.',
     placement: 'right',
     navigateTo: '/dashboard',
+    fallbackTarget: '[href="/dashboard"]',
   },
   
   // Dashboard Deep Dive (Step 4)
@@ -39,6 +41,7 @@ export const mainTourSteps: TourStep[] = [
     content: 'Now let\'s explore task management. This is where you\'ll create, assign, and track all your compliance tasks across different frameworks. Click to navigate to the tasks section.',
     placement: 'right',
     navigateTo: '/tasks',
+    fallbackTarget: '[href="/tasks"]',
   },
   {
     target: '[data-testid="create-task-button"]',

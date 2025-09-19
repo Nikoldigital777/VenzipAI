@@ -230,14 +230,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {group.items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location === item.url}
-                    tooltip={item.title}
-                  >
-                    <a
-                      href={item.url}
-                      onClick={(e) => {
+                  <SidebarMenuButton asChild isActive={location === item.url}>
+                    <a href={item.url} onClick={(e) => {
                         e.preventDefault()
                         navigate(item.url)
                       }}

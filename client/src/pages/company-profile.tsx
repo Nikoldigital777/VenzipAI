@@ -284,15 +284,15 @@ export default function CompanyProfile() {
 
           <Tabs defaultValue="company" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
-              <TabsTrigger value="company" className="flex items-center gap-2">
+              <TabsTrigger value="company" className="flex items-center gap-2" data-testid="nav-company-profile">
                 <Building className="h-4 w-4" />
                 Company
               </TabsTrigger>
-              <TabsTrigger value="frameworks" className="flex items-center gap-2">
+              <TabsTrigger value="frameworks" className="flex items-center gap-2" data-testid="nav-frameworks">
                 <Shield className="h-4 w-4" />
                 Frameworks
               </TabsTrigger>
-              <TabsTrigger value="preferences" className="flex items-center gap-2">
+              <TabsTrigger value="preferences" className="flex items-center gap-2" data-testid="nav-preferences">
                 <Settings className="h-4 w-4" />
                 Preferences
               </TabsTrigger>
@@ -366,6 +366,7 @@ export default function CompanyProfile() {
                           disabled={!isEditing}
                           className="h-12"
                           placeholder="Enter company name"
+                          data-testid="input-company-name"
                         />
                       </div>
 
@@ -449,6 +450,7 @@ export default function CompanyProfile() {
                           disabled={!isEditing}
                           className="h-12"
                           placeholder="https://company.com"
+                          data-testid="input-company-website"
                         />
                       </div>
                     </div>
@@ -475,6 +477,7 @@ export default function CompanyProfile() {
                           disabled={!isEditing}
                           className="h-12"
                           placeholder="contact@company.com"
+                          data-testid="input-company-email"
                         />
                       </div>
 
@@ -489,6 +492,7 @@ export default function CompanyProfile() {
                           disabled={!isEditing}
                           className="h-12"
                           placeholder="+1 (555) 123-4567"
+                          data-testid="input-company-phone"
                         />
                       </div>
 
@@ -504,6 +508,7 @@ export default function CompanyProfile() {
                           disabled={!isEditing}
                           className="h-12"
                           placeholder="compliance@company.com"
+                          data-testid="input-company-compliance-contact"
                         />
                       </div>
 
@@ -519,6 +524,7 @@ export default function CompanyProfile() {
                           disabled={!isEditing}
                           className="h-12"
                           placeholder="security@company.com"
+                          data-testid="input-company-security-contact"
                         />
                       </div>
                     </div>
@@ -548,7 +554,7 @@ export default function CompanyProfile() {
                           companyData.selectedFrameworks.includes(framework.name)
                             ? 'border-venzip-primary bg-venzip-primary/10 shadow-lg'
                             : 'border-gray-200 bg-white hover:border-venzip-primary/50 hover:shadow-md'
-                        }`} onClick={() => isEditing && toggleFramework(framework.name)}>
+                        }`} onClick={() => isEditing && toggleFramework(framework.name)} data-testid={`framework-card-${framework.name}`}>
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-3">
                               <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
@@ -626,6 +632,7 @@ export default function CompanyProfile() {
                         <Switch
                           checked={userPreferences.emailNotifications}
                           onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, emailNotifications: checked }))}
+                          data-testid="switch-email-notifications"
                         />
                       </div>
 
@@ -640,6 +647,7 @@ export default function CompanyProfile() {
                         <Switch
                           checked={userPreferences.taskReminders}
                           onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, taskReminders: checked }))}
+                          data-testid="switch-task-reminders"
                         />
                       </div>
 
@@ -654,6 +662,7 @@ export default function CompanyProfile() {
                         <Switch
                           checked={userPreferences.riskAlerts}
                           onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, riskAlerts: checked }))}
+                          data-testid="switch-risk-alerts"
                         />
                       </div>
 
@@ -668,6 +677,7 @@ export default function CompanyProfile() {
                         <Switch
                           checked={userPreferences.weeklyReports}
                           onCheckedChange={(checked) => setUserPreferences(prev => ({ ...prev, weeklyReports: checked }))}
+                          data-testid="switch-weekly-reports"
                         />
                       </div>
                     </div>
@@ -681,6 +691,7 @@ export default function CompanyProfile() {
                     <Select 
                       value={userPreferences.reminderFrequency} 
                       onValueChange={(value) => setUserPreferences(prev => ({ ...prev, reminderFrequency: value }))}
+                      data-testid="select-reminder-frequency"
                     >
                       <SelectTrigger className="w-full h-12">
                         <SelectValue placeholder="Select frequency" />
@@ -713,6 +724,7 @@ export default function CompanyProfile() {
                       onClick={handlePreferencesUpdate}
                       disabled={updatePreferencesMutation.isPending}
                       className="bg-gradient-to-r from-venzip-accent to-venzip-secondary text-white"
+                      data-testid="button-save-preferences"
                     >
                       {updatePreferencesMutation.isPending ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>

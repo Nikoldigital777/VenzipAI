@@ -25,10 +25,12 @@ import {
   Shield,
   Globe,
   ShieldAlert,
-  FileText
+  FileText,
+  CheckSquare // Import CheckSquare
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FrameworkProgressTable } from "@/components/FrameworkProgressTable";
+import { Button } from "@/components/ui/button"; // Import Button
 
 type Gap = {
   id: string;
@@ -104,12 +106,12 @@ export default function Dashboard() {
           return { tasks: [], hasData: false, error: `HTTP ${response.status}`, totalTasks: 0 };
         }
         const data = await response.json();
-        
+
         // Handle both old and new response formats
         if (Array.isArray(data)) {
           return { tasks: data, hasData: data.length > 0, totalTasks: data.length };
         }
-        
+
         return {
           tasks: data.tasks || [],
           hasData: data.hasData !== false,
@@ -237,7 +239,7 @@ export default function Dashboard() {
             {/* Enhanced Compliance Score Card */}
             <Card className="lg:col-span-1 glass-card group hover-lift relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.1s'}}>
               <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <CardHeader className="relative z-10">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-gray-900 group-hover:text-venzip-primary transition-colors duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg animate-glow-pulse">
                     <TrendingUp className="h-6 w-6 text-venzip-primary group-hover:animate-bounce" />
@@ -500,8 +502,8 @@ export default function Dashboard() {
                 <div className="text-center py-8">
                   <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-orange-400" />
                   <p className="text-sm text-gray-500 mb-2">{recentTasksData.error}</p>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
                   >
@@ -588,7 +590,7 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-500 mb-4">
                     {recentTasksData?.message || "Complete your onboarding to generate compliance tasks"}
                   </p>
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => window.location.href = '/tasks'}
                   >
