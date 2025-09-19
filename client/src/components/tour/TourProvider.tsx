@@ -165,18 +165,33 @@ export function TourProvider({ children }: TourProviderProps) {
         totalSteps: 0,
         currentTourId: null,
         completedTours: newCompletedTours,
+        userPreferences: {
+          ...prev.userPreferences,
+          hasSeenWelcome: true,
+        },
       };
     });
   }, []);
 
   const endTour = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      isActive: false,
-      currentStep: 0,
-      totalSteps: 0,
-      currentTourId: null,
-    }));
+    setState(prev => {
+      const newCompletedTours = prev.currentTourId 
+        ? [...prev.completedTours, prev.currentTourId]
+        : prev.completedTours;
+      
+      return {
+        ...prev,
+        isActive: false,
+        currentStep: 0,
+        totalSteps: 0,
+        currentTourId: null,
+        completedTours: newCompletedTours,
+        userPreferences: {
+          ...prev.userPreferences,
+          hasSeenWelcome: true,
+        },
+      };
+    });
     setCurrentSteps([]);
   }, []);
 

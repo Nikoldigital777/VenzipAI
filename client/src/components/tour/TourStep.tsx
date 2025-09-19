@@ -170,6 +170,12 @@ export function TourStep({
       const handleUpdate = () => requestAnimationFrame(updatePosition);
       window.addEventListener('scroll', handleUpdate);
       window.addEventListener('resize', handleUpdate);
+      
+      // Return cleanup function that removes the exact same listeners
+      return () => {
+        window.removeEventListener('scroll', handleUpdate);
+        window.removeEventListener('resize', handleUpdate);
+      };
     };
 
     // Start the targeting process
@@ -180,11 +186,8 @@ export function TourStep({
       if (autoAdvanceTimeout) {
         clearTimeout(autoAdvanceTimeout);
       }
-      // Clean up event listeners
-      window.removeEventListener('scroll', () => {});
-      window.removeEventListener('resize', () => {});
     };
-  }, [target, nextStep]);
+  }, [target, nextStep, fallbackTarget]);
 
   // Calculate popover position based on target position and placement
   useEffect(() => {
@@ -242,28 +245,34 @@ export function TourStep({
         style={{
           background: `
             radial-gradient(
-              ellipse ${targetPosition.width + 20}px ${targetPosition.height + 20}px at 
+              ellipse ${targetPosition.width + 40}px ${targetPosition.height + 40}px at 
               ${targetPosition.left + targetPosition.width / 2}px 
               ${targetPosition.top + targetPosition.height / 2}px,
               transparent 0%,
-              transparent 40%,
-              rgba(0, 0, 0, 0.7) 70%,
-              rgba(0, 0, 0, 0.8) 100%
+              transparent 20%,
+              rgba(0, 0, 0, 0.2) 30%,
+              rgba(0, 0, 0, 0.8) 60%,
+              rgba(0, 0, 0, 0.9) 100%
             )
           `
         }}
-        onClick={endTour}
+        onClick={() => showSkip ? setShowSkipConfirm(true) : endTour()}
       />
       
       {/* Highlighted target border */}
       <div
-        className="absolute border-4 border-venzip-primary rounded-lg shadow-lg shadow-venzip-primary/30 animate-pulse"
+        className="absolute border-4 border-venzip-primary rounded-lg shadow-xl shadow-venzip-primary/50 animate-pulse"
         style={{
-          top: targetPosition.top - 4,
-          left: targetPosition.left - 4,
-          width: targetPosition.width + 8,
-          height: targetPosition.height + 8,
+          top: targetPosition.top - 6,
+          left: targetPosition.left - 6,
+          width: targetPosition.width + 12,
+          height: targetPosition.height + 12,
           pointerEvents: 'none',
+          boxShadow: `
+            0 0 20px 4px rgba(78, 205, 196, 0.4),
+            0 0 40px 8px rgba(78, 205, 196, 0.2),
+            inset 0 0 20px 4px rgba(78, 205, 196, 0.1)
+          `,
         }}
       />
 
@@ -287,7 +296,7 @@ export function TourStep({
             <Button
               variant="ghost"
               size="sm"
-              onClick={endTour}
+              onClick={() => showSkip ? setShowSkipConfirm(true) : endTour()}
               className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
               data-testid="tour-close-button"
             >
@@ -364,7 +373,7 @@ export function TourStep({
               Skip Tour?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to skip this tour? You can always restart it later from the help menu.
+              Are you sure you want to cancel the guided tour? The tour helps you understand how to use Venzip effectively and reduces the need to reach out for support.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -382,7 +391,7 @@ export function TourStep({
               className="bg-red-600 hover:bg-red-700"
               data-testid="skip-confirm-button"
             >
-              Skip Tour
+              Yes, Cancel Tour
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
