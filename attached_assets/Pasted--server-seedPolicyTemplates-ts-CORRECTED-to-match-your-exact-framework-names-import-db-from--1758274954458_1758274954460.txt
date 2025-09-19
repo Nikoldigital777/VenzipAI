@@ -1,0 +1,260 @@
+// server/seedPolicyTemplates.ts - CORRECTED to match your exact framework names
+import { db } from './db';
+import { policyTemplates, frameworks } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import {
+  ISO27001_INFORMATION_SECURITY_POLICY,
+  ISO27001_SYSTEM_DESCRIPTION,
+  HIPAA_PRIVACY_POLICY,
+  HIPAA_RISK_ASSESSMENT_TEMPLATE
+} from './templates/policyTemplates';
+
+export async function seedPolicyTemplates() {
+  console.log('🌱 Seeding policy templates...');
+
+  try {
+    // Get frameworks using your exact naming convention
+    const existingFrameworks = await db.select().from(frameworks);
+    
+    // Find frameworks by your exact names
+    const iso27001 = existingFrameworks.find(f => f.name === 'iso27001');
+    const hipaa = existingFrameworks.find(f => f.name === 'hipaa');
+
+    console.log('🔍 Framework lookup results:');
+    console.log(`   ISO 27001: ${iso27001 ? '✅ Found' : '❌ Not found'}`);
+    console.log(`   HIPAA: ${hipaa ? '✅ Found' : '❌ Not found'}`);
+
+    if (!iso27001 && !hipaa) {
+      console.warn('⚠️  No matching frameworks found. Available frameworks:');
+      existingFrameworks.forEach(f => {
+        console.warn(`   - ${f.name} (${f.displayName})`);
+      });
+      return;
+    }
+
+    const templates = [];
+
+    // ISO 27001 templates
+    if (iso27001) {
+      templates.push(
+        {
+          frameworkId: iso27001.id,
+          templateName: 'Information Security Policy',
+          templateType: 'policy',
+          category: 'governance',
+          title: 'Information Security Policy',
+          description: 'Comprehensive information security policy addressing ISO 27001 requirements',
+          templateContent: ISO27001_INFORMATION_SECURITY_POLICY,
+          requirementIds: ['A.5.1.1', 'A.5.1.2', 'A.6.1.1'],
+          priority: 'high',
+          version: '1.0'
+        },
+        {
+          frameworkId: iso27001.id,
+          templateName: 'System of Authority (SoA)',
+          templateType: 'soa',
+          category: 'documentation',
+          title: 'Information Security Management System Description',
+          description: 'System of Authority document describing the ISMS scope and implementation',
+          templateContent: ISO27001_SYSTEM_DESCRIPTION,
+          requirementIds: ['A.5.1.1', 'A.8.1.1', 'A.18.1.1'],
+          priority: 'high',
+          version: '1.0'
+        }
+      );
+      console.log(`📄 Adding ${2} ISO 27001 policy templates`);
+    }
+
+    // HIPAA templates
+    if (hipaa) {
+      templates.push(
+        {
+          frameworkId: hipaa.id,
+          templateName: 'HIPAA Privacy Policy',
+          templateType: 'policy',
+          category: 'privacy',
+          title: 'HIPAA Privacy Policy',
+          description: 'Comprehensive privacy policy addressing HIPAA Privacy Rule requirements',
+          templateContent: HIPAA_PRIVACY_POLICY,
+          requirementIds: ['164.530', '164.520', '164.524'],
+          priority: 'high',
+          version: '1.0'
+        },
+        {
+          frameworkId: hipaa.id,
+          templateName: 'HIPAA Risk Assessment',
+          templateType: 'risk_assessment',
+          category: 'assessment',
+          title: 'HIPAA Security Risk Assessment',
+          description: 'Comprehensive risk assessment template for HIPAA Security Rule compliance',
+          templateContent: HIPAA_RISK_ASSESSMENT_TEMPLATE,
+          requirementIds: ['164.308(a)(1)', '164.316(b)(2)'],
+          priority: 'high',
+          version: '1.0'
+        }
+      );
+      console.log(`📄 Adding ${2} HIPAA policy templates`);
+    }
+
+    // Insert templates
+    let insertedCount = 0;
+    for (const template of templates) {
+      // Check if template already exists
+      const existing = await db.select().from(policyTemplates)
+        .where(eq(policyTemplates.templateName, template.templateName))
+        .limit(1);
+
+      if (existing.length === 0) {
+        await db.insert(policyTemplates).values({
+          ...template,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        insertedCount++;
+        console.log(`  ✅ Added: ${template.templateName}`);
+      } else {
+        console.log(`  ⏭️  Exists: ${template.templateName}`);
+      }
+    }
+
+    console.log(`✅ Policy templates seeding completed. Added ${insertedCount} new templates.`);
+    
+    // Show final count
+    const totalTemplates = await db.select().from(policyTemplates);
+    console.log(`📊 Total policy templates in database: ${totalTemplates.length}`);
+    
+  } catch (error) {
+    console.error('❌ Error seeding policy templates:', error);
+    console.warn('⚠️  Continuing without policy templates...');
+  }
+}
+
+// Integration helper to add this to your existing seeding process
+export async function integratePolicySeeding() {
+  console.log('\n🔗 Integrating policy templates into existing seed process...');
+  
+  try {
+    // First, make sure your existing compliance data is seeded
+    const { seedComplianceData } = await import('./seedComplianceData');
+    console.log('📋 Running existing compliance data seeding...');
+    await seedComplianceData();
+    console.log('✅ Existing compliance data completed');
+    
+    // Then seed policy templates
+    console.log('📝 Running policy template seeding...');
+    await seedPolicyTemplates();
+    console.log('✅ Policy template seeding completed');
+    
+    console.log('\n🎉 Full seeding process complete!');
+    
+  } catch (error) {
+    console.error('❌ Integration seeding failed:', error);
+  }
+}
+
+Policy Generation Integration - Final Steps
+What I Found in Your Code
+Looking at your server/seedComplianceData.ts, you have these frameworks:
+* name: 'iso27001' → displayName: 'ISO 27001'
+* name: 'soc2' → displayName: 'SOC 2'
+* name: 'hipaa' → displayName: 'HIPAA'
+* name: 'gdpr' → displayName: 'GDPR'
+Perfect! My policy seeding is now corrected to match your exact framework names.
+Integration Steps
+1. Install Missing Dependencies
+npm install handlebars @types/handlebars
+2. Add Policy Tables to Schema
+Add these tables to your shared/schema.ts (after your existing tables):
+// Add these imports if not already present
+import { pgTable, text, timestamp, integer, boolean, jsonb, uuid, index } from "drizzle-orm/pg-core";
+
+// Policy templates table
+export const policyTemplates = pgTable("policy_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  frameworkId: uuid("framework_id").notNull().references(() => frameworks.id),
+  templateName: text("template_name").notNull(),
+  templateType: text("template_type").notNull(),
+  category: text("category").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  templateContent: text("template_content").notNull(),
+  requirementIds: jsonb("requirement_ids"),
+  priority: text("priority").notNull().default("medium"),
+  version: text("version").notNull().default("1.0"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  frameworkIdIdx: index("policy_templates_framework_id_idx").on(table.frameworkId),
+  typeIdx: index("policy_templates_type_idx").on(table.templateType),
+}));
+
+// Generated policies table  
+export const generatedPolicies = pgTable("generated_policies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  companyId: uuid("company_id").notNull().references(() => companies.id, { onDelete: "cascade" }),
+  templateId: uuid("template_id").notNull().references(() => policyTemplates.id),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  policyType: text("policy_type").notNull(),
+  category: text("category").notNull(),
+  content: text("content").notNull(),
+  variables: jsonb("variables"),
+  status: text("status").notNull().default("draft"),
+  version: text("version").notNull().default("1.0"),
+  approvedBy: uuid("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  companyIdIdx: index("generated_policies_company_id_idx").on(table.companyId),
+  statusIdx: index("generated_policies_status_idx").on(table.status),
+}));
+3. Create Template Content File
+Create server/templates/policyTemplates.ts with the policy template content (from the earlier artifacts).
+4. Create Policy Service
+Create server/services/policyGenerator.ts with the PolicyGenerator class (from earlier artifacts).
+5. Create Policy Routes
+Create server/routes/policies.ts with the policy API routes (from earlier artifacts).
+6. Update Your Server Routes
+Add to your server/routes.ts:
+// Add import at top
+import policiesRouter from "./routes/policies";
+
+// Add route in registerRoutes function
+app.use("/api/policies", policiesRouter);
+7. Update Your Server Index
+Add policy seeding to your server/index.ts after your existing seedComplianceData call:
+// After your existing seeding code:
+try {
+  const { seedPolicyTemplates } = await import("./seedPolicyTemplates");
+  await seedPolicyTemplates();
+  console.log("✅ Policy templates seeding completed");
+} catch (policyError) {
+  console.warn("⚠️ Policy templates seeding warning:", policyError);
+}
+8. Test the Integration
+Start your server:
+npm run dev
+Check the logs - you should see:
+✅ Comprehensive compliance data seeding completed
+📄 Adding 2 ISO 27001 policy templates  
+📄 Adding 2 HIPAA policy templates
+✅ Policy templates seeding completed. Added 4 new templates.
+Test the API:
+# List available templates
+curl http://localhost:5000/api/policies/templates
+
+# Generate a policy (with auth cookie)
+curl -X POST http://localhost:5000/api/policies/generate \
+  -H "Content-Type: application/json" \
+  -H "Cookie: connect.sid=your-session" \
+  -d '{"templateId": "template-id-here"}'
+Expected Results
+After integration, you'll have:
+* 4 professional policy templates (2 ISO 27001, 2 HIPAA)
+* Working policy generation API with company data integration
+* Professional document output ready for compliance teams
+* Version control and approval workflows
+The generated policies will be substantial documents (8-12 pages) with your company's actual data populated throughout - names, roles, security configurations, timelines, etc.
+This gives you immediate demo value for prospects who want to see real compliance deliverables.
