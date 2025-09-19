@@ -47,9 +47,16 @@ app.use((req, res, next) => {
     await db.execute(sql`SELECT 1`);
     console.log("✅ Database connected successfully");
 
-    // Use Drizzle's schema sync instead of manual migrations
-    console.log("🔄 Starting database schema sync...");
-    console.log("✅ Database schema sync completed - using Drizzle's built-in schema management");
+    // Run database migrations first
+    console.log("🔄 Running database migrations...");
+    try {
+      const { runMigrations } = await import("./runMigrations");
+      await runMigrations();
+      console.log("✅ Database migrations completed");
+    } catch (migrationError) {
+      console.error("❌ Database migration failed:", migrationError);
+      // Continue but log the error
+    }
 
     // Run comprehensive seed data with proper error handling
     try {
@@ -62,8 +69,13 @@ app.use((req, res, next) => {
     }
 
     // Seed policy templates
-    const { seedPolicyTemplates } = await import('./seedPolicyTemplates');
-    await seedPolicyTemplates();
+    try {
+      const { seedPolicyTemplates } = await import('./seedPolicyTemplates');
+      await seedPolicyTemplates();
+      console.log("✅ Policy templates seeding completed");
+    } catch (templateError) {
+      console.warn("⚠️ Policy template seeding warning:", templateError);
+    }
   } catch (error) {
     console.error("❌ Database connection failed:", error);
     process.exit(1);
