@@ -85,9 +85,9 @@ export const frameworks = pgTable("frameworks", {
 export const frameworkProgress = pgTable(
   "framework_progress",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id").notNull().references(() => users.id),
-    frameworkId: uuid("framework_id").notNull().references(() => frameworks.id),
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: varchar("user_id").notNull().references(() => users.id),
+    frameworkId: varchar("framework_id").notNull().references(() => frameworks.id),
     completedControls: integer("completed_controls").default(0),
     totalControls: integer("total_controls").default(0),
     progressPercentage: decimal("progress_percentage", { precision: 5, scale: 2 }).default("0.00"),
