@@ -1,0 +1,130 @@
+Perfect ✅ — this is exactly the step that makes your compliance app *actionable* instead of just a checklist. If every control in HIPAA/SOC 2 has a mapped **evidence suggestion list**, then:
+
+* **Evidence Tab** can display: *“Upload risk assessment policy PDF”* instead of a blank file uploader.
+* **AI Assistant** can answer: *“What evidence should I provide for HIPAA 164.308(a)(1)?” → “Risk analysis report, policies, remediation plans.”*
+* **PDF Exports** can show *expected evidence vs. uploaded evidence* to look audit-ready.
+
+---
+
+# 🧩 Data Model Update
+
+Add a field to your `controls` seed objects:
+
+```ts
+{
+  id: "hipaa-164-308a1",
+  frameworkId: "hipaa",
+  clause: "164.308(a)(1)",
+  title: "Security Management Process",
+  description: "Implement policies and procedures to prevent, detect, contain, and correct security violations.",
+  category: "administrative_safeguard",
+  requiredEvidence: [
+    "Risk analysis report",
+    "Risk management plan",
+    "Security policy document"
+  ]
+}
+```
+
+This `requiredEvidence` array will be optional but recommended.
+
+---
+
+# 📚 Example Evidence Suggestions
+
+### HIPAA (sample subset)
+
+* **164.308(a)(1) Security Management Process**
+  Evidence: Risk analysis, risk management plan, ISMS policy
+* **164.308(a)(5) Security Awareness & Training**
+  Evidence: Training logs, workforce attestation forms, awareness materials
+* **164.310(a)(1) Facility Access Controls**
+  Evidence: Facility access policy, visitor logs, access card system reports
+* **164.312(a)(1) Access Control**
+  Evidence: Access control matrix, role-based access policy, authentication logs
+* **164.312(b) Audit Controls**
+  Evidence: System logs, SIEM reports, log review procedures
+
+### SOC 2 (sample subset)
+
+* **CC1.1 Control Environment**
+  Evidence: Code of conduct, HR policies, organizational chart
+* **CC3.1 Risk Assessment**
+  Evidence: Risk register, board review minutes, threat modeling report
+* **CC5.1 Control Activities**
+  Evidence: Change management policy, workflow approvals, access provisioning logs
+* **A1.1 Availability**
+  Evidence: DR/BCP plan, uptime monitoring logs, failover test results
+* **C1.1 Confidentiality**
+  Evidence: NDA templates, data classification policy, encryption standards
+
+---
+
+# 🔧 Schema Change
+
+In `shared/schema.ts`, update `controls`:
+
+```ts
+export const controls = pgTable("controls", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  frameworkId: uuid("framework_id").references(() => frameworks.id),
+  clause: varchar("clause", { length: 50 }),
+  title: varchar("title", { length: 255 }),
+  description: text("description"),
+  category: varchar("category", { length: 100 }),
+  requiredEvidence: jsonb("required_evidence").$type<string[]>(), // NEW
+});
+```
+
+---
+
+# 🛠️ Frontend: Evidence Tab
+
+When viewing tasks/evidence:
+
+```tsx
+{control.requiredEvidence?.length > 0 && (
+  <div className="mt-2 text-sm text-gray-600">
+    <p className="font-medium text-gray-800">Suggested Evidence:</p>
+    <ul className="list-disc list-inside">
+      {control.requiredEvidence.map((item, idx) => (
+        <li key={idx}>{item}</li>
+      ))}
+    </ul>
+  </div>
+)}
+```
+
+---
+
+# 🤖 AI Assistant Integration
+
+Update your AI prompt template:
+
+```txt
+If a user asks what evidence to provide for a specific HIPAA or SOC 2 control, 
+answer with the "requiredEvidence" list from the controls database. 
+Always cite the clause number in the response.
+```
+
+Example answer:
+
+**Q:** *What evidence do I need for HIPAA 164.312(b)?*
+**A:** For **HIPAA 164.312(b) – Audit Controls**, you should provide:
+
+* System logs from applications and servers
+* Security Information and Event Management (SIEM) reports
+* Documented log review procedures
+
+---
+
+# ✅ Why This Matters
+
+* Evidence collection is the **hardest part of audits** — you’re now guiding users explicitly.
+* Makes dashboards **actionable** instead of passive.
+* AI assistant becomes **compliance-aware** with real regulatory mappings.
+* Improves ROI story: “We save you time by telling you *exactly* what evidence auditors expect.”
+
+---
+
+⚡ Do you want me to **draft the full HIPAA evidence mapping (all 19 controls)** so your Evidence Tab + AI Chat are immediately useful, or do you prefer a framework/template so you can gradually expand SOC 2 and HIPAA yourself?
