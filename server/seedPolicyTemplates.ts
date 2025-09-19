@@ -15,10 +15,10 @@ export async function seedPolicyTemplates() {
       return;
     }
 
-    // Get frameworks
+    // Get frameworks - try both id and name fields for compatibility
     const existingFrameworks = await db.select().from(frameworks);
-    const iso27001 = existingFrameworks.find(f => f.name === 'iso27001');
-    const hipaa = existingFrameworks.find(f => f.name === 'hipaa');
+    const iso27001 = existingFrameworks.find(f => f.name === 'iso27001' || f.id === 'iso27001');
+    const hipaa = existingFrameworks.find(f => f.name === 'hipaa' || f.id === 'hipaa');
 
     const templates = [];
 

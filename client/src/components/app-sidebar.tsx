@@ -347,7 +347,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut />
                   Log out
-                </DropdownMenuItem>
+                </DropdownMenuMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>

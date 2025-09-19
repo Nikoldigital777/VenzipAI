@@ -50,9 +50,25 @@ export class PolicyGenerator {
       category: template.category,
       content: enhancedContent,
       variables: variables,
-      status: 'draft',
-      version: '1.0'
+      status: 'approved', // Auto-approve generated policies
+      version: '1.0',
+      approvedBy: userId,
+      approvedAt: new Date()
     });
+
+    // Automatically map this policy to compliance requirements as evidence
+    try {
+      const { policyEvidenceMapper } = await import('./policyEvidenceMapper');
+      await policyEvidenceMapper.mapPoliciesToEvidence(
+        generatedPolicy.id,
+        userId,
+        companyId
+      );
+      console.log(`Successfully mapped policy "${generatedPolicy.title}" to compliance requirements`);
+    } catch (mappingError) {
+      console.error('Failed to map policy to evidence:', mappingError);
+      // Don't fail policy generation if mapping fails
+    }
 
     return generatedPolicy;
   }

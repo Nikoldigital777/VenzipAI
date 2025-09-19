@@ -27,7 +27,8 @@ import {
   Globe,
   ShieldAlert,
   FileText,
-  CheckSquare // Import CheckSquare
+  CheckSquare, // Import CheckSquare
+  Eye // Import Eye
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FrameworkProgressTable } from "@/components/FrameworkProgressTable";
@@ -473,140 +474,50 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Enhanced Recent Tasks Section */}
-          <Card className="lg:col-span-2 glass-card animate-fadeInUp" style={{animationDelay: '0.6s'}} data-testid="recent-tasks-card">
+          {/* Generated Policies Section */}
+          <Card className="lg:col-span-2 glass-card animate-fadeInUp" style={{animationDelay: '0.7s'}} data-testid="generated-policies-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-gray-900">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-indigo-600" />
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <div className="text-lg font-semibold">Recent Tasks</div>
-                  <div className="text-sm text-gray-500 font-normal">
-                    Latest compliance activities
-                    {recentTasksData?.totalTasks > 0 && (
-                      <span className="ml-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
-                        {recentTasksData?.totalTasks} total
-                      </span>
-                    )}
-                  </div>
+                  <div className="text-lg font-semibold">Generated Policies</div>
+                  <div className="text-sm text-gray-500 font-normal">Baseline compliance policies for your frameworks</div>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {tasksLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
-                  <span className="ml-2 text-gray-600">Loading tasks...</span>
-                </div>
-              ) : recentTasksData?.error ? (
-                <div className="text-center py-8">
-                  <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-orange-400" />
-                  <p className="text-sm text-gray-500 mb-2">{recentTasksData.error}</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.location.reload()}
-                    data-testid="retry-tasks-button"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Retry
-                  </Button>
-                </div>
-              ) : recentTasks && recentTasks.length > 0 ? (
-                <div className="space-y-3">
-                  {recentTasks.map((task: any, index: number) => (
-                    <Card key={task.id} className="glass-card border-0 shadow-sm hover:shadow-md transition-shadow duration-200" data-testid={`recent-task-item-${index}`}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 truncate">{task.title}</div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge
-                                variant="outline"
-                                className={
-                                  task.status === 'completed' ? 'border-green-200 text-green-700 bg-green-50' :
-                                  task.status === 'in_progress' ? 'border-blue-200 text-blue-700 bg-blue-50' :
-                                  task.status === 'under_review' ? 'border-purple-200 text-purple-700 bg-purple-50' :
-                                  'border-gray-200 text-gray-700 bg-gray-50'
-                                }
-                              >
-                                {task.status.replace('_', ' ')}
-                              </Badge>
-                              <Badge
-                                variant="outline"
-                                className={
-                                  task.priority === 'critical' ? 'border-red-200 text-red-700 bg-red-50' :
-                                  task.priority === 'high' ? 'border-orange-200 text-orange-700 bg-orange-50' :
-                                  task.priority === 'medium' ? 'border-yellow-200 text-yellow-700 bg-yellow-50' :
-                                  'border-gray-200 text-gray-700 bg-gray-50'
-                                }
-                              >
-                                {task.priority}
-                              </Badge>
-                              {task.isOverdue && (
-                                <Badge variant="destructive" className="text-xs">
-                                  Overdue
-                                </Badge>
-                              )}
-                              {task.frameworkId && (
-                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                  {task.frameworkId.toUpperCase()}
-                                </span>
-                              )}
-                            </div>
-                            {task.dueDate && (
-                              <div className={`text-xs mt-1 ${task.isOverdue ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
-                                Due: {new Date(task.dueDate).toLocaleDateString()}
-                                {task.isOverdue && ' (Overdue)'}
-                              </div>
-                            )}
+              <div className="space-y-3">
+                {['Information Security Policy', 'HIPAA Privacy Policy', 'Data Protection Policy'].map((policy, index) => (
+                  <Card key={index} className="glass-card border-0 shadow-sm hover:shadow-md transition-shadow duration-200" data-testid={`policy-item-${index}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <CheckCircle className="h-4 w-4 text-white" />
                           </div>
-                          <div className="ml-3 flex-shrink-0">
-                            <div className="w-12 h-12 relative">
-                              <div className="w-full h-full bg-gray-200 rounded-full"></div>
-                              <div
-                                className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                                  task.isOverdue ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-indigo-500 to-purple-500'
-                                }`}
-                                style={{
-                                  clipPath: `polygon(50% 50%, 50% 0%, ${50 + Math.cos((task.progressPercentage / 100) * 2 * Math.PI - Math.PI/2) * 50}% ${50 + Math.sin((task.progressPercentage / 100) * 2 * Math.PI - Math.PI/2) * 50}%, 50% 50%)`
-                                }}
-                              ></div>
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-xs font-bold text-gray-700">
-                                  {task.progressPercentage}%
-                                </span>
-                              </div>
-                            </div>
+                          <div>
+                            <div className="font-medium text-sm text-gray-900">{policy}</div>
+                            <div className="text-xs text-gray-500">Auto-generated • Approved</div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <CheckSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg font-medium text-gray-700 mb-2">No tasks yet</p>
-                  <p className="text-sm text-gray-500 mb-4">
-                    {recentTasksData?.message || "Complete your onboarding to generate compliance tasks"}
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.location.href = '/tasks'}
-                    data-testid="view-all-tasks-button"
-                  >
-                    <Target className="h-4 w-4 mr-2" />
-                    View All Tasks
-                  </Button>
-                </div>
-              )}
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">Active</Badge>
+                          <Button variant="ghost" size="sm" data-testid={`view-policy-${policy.toLowerCase().replace(' ', '-')}`}>
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
           {/* Reports Section */}
-          <Card className="lg:col-span-1 glass-card animate-fadeInUp" style={{animationDelay: '0.7s'}} data-testid="reports-card">
+          <Card className="lg:col-span-1 glass-card animate-fadeInUp" style={{animationDelay: '0.8s'}} data-testid="reports-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-gray-900">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center">

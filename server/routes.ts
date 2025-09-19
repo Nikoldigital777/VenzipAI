@@ -3524,8 +3524,8 @@ export async function registerRoutes(app: Express) {
         selectedFrameworks: frameworks,
         onboardingCompleted: true // Mark onboarding as completed
       });
-      const companyRecord = await storage.upsertCompany(companyData);
-      console.log("Company record created/updated:", companyRecord.id);
+      const savedCompany = await storage.upsertCompany(companyData);
+      console.log("Company record created/updated:", savedCompany.id);
 
       const selectedFrameworksData = [];
       let totalTasks = 0;
@@ -3599,6 +3599,38 @@ export async function registerRoutes(app: Express) {
         }
       }
 
+      // Generate baseline policies for selected frameworks
+      let generatedPolicies = 0;
+      try {
+        const { policyGenerator } = await import('./services/policyGenerator');
+
+        for (const frameworkId of frameworks) {
+          try {
+            // Get available templates for this framework
+            const templates = await policyGenerator.getTemplatesForFramework(frameworkId);
+
+            for (const template of templates) {
+              // Generate policy from template
+              await policyGenerator.generatePolicy(
+                template.id,
+                userId,
+                savedCompany.id,
+                {} // Use default variables for now
+              );
+              generatedPolicies++;
+              console.log(`Generated policy: ${template.title} for framework: ${frameworkId}`);
+            }
+          } catch (policyError) {
+            console.error(`Error generating policies for framework ${frameworkId}:`, policyError);
+          }
+        }
+
+        console.log(`Generated ${generatedPolicies} baseline policies`);
+      } catch (policyGenError) {
+        console.error("Policy generation failed:", policyGenError);
+        // Don't fail onboarding if policy generation fails
+      }
+
       // Update user to mark onboarding as completed
       try {
         await storage.updateUser(userId, {
@@ -3612,20 +3644,16 @@ export async function registerRoutes(app: Express) {
         console.warn("⚠️ User onboarding completion flag not set - user may need to redo onboarding");
       }
 
-      console.log(`Onboarding completed successfully - processed ${successfulFrameworks}/${frameworks.length} frameworks, created ${totalTasks} tasks`);
+      console.log(`Onboarding completed successfully - processed ${successfulFrameworks}/${frameworks.length} frameworks, created ${totalTasks} tasks, generated ${generatedPolicies} policies`);
 
-      res.json({ 
-        success: true, 
-        company: {
-          id: companyRecord.id,
-          name: companyRecord.name,
-          industry: companyRecord.industry,
-          size: companyRecord.size
-        },
-        frameworks: selectedFrameworksData,
+      res.json({
+        success: true,
+        message: "Company profile and tasks created successfully",
+        company: savedCompany,
         totalTasks,
-        aiEnabled: aiEnabled !== undefined ? aiEnabled : true,
-        message: `Onboarding completed successfully - ${successfulFrameworks} frameworks processed, ${totalTasks} tasks created`
+        generatedPolicies,
+        successfulFrameworks,
+        failedFrameworks: frameworks.length - successfulFrameworks
       });
     } catch (error) {
       console.error("Error completing onboarding:", error);
