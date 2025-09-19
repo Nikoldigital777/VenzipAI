@@ -123,7 +123,7 @@ export function GapDetection() {
             </Button>
           </div>
         </CardHeader>
-        
+
         {gapData && (
           <CardContent className="relative z-10">
             {/* Summary Stats */}
@@ -137,7 +137,7 @@ export function GapDetection() {
                   {gapData.overallCompletion}%
                 </p>
               </div>
-              
+
               <div className="bg-white/60 rounded-lg p-4 border border-gray-200/50">
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="h-4 w-4 text-purple-600" />
@@ -147,7 +147,7 @@ export function GapDetection() {
                   {gapData.totalGaps}
                 </p>
               </div>
-              
+
               <div className="bg-white/60 rounded-lg p-4 border border-gray-200/50">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="h-4 w-4 text-red-600" />
@@ -157,7 +157,7 @@ export function GapDetection() {
                   {gapData.criticalGaps}
                 </p>
               </div>
-              
+
               <div className="bg-white/60 rounded-lg p-4 border border-gray-200/50">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -191,7 +191,7 @@ export function GapDetection() {
       {gapData && gapData.frameworks.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900">Framework Compliance Status</h3>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {gapData.frameworks.map((framework, index) => (
               <Card
@@ -201,30 +201,32 @@ export function GapDetection() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                 <CardHeader className="relative z-10 pb-4">
-                  <div className="flex items-center justify-between">
+                  {/* Framework Header */}
+                  <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl flex items-center justify-center border border-gray-200">
-                        <span className="text-sm font-bold text-gray-700">
-                          {framework.frameworkName.slice(0, 2).toUpperCase()}
-                        </span>
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold text-white shadow-lg"
+                        style={{ backgroundColor: framework.status === 'excellent' ? '#10B981' :
+                                                   framework.status === 'good' ? '#3B82F6' :
+                                                   framework.status === 'needs_attention' ? '#F59E0B' : '#EF4444' }}
+                      >
+                        {framework.displayName?.charAt(0) || 'F'}
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900" data-testid={`framework-name-${index}`}>
-                          {framework.displayName}
-                        </h4>
-                        <p className="text-xs text-gray-500">
-                          {framework.completedTasks} of {framework.totalTasks} tasks completed
+                        <h3 className="text-lg font-bold text-gray-900">{framework.displayName}</h3>
+                        <p className="text-sm text-gray-600">
+                          {framework.frameworkName} • {framework.totalTasks} total tasks
                         </p>
                       </div>
                     </div>
-                    
+
                     <Badge className={`${getStatusColor(framework.status)} font-medium`} variant="outline">
                       {getStatusIcon(framework.status)}
                       <span className="ml-1 capitalize">{framework.status.replace('_', ' ')}</span>
                     </Badge>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="relative z-10 space-y-4">
                   {/* Progress Bar */}
                   <div className="space-y-2">
@@ -255,7 +257,7 @@ export function GapDetection() {
                           {framework.missingRequirements.length} gaps
                         </Badge>
                       </div>
-                      
+
                       <div className="space-y-2 max-h-40 overflow-y-auto">
                         {framework.missingRequirements.slice(0, 5).map((requirement, reqIndex) => (
                           <div
@@ -271,7 +273,7 @@ export function GapDetection() {
                             </div>
                           </div>
                         ))}
-                        
+
                         {framework.missingRequirements.length > 5 && (
                           <div className="text-center">
                             <Badge variant="outline" className="text-xs text-gray-600">
@@ -288,7 +290,7 @@ export function GapDetection() {
                     <div className="bg-green-50/80 border border-green-200/50 rounded-lg p-4 text-center">
                       <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto mb-2" />
                       <p className="text-sm font-medium text-green-700">Complete!</p>
-                      <p className="text-xs text-green-600">All requirements satisfied</p>
+                      <p className="text-sm text-green-600">All requirements satisfied</p>
                     </div>
                   )}
                 </CardContent>

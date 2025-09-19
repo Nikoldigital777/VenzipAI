@@ -990,27 +990,64 @@ export async function registerRoutes(app: Express) {
     try {
       const userId = req.user.sub;
 
-      // Get user's framework progress
-      const frameworkProgress = await storage.getFrameworkProgressByUserId(userId);
+      // Get user's company to know selected frameworks
+      const company = await storage.getCompanyByUserId(userId);
+      const selectedFrameworks = company?.selectedFrameworks || [];
 
-      // Get all frameworks for display names
-      const frameworks = await storage.getAllFrameworks();
+      // Get all frameworks
+      const allFrameworks = await storage.getAllFrameworks();
 
-      // Combine progress data with framework details
-      const progressWithDetails = frameworkProgress.map(progress => {
-        const framework = frameworks.find(f => f.id === progress.frameworkId);
-        return {
-          frameworkId: progress.frameworkId,
-          frameworkName: framework?.name || 'Unknown',
-          displayName: framework?.displayName || framework?.name || 'Unknown',
-          completionPercentage: progress.progressPercentage ? parseFloat(progress.progressPercentage) : 0,
-          totalTasks: progress.totalTasks || 0,
-          completedTasks: progress.completedTasks || 0,
-          status: progress.progressPercentage && parseFloat(progress.progressPercentage) >= 80 ? 'excellent' :
-                  progress.progressPercentage && parseFloat(progress.progressPercentage) >= 60 ? 'good' :
-                  progress.progressPercentage && parseFloat(progress.progressPercentage) >= 40 ? 'needs_attention' : 'critical',
-        };
-      });
+      // Get all user tasks
+      const allTasks = await storage.getTasksByUserId(userId);
+
+      // Calculate progress for each selected framework
+      const progressWithDetails = [];
+
+      for (const frameworkName of selectedFrameworks) {
+        const framework = allFrameworks.find(f => f.name === frameworkName || f.id === frameworkName);
+        
+        if (framework) {
+          // Get tasks for this framework
+          const frameworkTasks = allTasks.filter(task => task.frameworkId === framework.id);
+          const completedTasks = frameworkTasks.filter(task => task.status === 'completed');
+          
+          const totalTasks = frameworkTasks.length;
+          const completedTasksCount = completedTasks.length;
+          const completionPercentage = totalTasks > 0 ? Math.round((completedTasksCount / totalTasks) * 100) : 0;
+          
+          // Determine status based on completion
+          let status: 'excellent' | 'good' | 'needs_attention' | 'critical';
+          if (completionPercentage >= 90) status = 'excellent';
+          else if (completionPercentage >= 70) status = 'good';
+          else if (completionPercentage >= 50) status = 'needs_attention';
+          else status = 'critical';
+
+          progressWithDetails.push({
+            frameworkId: framework.id,
+            frameworkName: framework.name,
+            displayName: framework.displayName,
+            completionPercentage,
+            totalTasks,
+            completedTasks: completedTasksCount,
+            status,
+            color: framework.color || '#4ECDC4',
+            icon: framework.icon || '📋'
+          });
+
+          // Update framework progress in database
+          try {
+            await storage.upsertFrameworkProgress({
+              userId,
+              frameworkId: framework.id,
+              completedControls: completedTasksCount,
+              totalControls: totalTasks,
+              progressPercentage: completionPercentage.toString()
+            });
+          } catch (progressError) {
+            console.error("Error updating framework progress:", progressError);
+          }
+        }
+      }
 
       res.json(progressWithDetails);
     } catch (error) {
@@ -2535,6 +2572,49 @@ export async function registerRoutes(app: Express) {
       });
     } catch (error) {
       console.error("Evidence mapping test failed:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Test progress tracking functionality
+  app.get("/api/test/progress-tracking", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      
+      // Get framework progress
+      const frameworkProgress = await fetch(`http://localhost:5000/api/framework-progress`, {
+        headers: { 'Authorization': req.headers.authorization || '' }
+      }).then(r => r.json()).catch(() => []);
+      
+      // Get velocity data
+      const velocityData = await fetch(`http://localhost:5000/api/progress/velocity`, {
+        headers: { 'Authorization': req.headers.authorization || '' }
+      }).then(r => r.json()).catch(() => null);
+      
+      // Get gap analysis
+      const gapAnalysis = await fetch(`http://localhost:5000/api/compliance/gap-analysis`, {
+        headers: { 'Authorization': req.headers.authorization || '' }
+      }).then(r => r.json()).catch(() => null);
+
+      res.json({
+        success: true,
+        data: {
+          frameworkProgress: frameworkProgress.length || 0,
+          velocity: velocityData?.currentVelocity || 0,
+          gapsFound: gapAnalysis?.frameworks?.length || 0,
+          overallCompletion: gapAnalysis?.overallCompletion || 0
+        },
+        details: {
+          frameworks: frameworkProgress,
+          velocity: velocityData,
+          gaps: gapAnalysis
+        }
+      });
+    } catch (error) {
+      console.error("Progress tracking test failed:", error);
       res.status(500).json({ 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error'

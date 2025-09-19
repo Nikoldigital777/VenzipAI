@@ -2,15 +2,20 @@
 import { useSummary } from "@/hooks/useSummary";
 import ProgressRing from "@/components/progress-ring";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LazyAIChat from "@/components/LazyAIChat";
 import { ReportGenerator } from "@/components/reports/ReportGenerator";
-import { 
-  Upload, 
-  MessageSquare, 
-  AlertTriangle, 
-  Target, 
+import {
+  Upload,
+  MessageSquare,
+  AlertTriangle,
+  Target,
   TrendingUp,
   Clock,
   Activity,
@@ -23,11 +28,12 @@ import {
   FileText
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { FrameworkProgressTable } from "@/components/FrameworkProgressTable";
 
-type Gap = { 
-  id: string; 
-  title: string; 
-  severity: "low" | "medium" | "high" | "critical"; 
+type Gap = {
+  id: string;
+  title: string;
+  severity: "low" | "medium" | "high" | "critical";
   kind: "task" | "risk";
   meta: {
     framework?: string;
@@ -41,18 +47,18 @@ type Activity = { id: string; action: string; resourceType: string; createdAt: s
 type Summary = {
   compliancePercent: number;
   gaps: Gap[];
-  stats: { 
-    uploads: number; 
-    conversations: number; 
-    tasksOpenHigh?: number; 
-    risksHigh?: number; 
+  stats: {
+    uploads: number;
+    conversations: number;
+    tasksOpenHigh?: number;
+    risksHigh?: number;
   };
   recentActivity: Activity[];
 };
 
 export default function Dashboard() {
   const { data, isLoading, isError, error, refetch } = useSummary();
-  
+
   // Dashboard progress data
   const { data: progressData, isLoading: progressLoading, error: progressError } = useQuery({
     queryKey: ['/api/dashboard/progress'],
@@ -203,8 +209,8 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex items-center justify-center py-12 relative z-10">
-                <ProgressRing 
-                  percentage={progressData?.percentComplete || compliancePercent} 
+                <ProgressRing
+                  percentage={progressData?.percentComplete || compliancePercent}
                   size={140}
                   strokeWidth={12}
                   showGlow={true}
@@ -291,109 +297,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Corporate Compliance Metrics Table */}
-          <Card className="lg:col-span-3 glass-card animate-fadeInUp" style={{animationDelay: '0.5s'}}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-gray-900">
-                <div className="w-10 h-10 bg-info-blue/10 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="h-5 w-5 text-info-blue" />
-                </div>
-                <div>
-                  <div className="text-lg font-semibold">Compliance Framework Status</div>
-                  <div className="text-sm text-gray-500 font-normal">Detailed progress across all frameworks</div>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Framework</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Progress</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Controls</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Risk Level</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Next Audit</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-venzip-primary" />
-                          <span className="font-medium">SOC 2 Type II</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div className="bg-venzip-primary h-2 rounded-full" style={{width: `${compliancePercent}%`}}></div>
-                          </div>
-                          <span className="text-sm font-medium">{compliancePercent}%</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">64/75</td>
-                      <td className="py-4 px-4">
-                        <span className="px-2 py-1 bg-success-green/10 text-success-green rounded-full text-xs font-medium">Low</span>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">Q3 2025</td>
-                      <td className="py-4 px-4">
-                        <span className="px-2 py-1 bg-warning-orange/10 text-warning-orange rounded-full text-xs font-medium">In Progress</span>
-                      </td>
-                    </tr>
-                    <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-venzip-accent" />
-                          <span className="font-medium">ISO 27001</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div className="bg-venzip-accent h-2 rounded-full" style={{width: '45%'}}></div>
-                          </div>
-                          <span className="text-sm font-medium">45%</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">51/114</td>
-                      <td className="py-4 px-4">
-                        <span className="px-2 py-1 bg-warning-orange/10 text-warning-orange rounded-full text-xs font-medium">Medium</span>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">Q4 2025</td>
-                      <td className="py-4 px-4">
-                        <span className="px-2 py-1 bg-info-blue/10 text-info-blue rounded-full text-xs font-medium">Planning</span>
-                      </td>
-                    </tr>
-                    <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <ShieldAlert className="h-4 w-4 text-danger-coral" />
-                          <span className="font-medium">HIPAA</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div className="bg-danger-coral h-2 rounded-full" style={{width: '78%'}}></div>
-                          </div>
-                          <span className="text-sm font-medium">78%</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">28/36</td>
-                      <td className="py-4 px-4">
-                        <span className="px-2 py-1 bg-success-green/10 text-success-green rounded-full text-xs font-medium">Low</span>
-                      </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">Q2 2025</td>
-                      <td className="py-4 px-4">
-                        <span className="px-2 py-1 bg-success-green/10 text-success-green rounded-full text-xs font-medium">Compliant</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+            <FrameworkProgressTable />
 
             {/* Enhanced Gaps Section */}
             <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.3s'}}>
@@ -433,8 +337,8 @@ export default function Dashboard() {
                                     {g.title}
                                   </div>
                                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                    {g.kind === "task" 
-                                      ? `${g.meta?.framework?.toUpperCase() || "TASK"}` 
+                                    {g.kind === "task"
+                                      ? `${g.meta?.framework?.toUpperCase() || "TASK"}`
                                       : `${g.meta?.category?.toUpperCase() || "RISK"}`
                                     }
                                   </span>
@@ -549,8 +453,8 @@ export default function Dashboard() {
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-gray-900 truncate">{task.title}</div>
                             <div className="flex items-center gap-2 mt-1">
-                              <Badge 
-                                variant="outline" 
+                              <Badge
+                                variant="outline"
                                 className={
                                   task.status === 'completed' ? 'border-green-200 text-green-700 bg-green-50' :
                                   task.status === 'in_progress' ? 'border-blue-200 text-blue-700 bg-blue-50' :
@@ -560,7 +464,7 @@ export default function Dashboard() {
                               >
                                 {task.status.replace('_', ' ')}
                               </Badge>
-                              <Badge 
+                              <Badge
                                 variant="outline"
                                 className={
                                   task.priority === 'critical' ? 'border-red-200 text-red-700 bg-red-50' :
@@ -586,7 +490,7 @@ export default function Dashboard() {
                           <div className="ml-3 flex-shrink-0">
                             <div className="w-12 h-12 relative">
                               <div className="w-full h-full bg-gray-200 rounded-full"></div>
-                              <div 
+                              <div
                                 className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
                                 style={{
                                   clipPath: `polygon(50% 50%, 50% 0%, ${50 + Math.cos((task.progressPercentage / 100) * 2 * Math.PI - Math.PI/2) * 50}% ${50 + Math.sin((task.progressPercentage / 100) * 2 * Math.PI - Math.PI/2) * 50}%, 50% 50%)`
