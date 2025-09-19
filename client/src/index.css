@@ -670,32 +670,43 @@ html {
   background: rgba(78, 205, 196, 0.7);
 }
 
-/* Force light mode for onboarding page */
+/* Force light mode for landing and onboarding pages */
 .light {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(210, 25%, 7.8431%);
-  --card: hsl(180, 6.6667%, 97.0588%);
-  --card-foreground: hsl(210, 25%, 7.8431%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(210, 25%, 7.8431%);
-  --primary: hsl(203.8863, 88.2845%, 53.1373%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(210, 25%, 7.8431%);
-  --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(240, 1.9608%, 90%);
-  --muted-foreground: hsl(210, 25%, 7.8431%);
-  --accent: hsl(211.5789, 51.3514%, 92.7451%);
-  --accent-foreground: hsl(203.8863, 88.2845%, 53.1373%);
-  --destructive: hsl(356.3033, 90.5579%, 54.3137%);
-  --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(201.4286, 30.4348%, 90.9804%);
-  --input: hsl(200, 23.0769%, 97.4510%);
-  --ring: hsl(202.8169, 89.1213%, 53.1373%);
-  color-scheme: light;
+  --background: hsl(0, 0%, 100%) !important;
+  --foreground: hsl(210, 25%, 7.8431%) !important;
+  --card: hsl(180, 6.6667%, 97.0588%) !important;
+  --card-foreground: hsl(210, 25%, 7.8431%) !important;
+  --popover: hsl(0, 0%, 100%) !important;
+  --popover-foreground: hsl(210, 25%, 7.8431%) !important;
+  --primary: hsl(203.8863, 88.2845%, 53.1373%) !important;
+  --primary-foreground: hsl(0, 0%, 100%) !important;
+  --secondary: hsl(210, 25%, 7.8431%) !important;
+  --secondary-foreground: hsl(0, 0%, 100%) !important;
+  --muted: hsl(240, 1.9608%, 90%) !important;
+  --muted-foreground: hsl(210, 25%, 7.8431%) !important;
+  --accent: hsl(211.5789, 51.3514%, 92.7451%) !important;
+  --accent-foreground: hsl(203.8863, 88.2845%, 53.1373%) !important;
+  --destructive: hsl(356.3033, 90.5579%, 54.3137%) !important;
+  --destructive-foreground: hsl(0, 0%, 100%) !important;
+  --border: hsl(201.4286, 30.4348%, 90.9804%) !important;
+  --input: hsl(200, 23.0769%, 97.4510%) !important;
+  --ring: hsl(202.8169, 89.1213%, 53.1373%) !important;
+  color-scheme: light !important;
 }
 
-.light * {
-  color-scheme: light;
+.light *,
+.light *::before,
+.light *::after {
+  color-scheme: light !important;
+}
+
+/* Override any dark mode classes for light-only pages */
+.light .dark\:bg-gray-900 {
+  background-color: hsl(0, 0%, 100%) !important;
+}
+
+.light .dark\:text-white {
+  color: hsl(210, 25%, 7.8431%) !important;
 }
 
 /* Custom animations */
