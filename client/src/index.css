@@ -64,24 +64,36 @@
 }
 
 .dark {
-  --background: hsl(0, 0%, 3.9%); /* Slightly lighter than pure black */
-  --foreground: hsl(0, 0%, 96%); /* High contrast white */
-  --card: hsl(0, 0%, 7%); /* Dark card background */
-  --card-foreground: hsl(0, 0%, 96%);
-  --popover: hsl(0, 0%, 7%);
-  --popover-foreground: hsl(0, 0%, 96%);
+  /* Surface Elevation System - SaaS Dark Mode Best Practices */
+  --background: hsl(0, 0%, 3.9%); /* App background - deepest level */
+  --surface-primary: hsl(0, 0%, 7%); /* Cards, panels - primary surfaces */
+  --surface-secondary: hsl(0, 0%, 11%); /* Elevated elements - secondary surfaces */
+  --surface-tertiary: hsl(0, 0%, 15%); /* Modals, tooltips - highest elevation */
+  
+  /* 4-Tier Text Hierarchy for SaaS Data Legibility */
+  --text-primary: hsl(0, 0%, 96%); /* Primary content - highest contrast */
+  --text-secondary: hsl(0, 0%, 78%); /* Secondary content - medium contrast */
+  --text-tertiary: hsl(0, 0%, 65%); /* Tertiary content - lower contrast */
+  --text-subdued: hsl(0, 0%, 52%); /* Captions, metadata - lowest contrast */
+  
+  /* Updated Semantic Colors */
+  --foreground: var(--text-primary);
+  --card: var(--surface-primary);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-tertiary);
+  --popover-foreground: var(--text-primary);
   --primary: hsl(203.7736, 87.6033%, 52.5490%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(0, 0%, 14.9%); /* Darker secondary */
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --muted: hsl(0, 0%, 14.9%); /* Muted elements */
-  --muted-foreground: hsl(0, 0%, 65%); /* Better readability */
-  --accent: hsl(0, 0%, 14.9%);
+  --secondary: var(--surface-secondary);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-secondary);
+  --muted-foreground: var(--text-tertiary);
+  --accent: var(--surface-secondary);
   --accent-foreground: hsl(177, 54%, 65%); /* Venzip primary for dark */
   --destructive: hsl(0, 85%, 60%); /* Adjusted for dark mode */
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(0, 0%, 14.9%); /* Subtle borders */
-  --input: hsl(0, 0%, 14.9%); /* Input backgrounds */
+  --border: hsl(0, 0%, 14.9%); /* Subtle borders for separation */
+  --input: var(--surface-secondary); /* Input backgrounds use secondary surface */
   --ring: hsl(177, 54%, 65%); /* Focus rings with brand color */
   
   /* Chart colors optimized for dark mode */
@@ -91,12 +103,12 @@
   --chart-4: hsl(147, 78%, 50%); /* Success green */
   --chart-5: hsl(341, 75%, 60%); /* Pink/coral */
   
-  /* Sidebar dark mode */
-  --sidebar: hsl(0, 0%, 7%);
-  --sidebar-foreground: hsl(0, 0%, 96%);
+  /* Sidebar dark mode - using surface elevation system */
+  --sidebar: var(--surface-primary);
+  --sidebar-foreground: var(--text-primary);
   --sidebar-primary: hsl(177, 54%, 65%);
   --sidebar-primary-foreground: hsl(0, 0%, 0%);
-  --sidebar-accent: hsl(0, 0%, 14.9%);
+  --sidebar-accent: var(--surface-secondary);
   --sidebar-accent-foreground: hsl(177, 54%, 65%);
   --sidebar-border: hsl(0, 0%, 14.9%);
   --sidebar-ring: hsl(177, 54%, 65%);
@@ -111,6 +123,12 @@
   --warning-orange: hsl(21, 100%, 68%); /* Brighter warning */
   --danger-coral: hsl(0, 85%, 65%); /* Adjusted danger */
   --info-blue: hsl(207, 88%, 70%); /* Brighter info */
+  
+  /* SaaS Interaction States - optimized for work environments */
+  --hover-overlay: rgba(255, 255, 255, 0.05); /* Subtle hover feedback */
+  --selection-overlay: rgba(78, 205, 196, 0.15); /* Selection states */
+  --focus-overlay: rgba(78, 205, 196, 0.25); /* Focus states */
+  --active-overlay: rgba(78, 205, 196, 0.1); /* Active states */
   
   /* Shadows for dark mode */
   --shadow-2xs: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
@@ -147,6 +165,41 @@
   .glass-morphism {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   }
+  
+  /* SaaS-optimized interaction states */
+  .saas-hover {
+    transition: all 0.2s ease;
+  }
+  
+  .saas-hover:hover {
+    background-color: var(--hover-overlay);
+  }
+  
+  .saas-selected {
+    background-color: var(--selection-overlay);
+    border-color: var(--venzip-primary);
+  }
+  
+  .saas-focus:focus {
+    outline: 2px solid var(--venzip-primary);
+    outline-offset: 2px;
+    background-color: var(--focus-overlay);
+  }
+  
+  .saas-interactive {
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .saas-interactive:hover {
+    background-color: var(--hover-overlay);
+    transform: translateY(-1px);
+  }
+  
+  .saas-interactive:active {
+    background-color: var(--active-overlay);
+    transform: translateY(0);
+  }
 }
 
 /* Glassmorphism Effects - Light Mode */
@@ -181,28 +234,35 @@
   transform: translateY(-8px);
 }
 
-/* Glassmorphism Effects - Dark Mode */
+/* Glassmorphism Effects - Dark Mode with Surface Elevation */
 .dark .glass-morphism {
-  background: rgba(10, 10, 10, 0.6);
+  background: hsl(0, 0%, 7%, 0.8); /* Using surface-primary with transparency */
   border: 1px solid rgba(78, 205, 196, 0.2);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .dark .glass-morphism-enhanced {
-  background: rgba(10, 10, 10, 0.8);
+  background: hsl(0, 0%, 11%, 0.9); /* Using surface-secondary */
   border: 1px solid rgba(78, 205, 196, 0.25);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
 }
 
 .dark .glass-card {
-  background: rgba(18, 18, 18, 0.8);
+  background: hsl(0, 0%, 7%, 0.95); /* Primary surface with slight transparency */
   border: 1px solid rgba(78, 205, 196, 0.15);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .dark .glass-card:hover {
-  background: rgba(18, 18, 18, 0.9);
+  background: hsl(0, 0%, 11%, 0.95); /* Elevate to secondary surface on hover */
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  border-color: rgba(78, 205, 196, 0.25);
 }
 
 /* Gradient Backgrounds */

@@ -136,7 +136,7 @@ export default function Dashboard() {
   if (isLoading && !data) {
     return (
       <>
-        <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 relative overflow-hidden">
+        <div className="pt-16 min-h-screen bg-gradient-to-br from-gray-50/80 via-white/50 to-venzip-primary/5 dark:from-surface-background dark:via-surface-primary/50 dark:to-venzip-primary/10 relative overflow-hidden">
           {/* Loading background effects */}
           <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
           <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/10 to-transparent rounded-full blur-3xl animate-float"></div>
@@ -149,9 +149,9 @@ export default function Dashboard() {
                   <div className="w-16 h-16 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-6 animate-pulse">
                     <Activity className="h-8 w-8 text-white" />
                   </div>
-                  <div className="text-xl font-medium text-gray-700">Loading your compliance dashboard...</div>
-                  <div className="text-sm text-gray-500 mt-2">Analyzing your compliance data</div>
-                  <div className="text-xs text-gray-400 mt-4">Note: Database is initializing - this may take a moment</div>
+                  <div className="text-xl font-medium text-gray-700 dark:text-text-primary">Loading your compliance dashboard...</div>
+                  <div className="text-sm text-gray-500 dark:text-text-secondary mt-2">Analyzing your compliance data</div>
+                  <div className="text-xs text-gray-400 dark:text-text-subdued mt-4">Note: Database is initializing - this may take a moment</div>
                 </CardContent>
               </Card>
             </div>
@@ -173,7 +173,7 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
             <Card className="glass-card border-danger-coral/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-gray-900">
+                <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-text-primary">
                   <div className="w-10 h-10 bg-danger-coral/10 rounded-2xl flex items-center justify-center">
                     <AlertTriangle className="h-5 w-5 text-danger-coral" />
                   </div>
@@ -246,7 +246,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <div className="text-lg font-bold">Overall Compliance</div>
-                    <div className="text-sm text-gray-500 font-normal">Current progress status</div>
+                    <div className="text-sm text-gray-500 dark:text-text-secondary font-normal">Current progress status</div>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -259,7 +259,7 @@ export default function Dashboard() {
                   label="Complete"
                 />
                 {progressData && (
-                  <div className="absolute bottom-4 text-center text-xs text-gray-500">
+                  <div className="absolute bottom-4 text-center text-xs text-gray-500 dark:text-text-subdued">
                     {progressData.completedTasks} of {progressData.totalTasks} tasks
                   </div>
                 )}
@@ -269,13 +269,13 @@ export default function Dashboard() {
             {/* Enhanced Stats Grid */}
             <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.2s'}}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-gray-900">
+                <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-text-primary">
                   <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center">
                     <Activity className="h-5 w-5 text-info-blue" />
                   </div>
                   <div>
                     <div className="text-xl font-bold">Key Metrics</div>
-                    <div className="text-sm text-gray-500 font-normal">Real-time compliance statistics</div>
+                    <div className="text-sm text-gray-500 dark:text-text-secondary font-normal">Real-time compliance statistics</div>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -284,13 +284,13 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-br from-info-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="text-sm font-medium text-gray-600 group-hover:text-info-blue transition-colors duration-300">Evidence Uploads</div>
+                      <div className="text-sm font-medium text-gray-600 dark:text-text-secondary group-hover:text-info-blue transition-colors duration-300">Evidence Uploads</div>
                       <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
                         <Upload className="h-5 w-5 text-info-blue group-hover:animate-bounce" />
                       </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-info-blue transition-colors duration-300">{stats.uploads}</div>
-                    <div className="text-xs text-gray-500">Documents uploaded</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-text-primary mb-2 group-hover:text-info-blue transition-colors duration-300">{stats.uploads}</div>
+                    <div className="text-xs text-gray-500 dark:text-text-subdued">Documents uploaded</div>
                   </CardContent>
                 </Card>
 
@@ -298,13 +298,13 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-br from-venzip-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="text-sm font-medium text-gray-600 group-hover:text-venzip-accent transition-colors duration-300">AI Conversations</div>
+                      <div className="text-sm font-medium text-gray-600 dark:text-text-secondary group-hover:text-venzip-accent transition-colors duration-300">AI Conversations</div>
                       <div className="w-10 h-10 bg-gradient-to-br from-venzip-accent/20 to-venzip-accent/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
                         <MessageSquare className="h-5 w-5 text-venzip-accent group-hover:animate-bounce" />
                       </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-venzip-accent transition-colors duration-300">{stats.conversations}</div>
-                    <div className="text-xs text-gray-500">Claude interactions</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-text-primary mb-2 group-hover:text-venzip-accent transition-colors duration-300">{stats.conversations}</div>
+                    <div className="text-xs text-gray-500 dark:text-text-subdued">Claude interactions</div>
                   </CardContent>
                 </Card>
 
@@ -312,13 +312,13 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="text-sm font-medium text-gray-600 group-hover:text-warning-orange transition-colors duration-300">High Priority Tasks</div>
+                      <div className="text-sm font-medium text-gray-600 dark:text-text-secondary group-hover:text-warning-orange transition-colors duration-300">High Priority Tasks</div>
                       <div className="w-10 h-10 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
                         <Target className="h-5 w-5 text-warning-orange group-hover:animate-bounce" />
                       </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-warning-orange transition-colors duration-300">{stats.tasksOpenHigh || 0}</div>
-                    <div className="text-xs text-gray-500">Tasks requiring attention</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-text-primary mb-2 group-hover:text-warning-orange transition-colors duration-300">{stats.tasksOpenHigh || 0}</div>
+                    <div className="text-xs text-gray-500 dark:text-text-subdued">Tasks requiring attention</div>
                   </CardContent>
                 </Card>
 
@@ -326,13 +326,13 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="text-sm font-medium text-gray-600 group-hover:text-danger-coral transition-colors duration-300">High Risks</div>
+                      <div className="text-sm font-medium text-gray-600 dark:text-text-secondary group-hover:text-danger-coral transition-colors duration-300">High Risks</div>
                       <div className="w-10 h-10 bg-gradient-to-br from-danger-coral/20 to-danger-coral/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
                         <ShieldAlert className="h-5 w-5 text-danger-coral group-hover:animate-bounce" />
                       </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-danger-coral transition-colors duration-300">{stats.risksHigh || 0}</div>
-                    <div className="text-xs text-gray-500">Critical risks identified</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-text-primary mb-2 group-hover:text-danger-coral transition-colors duration-300">{stats.risksHigh || 0}</div>
+                    <div className="text-xs text-gray-500 dark:text-text-subdued">Critical risks identified</div>
                   </CardContent>
                 </Card>
               </CardContent>
@@ -344,13 +344,13 @@ export default function Dashboard() {
             {/* Enhanced Gaps Section */}
             <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.3s'}}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-gray-900">
+                <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-text-primary">
                   <div className="w-12 h-12 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
                     <AlertTriangle className="h-6 w-6 text-warning-orange group-hover:animate-pulse" />
                   </div>
                   <div>
                     <div className="text-xl font-bold">Compliance Gaps</div>
-                    <div className="text-sm text-gray-500 font-normal">Areas requiring immediate attention</div>
+                    <div className="text-sm text-gray-500 dark:text-text-secondary font-normal">Areas requiring immediate attention</div>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -361,8 +361,8 @@ export default function Dashboard() {
                       <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
                         <CheckCircle className="h-8 w-8 text-success-green" />
                       </div>
-                      <div className="text-lg font-medium text-gray-900 mb-2">No Gaps Detected</div>
-                      <div className="text-sm text-gray-600">Your compliance framework is on track!</div>
+                      <div className="text-lg font-medium text-gray-900 dark:text-text-primary mb-2">No Gaps Detected</div>
+                      <div className="text-sm text-gray-600 dark:text-text-secondary">Your compliance framework is on track!</div>
                     </CardContent>
                   </Card>
                 ) : (
@@ -375,7 +375,7 @@ export default function Dashboard() {
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
-                                  <div className="font-semibold text-gray-900 group-hover:text-warning-orange transition-colors duration-300">
+                                  <div className="font-semibold text-gray-900 dark:text-text-primary group-hover:text-warning-orange transition-colors duration-300">
                                     {g.title}
                                   </div>
                                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
@@ -416,7 +416,7 @@ export default function Dashboard() {
             {/* Enhanced Recent Activity */}
             <Card className="lg:col-span-1 glass-card group hover:shadow-lg transition-shadow duration-300 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-gray-900">
+                <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-text-primary">
                   <div className="w-10 h-10 bg-venzip-secondary/10 rounded-lg flex items-center justify-center">
                     <Activity className="h-5 w-5 text-venzip-secondary" />
                   </div>
@@ -485,7 +485,7 @@ export default function Dashboard() {
                     Latest compliance activities
                     {recentTasksData?.totalTasks > 0 && (
                       <span className="ml-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
-                        {recentTasksData.totalTasks} total
+                        {recentTasksData?.totalTasks} total
                       </span>
                     )}
                   </div>

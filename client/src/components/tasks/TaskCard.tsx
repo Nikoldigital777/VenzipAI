@@ -50,11 +50,11 @@ const priorityColors = {
 };
 
 const statusColors = {
-  not_started: 'bg-gray-100/80 text-gray-700 border border-gray-200/50',
-  in_progress: 'bg-venzip-primary/15 text-venzip-primary border border-venzip-primary/20 shadow-sm',
-  under_review: 'bg-venzip-secondary/15 text-venzip-secondary border border-venzip-secondary/20 shadow-sm',
-  completed: 'bg-success-green/15 text-success-green border border-success-green/20 shadow-sm',
-  blocked: 'bg-danger-coral/15 text-danger-coral border border-danger-coral/20 shadow-sm'
+  not_started: 'bg-gray-100/80 dark:bg-surface-secondary text-gray-700 dark:text-text-secondary border border-gray-200/50 dark:border-gray-600/30',
+  in_progress: 'bg-venzip-primary/15 dark:bg-venzip-primary/20 text-venzip-primary border border-venzip-primary/20 shadow-sm',
+  under_review: 'bg-venzip-secondary/15 dark:bg-venzip-secondary/20 text-venzip-secondary border border-venzip-secondary/20 shadow-sm',
+  completed: 'bg-success-green/15 dark:bg-success-green/20 text-success-green border border-success-green/20 shadow-sm',
+  blocked: 'bg-danger-coral/15 dark:bg-danger-coral/20 text-danger-coral border border-danger-coral/20 shadow-sm'
 };
 
 const categoryIcons = {
@@ -73,9 +73,9 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
   const daysUntilDue = task.dueDate ? differenceInDays(new Date(task.dueDate), new Date()) : null;
 
   return (
-    <Card className={`glass-card group hover-lift cursor-pointer relative overflow-hidden transition-all duration-500 ${isOverdue ? 'border-danger-coral/30 shadow-danger-coral/20' : 'hover:shadow-xl hover:shadow-venzip-primary/10'}`} data-testid={`task-card-${task.id}`}>
-      {/* Gradient overlay for hover effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    <Card className={`glass-card group saas-interactive cursor-pointer relative overflow-hidden transition-all duration-300 ${isOverdue ? 'border-danger-coral/30 shadow-danger-coral/20 dark:border-danger-coral/40' : 'hover:shadow-xl hover:shadow-venzip-primary/10 dark:hover:shadow-venzip-primary/20'}`} data-testid={`task-card-${task.id}`}>
+      {/* Gradient overlay for hover effect - enhanced for dark mode */}
+      <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:from-venzip-primary/10 dark:to-transparent"></div>
       
       {/* Overdue warning overlay */}
       {isOverdue && (
@@ -85,11 +85,11 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-sm">
+              <div className="w-10 h-10 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 dark:from-venzip-primary/30 dark:to-venzip-primary/15 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-sm">
                 <span className="text-lg group-hover:animate-bounce">{categoryIcons[task.category as keyof typeof categoryIcons] || '📌'}</span>
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 leading-tight group-hover:text-venzip-primary transition-colors duration-300 text-lg" 
+                <h3 className="font-bold text-gray-900 dark:text-foreground leading-tight group-hover:text-venzip-primary dark:group-hover:text-venzip-primary transition-colors duration-300 text-lg" 
                     onClick={() => onView(task)}
                     data-testid={`task-title-${task.id}`}>
                   {task.title}
@@ -106,7 +106,7 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
             </div>
             
             {task.description && (
-              <p className="text-sm text-gray-600 line-clamp-2 mb-3" data-testid={`task-description-${task.id}`}>{task.description}</p>
+              <p className="text-sm text-gray-600 dark:text-text-secondary line-clamp-2 mb-3 group-hover:text-gray-800 dark:group-hover:text-text-primary transition-colors duration-300" data-testid={`task-description-${task.id}`}>{task.description}</p>
             )}
             
             <div className="flex flex-wrap gap-2 mb-4">
@@ -134,9 +134,9 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
         {task.progressPercentage > 0 && (
           <div className="mb-6">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-gray-700 group-hover:text-venzip-primary transition-colors duration-300">Progress</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-text-secondary group-hover:text-venzip-primary transition-colors duration-300">Progress</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-gray-900 group-hover:text-venzip-primary transition-colors duration-300" data-testid={`task-progress-${task.id}`}>
+                <span className="text-sm font-bold text-gray-900 dark:text-text-primary group-hover:text-venzip-primary transition-colors duration-300" data-testid={`task-progress-${task.id}`}>
                   {task.progressPercentage}%
                 </span>
                 <div className="w-6 h-6 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-full flex items-center justify-center">
@@ -148,7 +148,7 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
             </div>
             {/* Enhanced Progress Bar */}
             <div className="relative">
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+              <div className="h-3 bg-gray-100 dark:bg-surface-secondary rounded-full overflow-hidden shadow-inner">
                 <div 
                   className="h-full bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-primary rounded-full transition-all duration-1000 ease-out relative group-hover:shadow-lg group-hover:shadow-venzip-primary/25"
                   style={{ width: `${task.progressPercentage}%` }}
@@ -174,11 +174,11 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
         {/* Task metadata */}
         <div className="space-y-2 mb-4">
           {task.dueDate && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-text-secondary">
               <Calendar className="h-4 w-4" />
               <span data-testid={`task-due-date-${task.id}`}>Due: {format(new Date(task.dueDate), 'MMM dd, yyyy')}</span>
               {daysUntilDue !== null && (
-                <span className={`ml-auto ${daysUntilDue < 0 ? 'text-red-600' : daysUntilDue <= 3 ? 'text-orange-600' : 'text-gray-500'}`}
+                <span className={`ml-auto ${daysUntilDue < 0 ? 'text-red-600 dark:text-red-400' : daysUntilDue <= 3 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-text-subdued'}`}
                       data-testid={`task-days-until-due-${task.id}`}>
                   {daysUntilDue < 0 ? `${Math.abs(daysUntilDue)} days overdue` : 
                    daysUntilDue === 0 ? 'Due today' : 
@@ -189,7 +189,7 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
           )}
           
           {task.assignedTo && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-text-secondary">
               <User className="h-4 w-4" />
               <span data-testid={`task-assigned-to-${task.id}`}>Assigned to: {task.assignedTo.firstName} {task.assignedTo.lastName}</span>
             </div>
@@ -198,14 +198,14 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
         
         {/* AI Insights Section */}
         {(task.aiReasoning || task.aiNextAction) && (
-          <div className="bg-gradient-to-r from-purple-50/80 to-blue-50/80 rounded-xl p-4 mb-4 border border-purple-200/30">
+          <div className="bg-gradient-to-r from-purple-50/80 to-blue-50/80 dark:from-purple-900/30 dark:to-blue-900/30 rounded-xl p-4 mb-4 border border-purple-200/30 dark:border-purple-600/30">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-bold">🤖</span>
               </div>
-              <h4 className="font-semibold text-purple-700 text-sm">AI Intelligence</h4>
+              <h4 className="font-semibold text-purple-700 dark:text-purple-300 text-sm">AI Intelligence</h4>
               {task.aiAnalyzedAt && (
-                <span className="text-xs text-purple-600 ml-auto">
+                <span className="text-xs text-purple-600 dark:text-purple-400 ml-auto">
                   Analyzed {format(new Date(task.aiAnalyzedAt), 'MMM dd')}
                 </span>
               )}
@@ -213,19 +213,19 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
             
             {task.aiReasoning && (
               <div className="mb-3">
-                <p className="text-sm text-purple-800 font-medium mb-1">Priority Reasoning:</p>
-                <p className="text-xs text-purple-700 leading-relaxed" data-testid={`task-ai-reasoning-${task.id}`}>
+                <p className="text-sm text-purple-800 dark:text-purple-200 font-medium mb-1">Priority Reasoning:</p>
+                <p className="text-xs text-purple-700 dark:text-purple-300 leading-relaxed" data-testid={`task-ai-reasoning-${task.id}`}>
                   {task.aiReasoning}
                 </p>
               </div>
             )}
             
             {task.aiNextAction && (
-              <div className="bg-white/60 rounded-lg p-3 border border-purple-200/40">
-                <p className="text-sm text-blue-800 font-medium mb-1 flex items-center gap-1">
+              <div className="bg-white/60 dark:bg-surface-secondary/60 rounded-lg p-3 border border-purple-200/40 dark:border-purple-600/40">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-1 flex items-center gap-1">
                   <span>🎯</span> Suggested Next Action:
                 </p>
-                <p className="text-xs text-blue-700 leading-relaxed" data-testid={`task-ai-next-action-${task.id}`}>
+                <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed" data-testid={`task-ai-next-action-${task.id}`}>
                   {task.aiNextAction}
                 </p>
               </div>
@@ -260,7 +260,7 @@ export default function TaskCard({ task, onEdit, onComplete, onView }: TaskCardP
               variant="ghost" 
               size="sm" 
               onClick={() => onView(task)} 
-              className="text-gray-600 hover:text-venzip-secondary hover:bg-venzip-secondary/10 hover:scale-105 transition-all duration-300 font-medium"
+              className="text-gray-600 dark:text-text-secondary hover:text-venzip-secondary hover:bg-venzip-secondary/10 hover:scale-105 transition-all duration-300 font-medium"
               data-testid={`button-view-${task.id}`}
             >
               View Details
