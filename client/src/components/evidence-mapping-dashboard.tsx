@@ -591,8 +591,17 @@ export default function EvidenceMappingDashboard() {
                     <TableCell>
                       <div>
                         <div className="font-medium mb-1 flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-gray-400" />
+                          {mapping.documentName?.includes('.pdf') && mapping.documentName?.includes('Policy') ? (
+                            <FileText className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <FileText className="h-4 w-4 text-gray-400" />
+                          )}
                           {mapping.documentName}
+                          {mapping.documentName?.includes('.pdf') && mapping.documentName?.includes('Policy') && (
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                              Generated Policy
+                            </Badge>
+                          )}
                         </div>
                         <Badge className={`text-xs ${frameworkColors[mapping.frameworkId || ''] || 'bg-gray-100 text-gray-800'}`}>
                           {mapping.frameworkId}

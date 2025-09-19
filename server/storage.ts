@@ -725,7 +725,33 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(evidenceMappings.validationStatus, params.validationStatus));
     }
 
-    return await db.select().from(evidenceMappings).where(and(...conditions));
+    // Get evidence mappings with document details including policy-generated documents
+    const results = await db.select({
+      id: evidenceMappings.id,
+      userId: evidenceMappings.userId,
+      documentId: evidenceMappings.documentId,
+      requirementId: evidenceMappings.requirementId,
+      mappingConfidence: evidenceMappings.mappingConfidence,
+      qualityScore: evidenceMappings.qualityScore,
+      mappingType: evidenceMappings.mappingType,
+      evidenceSnippets: evidenceMappings.evidenceSnippets,
+      aiAnalysis: evidenceMappings.aiAnalysis,
+      validationStatus: evidenceMappings.validationStatus,
+      createdAt: evidenceMappings.createdAt,
+      updatedAt: evidenceMappings.updatedAt,
+      validatedBy: evidenceMappings.validatedBy,
+      validatedAt: evidenceMappings.validatedAt,
+      // Document details
+      documentName: documents.fileName,
+      requirementTitle: complianceRequirements.title,
+      frameworkId: complianceRequirements.frameworkId,
+    })
+    .from(evidenceMappings)
+    .leftJoin(documents, eq(evidenceMappings.documentId, documents.id))
+    .leftJoin(complianceRequirements, eq(evidenceMappings.requirementId, complianceRequirements.id))
+    .where(and(...conditions));
+
+    return results;
   }
 
   async updateEvidenceMapping(id: string, updates: Partial<EvidenceMapping>): Promise<EvidenceMapping> {
@@ -906,7 +932,7 @@ export class DatabaseStorage implements IStorage {
       .where(or(...documentIds.map(id => eq(documents.id, id))));
   }
 
-  // Method to get evidence status for controls
+  // Method to get evidence status for controls including policy evidence
   async getEvidenceStatus(userId: string, frameworkId?: string): Promise<any[]> {
     let requirements;
 
@@ -918,16 +944,24 @@ export class DatabaseStorage implements IStorage {
     }
 
     const statusPromises = requirements.map(async (requirement) => {
-      const mappings = await db.select().from(evidenceMappings)
-        .where(
-          and(
-            eq(evidenceMappings.requirementId, requirement.id),
-            eq(evidenceMappings.userId, userId)
-          )
-        );
+      const mappings = await db.select({
+        id: evidenceMappings.id,
+        validationStatus: evidenceMappings.validationStatus,
+        documentName: documents.fileName,
+        isPolicyGenerated: documents.filePath,
+      })
+      .from(evidenceMappings)
+      .leftJoin(documents, eq(evidenceMappings.documentId, documents.id))
+      .where(
+        and(
+          eq(evidenceMappings.requirementId, requirement.id),
+          eq(evidenceMappings.userId, userId)
+        )
+      );
 
       const documentsCount = mappings.length;
       const validatedCount = mappings.filter(m => m.validationStatus === 'validated').length;
+      const policyCount = mappings.filter(m => m.isPolicyGenerated?.includes('/generated-policies/')).length;
 
       return {
         id: requirement.id,
@@ -939,6 +973,8 @@ export class DatabaseStorage implements IStorage {
         frameworkId: requirement.frameworkId,
         evidenceCount: documentsCount,
         validatedCount: validatedCount,
+        policyCount: policyCount,
+        hasPolicy: policyCount > 0,
         status: documentsCount === 0 ? 'missing' :
                validatedCount === 0 ? 'pending' :
                validatedCount === documentsCount ? 'complete' : 'partial'

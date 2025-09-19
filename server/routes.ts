@@ -547,6 +547,7 @@ export async function registerRoutes(app: Express) {
       let tasksData = [];
       let risksData = [];
       let company = null;
+      let generatedPolicies = [];
 
       // Fetch data with timeout protection
       const fetchWithTimeout = async (fetchFn: Function, name: string, timeout = 8000) => {
@@ -576,18 +577,23 @@ export async function registerRoutes(app: Express) {
       tasksData = tasksResult.status === 'fulfilled' ? tasksResult.value || [] : [];
       risksData = risksResult.status === 'fulfilled' ? risksResult.value || [] : [];
       company = companyResult.status === 'fulfilled' ? companyResult.value : null;
+      
+      if (company) {
+        generatedPolicies = await fetchWithTimeout(() => storage.getGeneratedPolicies(company.id), 'generated policies');
+      }
 
-      console.log(`Data fetched - Documents: ${documents.length}, Chat: ${chatMessagesData.length}, Tasks: ${tasksData.length}, Risks: ${risksData.length}, Company: ${company ? 'found' : 'not found'}`);
+      console.log(`Data fetched - Documents: ${documents.length}, Chat: ${chatMessagesData.length}, Tasks: ${tasksData.length}, Risks: ${risksData.length}, Policies: ${generatedPolicies.length}, Company: ${company ? 'found' : 'not found'}`);
 
       // Validate data arrays
       documents = Array.isArray(documents) ? documents : [];
       chatMessagesData = Array.isArray(chatMessagesData) ? chatMessagesData : [];
       tasksData = Array.isArray(tasksData) ? tasksData : [];
       risksData = Array.isArray(risksData) ? risksData : [];
+      generatedPolicies = Array.isArray(generatedPolicies) ? generatedPolicies : [];
 
       // --- gaps = open high/critical tasks + high/critical risks
       // Tasks: not completed AND priority in ('high','critical')
-      const highTasks = tasksData.filter(task => 
+      const highPriorityTasks = tasksData.filter(task => 
         task.status !== 'completed' && 
         (task.priority === 'high' || task.priority === 'critical')
       ).slice(0, 10);
@@ -599,7 +605,7 @@ export async function registerRoutes(app: Express) {
 
       // Normalize both into one "gaps" list for the UI
       const gaps = [
-        ...highTasks.map((t) => ({
+        ...highPriorityTasks.map((t) => ({
           id: `task-${t.id}`,
           kind: "task" as const,
           title: t.title,
@@ -625,9 +631,10 @@ export async function registerRoutes(app: Express) {
       // --- simple, explainable compliance score
       // Start with baseline + "activity" bonus, then subtract weighted gap penalties
       const baseline = 45;
-      const bonus = Math.min(35, documents.length * 2 + Math.floor(chatMessagesData.length / 3));
+      const totalEvidence = documents.length + generatedPolicies.length;
+      const bonus = Math.min(35, totalEvidence * 2 + Math.floor(chatMessagesData.length / 3));
 
-      const highTaskCount = highTasks.filter((t) => t.priority === "high").length;
+      const highTaskCount = highPriorityTasks.filter((t) => t.priority === "high").length;
       const critTaskCount = 0; // No critical in existing schema
       const highRiskCount = highRisks.filter((r) => r.impact === "high").length;
       const critRiskCount = 0; // No critical in existing schema
@@ -652,8 +659,16 @@ export async function registerRoutes(app: Express) {
         ...documents.slice(0, 4).map(d => ({
           id: d.id,
           action: "upload", 
-          resourceType: d.fileName,
+          resourceType: "Document",
+          fileName: d.fileName,
           createdAt: d.uploadedAt?.toISOString() || new Date().toISOString(),
+        })),
+        ...generatedPolicies.slice(0, 4).map(p => ({
+          id: p.id,
+          action: "generate",
+          resourceType: "Policy Document",
+          fileName: p.title,
+          createdAt: p.createdAt || new Date().toISOString(),
         }))
       ].sort((a, b) => {
         const dateA = typeof a.createdAt === 'string' ? new Date(a.createdAt) : (a.createdAt || new Date());
@@ -665,7 +680,9 @@ export async function registerRoutes(app: Express) {
         compliancePercent: Math.max(0, Math.min(100, compliancePercent)),
         gaps: gaps || [], // array of { id, kind: 'task'|'risk', title, severity, meta: {...} }
         stats: {
-          uploads: documents.length || 0,
+          uploads: documents.length,
+          policies: generatedPolicies.length,
+          totalEvidence: documents.length + generatedPolicies.length,
           conversations: Math.floor((chatMessagesData.length || 0) / 2),
           tasksOpenHigh: (highTaskCount || 0) + (critTaskCount || 0),
           risksHigh: (highRiskCount || 0) + (critRiskCount || 0),
@@ -2001,7 +2018,8 @@ export async function registerRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching risk score history:", error);
       res.status(500).json({ message: "Failed to fetch risk score history" });
-
+    }
+  });
 
   // Dashboard health check and test endpoint
   app.get('/api/dashboard/health', isAuthenticated, async (req: any, res) => {
@@ -2341,6 +2359,10 @@ export async function registerRoutes(app: Express) {
       if (likelihood) {
         risks = risks.filter(risk => risk.likelihood === likelihood);
       }
+      if (filters.frameworkId) {
+        risks = risks.filter(risk => risk.frameworkId === filters.frameworkId);
+      }
+
       if (q && q.trim()) {
         const needle = q.toLowerCase();
         risks = risks.filter(risk =>
@@ -2643,16 +2665,23 @@ export async function registerRoutes(app: Express) {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
-      const { framework, status } = req.query;
+      const { framework, status, documentId, requirementId } = req.query;
       const mappings = await storage.getEvidenceMappings({
         userId,
-        validationStatus: status as string
+        documentId,
+        requirementId,
+        validationStatus: status
       });
 
-      res.json(mappings);
+      // Include framework filtering if requested
+      const filteredMappings = framework 
+        ? mappings.filter(m => m.frameworkId === framework)
+        : mappings;
+
+      res.json(filteredMappings);
     } catch (error) {
       console.error("Error fetching evidence mappings:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ message: "Failed to fetch evidence mappings" });
     }
   });
 

@@ -288,13 +288,15 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-br from-info-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="text-sm font-medium text-gray-600 dark:text-text-secondary group-hover:text-info-blue transition-colors duration-300">Evidence Uploads</div>
+                      <div className="text-sm font-medium text-gray-600 dark:text-text-secondary group-hover:text-info-blue transition-colors duration-300">Total Evidence</div>
                       <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
                         <Upload className="h-5 w-5 text-info-blue group-hover:animate-bounce" />
                       </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-text-primary mb-2 group-hover:text-info-blue transition-colors duration-300">{stats.uploads}</div>
-                    <div className="text-xs text-gray-500 dark:text-text-subdued">Documents uploaded</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-text-primary mb-2 group-hover:text-info-blue transition-colors duration-300">{stats.totalEvidence || stats.uploads}</div>
+                    <div className="text-xs text-gray-500 dark:text-text-subdued">
+                      {stats.uploads} docs + {stats.policies || 0} policies
+                    </div>
                   </CardContent>
                 </Card>
 

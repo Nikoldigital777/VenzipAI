@@ -1,13 +1,7 @@
-
 import { Router } from "express";
 import { isAuthenticated } from "../replitAuth";
 import { policyGenerator } from "../services/policyGenerator";
 import { storage } from "../storage";
-
-import { Router } from "express";
-import { isAuthenticated } from "../replitAuth";
-import { storage } from "../storage";
-import { policyGenerator } from "../services/policyGenerator";
 
 const router = Router();
 
@@ -15,7 +9,7 @@ const router = Router();
 router.get("/templates", isAuthenticated, async (req: any, res) => {
   try {
     const { framework } = req.query;
-    
+
     if (framework) {
       const templates = await policyGenerator.getTemplatesForFramework(framework);
       res.json(templates);
@@ -50,8 +44,11 @@ router.post("/generate", isAuthenticated, async (req: any, res) => {
 
     res.json(generatedPolicy);
   } catch (error) {
-    console.error("Error generating policy:", error);
-    res.status(500).json({ error: "Failed to generate policy" });
+    console.error('Error generating policy:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate policy',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
@@ -59,7 +56,7 @@ router.post("/generate", isAuthenticated, async (req: any, res) => {
 router.get("/generated", isAuthenticated, async (req: any, res) => {
   try {
     const userId = req.user.sub;
-    
+
     const company = await storage.getCompanyByUserId(userId);
     if (!company) {
       return res.status(400).json({ error: "Company profile required" });
@@ -78,7 +75,7 @@ router.get("/generated/:id", isAuthenticated, async (req: any, res) => {
   try {
     const { id } = req.params;
     const policy = await storage.getGeneratedPolicyById(id);
-    
+
     if (!policy) {
       return res.status(404).json({ error: "Policy not found" });
     }
@@ -98,7 +95,7 @@ router.put("/generated/:id/status", isAuthenticated, async (req: any, res) => {
     const userId = req.user.sub;
 
     const updateData: any = { status };
-    
+
     if (status === 'approved') {
       updateData.approvedBy = userId;
       updateData.approvedAt = new Date();
@@ -109,16 +106,6 @@ router.put("/generated/:id/status", isAuthenticated, async (req: any, res) => {
   } catch (error) {
     console.error("Error updating policy status:", error);
     res.status(500).json({ error: "Failed to update policy status" });
-  }
-});
-
-export default router;
-
-    const updatedPolicy = await storage.updateGeneratedPolicy(id, updateData);
-    res.json(updatedPolicy);
-  } catch (error) {
-    console.error("Error updating policy:", error);
-    res.status(500).json({ error: "Failed to update policy" });
   }
 });
 
