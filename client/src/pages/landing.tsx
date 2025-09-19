@@ -249,7 +249,7 @@ export default function Landing() {
         </script>
       </head>
       
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/30 relative overflow-hidden noise-texture light">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/30 relative overflow-hidden noise-texture light" style={{colorScheme: 'light'}}>
         {/* Optimized background effects - reduced complexity */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
           <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/15 to-venzip-secondary/10 rounded-full blur-3xl animate-float"></div>

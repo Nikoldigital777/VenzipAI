@@ -698,49 +698,77 @@ html {
   color-scheme: light !important;
 }
 
-/* Comprehensive light mode enforcement */
+/* Comprehensive light mode enforcement for all devices including mobile */
+.light,
 .light *,
 .light *::before,
 .light *::after {
   color-scheme: light !important;
 }
 
-/* Override all possible dark mode classes for light-only pages */
+/* Override all possible dark mode classes for light-only pages on all devices */
 .light .dark\:bg-gray-900,
 .light .dark\:bg-gray-800,
 .light .dark\:bg-gray-700,
 .light .dark\:bg-slate-900,
-.light .dark\:bg-slate-800 {
+.light .dark\:bg-slate-800,
+.light .md\:dark\:bg-gray-900,
+.light .sm\:dark\:bg-gray-900 {
   background-color: hsl(0, 0%, 100%) !important;
 }
 
 .light .dark\:text-white,
 .light .dark\:text-gray-100,
-.light .dark\:text-gray-200 {
+.light .dark\:text-gray-200,
+.light .md\:dark\:text-white,
+.light .sm\:dark\:text-white {
   color: hsl(210, 25%, 7.8431%) !important;
 }
 
 .light .dark\:border-gray-700,
-.light .dark\:border-gray-600 {
+.light .dark\:border-gray-600,
+.light .md\:dark\:border-gray-700,
+.light .sm\:dark\:border-gray-700 {
   border-color: hsl(201.4286, 30.4348%, 90.9804%) !important;
 }
 
-/* Force light backgrounds on all elements */
-.light .bg-background {
+/* Force light backgrounds on all elements across all screen sizes */
+.light .bg-background,
+.light .md\:bg-background,
+.light .sm\:bg-background {
   background-color: hsl(0, 0%, 100%) !important;
 }
 
-.light .text-foreground {
+.light .text-foreground,
+.light .md\:text-foreground,
+.light .sm\:text-foreground {
   color: hsl(210, 25%, 7.8431%) !important;
 }
 
-/* Disable theme provider context in light mode */
+/* Disable theme provider context in light mode across all devices */
 .light [data-theme="dark"],
 .light .dark {
   --background: hsl(0, 0%, 100%) !important;
   --foreground: hsl(210, 25%, 7.8431%) !important;
   background-color: hsl(0, 0%, 100%) !important;
   color: hsl(210, 25%, 7.8431%) !important;
+}
+
+/* Mobile-specific light mode enforcement */
+@media (max-width: 768px) {
+  .light {
+    background-color: hsl(0, 0%, 100%) !important;
+    color: hsl(210, 25%, 7.8431%) !important;
+  }
+  
+  .light body {
+    background-color: hsl(0, 0%, 100%) !important;
+    color: hsl(210, 25%, 7.8431%) !important;
+  }
+  
+  .light * {
+    color-scheme: light !important;
+  }
 }
 
 /* Custom animations */
