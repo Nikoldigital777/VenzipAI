@@ -1567,6 +1567,48 @@ export async function registerRoutes(app: Express) {
       });
 
       const document = await storage.createDocument(documentData);
+
+      // If requirementId is provided, create evidence mapping and get control information
+      let mappingInfo = null;
+      if (requirementId) {
+        try {
+          // Create evidence mapping
+          const mapping = await storage.createEvidenceMapping({
+            userId,
+            documentId: document.id,
+            requirementId,
+            mappingConfidence: (analysisResult?.completeness_score || 0.8).toString(),
+            qualityScore: (analysisResult?.completeness_score || 0.7).toString(),
+            mappingType: 'direct',
+            evidenceSnippets: analysisResult?.key_findings || null,
+            aiAnalysis: analysisResult || null,
+            validationStatus: 'pending'
+          });
+
+          // Get the control information
+          const requirements = await storage.getComplianceRequirements();
+          const control = requirements.find(req => req.id === requirementId);
+          
+          mappingInfo = {
+            mappingId: mapping.id,
+            control: control ? {
+              id: control.id,
+              requirementId: control.requirementId,
+              title: control.title,
+              description: control.description,
+              category: control.category,
+              priority: control.priority,
+              frameworkId: control.frameworkId
+            } : null,
+            mappingType: mapping.mappingType,
+            confidence: mapping.mappingConfidence,
+            status: mapping.validationStatus
+          };
+        } catch (mappingError) {
+          console.error("Error creating evidence mapping:", mappingError);
+          // Continue without mapping if it fails
+        }
+      }
       
       // Create audit log for the upload
       await storage.createAuditLog({
@@ -1580,12 +1622,19 @@ export async function registerRoutes(app: Express) {
           version,
           fileSize: document.fileSize,
           companyId,
-          requirementId: requirementId || null
+          requirementId: requirementId || null,
+          mappingCreated: !!mappingInfo
         },
         success: true
       });
 
-      res.json(document);
+      // Enhanced response with control information
+      const response = {
+        ...document,
+        ...(mappingInfo && { mapping: mappingInfo })
+      };
+
+      res.json(response);
     } catch (error) {
       console.error("Error uploading document:", error);
       
@@ -3691,6 +3740,46 @@ export async function registerRoutes(app: Express) {
     } catch (error) {
       console.error("Error chatting with Claude:", error);
       res.status(500).json({ message: "Failed to get response from Claude" });
+    }
+  });
+
+  // Compliance Requirements Endpoint
+  app.get('/api/compliance/requirements', isAuthenticated, async (req: any, res) => {
+    try {
+      const { frameworkId } = req.query;
+      
+      const requirements = await storage.getComplianceRequirements(frameworkId);
+      
+      // Format response for dropdown selection
+      const formattedRequirements = requirements.map(req => ({
+        id: req.id,
+        requirementId: req.requirementId,
+        title: req.title,
+        description: req.description,
+        category: req.category,
+        priority: req.priority,
+        frameworkId: req.frameworkId
+      }));
+      
+      res.json({ requirements: formattedRequirements });
+    } catch (error) {
+      console.error("Error fetching compliance requirements:", error);
+      res.status(500).json({ message: "Failed to fetch compliance requirements" });
+    }
+  });
+
+  // Evidence Status Endpoint
+  app.get('/api/evidence/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const { frameworkId } = req.query;
+      
+      const evidenceStatus = await storage.getEvidenceStatus(userId, frameworkId);
+      
+      res.json({ controls: evidenceStatus });
+    } catch (error) {
+      console.error("Error fetching evidence status:", error);
+      res.status(500).json({ message: "Failed to fetch evidence status" });
     }
   });
 

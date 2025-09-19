@@ -141,6 +141,22 @@ export interface IStorage {
   getLearningProgress(userId: string, resourceId?: string): Promise<LearningProgress[]>;
   upsertLearningProgress(progress: InsertLearningProgress): Promise<LearningProgress>;
   getUserCompletedResources(userId: string): Promise<LearningProgress[]>;
+
+  // Compliance requirements operations
+  getComplianceRequirements(frameworkId?: string): Promise<ComplianceRequirement[]>;
+  createComplianceRequirement(requirement: InsertComplianceRequirement): Promise<ComplianceRequirement>;
+  getDocumentsByRequirementId(requirementId: string): Promise<Document[]>;
+
+  // Evidence mapping operations
+  createEvidenceMapping(mapping: InsertEvidenceMapping): Promise<EvidenceMapping>;
+  getEvidenceMappings(params: {
+    userId: string;
+    documentId?: string;
+    requirementId?: string;
+    validationStatus?: string;
+  }): Promise<EvidenceMapping[]>;
+  updateEvidenceMapping(id: string, updates: Partial<EvidenceMapping>): Promise<EvidenceMapping>;
+  getEvidenceStatus(userId: string, frameworkId?: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -580,7 +596,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createComplianceRequirement(requirement: InsertComplianceRequirement): Promise<ComplianceRequirement> {
-    const [result] = await db.insert(complianceRequirements).values(requirement).returning();
+    const [result] = await db.insert(complianceRequirements).values([requirement]).returning();
     return result;
   }
 
@@ -724,6 +740,62 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(learningProgress.completedAt));
+  }
+
+  // Method to get documents by requirement ID
+  async getDocumentsByRequirementId(requirementId: string): Promise<Document[]> {
+    const mappings = await db.select().from(evidenceMappings)
+      .where(eq(evidenceMappings.requirementId, requirementId));
+    
+    if (mappings.length === 0) {
+      return [];
+    }
+
+    const documentIds = mappings.map(m => m.documentId);
+    return await db.select().from(documents)
+      .where(or(...documentIds.map(id => eq(documents.id, id))));
+  }
+
+  // Method to get evidence status for controls
+  async getEvidenceStatus(userId: string, frameworkId?: string): Promise<any[]> {
+    let requirements;
+    
+    if (frameworkId) {
+      requirements = await db.select().from(complianceRequirements)
+        .where(eq(complianceRequirements.frameworkId, frameworkId));
+    } else {
+      requirements = await db.select().from(complianceRequirements);
+    }
+    
+    const statusPromises = requirements.map(async (requirement) => {
+      const mappings = await db.select().from(evidenceMappings)
+        .where(
+          and(
+            eq(evidenceMappings.requirementId, requirement.id),
+            eq(evidenceMappings.userId, userId)
+          )
+        );
+      
+      const documentsCount = mappings.length;
+      const validatedCount = mappings.filter(m => m.validationStatus === 'validated').length;
+      
+      return {
+        id: requirement.id,
+        requirementId: requirement.requirementId,
+        title: requirement.title,
+        description: requirement.description,
+        category: requirement.category,
+        priority: requirement.priority,
+        frameworkId: requirement.frameworkId,
+        evidenceCount: documentsCount,
+        validatedCount: validatedCount,
+        status: documentsCount === 0 ? 'missing' : 
+               validatedCount === 0 ? 'pending' : 
+               validatedCount === documentsCount ? 'complete' : 'partial'
+      };
+    });
+    
+    return await Promise.all(statusPromises);
   }
 }
 
