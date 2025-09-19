@@ -4,6 +4,11 @@ import { isAuthenticated } from "../replitAuth";
 import { policyGenerator } from "../services/policyGenerator";
 import { storage } from "../storage";
 
+import { Router } from "express";
+import { isAuthenticated } from "../replitAuth";
+import { storage } from "../storage";
+import { policyGenerator } from "../services/policyGenerator";
+
 const router = Router();
 
 // Get available policy templates
@@ -98,6 +103,16 @@ router.put("/generated/:id/status", isAuthenticated, async (req: any, res) => {
       updateData.approvedBy = userId;
       updateData.approvedAt = new Date();
     }
+
+    const updatedPolicy = await storage.updateGeneratedPolicy(id, updateData);
+    res.json(updatedPolicy);
+  } catch (error) {
+    console.error("Error updating policy status:", error);
+    res.status(500).json({ error: "Failed to update policy status" });
+  }
+});
+
+export default router;
 
     const updatedPolicy = await storage.updateGeneratedPolicy(id, updateData);
     res.json(updatedPolicy);

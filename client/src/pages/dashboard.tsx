@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import LazyAIChat from "@/components/LazyAIChat";
 import { ReportGenerator } from "@/components/reports/ReportGenerator";
+import PoliciesList from "@/components/PoliciesList";
 import {
   Upload,
   MessageSquare,
@@ -488,31 +489,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {['Information Security Policy', 'HIPAA Privacy Policy', 'Data Protection Policy'].map((policy, index) => (
-                  <Card key={index} className="glass-card border-0 shadow-sm hover:shadow-md transition-shadow duration-200" data-testid={`policy-item-${index}`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <CheckCircle className="h-4 w-4 text-white" />
-                          </div>
-                          <div>
-                            <div className="font-medium text-sm text-gray-900">{policy}</div>
-                            <div className="text-xs text-gray-500">Auto-generated • Approved</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs">Active</Badge>
-                          <Button variant="ghost" size="sm" data-testid={`view-policy-${policy.toLowerCase().replace(' ', '-')}`}>
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <PoliciesList compact={true} showGenerateButton={true} maxItems={3} />
             </CardContent>
           </Card>
 

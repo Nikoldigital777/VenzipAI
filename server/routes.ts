@@ -1075,7 +1075,7 @@ export async function registerRoutes(app: Express) {
       // Get user's company to know selected frameworks
       const company = await storage.getCompanyByUserId(userId);
       // TODO: Get frameworks from frameworksCompanies table
-      const selectedFrameworks: string[] = [];
+      const selectedFrameworks: string[] = company?.selectedFrameworks || [];
 
       // Get all frameworks
       const allFrameworks = await storage.getAllFrameworks();

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import FileUpload from "@/components/file-upload";
+import PoliciesList from "@/components/PoliciesList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -207,6 +208,7 @@ export default function Documents() {
       <Tabs defaultValue="documents" className="space-y-6">
         <TabsList>
           <TabsTrigger value="documents">All Documents</TabsTrigger>
+          <TabsTrigger value="policies">Generated Policies</TabsTrigger>
           <TabsTrigger value="coverage">Evidence Coverage</TabsTrigger>
         </TabsList>
 
@@ -442,6 +444,11 @@ export default function Documents() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="policies" className="space-y-6">
+          {/* Generated Policies */}
+          <PoliciesList compact={false} showGenerateButton={true} />
         </TabsContent>
 
         <TabsContent value="coverage" className="space-y-6">

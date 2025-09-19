@@ -1,7 +1,7 @@
 
 -- Drop existing table if it exists with wrong structure
-DROP TABLE IF EXISTS "policy_templates" CASCADE;
 DROP TABLE IF EXISTS "generated_policies" CASCADE;
+DROP TABLE IF EXISTS "policy_templates" CASCADE;
 
 -- Add policy templates table with correct structure
 CREATE TABLE IF NOT EXISTS "policy_templates" (
@@ -39,6 +39,9 @@ CREATE TABLE IF NOT EXISTS "generated_policies" (
   "created_at" timestamp DEFAULT now(),
   "updated_at" timestamp DEFAULT now()
 );
+
+-- Add foreign key constraints (without strict references for flexibility)
+-- Note: Framework references may be flexible strings rather than strict FK constraints
 
 -- Add foreign key constraints
 ALTER TABLE "policy_templates" ADD CONSTRAINT "policy_templates_framework_id_frameworks_id_fk" 

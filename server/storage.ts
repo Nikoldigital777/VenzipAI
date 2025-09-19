@@ -181,6 +181,8 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  private db = db;
+
   // User operations (mandatory for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
@@ -630,7 +632,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAuditLog(data: InsertAuditLog): Promise<AuditLog> {
-    const result = await this.db.insert(auditLogs).values(data).returning();
+    const result = await db.insert(auditLogs).values(data).returning();
     return result[0];
   }
 
