@@ -233,21 +233,6 @@ export default function Landing() {
 
   return (
     <>
-      {/* SEO Head Tags */}
-      <head>
-        <title>Venzip - AI-Powered Compliance Platform | Get Audit-Ready in Days</title>
-        <meta name="description" content="Transform compliance with Venzip's AI platform. Automate ISO 27001, SOC 2, HIPAA & GDPR compliance. Reduce costs by 60%, save 80% time. Start free trial." />
-        <meta name="keywords" content="compliance automation, ISO 27001, SOC 2, HIPAA, GDPR, audit preparation, AI compliance, security compliance" />
-        <meta property="og:title" content="Venzip - Get Audit-Ready in Days, Not Months" />
-        <meta property="og:description" content="AI-powered compliance platform for modern businesses. Automate evidence collection, risk assessment, and audit preparation." />
-        <meta property="og:image" content="/assets/venzip-logo.png" />
-        <meta property="og:url" content="https://venzip.com" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://venzip.com" />
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      </head>
       
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/30 relative overflow-hidden noise-texture light" style={{colorScheme: 'light'}}>
         {/* Optimized background effects - reduced complexity */}
@@ -268,7 +253,7 @@ export default function Landing() {
               alt="Venzip - AI-Powered Compliance Platform"
               className="h-10 w-auto"
               loading="eager"
-              fetchPriority="high"
+              fetchpriority="high"
             />
           </div>
           <div className="hidden md:flex items-center space-x-8">
