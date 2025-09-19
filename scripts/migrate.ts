@@ -1,4 +1,3 @@
-
 #!/usr/bin/env tsx
 
 import { runMigrations } from "../server/runMigrations";
