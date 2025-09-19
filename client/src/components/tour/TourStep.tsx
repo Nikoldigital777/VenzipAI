@@ -107,8 +107,8 @@ export function TourStep({
   // Calculate target element position and highlight
   useEffect(() => {
     let retryCount = 0;
-    const maxRetries = 10;
-    const retryDelay = 500;
+    const maxRetries = 15;
+    const retryDelay = 300;
     let autoAdvanceTimeout: NodeJS.Timeout | null = null;
 
     const findTargetElement = (): HTMLElement | null => {
@@ -119,6 +119,21 @@ export function TourStep({
         targetElement = document.querySelector(fallbackTarget) as HTMLElement;
         if (targetElement) {
           console.log(`Primary target ${target} not found, using fallback: ${fallbackTarget}`);
+        }
+      }
+      
+      // Try even more generic fallbacks for common cases
+      if (!targetElement) {
+        if (target.includes('sidebar')) {
+          targetElement = document.querySelector('aside') || document.querySelector('[role="navigation"]') as HTMLElement;
+        } else if (target.includes('button')) {
+          targetElement = document.querySelector('button:last-of-type') as HTMLElement;
+        } else if (target.includes('dashboard') || target.includes('overview')) {
+          targetElement = document.querySelector('main') || document.querySelector('.container') as HTMLElement;
+        }
+        
+        if (targetElement) {
+          console.log(`Using generic fallback for ${target}`);
         }
       }
       

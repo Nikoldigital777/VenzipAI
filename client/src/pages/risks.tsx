@@ -323,7 +323,7 @@ export default function RisksPage() {
 
           {/* Content based on active tab */}
           {activeTab === 'dashboard' ? (
-            <div data-testid="risk-dashboard" className="risk-overview">
+            <div className="risk-overview" data-testid="risk-dashboard">
               <DynamicRiskDashboard />
             </div>
           ) : (

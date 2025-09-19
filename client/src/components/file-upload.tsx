@@ -171,14 +171,12 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
 
-      // Extract text from PDF using pdfjs-dist
+      // Import pdfjs-dist dynamically
+      const pdfjsLib = await import('pdfjs-dist');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
       try {
         const arrayBuffer = await file.arrayBuffer();
-
-        // Import pdfjs-dist dynamically
-        const pdfjsLib = await import('pdfjs-dist');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         setPdfPageCount(pdf.numPages);
 

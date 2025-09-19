@@ -25,7 +25,7 @@ export function TourInitializer() {
 
     console.log('🎯 Tour initializer conditions met, starting tour in 2 seconds');
     
-    // Start tour automatically for new users after a short delay to ensure page is loaded
+    // Start tour automatically for new users after a delay to ensure page is loaded
     const timer = setTimeout(() => {
       // Double-check conditions before starting (state might have changed)
       if (
@@ -39,7 +39,7 @@ export function TourInitializer() {
       } else {
         console.log('🎯 Tour start conditions no longer met, skipping');
       }
-    }, 2000); // 2 second delay to ensure page elements are rendered
+    }, 3000); // 3 second delay to ensure page elements are fully rendered
 
     return () => clearTimeout(timer);
   }, [user, location, state.isActive, state.userPreferences.autoStart, state.userPreferences.hasSeenWelcome, state.userPreferences.skipTutorials, startTour, isTourCompleted]);

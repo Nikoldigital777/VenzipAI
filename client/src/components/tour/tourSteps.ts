@@ -14,7 +14,7 @@ export const mainTourSteps: TourStep[] = [
     title: '🧭 Your Navigation Hub',
     content: 'This sidebar is your command center. You can access all main sections, track framework progress, and see completion percentages at a glance. Notice how each section is organized for optimal workflow.',
     placement: 'right',
-    fallbackTarget: '.sidebar',
+    fallbackTarget: '[data-sidebar="sidebar"]',
   },
   {
     target: '[data-testid="nav-dashboard"]',
@@ -31,7 +31,7 @@ export const mainTourSteps: TourStep[] = [
     title: '📈 Compliance Overview',
     content: 'Here you can see your overall compliance status across all frameworks. The visual indicators show your progress and highlight areas that need attention. This real-time view helps you prioritize your work.',
     placement: 'bottom',
-    fallbackTarget: '.dashboard-content',
+    fallbackTarget: '.grid',
   },
   
   // Task Management (Steps 5-6)
@@ -48,7 +48,7 @@ export const mainTourSteps: TourStep[] = [
     title: '➕ Creating Tasks',
     content: 'Use this button to create new compliance tasks. You can assign tasks to team members, set deadlines, link them to specific frameworks, and track progress. Tasks are the building blocks of your compliance program.',
     placement: 'bottom',
-    fallbackTarget: '.tasks-header',
+    fallbackTarget: 'button',
   },
   
   // Evidence Management (Steps 7-8)
@@ -64,7 +64,7 @@ export const mainTourSteps: TourStep[] = [
     title: '🤖 AI-Powered Document Analysis',
     content: 'Upload documents here and watch our AI work! It automatically analyzes content, identifies compliance mappings, suggests improvements, and tracks document completeness. This saves hours of manual work.',
     placement: 'top',
-    fallbackTarget: '.evidence-upload-section',
+    fallbackTarget: '.border-dashed',
   },
   
   // Risk Management (Steps 9-10)
@@ -80,7 +80,7 @@ export const mainTourSteps: TourStep[] = [
     title: '🎯 Risk Scoring & Monitoring',
     content: 'Our AI continuously evaluates your compliance risks, considering factors like overdue tasks, missing evidence, and regulatory changes. This dashboard helps you focus on the highest-priority issues first.',
     placement: 'bottom',
-    fallbackTarget: '.risk-overview',
+    fallbackTarget: '.container',
   },
   
   // Compliance Frameworks (Steps 11-12)
@@ -96,7 +96,7 @@ export const mainTourSteps: TourStep[] = [
     title: '📊 Framework Analytics & Gap Analysis',
     content: 'Get deep insights into your compliance posture. See completion percentages, identify gaps, track trends over time, and receive AI recommendations tailored to each framework\'s requirements.',
     placement: 'bottom',
-    fallbackTarget: '.frameworks-overview',
+    fallbackTarget: '.container',
   },
   
   // AI Assistant (Step 13)

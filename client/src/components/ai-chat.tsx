@@ -43,7 +43,7 @@ interface ChatMessage {
 const formatMessage = (text: string) => {
   // Split text into paragraphs
   const paragraphs = text.split('\n\n').filter(p => p.trim());
-  
+
   return paragraphs.map((paragraph, index) => {
     // Handle bullet points
     if (paragraph.includes('•') || paragraph.includes('-') || paragraph.includes('*')) {
@@ -65,7 +65,7 @@ const formatMessage = (text: string) => {
         </div>
       );
     }
-    
+
     // Handle numbered lists
     if (paragraph.match(/^\d+\./)) {
       const lines = paragraph.split('\n');
@@ -88,7 +88,7 @@ const formatMessage = (text: string) => {
         </div>
       );
     }
-    
+
     // Regular paragraph
     return (
       <div key={index} className="mb-2 last:mb-0">
@@ -108,7 +108,7 @@ const formatMessage = (text: string) => {
           </strong>
         );
       }
-      
+
       // SOC 2 Trust Service Criteria (CC1.1, CC2.1, etc.)
       if (part.match(/^CC\d+\.\d+$/)) {
         return (
@@ -117,7 +117,7 @@ const formatMessage = (text: string) => {
           </span>
         );
       }
-      
+
       // HIPAA CFR references (164.312(b), etc.)
       if (part.match(/^164\.\d+\(.\)$/)) {
         return (
@@ -126,7 +126,7 @@ const formatMessage = (text: string) => {
           </span>
         );
       }
-      
+
       // ISO 27001 Annex A controls (A.5.1.1, etc.)
       if (part.match(/^A\.\d+\.\d+\.\d+$/)) {
         return (
@@ -135,7 +135,7 @@ const formatMessage = (text: string) => {
           </span>
         );
       }
-      
+
       // GDPR Articles (Art. 25, etc.)
       if (part.match(/^Art\.\s?\d+$/)) {
         return (
@@ -144,7 +144,7 @@ const formatMessage = (text: string) => {
           </span>
         );
       }
-      
+
       // CFR general references
       if (part.match(/^CFR\s?\d+\.\d+$/)) {
         return (
@@ -153,7 +153,7 @@ const formatMessage = (text: string) => {
           </span>
         );
       }
-      
+
       return part;
     });
   }
@@ -169,7 +169,7 @@ export default function AIChat() {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Enhanced quick action prompts with categories including citation-focused questions
   const quickPrompts = [
     { icon: Shield, text: "What's left to be compliant?", color: "text-blue-600", category: "Status Check", bg: "from-blue-500/10 to-blue-600/5" },
@@ -179,7 +179,7 @@ export default function AIChat() {
     { icon: TrendingUp, text: "Analyze compliance with specific citations", color: "text-purple-600", category: "Audit Prep", bg: "from-purple-500/10 to-purple-600/5" },
     { icon: Brain, text: "Generate auditor-ready evidence list", color: "text-indigo-600", category: "Documentation", bg: "from-indigo-500/10 to-indigo-600/5" }
   ];
-  
+
   // Achievement system
   const achievements = [
     { threshold: 1, icon: Star, text: "First question!", unlocked: messageCount >= 1 },
@@ -215,16 +215,16 @@ export default function AIChat() {
       setIsTyping(true);
       // Simulate typing delay for better UX
       await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
-      
+
       // Get current user context for Claude
       const [companyResponse, summaryResponse] = await Promise.all([
         apiRequest("GET", "/api/company").catch(() => null),
         apiRequest("GET", "/api/summary").catch(() => null)
       ]);
-      
+
       const company = companyResponse ? await companyResponse.json() : null;
       const summary = summaryResponse ? await summaryResponse.json() : null;
-      
+
       const response = await apiRequest("POST", "/api/chat", { 
         message: messageText,
         context: {
@@ -304,7 +304,7 @@ export default function AIChat() {
       sendMessageMutation.mutate(prompt);
     }, 300);
   };
-  
+
   // Hide welcome animation after first interaction
   useEffect(() => {
     if (messageCount > 0) {
@@ -368,7 +368,7 @@ export default function AIChat() {
                 <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
               </Button>
             </div>
-            
+
             <div 
               ref={messagesContainerRef}
               className="p-4 flex-1 overflow-y-auto bg-gradient-to-b from-gray-50/30 to-white/80 relative z-10 scrollbar-thin scrollbar-thumb-venzip-primary/20 scrollbar-track-transparent scroll-smooth"
@@ -394,7 +394,7 @@ export default function AIChat() {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Enhanced Quick Action Prompts */}
                     <div className={`space-y-4 mt-6 ${showWelcomeAnimation ? 'animate-fadeInUp' : ''}`} style={{animationDelay: '0.3s'}}>
                       <div className="flex items-center gap-2">
@@ -475,7 +475,7 @@ export default function AIChat() {
                     </div>
                   ))
                 )}
-                
+
                 {(sendMessageMutation.isPending || isTyping) && (
                   <div className="flex space-x-4 animate-fadeInUp">
                     <div className="w-10 h-10 bg-gradient-to-r from-venzip-primary to-venzip-accent rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg animate-pulse">
@@ -515,7 +515,7 @@ export default function AIChat() {
                 </div>
               )}
             </div>
-            
+
             <div className="p-6 border-t border-gray-200/50 bg-gradient-to-r from-white/80 to-gray-50/80 relative z-10">
               <div className="space-y-3">
                 {/* Quick Status Check Button */}
@@ -533,7 +533,7 @@ export default function AIChat() {
                     </div>
                   </Button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="flex space-x-4">
                   <div className="relative flex-1">
                     <Input
@@ -567,7 +567,7 @@ export default function AIChat() {
                   </Button>
                 </form>
               </div>
-              
+
               {/* Achievement indicators */}
               {messageCount > 0 && (
                 <div className="flex items-center justify-center gap-2 mt-3">
@@ -596,30 +596,31 @@ export default function AIChat() {
               <p className="text-xs font-medium text-gray-700 whitespace-nowrap">💬 Ask Claude anything!</p>
               <div className="absolute bottom-0 right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-white/90"></div>
             </div>
-            
+
             <Button
               onClick={toggleChat}
               className="group w-20 h-20 bg-gradient-to-r from-venzip-primary via-venzip-accent to-venzip-secondary text-white rounded-3xl shadow-2xl hover:shadow-3xl hover:scale-110 transition-all duration-500 flex items-center justify-center relative overflow-hidden animate-glow-pulse"
+              data-testid="ai-chat-bubble-button"
             >
               {/* Background animations */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-venzip-primary/50 to-venzip-accent/50 rounded-3xl animate-ping opacity-75"></div>
-              
+
               {/* Main icon */}
               <MessageCircle className="h-10 w-10 relative z-10 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300" />
-              
+
               {/* Status indicators */}
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-pulse flex items-center justify-center shadow-lg">
                 <Sparkles className="h-4 w-4 text-white animate-spin" />
               </div>
-              
+
               {/* Message count badge */}
               {messageCount > 0 && (
                 <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-r from-venzip-secondary to-venzip-primary rounded-full flex items-center justify-center shadow-lg border-2 border-white">
                   <span className="text-xs font-bold text-white">{messageCount}</span>
                 </div>
               )}
-              
+
               {/* Floating particles */}
               <div className="absolute top-1 left-1 w-2 h-2 bg-white/50 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
               <div className="absolute top-3 right-2 w-1.5 h-1.5 bg-white/40 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>

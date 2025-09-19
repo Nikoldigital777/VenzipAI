@@ -200,7 +200,7 @@ export default function TaskForm({ task, onSuccess, onCancel }: TaskFormProps) {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Enter task description"
                       className="resize-none"
                       rows={3}
@@ -317,8 +317,8 @@ export default function TaskForm({ task, onSuccess, onCancel }: TaskFormProps) {
                   <FormItem>
                     <FormLabel>Estimated Hours</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         placeholder="0"
                         {...field}
                         onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
@@ -339,7 +339,7 @@ export default function TaskForm({ task, onSuccess, onCancel }: TaskFormProps) {
                 <FormItem>
                   <FormLabel>Compliance Requirement</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Describe the compliance requirement this task addresses"
                       className="resize-none"
                       rows={2}
@@ -372,8 +372,8 @@ export default function TaskForm({ task, onSuccess, onCancel }: TaskFormProps) {
                   {tags.map((tag, index) => (
                     <Badge key={index} variant="secondary" className="flex items-center gap-1" data-testid={`tag-${index}`}>
                       {tag}
-                      <X 
-                        className="h-3 w-3 cursor-pointer hover:text-red-500" 
+                      <X
+                        className="h-3 w-3 cursor-pointer hover:text-red-500"
                         onClick={() => removeTag(tag)}
                         data-testid={`button-remove-tag-${index}`}
                       />

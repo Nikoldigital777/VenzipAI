@@ -6,7 +6,8 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle
+  CardTitle,
+  CardDescription // Import CardDescription
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LazyAIChat from "@/components/LazyAIChat";
@@ -374,38 +375,36 @@ export default function Dashboard() {
                           <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                           <CardContent className="p-6 relative z-10">
                             <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <div className="font-semibold text-gray-900 dark:text-text-primary group-hover:text-warning-orange transition-colors duration-300">
-                                    {g.title}
-                                  </div>
-                                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                    {g.kind === "task"
-                                      ? `${g.meta?.framework?.toUpperCase() || "TASK"}`
-                                      : `${g.meta?.category?.toUpperCase() || "RISK"}`
-                                    }
-                                  </span>
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="font-semibold text-gray-900 dark:text-text-primary group-hover:text-warning-orange transition-colors duration-300">
+                                  {g.title}
                                 </div>
-                                {g.meta?.dueDate && (
-                                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
-                                    <Clock className="h-3 w-3" />
-                                    <span>Due: {new Date(g.meta.dueDate).toLocaleDateString()}</span>
-                                  </div>
-                                )}
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                  {g.kind === "task"
+                                    ? `${g.meta?.framework?.toUpperCase() || "TASK"}`
+                                    : `${g.meta?.category?.toUpperCase() || "RISK"}`
+                                  }
+                                </span>
                               </div>
-                              <span
-                                className={[
-                                  "px-3 py-1.5 text-xs font-medium rounded-full capitalize transition-all duration-300 group-hover:scale-110",
-                                  g.severity === "critical" ? "bg-danger-coral/15 text-danger-coral border border-danger-coral/20" :
-                                  g.severity === "high" ? "bg-warning-orange/15 text-warning-orange border border-warning-orange/20" :
-                                  g.severity === "medium" ? "bg-venzip-primary/15 text-venzip-primary border border-venzip-primary/20" :
-                                  "bg-success-green/15 text-success-green border border-success-green/20"
-                                ].join(" ")}
-                                data-testid={`gap-severity-${g.severity}`}
-                              >
-                                {g.severity}
-                              </span>
+                              {g.meta?.dueDate && (
+                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
+                                  <Clock className="h-3 w-3" />
+                                  <span>Due: {new Date(g.meta.dueDate).toLocaleDateString()}</span>
+                                </div>
+                              )}
                             </div>
+                            <span
+                              className={[
+                                "px-3 py-1.5 text-xs font-medium rounded-full capitalize transition-all duration-300 group-hover:scale-110",
+                                g.severity === "critical" ? "bg-danger-coral/15 text-danger-coral border border-danger-coral/20" :
+                                g.severity === "high" ? "bg-warning-orange/15 text-warning-orange border border-warning-orange/20" :
+                                g.severity === "medium" ? "bg-venzip-primary/15 text-venzip-primary border border-venzip-primary/20" :
+                                "bg-success-green/15 text-success-green border border-success-green/20"
+                              ].join(" ")}
+                              data-testid={`gap-severity-${g.severity}`}
+                            >
+                              {g.severity}
+                            </span>
                           </CardContent>
                         </Card>
                       </li>
