@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -31,7 +30,7 @@ export function FrameworkProgressTable() {
     };
 
     const props = badgeProps[status as keyof typeof badgeProps] || badgeProps.critical;
-    
+
     return (
       <Badge {...props}>
         {completionPercentage}% Complete
@@ -153,7 +152,7 @@ export function FrameworkProgressTable() {
           })}
         </tbody>
       </table>
-      
+
       {/* Summary Stats */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
         <div className="bg-blue-50/50 rounded-lg p-4">
@@ -166,7 +165,7 @@ export function FrameworkProgressTable() {
           </div>
           <div className="text-xs text-blue-600">across all frameworks</div>
         </div>
-        
+
         <div className="bg-green-50/50 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
             <Target className="h-4 w-4 text-green-600" />
@@ -179,7 +178,7 @@ export function FrameworkProgressTable() {
             of {frameworkProgress.reduce((sum, f) => sum + f.totalTasks, 0)} total
           </div>
         </div>
-        
+
         <div className="bg-purple-50/50 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="h-4 w-4 text-purple-600" />

@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -25,6 +24,8 @@ import {
   ZoomIn,
   ZoomOut
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
 
 type UploadResult = { 
   id: string; 
@@ -90,7 +91,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
       return response.json();
     },
   });
-  
+
   const documents = documentsResponse?.items || [];
 
   // Fetch compliance requirements when frameworkId is provided
@@ -107,7 +108,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const xhr = new XMLHttpRequest();
-      
+
       return new Promise<UploadResult>((resolve, reject) => {
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
@@ -155,34 +156,34 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
 
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    
+
     const file = files[0];
     setSelectedFile(file);
-    
+
     // Generate preview for images
     if (file.type.startsWith('image/')) {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
-    
+
     // Handle PDF files
     if (file.type === 'application/pdf') {
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      
+
       // Extract text from PDF using pdfjs-dist
       try {
         const arrayBuffer = await file.arrayBuffer();
-        
+
         // Import pdfjs-dist dynamically
         const pdfjsLib = await import('pdfjs-dist');
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        
+
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         setPdfPageCount(pdf.numPages);
-        
+
         let fullText = '';
-        
+
         // Extract text from each page (limit to first 10 pages for performance)
         for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
           const page = await pdf.getPage(i);
@@ -192,9 +193,9 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
             .join(' ');
           fullText += pageText + '\n\n';
         }
-        
+
         setPdfText(fullText.trim());
-        
+
       } catch (error) {
         console.error('Error processing PDF:', error);
         setPdfText("PDF text extraction failed. Upload will proceed with filename analysis only.");
@@ -204,7 +205,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
 
   const handleUpload = () => {
     if (!selectedFile) return;
-    
+
     const formData = new FormData();
     formData.append("file", selectedFile);
     if (frameworkId) formData.append("frameworkId", frameworkId);
@@ -213,7 +214,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
     if (tags) formData.append("tags", tags);
     if (description) formData.append("description", description);
     if (pdfText) formData.append("extractedText", pdfText);
-    
+
     mutation.mutate(formData);
   };
 
@@ -274,6 +275,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
         <CardContent>
           {/* Upload Area */}
           <div
+            data-testid="file-upload-area"
             onDragEnter={onDrag}
             onDragOver={onDrag}
             onDragLeave={onDrag}
@@ -308,7 +310,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                
+
                 {/* File Preview */}
                 {previewUrl && selectedFile && (
                   <div className="mt-4">
@@ -332,7 +334,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                             </Button>
                           </div>
                         </div>
-                        
+
                         <div className="border rounded-lg p-4 bg-white">
                           <embed
                             src={previewUrl}
@@ -342,7 +344,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                             className="rounded border"
                           />
                         </div>
-                        
+
                         {pdfText && (
                           <div className="bg-gray-50 p-3 rounded-lg">
                             <h4 className="text-sm font-medium mb-2">Extracted Content Preview</h4>
@@ -433,7 +435,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                   )}
                 </div>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="category">Category</Label>
@@ -450,7 +452,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="tags">Tags (comma-separated)</Label>
                   <Input
@@ -461,7 +463,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Input
@@ -531,7 +533,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                           </Badge>
                         )}
                       </div>
-                      
+
                       {/* AI Analysis Results */}
                       {doc.analysisResult && (
                         <div className="mt-2 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200/30">
@@ -542,7 +544,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                                 <span className="font-medium text-blue-800">AI Analysis:</span>
                                 <span className="text-blue-700 ml-2">{doc.analysisResult.summary}</span>
                               </div>
-                              
+
                               <div className="flex items-center gap-4 text-xs">
                                 <div className="flex items-center gap-1">
                                   <span className="text-blue-600">Risk Level:</span>
@@ -557,18 +559,18 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                                     {doc.analysisResult.risk_level}
                                   </Badge>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-1">
                                   <span className="text-blue-600">Type:</span>
                                   <span className="text-blue-800 font-medium">{doc.analysisResult.document_type}</span>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-1">
                                   <span className="text-blue-600">Completeness:</span>
                                   <span className="text-blue-800 font-medium">{doc.analysisResult.completeness_score}%</span>
                                 </div>
                               </div>
-                              
+
                               {doc.analysisResult.compliance_gaps && doc.analysisResult.compliance_gaps.length > 0 && (
                                 <div className="text-xs">
                                   <span className="text-red-600 font-medium">Gaps Found:</span>
@@ -579,7 +581,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Control Mapping Information */}
                       {doc.mapping && (
                         <div className="mt-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200/30">
@@ -590,13 +592,13 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                                 <span className="font-medium text-green-800">Mapped to Control:</span>
                                 <span className="text-green-700 ml-2">{doc.mapping.control.requirementId}: {doc.mapping.control.title}</span>
                               </div>
-                              
+
                               <div className="flex items-center gap-4 text-xs">
                                 <div className="flex items-center gap-1">
                                   <span className="text-green-600">Category:</span>
                                   <span className="text-green-800 font-medium">{doc.mapping.control.category}</span>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-1">
                                   <span className="text-green-600">Priority:</span>
                                   <Badge 
@@ -610,7 +612,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                                     {doc.mapping.control.priority}
                                   </Badge>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-1">
                                   <span className="text-green-600">Confidence:</span>
                                   <span className="text-green-800 font-medium">{Math.round(parseFloat(doc.mapping.confidence) * 100)}%</span>
@@ -622,7 +624,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     {doc.fileType === 'application/pdf' ? (
                       <Dialog>

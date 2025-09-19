@@ -11,6 +11,15 @@ import { useTheme } from '@/hooks/useTheme';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  
+  // Hide theme toggle on light-only pages
+  const isLightOnlyPage = document.documentElement.classList.contains('light') || 
+                         window.location.pathname === '/' || 
+                         window.location.pathname === '/onboarding';
+                         
+  if (isLightOnlyPage) {
+    return null;
+  }
 
   return (
     <DropdownMenu>

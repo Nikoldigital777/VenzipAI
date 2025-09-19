@@ -694,18 +694,48 @@ html {
   color-scheme: light !important;
 }
 
+/* Comprehensive light mode enforcement */
 .light *,
 .light *::before,
 .light *::after {
   color-scheme: light !important;
 }
 
-/* Override any dark mode classes for light-only pages */
-.light .dark\:bg-gray-900 {
+/* Override all possible dark mode classes for light-only pages */
+.light .dark\:bg-gray-900,
+.light .dark\:bg-gray-800,
+.light .dark\:bg-gray-700,
+.light .dark\:bg-slate-900,
+.light .dark\:bg-slate-800 {
   background-color: hsl(0, 0%, 100%) !important;
 }
 
-.light .dark\:text-white {
+.light .dark\:text-white,
+.light .dark\:text-gray-100,
+.light .dark\:text-gray-200 {
+  color: hsl(210, 25%, 7.8431%) !important;
+}
+
+.light .dark\:border-gray-700,
+.light .dark\:border-gray-600 {
+  border-color: hsl(201.4286, 30.4348%, 90.9804%) !important;
+}
+
+/* Force light backgrounds on all elements */
+.light .bg-background {
+  background-color: hsl(0, 0%, 100%) !important;
+}
+
+.light .text-foreground {
+  color: hsl(210, 25%, 7.8431%) !important;
+}
+
+/* Disable theme provider context in light mode */
+.light [data-theme="dark"],
+.light .dark {
+  --background: hsl(0, 0%, 100%) !important;
+  --foreground: hsl(210, 25%, 7.8431%) !important;
+  background-color: hsl(0, 0%, 100%) !important;
   color: hsl(210, 25%, 7.8431%) !important;
 }
 

@@ -144,7 +144,7 @@ export default function Dashboard() {
 
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
             <div className="grid gap-8">
-              <Card className="glass-card">
+              <Card className="glass-card" data-testid="loading-card">
                 <CardContent className="py-16 text-center">
                   <div className="w-16 h-16 bg-gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-6 animate-pulse">
                     <Activity className="h-8 w-8 text-white" />
@@ -171,7 +171,7 @@ export default function Dashboard() {
           <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-danger-coral/10 to-transparent rounded-full blur-3xl animate-float"></div>
 
           <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
-            <Card className="glass-card border-danger-coral/20">
+            <Card className="glass-card border-danger-coral/20" data-testid="error-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-text-primary">
                   <div className="w-10 h-10 bg-danger-coral/10 rounded-2xl flex items-center justify-center">
@@ -189,6 +189,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => refetch()}
                   className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 font-medium group"
+                  data-testid="retry-button"
                 >
                   <RefreshCw className="h-4 w-4 mr-2 group-hover:animate-spin" />
                   Retry Loading
@@ -237,7 +238,7 @@ export default function Dashboard() {
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Enhanced Compliance Score Card */}
-            <Card className="lg:col-span-1 glass-card group hover-lift relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.1s'}}>
+            <Card className="lg:col-span-1 glass-card group hover-lift relative overflow-hidden animate-fadeInUp" style={{animationDelay: '0.1s'}} data-testid="compliance-overview-card">
               <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-gray-900 group-hover:text-venzip-primary transition-colors duration-300">
@@ -267,7 +268,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Enhanced Stats Grid */}
-            <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+            <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.2s'}} data-testid="key-metrics-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-text-primary">
                   <div className="w-10 h-10 bg-gradient-to-br from-info-blue/20 to-info-blue/10 rounded-2xl flex items-center justify-center">
@@ -280,7 +281,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg" data-testid="evidence-uploads-card">
                   <div className="absolute inset-0 bg-gradient-to-br from-info-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
@@ -294,7 +295,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg" data-testid="ai-conversations-card">
                   <div className="absolute inset-0 bg-gradient-to-br from-venzip-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
@@ -308,7 +309,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg" data-testid="high-priority-tasks-card">
                   <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
@@ -322,7 +323,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg" data-testid="high-risks-card">
                   <div className="absolute inset-0 bg-gradient-to-br from-danger-coral/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                   <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-4">
@@ -339,10 +340,10 @@ export default function Dashboard() {
             </Card>
 
             {/* Corporate Compliance Metrics Table */}
-            <FrameworkProgressTable />
+            <FrameworkProgressTable data-testid="framework-progress-table" />
 
             {/* Enhanced Gaps Section */}
-            <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+            <Card className="lg:col-span-2 glass-card group hover-lift animate-fadeInUp" style={{animationDelay: '0.3s'}} data-testid="compliance-gaps-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-text-primary">
                   <div className="w-12 h-12 bg-gradient-to-br from-warning-orange/20 to-warning-orange/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
@@ -356,7 +357,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 {gaps.length === 0 ? (
-                  <Card className="glass-card border-0 shadow-lg">
+                  <Card className="glass-card border-0 shadow-lg" data-testid="no-gaps-detected-card">
                     <CardContent className="p-8 text-center">
                       <div className="w-16 h-16 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
                         <CheckCircle className="h-8 w-8 text-success-green" />
@@ -369,7 +370,7 @@ export default function Dashboard() {
                   <ul className="space-y-4">
                     {gaps.map((g: Gap, index: number) => (
                       <li key={g.id} className="animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
-                        <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                        <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg" data-testid={`gap-item-${index}`}>
                           <div className="absolute inset-0 bg-gradient-to-br from-warning-orange/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                           <CardContent className="p-6 relative z-10">
                             <div className="flex items-start justify-between">
@@ -400,6 +401,7 @@ export default function Dashboard() {
                                   g.severity === "medium" ? "bg-venzip-primary/15 text-venzip-primary border border-venzip-primary/20" :
                                   "bg-success-green/15 text-success-green border border-success-green/20"
                                 ].join(" ")}
+                                data-testid={`gap-severity-${g.severity}`}
                               >
                                 {g.severity}
                               </span>
@@ -414,7 +416,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Enhanced Recent Activity */}
-            <Card className="lg:col-span-1 glass-card group hover:shadow-lg transition-shadow duration-300 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+            <Card className="lg:col-span-1 glass-card group hover:shadow-lg transition-shadow duration-300 animate-fadeInUp" style={{animationDelay: '0.4s'}} data-testid="audit-trail-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-text-primary">
                   <div className="w-10 h-10 bg-venzip-secondary/10 rounded-lg flex items-center justify-center">
@@ -430,7 +432,7 @@ export default function Dashboard() {
                 <ul className="space-y-4">
                   {recentActivity.length === 0 ? (
                     <li>
-                      <Card className="glass-card border-0 shadow-lg">
+                      <Card className="glass-card border-0 shadow-lg" data-testid="no-activity-yet-card">
                         <CardContent className="p-6 text-center">
                           <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
                             <Clock className="h-6 w-6 text-gray-400" />
@@ -442,7 +444,7 @@ export default function Dashboard() {
                     </li>
                   ) : recentActivity.map((a: Activity, index: number) => (
                     <li key={a.id} className="animate-fadeInUp" style={{animationDelay: `${0.1 * index}s`}}>
-                      <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg">
+                      <Card className="glass-card group hover-lift cursor-pointer relative overflow-hidden border-0 shadow-lg" data-testid={`audit-trail-item-${index}`}>
                         <div className="absolute inset-0 bg-gradient-to-br from-venzip-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                         <CardContent className="p-4 relative z-10">
                           <div className="flex items-start justify-between">
@@ -473,7 +475,7 @@ export default function Dashboard() {
           </div>
 
           {/* Enhanced Recent Tasks Section */}
-          <Card className="lg:col-span-2 glass-card animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+          <Card className="lg:col-span-2 glass-card animate-fadeInUp" style={{animationDelay: '0.6s'}} data-testid="recent-tasks-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-gray-900">
                 <div className="w-10 h-10 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center">
@@ -506,6 +508,7 @@ export default function Dashboard() {
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
+                    data-testid="retry-tasks-button"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Retry
@@ -514,7 +517,7 @@ export default function Dashboard() {
               ) : recentTasks && recentTasks.length > 0 ? (
                 <div className="space-y-3">
                   {recentTasks.map((task: any, index: number) => (
-                    <Card key={task.id} className="glass-card border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <Card key={task.id} className="glass-card border-0 shadow-sm hover:shadow-md transition-shadow duration-200" data-testid={`recent-task-item-${index}`}>
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
@@ -593,6 +596,7 @@ export default function Dashboard() {
                   <Button
                     variant="outline"
                     onClick={() => window.location.href = '/tasks'}
+                    data-testid="view-all-tasks-button"
                   >
                     <Target className="h-4 w-4 mr-2" />
                     View All Tasks
@@ -603,7 +607,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Reports Section */}
-          <Card className="lg:col-span-1 glass-card animate-fadeInUp" style={{animationDelay: '0.7s'}}>
+          <Card className="lg:col-span-1 glass-card animate-fadeInUp" style={{animationDelay: '0.7s'}} data-testid="reports-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-gray-900">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center">

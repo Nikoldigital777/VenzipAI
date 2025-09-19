@@ -6,6 +6,8 @@ import LazyAIChat from "@/components/LazyAIChat";
 import TaskList from "@/components/tasks/TaskList";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskDetails from "@/components/tasks/TaskDetails";
+import { Button } from "@/components/ui/button"; // Assuming Button component is needed for the change
+import { Plus } from "lucide-react"; // Assuming Plus icon is needed for the change
 
 interface Task {
   id: string;

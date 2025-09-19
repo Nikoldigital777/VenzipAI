@@ -140,13 +140,13 @@ export default function DynamicRiskDashboard() {
       if (event.query.queryKey[0] === '/api/tasks' && event.type === 'updated') {
         // Capture current score before refresh
         const currentScore = latestScore ? parseFloat(latestScore.overallRiskScore) : 0;
-        
+
         // Task data changed, might be a completion - refresh risk scores
         setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ["/api/risks/score-history"] });
           queryClient.invalidateQueries({ queryKey: ["/api/risks/latest-score"] });
           setIsAutoUpdating(true);
-          
+
           // Show impact after refresh
           setTimeout(() => {
             setIsAutoUpdating(false);
@@ -155,7 +155,7 @@ export default function DynamicRiskDashboard() {
         }, 1000); // Small delay to allow backend processing
       }
     });
-    
+
     return unsubscribe;
   }, [latestScore]);
 
@@ -171,7 +171,7 @@ export default function DynamicRiskDashboard() {
           trigger,
           visible: true
         });
-        
+
         // Hide after 5 seconds
         setTimeout(() => {
           setScoreImpact(prev => prev ? { ...prev, visible: false } : null);
@@ -215,10 +215,10 @@ export default function DynamicRiskDashboard() {
 
   const getRiskTrendIcon = (history: RiskScoreHistory[]) => {
     if (history.length < 2) return <Activity className="h-4 w-4" />;
-    
+
     const latest = parseFloat(history[0].overallRiskScore);
     const previous = parseFloat(history[1].overallRiskScore);
-    
+
     if (latest < previous) return <TrendingDown className="h-4 w-4 text-green-600" />;
     if (latest > previous) return <TrendingUp className="h-4 w-4 text-red-600" />;
     return <Activity className="h-4 w-4 text-blue-600" />;
@@ -346,7 +346,7 @@ export default function DynamicRiskDashboard() {
 
       {/* Current Risk Score Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-2 min-h-[120px]">
+        <Card className="glass-card" data-testid="risk-dashboard">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300 truncate">Current Risk Score</CardTitle>
           </CardHeader>
