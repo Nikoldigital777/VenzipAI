@@ -136,6 +136,7 @@ Description: ${requirement.description}
 Category: ${requirement.category}
 Priority: ${requirement.priority}
 Expected Evidence Types: ${requirement.evidenceTypes?.join(', ') || 'Not specified'}
+Suggested Evidence: ${requirement.suggestedEvidence?.join(', ') || 'Not specified'}
 
 DOCUMENT TO ANALYZE:
 Title: ${document.fileName}

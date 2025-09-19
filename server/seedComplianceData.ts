@@ -14,7 +14,16 @@ const hipaaControls = [
     evidenceTypes: ["policy", "procedure", "documentation"],
     requiredEvidenceType: "policy",
     controlObjective: "Establish security management processes for protecting ePHI",
-    implementationGuidance: "Designate a security officer and implement security policies covering all workforce members."
+    implementationGuidance: "Designate a security officer and implement security policies covering all workforce members.",
+    suggestedEvidence: [
+      "Information Security Policy document",
+      "Security management procedures",
+      "Security officer designation letter",
+      "Risk analysis report",
+      "Risk management plan",
+      "Security incident response policy",
+      "Workforce security procedures"
+    ]
   },
   {
     id: "hipaa-164-308a5",
@@ -27,7 +36,16 @@ const hipaaControls = [
     evidenceTypes: ["training_records", "policy", "certification"],
     requiredEvidenceType: "training_records",
     controlObjective: "Ensure workforce receives appropriate security training",
-    implementationGuidance: "Conduct periodic security updates and implement training for new workforce members."
+    implementationGuidance: "Conduct periodic security updates and implement training for new workforce members.",
+    suggestedEvidence: [
+      "Security awareness training policy",
+      "Training attendance records",
+      "Training materials and curriculum",
+      "New employee training checklist",
+      "Annual security training completion certificates",
+      "Training effectiveness assessments",
+      "Security awareness program documentation"
+    ]
   },
   {
     id: "hipaa-164-310a1",
@@ -53,7 +71,16 @@ const hipaaControls = [
     evidenceTypes: ["access_logs", "user_management", "authentication"],
     requiredEvidenceType: "log",
     controlObjective: "Ensure only authorized personnel can access ePHI",
-    implementationGuidance: "Implement unique user identification, emergency access procedures, and role-based access controls."
+    implementationGuidance: "Implement unique user identification, emergency access procedures, and role-based access controls.",
+    suggestedEvidence: [
+      "Access control policy and procedures",
+      "Role-based access control matrix",
+      "User provisioning and deprovisioning procedures",
+      "Emergency access procedures documentation",
+      "Access review logs and reports",
+      "Authentication system configuration",
+      "System access audit trails"
+    ]
   },
   {
     id: "hipaa-164-312b",

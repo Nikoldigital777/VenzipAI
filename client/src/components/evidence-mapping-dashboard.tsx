@@ -607,6 +607,20 @@ export default function EvidenceMappingDashboard() {
                             "{mapping.evidenceSnippets.snippets[0]}"
                           </div>
                         )}
+                        {/* Show suggested evidence if available */}
+                        {mapping.suggestedEvidence && mapping.suggestedEvidence.length > 0 && (
+                          <div className="mt-2 text-xs">
+                            <div className="text-blue-600 font-medium">Suggested Evidence:</div>
+                            <ul className="list-disc list-inside text-gray-500 ml-2">
+                              {mapping.suggestedEvidence.slice(0, 2).map((evidence, idx) => (
+                                <li key={idx} className="truncate">{evidence}</li>
+                              ))}
+                              {mapping.suggestedEvidence.length > 2 && (
+                                <li className="text-blue-500">+{mapping.suggestedEvidence.length - 2} more</li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>

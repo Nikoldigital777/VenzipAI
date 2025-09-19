@@ -120,24 +120,24 @@ export const tasks = pgTable("tasks", {
   companyId: varchar("company_id").references(() => companies.id, { onDelete: "cascade" }),
   assignedTo: varchar("assigned_to"),
   createdById: varchar("created_by_id").references(() => users.id),
-  
+
   // Progress tracking
   progressPercentage: integer("progress_percentage").default(0),
   estimatedHours: integer("estimated_hours"),
   actualHours: integer("actual_hours"),
-  
+
   // AI-powered fields
   aiPriorityScore: integer("ai_priority_score"),
   aiReasoning: text("ai_reasoning"),
   aiNextAction: text("ai_next_action"),
   aiAnalyzedAt: timestamp("ai_analyzed_at"),
-  
+
   // Additional metadata
   tags: jsonb("tags"), // Store as JSON array
   dependencies: jsonb("dependencies"), // Store as JSON array
   complianceRequirement: text("compliance_requirement"),
   evidenceRequired: boolean("evidence_required").default(false),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -270,6 +270,7 @@ export const complianceRequirements = pgTable("compliance_requirements", {
   requiredEvidenceType: varchar("required_evidence_type"), // Primary evidence type for auto-suggestions
   controlObjective: text("control_objective"),
   implementationGuidance: text("implementation_guidance"),
+  suggestedEvidence: jsonb("suggested_evidence").$type<string[]>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
