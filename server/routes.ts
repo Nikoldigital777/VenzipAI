@@ -577,7 +577,7 @@ export async function registerRoutes(app: Express) {
       tasksData = tasksResult.status === 'fulfilled' ? tasksResult.value || [] : [];
       risksData = risksResult.status === 'fulfilled' ? risksResult.value || [] : [];
       company = companyResult.status === 'fulfilled' ? companyResult.value : null;
-      
+
       if (company) {
         generatedPolicies = await fetchWithTimeout(() => storage.getGeneratedPolicies(company.id), 'generated policies');
       }
@@ -2343,7 +2343,7 @@ export async function registerRoutes(app: Express) {
   app.get('/api/risks', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      const { category, impact, likelihood, q } = req.query as Record<string, string | undefined>;
+      const { category, impact, likelihood, q, frameworkId } = req.query as Record<string, string | undefined>;
       const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit ?? "25"), 10)));
       const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10));
 
@@ -2359,8 +2359,8 @@ export async function registerRoutes(app: Express) {
       if (likelihood) {
         risks = risks.filter(risk => risk.likelihood === likelihood);
       }
-      if (filters.frameworkId) {
-        risks = risks.filter(risk => risk.frameworkId === filters.frameworkId);
+      if (frameworkId) {
+        risks = risks.filter(risk => risk.frameworkId === frameworkId);
       }
 
       if (q && q.trim()) {
