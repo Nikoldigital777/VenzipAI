@@ -35,6 +35,21 @@ type UploadResult = {
   status: string;
   analysisResult?: any;
   uploadedAt: string;
+  mapping?: {
+    mappingId: string;
+    control: {
+      id: string;
+      requirementId: string;
+      title: string;
+      description: string;
+      category: string;
+      priority: string;
+      frameworkId: string;
+    };
+    mappingType: string;
+    confidence: string;
+    status: string;
+  };
 };
 
 interface FileUploadProps {
@@ -42,10 +57,21 @@ interface FileUploadProps {
   onUploadComplete?: (file: UploadResult) => void;
 }
 
+type ComplianceRequirement = {
+  id: string;
+  requirementId: string;
+  title: string;
+  description: string;
+  category: string;
+  priority: string;
+  frameworkId: string;
+};
+
 export default function FileUpload({ frameworkId, onUploadComplete }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedRequirement, setSelectedRequirement] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [tags, setTags] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -66,6 +92,17 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
   });
   
   const documents = documentsResponse?.items || [];
+
+  // Fetch compliance requirements when frameworkId is provided
+  const { data: complianceRequirements = [], isLoading: requirementsLoading } = useQuery<ComplianceRequirement[]>({
+    queryKey: ["/api/compliance/requirements", frameworkId],
+    queryFn: async () => {
+      const params = frameworkId ? `?framework=${frameworkId}` : "";
+      const response = await apiRequest("GET", `/api/compliance/requirements${params}`);
+      return response.json();
+    },
+    enabled: !!frameworkId,
+  });
 
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -100,6 +137,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
       setUploadProgress(0);
       setSelectedFile(null);
       setPreviewUrl(null);
+      setSelectedRequirement("");
       setCategory("");
       setTags("");
       setDescription("");
@@ -170,6 +208,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
     const formData = new FormData();
     formData.append("file", selectedFile);
     if (frameworkId) formData.append("frameworkId", frameworkId);
+    if (selectedRequirement) formData.append("requirementId", selectedRequirement);
     if (category) formData.append("category", category);
     if (tags) formData.append("tags", tags);
     if (description) formData.append("description", description);
@@ -259,6 +298,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                     onClick={() => {
                       setSelectedFile(null);
                       setPreviewUrl(null);
+                      setSelectedRequirement("");
                       setPdfText("");
                       setPdfPageCount(0);
                       setCurrentPage(1);
@@ -351,6 +391,49 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
           {/* File Metadata */}
           {selectedFile && (
             <div className="mt-6 space-y-4">
+              {/* Control Selection - Show when frameworkId is provided */}
+              {frameworkId && (
+                <div>
+                  <Label htmlFor="requirement" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    Select Compliance Control
+                  </Label>
+                  {requirementsLoading ? (
+                    <div className="flex items-center gap-2 mt-2 p-3 bg-gray-50 rounded-lg">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-venzip-primary"></div>
+                      <span className="text-sm text-gray-600">Loading compliance controls...</span>
+                    </div>
+                  ) : (
+                    <Select value={selectedRequirement} onValueChange={setSelectedRequirement}>
+                      <SelectTrigger data-testid="select-compliance-control">
+                        <SelectValue placeholder="Choose which compliance control this document addresses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {complianceRequirements.map((req) => (
+                          <SelectItem key={req.id} value={req.id}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{req.requirementId}: {req.title}</span>
+                              <span className="text-xs text-gray-500 mt-1">{req.category} • {req.priority} priority</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  {selectedRequirement && (
+                    <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800">Control Selected</span>
+                      </div>
+                      <p className="text-sm text-blue-700 mt-1">
+                        This document will be mapped as evidence for the selected compliance control.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="category">Category</Label>
@@ -442,6 +525,11 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                             AI Analyzed
                           </Badge>
                         )}
+                        {doc.mapping && (
+                          <Badge variant="outline" className="bg-green-50 text-green-700">
+                            Control Mapped
+                          </Badge>
+                        )}
                       </div>
                       
                       {/* AI Analysis Results */}
@@ -487,6 +575,47 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
                                   <span className="text-red-700 ml-1">{doc.analysisResult.compliance_gaps.length} compliance gap(s)</span>
                                 </div>
                               )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Control Mapping Information */}
+                      {doc.mapping && (
+                        <div className="mt-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200/30">
+                          <div className="flex items-start gap-2">
+                            <Shield className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 space-y-2">
+                              <div className="text-sm">
+                                <span className="font-medium text-green-800">Mapped to Control:</span>
+                                <span className="text-green-700 ml-2">{doc.mapping.control.requirementId}: {doc.mapping.control.title}</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-4 text-xs">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-green-600">Category:</span>
+                                  <span className="text-green-800 font-medium">{doc.mapping.control.category}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <span className="text-green-600">Priority:</span>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={
+                                      doc.mapping.control.priority === 'high' ? 'border-red-300 bg-red-50 text-red-700' :
+                                      doc.mapping.control.priority === 'medium' ? 'border-orange-300 bg-orange-50 text-orange-700' :
+                                      'border-blue-300 bg-blue-50 text-blue-700'
+                                    }
+                                  >
+                                    {doc.mapping.control.priority}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <span className="text-green-600">Confidence:</span>
+                                  <span className="text-green-800 font-medium">{Math.round(parseFloat(doc.mapping.confidence) * 100)}%</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>

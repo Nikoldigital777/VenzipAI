@@ -157,6 +157,7 @@ export interface IStorage {
   }): Promise<EvidenceMapping[]>;
   updateEvidenceMapping(id: string, updates: Partial<EvidenceMapping>): Promise<EvidenceMapping>;
   getEvidenceStatus(userId: string, frameworkId?: string): Promise<any[]>;
+  getDocumentsWithMappingsByUserId(userId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -380,6 +381,88 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(documents)
       .where(eq(documents.userId, userId))
       .orderBy(desc(documents.uploadedAt));
+  }
+
+  async getDocumentsWithMappingsByUserId(userId: string): Promise<any[]> {
+    // Get documents with their evidence mappings and associated compliance requirements
+    const results = await db.select({
+      // Document fields
+      id: documents.id,
+      fileName: documents.fileName,
+      fileType: documents.fileType,
+      fileSize: documents.fileSize,
+      filePath: documents.filePath,
+      status: documents.status,
+      analysisResult: documents.analysisResult,
+      uploadedAt: documents.uploadedAt,
+      frameworkId: documents.frameworkId,
+      requirementId: documents.requirementId,
+      userId: documents.userId,
+      // Evidence mapping fields
+      mappingId: evidenceMappings.id,
+      mappingType: evidenceMappings.mappingType,
+      confidence: evidenceMappings.confidence,
+      mappingStatus: evidenceMappings.validationStatus,
+      // Compliance requirement fields
+      controlId: complianceRequirements.id,
+      controlRequirementId: complianceRequirements.requirementId,
+      controlTitle: complianceRequirements.title,
+      controlDescription: complianceRequirements.description,
+      controlCategory: complianceRequirements.category,
+      controlPriority: complianceRequirements.priority,
+      controlFrameworkId: complianceRequirements.frameworkId,
+    })
+    .from(documents)
+    .leftJoin(evidenceMappings, eq(documents.id, evidenceMappings.documentId))
+    .leftJoin(complianceRequirements, eq(evidenceMappings.requirementId, complianceRequirements.id))
+    .where(eq(documents.userId, userId))
+    .orderBy(desc(documents.uploadedAt));
+
+    // Transform the flat results into nested structure
+    const documentsMap = new Map();
+    
+    results.forEach(row => {
+      const docId = row.id;
+      
+      if (!documentsMap.has(docId)) {
+        documentsMap.set(docId, {
+          id: row.id,
+          fileName: row.fileName,
+          fileType: row.fileType,
+          fileSize: row.fileSize,
+          filePath: row.filePath,
+          status: row.status,
+          analysisResult: row.analysisResult,
+          uploadedAt: row.uploadedAt,
+          frameworkId: row.frameworkId,
+          requirementId: row.requirementId,
+          userId: row.userId,
+          mapping: null,
+        });
+      }
+      
+      // Add mapping information if it exists
+      if (row.mappingId) {
+        const doc = documentsMap.get(docId);
+        doc.mapping = {
+          mappingId: row.mappingId,
+          mappingType: row.mappingType,
+          confidence: row.confidence,
+          status: row.mappingStatus,
+          control: {
+            id: row.controlId,
+            requirementId: row.controlRequirementId,
+            title: row.controlTitle,
+            description: row.controlDescription,
+            category: row.controlCategory,
+            priority: row.controlPriority,
+            frameworkId: row.controlFrameworkId,
+          }
+        };
+      }
+    });
+    
+    return Array.from(documentsMap.values());
   }
 
   async createDocument(documentData: InsertDocument): Promise<Document> {

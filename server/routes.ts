@@ -1451,12 +1451,16 @@ export async function registerRoutes(app: Express) {
       const userId = req.user.sub;
       const filters = documentFilterSchema.parse(req.query);
 
-      // Get all user documents
-      let documents = await storage.getDocumentsByUserId(userId);
+      // Get all user documents with their control mappings
+      let documents = await storage.getDocumentsWithMappingsByUserId(userId);
 
       // Apply filters
       if (filters.frameworkId) {
         documents = documents.filter(doc => doc.frameworkId === filters.frameworkId);
+      }
+
+      if (filters.status) {
+        documents = documents.filter(doc => doc.status === filters.status);
       }
 
       if (filters.documentType) {
@@ -1467,7 +1471,9 @@ export async function registerRoutes(app: Express) {
         const searchLower = filters.search.toLowerCase();
         documents = documents.filter(doc => 
           doc.fileName.toLowerCase().includes(searchLower) ||
-          doc.fileType.toLowerCase().includes(searchLower)
+          doc.fileType.toLowerCase().includes(searchLower) ||
+          (doc.mapping?.control?.title && doc.mapping.control.title.toLowerCase().includes(searchLower)) ||
+          (doc.mapping?.control?.category && doc.mapping.control.category.toLowerCase().includes(searchLower))
         );
       }
 
