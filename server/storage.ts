@@ -250,6 +250,11 @@ export class DatabaseStorage implements IStorage {
     return company;
   }
 
+  async getCompanyById(id: string): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.id, id));
+    return company;
+  }
+
   // Framework operations
   async getAllFrameworks(): Promise<Framework[]> {
     return await db.select().from(frameworks);
@@ -631,38 +636,38 @@ export class DatabaseStorage implements IStorage {
 
   // Policy template methods
   async getPolicyTemplate(id: string): Promise<PolicyTemplate | null> {
-    const result = await this.db.select().from(policyTemplates).where(eq(policyTemplates.id, id)).limit(1);
+    const result = await db.select().from(policyTemplates).where(eq(policyTemplates.id, id)).limit(1);
     return result[0] || null;
   }
 
   async getPolicyTemplates(frameworkId?: string): Promise<PolicyTemplate[]> {
     if (frameworkId) {
-      return await this.db.select().from(policyTemplates).where(eq(policyTemplates.frameworkId, frameworkId));
+      return await db.select().from(policyTemplates).where(eq(policyTemplates.frameworkId, frameworkId));
     }
-    return await this.db.select().from(policyTemplates);
+    return await db.select().from(policyTemplates);
   }
 
   async getAllPolicyTemplates(): Promise<PolicyTemplate[]> {
-    return await this.db.select().from(policyTemplates);
+    return await db.select().from(policyTemplates);
   }
 
   // Generated policy methods
   async createGeneratedPolicy(data: InsertGeneratedPolicy): Promise<GeneratedPolicy> {
-    const result = await this.db.insert(generatedPolicies).values(data).returning();
+    const result = await db.insert(generatedPolicies).values(data).returning();
     return result[0];
   }
 
   async getGeneratedPolicyById(id: string): Promise<GeneratedPolicy | null> {
-    const result = await this.db.select().from(generatedPolicies).where(eq(generatedPolicies.id, id)).limit(1);
+    const result = await db.select().from(generatedPolicies).where(eq(generatedPolicies.id, id)).limit(1);
     return result[0] || null;
   }
 
   async getGeneratedPolicies(companyId: string): Promise<GeneratedPolicy[]> {
-    return await this.db.select().from(generatedPolicies).where(eq(generatedPolicies.companyId, companyId));
+    return await db.select().from(generatedPolicies).where(eq(generatedPolicies.companyId, companyId));
   }
 
   async updateGeneratedPolicy(id: string, data: Partial<GeneratedPolicy>): Promise<GeneratedPolicy> {
-    const result = await this.db.update(generatedPolicies)
+    const result = await db.update(generatedPolicies)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(generatedPolicies.id, id))
       .returning();
