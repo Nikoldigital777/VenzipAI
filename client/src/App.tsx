@@ -26,6 +26,9 @@ import ComplianceInsights from "@/pages/compliance-insights";
 import NotFound from "@/pages/not-found";
 import { useAuth } from "@/hooks/useAuth";
 
+// Import the new TestDocuments component
+import TestDocuments from "@/pages/test-documents";
+
 // Component to wrap authenticated routes with sidebar
 function AuthenticatedLayout({ children, title }: { children: React.ReactNode; title: string }) {
   return (
@@ -143,11 +146,8 @@ function Router() {
             </AuthenticatedLayout>
           </Route>
 
-          <Route path="/test-notifications">
-            <AuthenticatedLayout title="Test Notifications">
-              <TestNotifications />
-            </AuthenticatedLayout>
-          </Route>
+          <Route path="/test-notifications" component={TestNotifications} />
+            <Route path="/test-documents" component={TestDocuments} />
         </>
       ) : (
         /* Redirect unauthenticated users to landing */

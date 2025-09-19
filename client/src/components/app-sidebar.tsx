@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   ChevronUp,
+  TestTube,
 } from "lucide-react"
 import { useLocation } from "wouter"
 import { useQuery } from "@tanstack/react-query"
@@ -198,16 +199,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <span className="text-xs font-medium text-gray-700 truncate">
                         {framework.displayName}
                       </span>
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={`text-xs px-1.5 py-0.5 ${getStatusColor(framework.status)}`}
                       >
                         {Math.round(framework.completionPercentage)}%
                       </Badge>
                     </div>
                     <div className="relative">
-                      <Progress 
-                        value={framework.completionPercentage} 
+                      <Progress
+                        value={framework.completionPercentage}
                         className="h-2"
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -229,13 +230,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {group.items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={location === item.url}
                     tooltip={item.title}
                   >
-                    <a 
-                      href={item.url} 
+                    <a
+                      href={item.url}
                       onClick={(e) => {
                         e.preventDefault()
                         navigate(item.url)
@@ -251,6 +252,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroup>
         ))}
+        {/* Test Notifications Link */}
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild>
+            <a href="/test-notifications" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.pathname === '/test-notifications' ? 'bg-venzip-primary text-white' : 'text-gray-700 hover:bg-gray-100'}`}>
+              <TestTube className="h-4 w-4" />
+              <span>Test Notifications</span>
+            </a>
+          </SidebarMenuButton>
+          <SidebarMenuButton asChild>
+            <a href="/test-documents" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.pathname === '/test-documents' ? 'bg-venzip-primary text-white' : 'text-gray-700 hover:bg-gray-100'}`}>
+              <FileText className="h-4 w-4" />
+              <span>Test Documents</span>
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarContent>
       <SidebarFooter>
         {/* AI Chat Button */}

@@ -1428,7 +1428,8 @@ export async function registerRoutes(app: Express) {
         fileSize: req.file.size,
         filePath: req.file.path,
         analysisResult,
-        status: analysisResult ? 'verified' : 'pending'
+        status: analysisResult ? 'verified' : 'pending',
+        extractedText: documentContent || null
       });
 
       const document = await storage.createDocument(documentData);
@@ -1436,6 +1437,63 @@ export async function registerRoutes(app: Express) {
     } catch (error) {
       console.error("Error uploading document:", error);
       res.status(500).json({ message: "Failed to upload document" });
+    }
+  });
+
+  // Document viewing endpoints
+  app.get('/api/documents/:id/view', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const { id } = req.params;
+      
+      const document = await storage.getDocumentById(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      const filePath = document.filePath;
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found on disk" });
+      }
+
+      // Set appropriate content type
+      res.setHeader('Content-Type', document.fileType);
+      res.setHeader('Content-Disposition', `inline; filename="${document.fileName}"`);
+      
+      // Stream the file
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error("Error viewing document:", error);
+      res.status(500).json({ message: "Failed to view document" });
+    }
+  });
+
+  app.get('/api/documents/:id/download', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const { id } = req.params;
+      
+      const document = await storage.getDocumentById(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      const filePath = document.filePath;
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found on disk" });
+      }
+
+      // Set headers for download
+      res.setHeader('Content-Type', document.fileType);
+      res.setHeader('Content-Disposition', `attachment; filename="${document.fileName}"`);
+      
+      // Stream the file
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      res.status(500).json({ message: "Failed to download document" });
     }
   });
 
@@ -2192,33 +2250,84 @@ export async function registerRoutes(app: Express) {
       const { framework } = req.body;
 
       // Get document details
-      const documents = await storage.getDocumentsByUserId(userId);
-      const document = documents.find(d => d.id === documentId);
-
-      if (!document) {
+      const document = await storage.getDocumentById(documentId);
+      if (!document || document.userId !== userId) {
         return res.status(404).json({ message: "Document not found" });
       }
 
-      // Read file content
-      const filePath = path.join('uploads', document.filePath.split('/').pop() || '');
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ message: "File not found" });
+      // Use extracted text if available, otherwise try to read file
+      let fileContent = document.extractedText || '';
+      
+      if (!fileContent) {
+        const filePath = document.filePath;
+        if (!fs.existsSync(filePath)) {
+          return res.status(404).json({ message: "File not found" });
+        }
+
+        try {
+          if (document.fileType.startsWith('text/') || 
+              document.fileType === 'application/json' ||
+              document.fileType.includes('xml')) {
+            fileContent = fs.readFileSync(filePath, 'utf8');
+          } else {
+            fileContent = `Document: ${document.fileName}\nType: ${document.fileType}\nSize: ${document.fileSize} bytes`;
+          }
+        } catch (error) {
+          console.error("Error reading file:", error);
+          fileContent = `Document: ${document.fileName} (content extraction failed)`;
+        }
       }
 
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      const existingDocs = documents.map(d => d.fileName);
+      const existingDocs = await storage.getDocumentsByUserId(userId);
+      const existingDocNames = existingDocs.map(d => d.fileName);
 
       const analysis = await analyzeDocumentAdvanced(
         fileContent,
         document.fileName,
         framework,
-        existingDocs
+        existingDocNames
       );
 
       res.json(analysis);
     } catch (error) {
       console.error("Error in advanced document analysis:", error);
       res.status(500).json({ message: "Failed to analyze document" });
+    }
+  });
+
+  // Test AI analysis endpoint
+  app.post('/api/test/ai-analysis', isAuthenticated, async (req: any, res) => {
+    try {
+      const { text, framework, filename } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text content required for analysis" });
+      }
+
+      console.log("Testing AI analysis with:", { 
+        textLength: text.length, 
+        framework: framework || 'general',
+        filename: filename || 'test.txt'
+      });
+
+      const analysis = await analyzeDocument(
+        text, 
+        framework || undefined, 
+        filename || 'test.txt'
+      );
+
+      res.json({
+        success: true,
+        analysis,
+        apiKeyConfigured: !!process.env.ANTHROPIC_API_KEY
+      });
+    } catch (error) {
+      console.error("AI analysis test failed:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        apiKeyConfigured: !!process.env.ANTHROPIC_API_KEY
+      });
     }
   });
 
@@ -2354,6 +2463,46 @@ export async function registerRoutes(app: Express) {
     } catch (error) {
       console.error("Error creating cross-framework mappings:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Test evidence mapping functionality
+  app.post("/api/test/evidence-mapping", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.sub;
+      const { documentId, frameworkId } = req.body;
+
+      if (!documentId) {
+        return res.status(400).json({ error: "Document ID is required" });
+      }
+
+      console.log("Testing evidence mapping for:", { userId, documentId, frameworkId });
+
+      // Import and use evidence mapping service
+      const { evidenceMappingService } = await import('./evidenceMapping');
+      const mappings = await evidenceMappingService.analyzeDocumentForCompliance(
+        documentId,
+        userId,
+        frameworkId
+      );
+
+      res.json({
+        success: true,
+        mappingsCreated: mappings.length,
+        mappings: mappings.map(m => ({
+          id: m.id,
+          confidence: m.mappingConfidence,
+          qualityScore: m.qualityScore,
+          mappingType: m.mappingType,
+          validationStatus: m.validationStatus
+        }))
+      });
+    } catch (error) {
+      console.error("Evidence mapping test failed:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
