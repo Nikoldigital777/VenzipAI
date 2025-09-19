@@ -1,4 +1,3 @@
-
 import "./index.css";
 import * as React from "react";
 import { Switch, Route, useLocation } from "wouter";
@@ -52,20 +51,20 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location, navigate] = useLocation();
 
-  // Show loading state only briefly while checking authentication
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
-        <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg">
-          <div className="w-8 h-8 border-3 border-venzip-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 text-center">Loading...</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-venzip-primary mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-700">Loading...</h2>
         </div>
       </div>
     );
   }
 
-  // Handle unauthenticated users - only redirect if not already on landing/home pages
-  if (!isAuthenticated && !['/landing', '/'].includes(location)) {
+  // Handle unauthenticated users - only redirect if not already on public pages
+  if (!isAuthenticated && !['/landing', '/', '/login'].includes(location)) {
     navigate('/landing');
     return null;
   }

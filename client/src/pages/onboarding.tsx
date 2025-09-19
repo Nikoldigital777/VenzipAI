@@ -465,10 +465,40 @@ export default function Onboarding() {
 
   const handleFinish = async () => {
     // Validate required data
-    if (!companyData.name || !companyData.contactEmail || !companyData.industry || !companyData.size) {
+    if (!companyData.name?.trim()) {
       toast({
-        title: "❌ Missing Information",
-        description: "Please complete your company profile before continuing.",
+        title: "❌ Missing Company Name",
+        description: "Please enter your company name.",
+        variant: "destructive",
+      });
+      setCurrentStep(2);
+      return;
+    }
+
+    if (!companyData.contactEmail?.trim()) {
+      toast({
+        title: "❌ Missing Contact Email",
+        description: "Please enter a contact email address.",
+        variant: "destructive",
+      });
+      setCurrentStep(2);
+      return;
+    }
+
+    if (!companyData.industry?.trim()) {
+      toast({
+        title: "❌ Missing Industry",
+        description: "Please select your company's industry.",
+        variant: "destructive",
+      });
+      setCurrentStep(2);
+      return;
+    }
+
+    if (!companyData.size?.trim()) {
+      toast({
+        title: "❌ Missing Company Size",
+        description: "Please select your company size.",
         variant: "destructive",
       });
       setCurrentStep(2);
@@ -508,10 +538,15 @@ export default function Onboarding() {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || `HTTP ${response.status}`);
+      }
+
       const result = await response.json();
       console.log("Onboarding response:", result);
 
-      if (response.ok && result.success) {
+      if (result.success) {
         toast({
           title: "🎉 Setup Complete!",
           description: `Your compliance workspace is ready with ${result.totalTasks || 'multiple'} tasks generated.`,
@@ -524,20 +559,15 @@ export default function Onboarding() {
         // Navigate to dashboard
         setTimeout(() => {
           navigate("/dashboard");
-        }, 1000);
+        }, 1500);
       } else {
-        console.error("Onboarding completion failed:", result);
-        toast({
-          title: "❌ Setup Failed",
-          description: result.details || result.error || "Could not complete onboarding. Please try again.",
-          variant: "destructive",
-        });
+        throw new Error(result.details || result.error || "Setup failed unexpectedly");
       }
     } catch (error) {
       console.error("Onboarding completion failed:", error);
       toast({
         title: "❌ Setup Failed",
-        description: "An error occurred while completing setup. Please try again.",
+        description: error instanceof Error ? error.message : "An error occurred while completing setup. Please try again.",
         variant: "destructive",
       });
     }

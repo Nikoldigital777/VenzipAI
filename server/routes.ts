@@ -65,37 +65,108 @@ function getInitialTasksForFramework(framework: string, industry: string, size: 
     return date.toISOString();
   };
 
+  // Adjust timeline based on company size
+  const sizeMultiplier = size?.includes('1-10') ? 0.8 : 
+                       size?.includes('11-50') ? 1.0 : 
+                       size?.includes('51-200') ? 1.2 : 1.5;
+
+  const adjustedDays = (days: number) => Math.round(days * sizeMultiplier);
+
   const tasks = {
-    "SOC 2": [
+    "soc2": [
       {
         title: "Establish Information Security Policy",
         description: "Create and document comprehensive information security policies covering data protection, access controls, and security procedures",
         priority: "high" as const,
-        dueDate: addDays(30)
+        dueDate: addDays(adjustedDays(30))
       },
       {
         title: "Implement Access Control System",
         description: "Set up user access management with role-based permissions and multi-factor authentication",
         priority: "high" as const,
-        dueDate: addDays(45)
+        dueDate: addDays(adjustedDays(45))
       },
       {
         title: "Conduct Security Risk Assessment",
         description: "Identify and document security risks across all systems and processes",
         priority: "medium" as const,
-        dueDate: addDays(60)
+        dueDate: addDays(adjustedDays(60))
       },
       {
         title: "Setup System Monitoring & Logging",
         description: "Implement comprehensive logging and monitoring for all critical systems",
         priority: "medium" as const,
-        dueDate: addDays(75)
+        dueDate: addDays(adjustedDays(75))
       },
       {
         title: "Develop Incident Response Plan",
         description: "Create detailed procedures for handling security incidents and breaches",
         priority: "medium" as const,
-        dueDate: addDays(90)
+        dueDate: addDays(adjustedDays(90))
+      }
+    ],
+    "SOC 2": [
+      {
+        title: "Establish Information Security Policy",
+        description: "Create and document comprehensive information security policies covering data protection, access controls, and security procedures",
+        priority: "high" as const,
+        dueDate: addDays(adjustedDays(30))
+      },
+      {
+        title: "Implement Access Control System",
+        description: "Set up user access management with role-based permissions and multi-factor authentication",
+        priority: "high" as const,
+        dueDate: addDays(adjustedDays(45))
+      },
+      {
+        title: "Conduct Security Risk Assessment",
+        description: "Identify and document security risks across all systems and processes",
+        priority: "medium" as const,
+        dueDate: addDays(adjustedDays(60))
+      },
+      {
+        title: "Setup System Monitoring & Logging",
+        description: "Implement comprehensive logging and monitoring for all critical systems",
+        priority: "medium" as const,
+        dueDate: addDays(adjustedDays(75))
+      },
+      {
+        title: "Develop Incident Response Plan",
+        description: "Create detailed procedures for handling security incidents and breaches",
+        priority: "medium" as const,
+        dueDate: addDays(adjustedDays(90))
+      }
+    ],
+    "iso27001": [
+      {
+        title: "Define Information Security Management System (ISMS)",
+        description: "Establish the scope and boundaries of your ISMS according to ISO 27001 requirements",
+        priority: "high" as const,
+        dueDate: addDays(adjustedDays(30))
+      },
+      {
+        title: "Conduct Initial Risk Assessment",
+        description: "Perform comprehensive risk assessment to identify information security risks",
+        priority: "high" as const,
+        dueDate: addDays(adjustedDays(45))
+      },
+      {
+        title: "Create Statement of Applicability (SoA)",
+        description: "Document which ISO 27001 controls apply to your organization and implementation status",
+        priority: "medium" as const,
+        dueDate: addDays(adjustedDays(60))
+      },
+      {
+        title: "Implement Security Controls",
+        description: "Begin implementation of selected controls from Annex A of ISO 27001",
+        priority: "medium" as const,
+        dueDate: addDays(adjustedDays(90))
+      },
+      {
+        title: "Establish Management Review Process",
+        description: "Set up regular management review meetings for the ISMS",
+        priority: "low" as const,
+        dueDate: addDays(adjustedDays(120))
       }
     ],
     "ISO 27001": [
@@ -103,63 +174,63 @@ function getInitialTasksForFramework(framework: string, industry: string, size: 
         title: "Define Information Security Management System (ISMS)",
         description: "Establish the scope and boundaries of your ISMS according to ISO 27001 requirements",
         priority: "high" as const,
-        dueDate: addDays(30)
+        dueDate: addDays(adjustedDays(30))
       },
       {
         title: "Conduct Initial Risk Assessment",
         description: "Perform comprehensive risk assessment to identify information security risks",
         priority: "high" as const,
-        dueDate: addDays(45)
+        dueDate: addDays(adjustedDays(45))
       },
       {
         title: "Create Statement of Applicability (SoA)",
         description: "Document which ISO 27001 controls apply to your organization and implementation status",
         priority: "medium" as const,
-        dueDate: addDays(60)
+        dueDate: addDays(adjustedDays(60))
       },
       {
         title: "Implement Security Controls",
         description: "Begin implementation of selected controls from Annex A of ISO 27001",
         priority: "medium" as const,
-        dueDate: addDays(90)
+        dueDate: addDays(adjustedDays(90))
       },
       {
         title: "Establish Management Review Process",
         description: "Set up regular management review meetings for the ISMS",
         priority: "low" as const,
-        dueDate: addDays(120)
+        dueDate: addDays(adjustedDays(120))
       }
     ],
-    "GDPR": [
+    "hipaa": [
       {
-        title: "Data Mapping and Inventory",
-        description: "Create comprehensive inventory of all personal data processing activities",
+        title: "Conduct HIPAA Security Risk Assessment",
+        description: "Perform comprehensive assessment of potential risks to ePHI",
         priority: "high" as const,
-        dueDate: addDays(30)
+        dueDate: addDays(adjustedDays(30))
       },
       {
-        title: "Update Privacy Policy",
-        description: "Ensure privacy policy meets GDPR transparency requirements",
+        title: "Implement Administrative Safeguards",
+        description: "Establish security officer role, workforce training, and access management procedures",
         priority: "high" as const,
-        dueDate: addDays(45)
+        dueDate: addDays(adjustedDays(45))
       },
       {
-        title: "Implement Data Subject Rights Procedures",
-        description: "Establish processes for handling data subject requests (access, deletion, portability)",
+        title: "Deploy Physical Safeguards",
+        description: "Secure facilities, workstations, and media containing ePHI",
         priority: "medium" as const,
-        dueDate: addDays(60)
+        dueDate: addDays(adjustedDays(60))
       },
       {
-        title: "Conduct Data Protection Impact Assessment (DPIA)",
-        description: "Perform DPIA for high-risk data processing activities",
+        title: "Configure Technical Safeguards",
+        description: "Implement access controls, encryption, and audit controls for ePHI systems",
         priority: "medium" as const,
-        dueDate: addDays(75)
+        dueDate: addDays(adjustedDays(75))
       },
       {
-        title: "Establish Data Breach Response Procedures",
-        description: "Create procedures for detecting, reporting, and responding to data breaches within 72 hours",
+        title: "Establish Business Associate Agreements",
+        description: "Create and execute BAAs with all vendors who handle ePHI",
         priority: "medium" as const,
-        dueDate: addDays(90)
+        dueDate: addDays(adjustedDays(90))
       }
     ],
     "HIPAA": [
@@ -167,37 +238,68 @@ function getInitialTasksForFramework(framework: string, industry: string, size: 
         title: "Conduct HIPAA Security Risk Assessment",
         description: "Perform comprehensive assessment of potential risks to ePHI",
         priority: "high" as const,
-        dueDate: addDays(30)
+        dueDate: addDays(adjustedDays(30))
       },
       {
         title: "Implement Administrative Safeguards",
         description: "Establish security officer role, workforce training, and access management procedures",
         priority: "high" as const,
-        dueDate: addDays(45)
+        dueDate: addDays(adjustedDays(45))
       },
       {
         title: "Deploy Physical Safeguards",
         description: "Secure facilities, workstations, and media containing ePHI",
         priority: "medium" as const,
-        dueDate: addDays(60)
+        dueDate: addDays(adjustedDays(60))
       },
       {
         title: "Configure Technical Safeguards",
         description: "Implement access controls, encryption, and audit controls for ePHI systems",
         priority: "medium" as const,
-        dueDate: addDays(75)
+        dueDate: addDays(adjustedDays(75))
       },
       {
         title: "Establish Business Associate Agreements",
         description: "Create and execute BAAs with all vendors who handle ePHI",
         priority: "medium" as const,
-        dueDate: addDays(90)
+        dueDate: addDays(adjustedDays(90))
+      }
+    ],
+    "scf": [
+      {
+        title: "Establish SCF Governance Framework",
+        description: "Set up governance structure for SCF implementation and oversight",
+        priority: "high" as const,
+        dueDate: addDays(adjustedDays(30))
+      },
+      {
+        title: "Conduct SCF Control Assessment",
+        description: "Assess current state against SCF controls and identify gaps",
+        priority: "high" as const,
+        dueDate: addDays(adjustedDays(45))
+      },
+      {
+        title: "Implement Priority SCF Controls",
+        description: "Begin implementation of highest priority SCF security controls",
+        priority: "medium" as const,
+        dueDate: addDays(adjustedDays(75))
+      },
+      {
+        title: "Establish SCF Monitoring Program",
+        description: "Set up continuous monitoring for SCF control effectiveness",
+        priority: "medium" as const,
+        dueDate: addDays(adjustedDays(90))
       }
     ]
   };
 
   // Return framework-specific tasks or empty array if framework not found
-  return tasks[framework as keyof typeof tasks] || [];
+  const frameworkTasks = tasks[framework as keyof typeof tasks] || 
+                        tasks[framework.toLowerCase() as keyof typeof tasks] || 
+                        [];
+  
+  console.log(`Generated ${frameworkTasks.length} tasks for framework: ${framework}`);
+  return frameworkTasks;
 }
 
 // Configure multer for file uploads
@@ -2870,16 +2972,6 @@ export async function registerRoutes(app: Express) {
             console.log("Framework progress initialized for:", framework.name);
           } catch (progressError) {
             console.error("Error initializing framework progress for", framework.name, ":", progressError);
-            // Try to get existing progress if it exists
-            try {
-              const existingProgress = await storage.getFrameworkProgressByUserId(userId);
-              const hasProgress = existingProgress.some(p => p.frameworkId === framework.id);
-              if (hasProgress) {
-                console.log("Framework progress already exists for:", framework.name);
-              }
-            } catch (checkError) {
-              console.error("Error checking existing progress:", checkError);
-            }
             // Continue with other frameworks - this is not critical for onboarding completion
           }
 
@@ -2891,7 +2983,7 @@ export async function registerRoutes(app: Express) {
 
           for (const taskData of initialTasks) {
             try {
-              await storage.createTask({
+              const task = await storage.createTask({
                 userId,
                 frameworkId: framework.id,
                 title: taskData.title,
@@ -2903,6 +2995,7 @@ export async function registerRoutes(app: Express) {
                 createdById: userId
               });
               frameworkTasksCreated++;
+              console.log(`Created task: ${task.title}`);
             } catch (taskError) {
               console.error("Error creating task:", taskError);
               // Continue with other tasks if one fails
