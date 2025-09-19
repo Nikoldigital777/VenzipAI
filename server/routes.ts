@@ -48,14 +48,8 @@ import { format } from 'date-fns';
 
 // Import modular route handlers
 import taskRoutes from './routes/tasks';
-
-// Import necessary schemas and functions for onboarding
-// Assuming eq is used in generateFrameworkTasks
-// Assuming generateId, users, companies, frameworksCompanies, tasks are available
-// and imported from a shared schema or utilities file.
-// For the purpose of this example, let's assume they are accessible.
-// import { generateId } from "./utils"; // Placeholder for generateId
-// import { users, companies, frameworksCompanies, tasks } from "../shared/schema"; // Placeholder for schema imports
+import policyRoutes from './routes/policies'; // Corrected import based on usage
+import onboardingRoutes from "./routes/onboarding"; // Added onboarding routes import
 
 
 // Helper function to generate initial compliance tasks
@@ -383,10 +377,8 @@ export async function registerRoutes(app: Express) {
 
   // Register enhanced task routes
   app.use('/api/tasks', taskRoutes);
-
-  // Import and apply policy routes
-  const policyRoutes = await import('./routes/policies');
-  app.use('/api/policies', policyRoutes.default);
+  app.use('/api/policies', policyRoutes);
+  app.use("/api/onboarding", onboardingRoutes); // Register onboarding routes
 
   // Enhanced Dashboard progress endpoint with validation
   app.get('/api/dashboard/progress', isAuthenticated, async (req: any, res) => {
@@ -1078,7 +1070,7 @@ export async function registerRoutes(app: Express) {
     try {
       const frameworks = await storage.getAllFrameworks();
       console.log(`📊 Returning ${frameworks.length} frameworks to client`);
-      
+
       // Ensure we have frameworks, if not seed them
       if (frameworks.length === 0) {
         console.log('⚠️ No frameworks found, attempting to seed...');

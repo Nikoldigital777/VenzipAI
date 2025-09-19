@@ -520,11 +520,11 @@ export default function Onboarding() {
           title: "🎉 Setup Complete!",
           description: `Your compliance workspace is ready with ${result.totalTasks || 'multiple'} tasks generated.`,
         });
-        
+
         // Invalidate queries to refresh data
         queryClient.invalidateQueries({ queryKey: ["/api/company"] });
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-        
+
         // Navigate to dashboard
         setTimeout(() => {
           navigate("/dashboard");
@@ -640,7 +640,7 @@ export default function Onboarding() {
   }, 0);
 
   // --- Main Render Logic ---
-  
+
   // Show loading for returning users
   if (isReturningUser) {
     return (
@@ -1043,7 +1043,7 @@ export default function Onboarding() {
                             <div className={`w-16 h-16 bg-gradient-to-br ${framework.color} rounded-2xl flex items-center justify-center mb-4`}>
                               <Icon className="h-8 w-8 text-white" />
                             </div>
-                            
+
                             {/* Progress Ring */}
                             <div className="relative w-20 h-20 mb-3">
                               <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
@@ -1067,14 +1067,14 @@ export default function Onboarding() {
                                 <span className="text-lg font-bold text-gray-600">0%</span>
                               </div>
                             </div>
-                            
+
                             <p className="text-sm font-medium text-gray-700 mb-1">{framework.name}</p>
                             <p className="text-xs text-gray-500">{framework.tasksCount} tasks</p>
                           </div>
                         );
                       })}
                     </div>
-                    
+
                     {selectedFrameworks.length === 0 && (
                       <div className="text-center py-8">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
