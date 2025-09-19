@@ -53,13 +53,29 @@ This policy establishes the framework for securing information assets within our
   // Test AI Analysis
   const testAIMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/test/ai-analysis", {
-        text: testText,
-        framework: framework,
-        filename: filename
-      });
-      if (!res.ok) throw new Error("AI analysis test failed");
-      return res.json();
+      try {
+        const response = await fetch("/api/test/ai-analysis", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: testText,
+            framework: framework,
+            filename: filename
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error("AI analysis error:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       toast({

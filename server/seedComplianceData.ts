@@ -68,7 +68,7 @@ const hipaaControls = [
     controlObjective: "Track and monitor access to ePHI systems",
     implementationGuidance: "Implement logging mechanisms and regular review of audit logs for unauthorized access."
   },
-  
+
   // Additional Administrative Safeguards
   {
     id: "hipaa-164-308a2",
@@ -601,7 +601,11 @@ export async function seedComplianceData() {
 
     await db.insert(complianceRequirements).values(allRequirements);
 
-    console.log('✅ Compliance data seeded successfully.');
+    // Seed basic compliance requirements for MVP
+    const { seedBasicRequirements } = await import('./seedBasicRequirements');
+    await seedBasicRequirements();
+
+    console.log('✅ Comprehensive compliance data seeding completed');
   } catch (error) {
     console.error('❌ Error seeding compliance data:', error);
   }

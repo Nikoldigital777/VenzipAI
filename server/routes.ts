@@ -2466,6 +2466,42 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  // Test AI analysis endpoint
+  app.post('/api/test/ai-analysis', async (req, res) => {
+    try {
+      const { text, framework, filename } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text content required for analysis" });
+      }
+
+      console.log("Testing AI analysis with:", { 
+        textLength: text.length, 
+        framework: framework || 'general',
+        filename: filename || 'test.txt'
+      });
+
+      const analysis = await analyzeDocument(
+        text, 
+        framework || undefined, 
+        filename || 'test.txt'
+      );
+
+      res.json({
+        success: true,
+        analysis,
+        apiKeyConfigured: !!process.env.ANTHROPIC_API_KEY
+      });
+    } catch (error) {
+      console.error("AI analysis test failed:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        apiKeyConfigured: !!process.env.ANTHROPIC_API_KEY
+      });
+    }
+  });
+
   // Test evidence mapping functionality
   app.post("/api/test/evidence-mapping", isAuthenticated, async (req: any, res) => {
     try {

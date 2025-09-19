@@ -512,6 +512,31 @@ export class DatabaseStorage implements IStorage {
 
   // Evidence mapping operations
   async createEvidenceMapping(mapping: InsertEvidenceMapping): Promise<EvidenceMapping> {
+    // For MVP, handle case where requirementId doesn't exist
+    if (mapping.requirementId === 'basic-requirement') {
+      // Create a basic requirement if it doesn't exist
+      try {
+        const basicReq = await this.createComplianceRequirement({
+          frameworkId: 'general',
+          requirementId: 'BASIC-001',
+          title: 'General Compliance Evidence',
+          description: 'Basic compliance documentation and evidence',
+          category: 'documentation',
+          priority: 'medium'
+        });
+        mapping.requirementId = basicReq.id;
+      } catch (error) {
+        console.log('Basic requirement might already exist, continuing...');
+        // Try to find existing basic requirement
+        const requirements = await this.getComplianceRequirements('general');
+        if (requirements.length > 0) {
+          mapping.requirementId = requirements[0].id;
+        } else {
+          throw new Error('Unable to create or find basic requirement');
+        }
+      }
+    }
+
     const [result] = await db.insert(evidenceMappings).values(mapping).returning();
     return result;
   }
