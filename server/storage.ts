@@ -623,7 +623,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (params?.resourceType) {
-      conditions.push(eq(learningResources.resourceType, params.resourceType));
+      conditions.push(eq(learningResources.resourceType, params.resourceType as any));
     }
 
     if (params?.category) {
@@ -640,7 +640,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await query.where(and(...conditions)).orderBy(learningResources.sortOrder, learningResources.createdAt);
     }
 
     return await query.orderBy(learningResources.sortOrder, learningResources.createdAt);

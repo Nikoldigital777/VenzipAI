@@ -2825,11 +2825,6 @@ export async function registerRoutes(app: Express) {
           error: "At least one framework must be selected",
           details: "Please select at least one compliance framework."
         });
-      }re required" });
-      }
-
-      if (!frameworks || !Array.isArray(frameworks) || frameworks.length === 0) {
-        return res.status(400).json({ error: "At least one framework must be selected" });
       }
 
       // Insert company data with selected frameworks
@@ -3009,19 +3004,6 @@ export async function registerRoutes(app: Express) {
     } catch (error) {
       console.error('Error in preview-tasks:', error);
       res.status(500).json({ error: 'Failed to generate preview tasks' });
-    }
-  });ianceRequirements(fwId);
-
-        // Shuffle and take 5 random samples
-        const shuffled = fwControls.sort(() => 0.5 - Math.random());
-        const sample = shuffled.slice(0, 5);
-        tasks.push(...sample);
-      }
-
-      res.json({ tasks });
-    } catch (error) {
-      console.error('Error fetching preview tasks:', error);
-      res.status(500).json({ error: 'Failed to fetch preview tasks' });
     }
   });
 

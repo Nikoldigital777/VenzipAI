@@ -62,9 +62,8 @@ async function upsertUser(
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
+    fullName: `${claims["first_name"] || ''} ${claims["last_name"] || ''}`.trim(),
+    profilePicture: claims["profile_image_url"],
   });
 }
 
@@ -128,15 +127,14 @@ export async function setupAuth(app: Express) {
         await storage.upsertUser({
           id: profile.id,
           email: profile.emails?.[0]?.value || '',
-          firstName: profile.name?.givenName || '',
-          lastName: profile.name?.familyName || '',
-          profileImageUrl: profile.photos?.[0]?.value || '',
+          fullName: `${profile.name?.givenName || ''} ${profile.name?.familyName || ''}`.trim(),
+          profilePicture: profile.photos?.[0]?.value || '',
         });
 
         return done(null, user);
       } catch (error) {
         console.error("Error in Google OAuth:", error);
-        return done(error, null);
+        return done(error, false);
       }
     }));
   } else {
