@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 
 (async () => {
   const { db } = await import("./db");
-  
+
   // Test database connection
   try {
     await db.execute(sql`SELECT 1`);
@@ -60,6 +60,10 @@ app.use((req, res, next) => {
       console.warn("⚠️ Database seeding warning:", seedError);
       // Don't exit on seeding failure - continue with server startup
     }
+
+    // Seed policy templates
+    const { seedPolicyTemplates } = await import('./seedPolicyTemplates');
+    await seedPolicyTemplates();
   } catch (error) {
     console.error("❌ Database connection failed:", error);
     process.exit(1);

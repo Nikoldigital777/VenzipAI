@@ -608,3 +608,60 @@ export type LearningResource = typeof learningResources.$inferSelect;
 export type InsertLearningResource = z.infer<typeof insertLearningResourceSchema>;
 export type LearningProgress = typeof learningProgress.$inferSelect;
 export type InsertLearningProgress = z.infer<typeof insertLearningProgressSchema>;
+
+// Policy templates table
+export const policyTemplates = pgTable("policy_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  frameworkId: varchar("framework_id").notNull().references(() => frameworks.id),
+  templateName: varchar("template_name").notNull(),
+  templateType: varchar("template_type").notNull(),
+  category: varchar("category").notNull(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  templateContent: text("template_content").notNull(),
+  requirementIds: jsonb("requirement_ids").$type<string[]>(),
+  priority: varchar("priority").notNull().default("medium"),
+  version: varchar("version").notNull().default("1.0"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Generated policies table  
+export const generatedPolicies = pgTable("generated_policies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => companies.id, { onDelete: "cascade" }),
+  templateId: varchar("template_id").notNull().references(() => policyTemplates.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  policyType: varchar("policy_type").notNull(),
+  category: varchar("category").notNull(),
+  content: text("content").notNull(),
+  variables: jsonb("variables"),
+  status: varchar("status").notNull().default("draft"),
+  version: varchar("version").notNull().default("1.0"),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for policy system
+export const insertPolicyTemplateSchema = createInsertSchema(policyTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertGeneratedPolicySchema = createInsertSchema(generatedPolicies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  approvedAt: true,
+});
+
+// Types for policy system
+export type PolicyTemplate = typeof policyTemplates.$inferSelect;
+export type InsertPolicyTemplate = z.infer<typeof insertPolicyTemplateSchema>;
+export type GeneratedPolicy = typeof generatedPolicies.$inferSelect;
+export type InsertGeneratedPolicy = z.infer<typeof insertGeneratedPolicySchema>;

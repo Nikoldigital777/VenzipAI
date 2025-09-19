@@ -299,7 +299,7 @@ function getInitialTasksForFramework(framework: string, industry: string, size: 
   const frameworkTasks = tasks[framework as keyof typeof tasks] || 
                         tasks[framework.toLowerCase() as keyof typeof tasks] || 
                         [];
-  
+
   console.log(`Generated ${frameworkTasks.length} tasks for framework: ${framework}`);
   return frameworkTasks;
 }
@@ -343,9 +343,9 @@ export async function registerRoutes(app: Express) {
     try {
       const userId = req.user.sub;
       console.log(`Fetching user data for: ${userId}`);
-      
+
       let user = await storage.getUser(userId);
-      
+
       // If user doesn't exist in database, create them
       if (!user) {
         console.log(`User ${userId} not found in database, creating...`);
@@ -360,7 +360,7 @@ export async function registerRoutes(app: Express) {
         user = await storage.upsertUser(userData);
         console.log(`Created user: ${user.id}`);
       }
-      
+
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -383,6 +383,10 @@ export async function registerRoutes(app: Express) {
 
   // Register enhanced task routes
   app.use('/api/tasks', taskRoutes);
+
+  // Import and apply policy routes
+  const policyRoutes = await import('./routes/policies');
+  app.use('/api/policies', policyRoutes.default);
 
   // Enhanced Dashboard progress endpoint with validation
   app.get('/api/dashboard/progress', isAuthenticated, async (req: any, res) => {
@@ -1084,16 +1088,16 @@ export async function registerRoutes(app: Express) {
 
       for (const frameworkName of selectedFrameworks) {
         const framework = allFrameworks.find(f => f.name === frameworkName || f.id === frameworkName);
-        
+
         if (framework) {
           // Get tasks for this framework
           const frameworkTasks = allTasks.filter(task => task.frameworkId === framework.id);
           const completedTasks = frameworkTasks.filter(task => task.status === 'completed');
-          
+
           const totalTasks = frameworkTasks.length;
           const completedTasksCount = completedTasks.length;
           const completionPercentage = totalTasks > 0 ? Math.round((completedTasksCount / totalTasks) * 100) : 0;
-          
+
           // Determine status based on completion
           let status: 'excellent' | 'good' | 'needs_attention' | 'critical';
           if (completionPercentage >= 90) status = 'excellent';
@@ -1594,7 +1598,7 @@ export async function registerRoutes(app: Express) {
           // Get the control information
           const requirements = await storage.getComplianceRequirements();
           const control = requirements.find(req => req.id === requirementId);
-          
+
           mappingInfo = {
             mappingId: mapping.id,
             control: control ? {
@@ -1615,7 +1619,7 @@ export async function registerRoutes(app: Express) {
           // Continue without mapping if it fails
         }
       }
-      
+
       // Create audit log for the upload
       await storage.createAuditLog({
         userId,
@@ -1643,7 +1647,7 @@ export async function registerRoutes(app: Express) {
       res.json(response);
     } catch (error) {
       console.error("Error uploading document:", error);
-      
+
       // Create audit log for failed upload
       try {
         await storage.createAuditLog({
@@ -1657,7 +1661,7 @@ export async function registerRoutes(app: Express) {
       } catch (auditError) {
         console.error("Error creating audit log:", auditError);
       }
-      
+
       res.status(500).json({ message: "Failed to upload document" });
     }
   });
@@ -1667,7 +1671,7 @@ export async function registerRoutes(app: Express) {
     try {
       const userId = req.user.sub;
       const { id } = req.params;
-      
+
       const document = await storage.getDocumentById(id);
       if (!document || document.userId !== userId) {
         return res.status(404).json({ message: "Document not found" });
@@ -1681,7 +1685,7 @@ export async function registerRoutes(app: Express) {
       // Set appropriate content type
       res.setHeader('Content-Type', document.fileType);
       res.setHeader('Content-Disposition', `inline; filename="${document.fileName}"`);
-      
+
       // Stream the file
       const fileStream = fs.createReadStream(filePath);
       fileStream.pipe(res);
@@ -1695,7 +1699,7 @@ export async function registerRoutes(app: Express) {
     try {
       const userId = req.user.sub;
       const { id } = req.params;
-      
+
       const document = await storage.getDocumentById(id);
       if (!document || document.userId !== userId) {
         return res.status(404).json({ message: "Document not found" });
@@ -1709,7 +1713,7 @@ export async function registerRoutes(app: Express) {
       // Set headers for download
       res.setHeader('Content-Type', document.fileType);
       res.setHeader('Content-Disposition', `attachment; filename="${document.fileName}"`);
-      
+
       // Stream the file
       const fileStream = fs.createReadStream(filePath);
       fileStream.pipe(res);
@@ -1739,13 +1743,14 @@ export async function registerRoutes(app: Express) {
       const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
       // Get comprehensive compliance analysis
-      const statusAnalysis = await detectComplianceGaps({
-        frameworks: [], // TODO: Get frameworks from frameworksCompanies table
-        completedTasks,
-        totalTasks,
-        openRisks: risks.filter(r => r.status === 'open').length,
-        uploadedDocuments: documents.length
-      }, company.industry || '', company.size || '');
+      const statusAnalysis = await detectComplianceGaps(
+        {
+          frameworks: [], // TODO: Get frameworks from frameworksCompanies table
+          completedTasks,
+          totalTasks,
+          openRisks: risks.filter(r => r.status === 'open').length,
+          uploadedDocuments: documents.length
+        }, company.industry || '', company.size || '');
 
       // Generate prioritized action plan
       const actionPlan = await generateComplianceRecommendations(
@@ -2555,7 +2560,7 @@ export async function registerRoutes(app: Express) {
 
       // Use extracted text if available, otherwise try to read file
       let fileContent = document.extractedText || '';
-      
+
       if (!fileContent) {
         const filePath = document.filePath;
         if (!fs.existsSync(filePath)) {
@@ -2597,7 +2602,7 @@ export async function registerRoutes(app: Express) {
   app.post('/api/test/ai-analysis', isAuthenticated, async (req: any, res) => {
     try {
       const { text, framework, filename } = req.body;
-      
+
       if (!text) {
         return res.status(400).json({ message: "Text content required for analysis" });
       }
@@ -2768,7 +2773,7 @@ export async function registerRoutes(app: Express) {
   app.post('/api/test/ai-analysis', async (req, res) => {
     try {
       const { text, framework, filename } = req.body;
-      
+
       if (!text) {
         return res.status(400).json({ message: "Text content required for analysis" });
       }
@@ -2844,17 +2849,17 @@ export async function registerRoutes(app: Express) {
   app.get("/api/test/progress-tracking", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.sub;
-      
+
       // Get framework progress
       const frameworkProgress = await fetch(`http://localhost:5000/api/framework-progress`, {
         headers: { 'Authorization': req.headers.authorization || '' }
       }).then(r => r.json()).catch(() => []);
-      
+
       // Get velocity data
       const velocityData = await fetch(`http://localhost:5000/api/progress/velocity`, {
         headers: { 'Authorization': req.headers.authorization || '' }
       }).then(r => r.json()).catch(() => null);
-      
+
       // Get gap analysis
       const gapAnalysis = await fetch(`http://localhost:5000/api/compliance/gap-analysis`, {
         headers: { 'Authorization': req.headers.authorization || '' }
@@ -3537,7 +3542,7 @@ export async function registerRoutes(app: Express) {
 
         if (framework) {
           console.log("Processing framework:", framework.name);
-          
+
           selectedFrameworksData.push({
             id: framework.id,
             name: framework.name,
@@ -3562,7 +3567,7 @@ export async function registerRoutes(app: Express) {
           // Generate initial compliance tasks for each framework
           const initialTasks = getInitialTasksForFramework(framework.name, companyData.industry || '', companyData.size || '');
           let frameworkTasksCreated = 0;
-          
+
           console.log(`Generating ${initialTasks.length} tasks for ${framework.name}`);
 
           for (const taskData of initialTasks) {
@@ -3645,10 +3650,10 @@ export async function registerRoutes(app: Express) {
         try {
           // Get controls for this framework
           const fwControls = await storage.getComplianceRequirements(fwId);
-          
+
           // Take first 3-5 controls as preview
           const previewControls = fwControls.slice(0, 4);
-          
+
           for (const control of previewControls) {
             tasks.push({
               id: `${fwId}-${control.requirementId}`,
@@ -3656,8 +3661,8 @@ export async function registerRoutes(app: Express) {
               requirementId: control.requirementId,
               title: control.title,
               description: control.description,
-              category: control.category || 'General',
-              priority: control.priority || 'medium'
+              category: control.category,
+              priority: control.priority
             });
           }
         } catch (error) {
@@ -3753,9 +3758,9 @@ export async function registerRoutes(app: Express) {
   app.get('/api/compliance/requirements', isAuthenticated, async (req: any, res) => {
     try {
       const { frameworkId } = req.query;
-      
+
       const requirements = await storage.getComplianceRequirements(frameworkId);
-      
+
       // Format response for dropdown selection
       const formattedRequirements = requirements.map(req => ({
         id: req.id,
@@ -3766,7 +3771,7 @@ export async function registerRoutes(app: Express) {
         priority: req.priority,
         frameworkId: req.frameworkId
       }));
-      
+
       res.json({ requirements: formattedRequirements });
     } catch (error) {
       console.error("Error fetching compliance requirements:", error);
@@ -3779,9 +3784,9 @@ export async function registerRoutes(app: Express) {
     try {
       const userId = req.user.sub;
       const { frameworkId } = req.query;
-      
+
       const evidenceStatus = await storage.getEvidenceStatus(userId, frameworkId);
-      
+
       res.json({ controls: evidenceStatus });
     } catch (error) {
       console.error("Error fetching evidence status:", error);

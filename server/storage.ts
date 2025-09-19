@@ -19,48 +19,57 @@ import {
   crossFrameworkMappings,
   learningResources,
   learningProgress,
-  type User,
-  type UpsertUser,
-  type Company,
-  type InsertCompany,
-  type Framework,
-  type FrameworkProgress,
-  type InsertFrameworkProgress,
-  type Task,
-  type InsertTask,
-  type TaskComment,
-  type InsertTaskComment,
-  type TaskAttachment,
-  type InsertTaskAttachment,
-  type Document,
-  type InsertDocument,
-  type Risk,
-  type InsertRisk,
-  type ChatMessage,
-  type InsertChatMessage,
-  type VendorAssessment,
-  type InsertVendorAssessment,
-  type Notification,
-  type InsertNotification,
-  type RiskScoreHistory,
-  type InsertRiskScoreHistory,
-  type AuditLog,
-  type InsertAuditLog,
-  type ComplianceRequirement,
-  type InsertComplianceRequirement,
-  type EvidenceMapping,
-  type InsertEvidenceMapping,
-  type EvidenceGap,
-  type InsertEvidenceGap,
-  type CrossFrameworkMapping,
-  type InsertCrossFrameworkMapping,
-  type LearningResource,
-  type InsertLearningResource,
-  type LearningProgress,
-  type InsertLearningProgress,
+  policyTemplates,
+  generatedPolicies,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, like } from "drizzle-orm";
+
+import type {
+  UpsertUser,
+  User,
+  Company,
+  InsertCompany,
+  Framework,
+  FrameworkProgress,
+  InsertFrameworkProgress,
+  Task,
+  InsertTask,
+  TaskComment,
+  InsertTaskComment,
+  TaskAttachment,
+  InsertTaskAttachment,
+  Document,
+  InsertDocument,
+  Risk,
+  InsertRisk,
+  ChatMessage,
+  InsertChatMessage,
+  VendorAssessment,
+  InsertVendorAssessment,
+  Notification,
+  InsertNotification,
+  RiskScoreHistory,
+  InsertRiskScoreHistory,
+  AuditLog,
+  InsertAuditLog,
+  ComplianceRequirement,
+  InsertComplianceRequirement,
+  EvidenceMapping,
+  InsertEvidenceMapping,
+  EvidenceGap,
+  InsertEvidenceGap,
+  CrossFrameworkMapping,
+  InsertCrossFrameworkMapping,
+  LearningResource,
+  InsertLearningResource,
+  LearningProgress,
+  InsertLearningProgress,
+  PolicyTemplate,
+  InsertPolicyTemplate,
+  GeneratedPolicy,
+  InsertGeneratedPolicy,
+} from '@shared/schema';
 
 // Interface for storage operations
 export interface IStorage {
@@ -158,6 +167,17 @@ export interface IStorage {
   updateEvidenceMapping(id: string, updates: Partial<EvidenceMapping>): Promise<EvidenceMapping>;
   getEvidenceStatus(userId: string, frameworkId?: string): Promise<any[]>;
   getDocumentsWithMappingsByUserId(userId: string): Promise<any[]>;
+
+  // Policy template operations
+  getPolicyTemplate(id: string): Promise<PolicyTemplate | null>;
+  getPolicyTemplates(frameworkId?: string): Promise<PolicyTemplate[]>;
+  getAllPolicyTemplates(): Promise<PolicyTemplate[]>;
+
+  // Generated policy operations
+  createGeneratedPolicy(data: InsertGeneratedPolicy): Promise<GeneratedPolicy>;
+  getGeneratedPolicyById(id: string): Promise<GeneratedPolicy | null>;
+  getGeneratedPolicies(companyId: string): Promise<GeneratedPolicy[]>;
+  updateGeneratedPolicy(id: string, data: Partial<GeneratedPolicy>): Promise<GeneratedPolicy>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -420,10 +440,10 @@ export class DatabaseStorage implements IStorage {
 
     // Transform the flat results into nested structure
     const documentsMap = new Map();
-    
+
     results.forEach(row => {
       const docId = row.id;
-      
+
       if (!documentsMap.has(docId)) {
         documentsMap.set(docId, {
           id: row.id,
@@ -440,7 +460,7 @@ export class DatabaseStorage implements IStorage {
           mapping: null,
         });
       }
-      
+
       // Add mapping information if it exists
       if (row.mappingId) {
         const doc = documentsMap.get(docId);
@@ -461,7 +481,7 @@ export class DatabaseStorage implements IStorage {
         };
       }
     });
-    
+
     return Array.from(documentsMap.values());
   }
 
@@ -520,7 +540,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRiskScoreHistoryByUserId(userId: string, frameworkId?: string): Promise<RiskScoreHistory[]> {
-    const conditions = frameworkId 
+    const conditions = frameworkId
       ? and(eq(riskScoreHistory.userId, userId), eq(riskScoreHistory.frameworkId, frameworkId))
       : eq(riskScoreHistory.userId, userId);
 
@@ -530,7 +550,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLatestRiskScore(userId: string, frameworkId?: string): Promise<RiskScoreHistory | null> {
-    const conditions = frameworkId 
+    const conditions = frameworkId
       ? and(eq(riskScoreHistory.userId, userId), eq(riskScoreHistory.frameworkId, frameworkId))
       : eq(riskScoreHistory.userId, userId);
 
@@ -604,9 +624,49 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(auditLogs).where(eq(auditLogs.userId, userId)).orderBy(desc(auditLogs.createdAt)).limit(limit);
   }
 
-  async createAuditLog(auditLog: InsertAuditLog): Promise<AuditLog> {
-    const [newAuditLog] = await db.insert(auditLogs).values(auditLog).returning();
-    return newAuditLog;
+  async createAuditLog(data: InsertAuditLog): Promise<AuditLog> {
+    const result = await this.db.insert(auditLogs).values(data).returning();
+    return result[0];
+  }
+
+  // Policy template methods
+  async getPolicyTemplate(id: string): Promise<PolicyTemplate | null> {
+    const result = await this.db.select().from(policyTemplates).where(eq(policyTemplates.id, id)).limit(1);
+    return result[0] || null;
+  }
+
+  async getPolicyTemplates(frameworkId?: string): Promise<PolicyTemplate[]> {
+    if (frameworkId) {
+      return await this.db.select().from(policyTemplates).where(eq(policyTemplates.frameworkId, frameworkId));
+    }
+    return await this.db.select().from(policyTemplates);
+  }
+
+  async getAllPolicyTemplates(): Promise<PolicyTemplate[]> {
+    return await this.db.select().from(policyTemplates);
+  }
+
+  // Generated policy methods
+  async createGeneratedPolicy(data: InsertGeneratedPolicy): Promise<GeneratedPolicy> {
+    const result = await this.db.insert(generatedPolicies).values(data).returning();
+    return result[0];
+  }
+
+  async getGeneratedPolicyById(id: string): Promise<GeneratedPolicy | null> {
+    const result = await this.db.select().from(generatedPolicies).where(eq(generatedPolicies.id, id)).limit(1);
+    return result[0] || null;
+  }
+
+  async getGeneratedPolicies(companyId: string): Promise<GeneratedPolicy[]> {
+    return await this.db.select().from(generatedPolicies).where(eq(generatedPolicies.companyId, companyId));
+  }
+
+  async updateGeneratedPolicy(id: string, data: Partial<GeneratedPolicy>): Promise<GeneratedPolicy> {
+    const result = await this.db.update(generatedPolicies)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(generatedPolicies.id, id))
+      .returning();
+    return result[0];
   }
 
   // Evidence mapping operations
@@ -732,11 +792,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Learning resource operations
-  async getLearningResources(params?: { 
-    frameworkId?: string; 
-    resourceType?: string; 
-    category?: string; 
-    search?: string 
+  async getLearningResources(params?: {
+    frameworkId?: string;
+    resourceType?: string;
+    category?: string;
+    search?: string
   }): Promise<LearningResource[]> {
     let query = db.select().from(learningResources);
 
@@ -829,7 +889,7 @@ export class DatabaseStorage implements IStorage {
   async getDocumentsByRequirementId(requirementId: string): Promise<Document[]> {
     const mappings = await db.select().from(evidenceMappings)
       .where(eq(evidenceMappings.requirementId, requirementId));
-    
+
     if (mappings.length === 0) {
       return [];
     }
@@ -842,14 +902,14 @@ export class DatabaseStorage implements IStorage {
   // Method to get evidence status for controls
   async getEvidenceStatus(userId: string, frameworkId?: string): Promise<any[]> {
     let requirements;
-    
+
     if (frameworkId) {
       requirements = await db.select().from(complianceRequirements)
         .where(eq(complianceRequirements.frameworkId, frameworkId));
     } else {
       requirements = await db.select().from(complianceRequirements);
     }
-    
+
     const statusPromises = requirements.map(async (requirement) => {
       const mappings = await db.select().from(evidenceMappings)
         .where(
@@ -858,10 +918,10 @@ export class DatabaseStorage implements IStorage {
             eq(evidenceMappings.userId, userId)
           )
         );
-      
+
       const documentsCount = mappings.length;
       const validatedCount = mappings.filter(m => m.validationStatus === 'validated').length;
-      
+
       return {
         id: requirement.id,
         requirementId: requirement.requirementId,
@@ -872,12 +932,12 @@ export class DatabaseStorage implements IStorage {
         frameworkId: requirement.frameworkId,
         evidenceCount: documentsCount,
         validatedCount: validatedCount,
-        status: documentsCount === 0 ? 'missing' : 
-               validatedCount === 0 ? 'pending' : 
+        status: documentsCount === 0 ? 'missing' :
+               validatedCount === 0 ? 'pending' :
                validatedCount === documentsCount ? 'complete' : 'partial'
       };
     });
-    
+
     return await Promise.all(statusPromises);
   }
 }
