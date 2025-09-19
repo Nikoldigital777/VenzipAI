@@ -59,37 +59,77 @@ type Summary = {
 export default function Dashboard() {
   const { data, isLoading, isError, error, refetch } = useSummary();
 
-  // Dashboard progress data
+  // Enhanced Dashboard progress data with better error handling
   const { data: progressData, isLoading: progressLoading, error: progressError } = useQuery({
     queryKey: ['/api/dashboard/progress'],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/progress');
-      if (!response.ok) {
-        console.warn('Progress API failed:', response.status);
-        return { percentComplete: 0, totalTasks: 0, completedTasks: 0 };
+      try {
+        const response = await fetch('/api/dashboard/progress', {
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          console.warn('Progress API failed:', response.status);
+          return { percentComplete: 0, totalTasks: 0, completedTasks: 0, hasData: false, error: `HTTP ${response.status}` };
+        }
+        const data = await response.json();
+        return {
+          percentComplete: data.percentComplete || 0,
+          totalTasks: data.totalTasks || 0,
+          completedTasks: data.completedTasks || 0,
+          hasData: data.hasData !== false,
+          message: data.message,
+          error: data.error
+        };
+      } catch (error) {
+        console.error('Progress fetch error:', error);
+        return { percentComplete: 0, totalTasks: 0, completedTasks: 0, hasData: false, error: 'Network error' };
       }
-      return response.json();
     },
     refetchOnWindowFocus: false,
     staleTime: 30000,
-    retry: 1
+    retry: 2,
+    retryDelay: 1000
   });
 
-  // Recent tasks data
-  const { data: recentTasks, isLoading: tasksLoading, error: tasksError } = useQuery({
+  // Enhanced Recent tasks data with structured response handling
+  const { data: recentTasksData, isLoading: tasksLoading, error: tasksError } = useQuery({
     queryKey: ['/api/dashboard/recent-tasks'],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/recent-tasks');
-      if (!response.ok) {
-        console.warn('Recent tasks API failed:', response.status);
-        return [];
+      try {
+        const response = await fetch('/api/dashboard/recent-tasks', {
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          console.warn('Recent tasks API failed:', response.status);
+          return { tasks: [], hasData: false, error: `HTTP ${response.status}`, totalTasks: 0 };
+        }
+        const data = await response.json();
+        
+        // Handle both old and new response formats
+        if (Array.isArray(data)) {
+          return { tasks: data, hasData: data.length > 0, totalTasks: data.length };
+        }
+        
+        return {
+          tasks: data.tasks || [],
+          hasData: data.hasData !== false,
+          totalTasks: data.totalTasks || 0,
+          message: data.message,
+          error: data.error
+        };
+      } catch (error) {
+        console.error('Recent tasks fetch error:', error);
+        return { tasks: [], hasData: false, error: 'Network error', totalTasks: 0 };
       }
-      return response.json();
     },
     refetchOnWindowFocus: false,
     staleTime: 30000,
-    retry: 1
+    retry: 2,
+    retryDelay: 1000
   });
+
+  // Extract recent tasks for backward compatibility
+  const recentTasks = recentTasksData?.tasks || [];
 
   if (isLoading && !data) {
     return (
@@ -430,7 +470,7 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Recent Tasks Section */}
+          {/* Enhanced Recent Tasks Section */}
           <Card className="lg:col-span-2 glass-card animate-fadeInUp" style={{animationDelay: '0.6s'}}>
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-gray-900">
@@ -439,12 +479,37 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <div className="text-lg font-semibold">Recent Tasks</div>
-                  <div className="text-sm text-gray-500 font-normal">Latest compliance activities</div>
+                  <div className="text-sm text-gray-500 font-normal">
+                    Latest compliance activities
+                    {recentTasksData?.totalTasks > 0 && (
+                      <span className="ml-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
+                        {recentTasksData.totalTasks} total
+                      </span>
+                    )}
+                  </div>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recentTasks && recentTasks.length > 0 ? (
+              {tasksLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                  <span className="ml-2 text-gray-600">Loading tasks...</span>
+                </div>
+              ) : recentTasksData?.error ? (
+                <div className="text-center py-8">
+                  <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-orange-400" />
+                  <p className="text-sm text-gray-500 mb-2">{recentTasksData.error}</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.location.reload()}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry
+                  </Button>
+                </div>
+              ) : recentTasks && recentTasks.length > 0 ? (
                 <div className="space-y-3">
                   {recentTasks.map((task: any, index: number) => (
                     <Card key={task.id} className="glass-card border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -475,6 +540,11 @@ export default function Dashboard() {
                               >
                                 {task.priority}
                               </Badge>
+                              {task.isOverdue && (
+                                <Badge variant="destructive" className="text-xs">
+                                  Overdue
+                                </Badge>
+                              )}
                               {task.frameworkId && (
                                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                                   {task.frameworkId.toUpperCase()}
@@ -482,8 +552,9 @@ export default function Dashboard() {
                               )}
                             </div>
                             {task.dueDate && (
-                              <div className="text-xs text-gray-500 mt-1">
+                              <div className={`text-xs mt-1 ${task.isOverdue ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
                                 Due: {new Date(task.dueDate).toLocaleDateString()}
+                                {task.isOverdue && ' (Overdue)'}
                               </div>
                             )}
                           </div>
@@ -491,7 +562,9 @@ export default function Dashboard() {
                             <div className="w-12 h-12 relative">
                               <div className="w-full h-full bg-gray-200 rounded-full"></div>
                               <div
-                                className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
+                                className={`absolute inset-0 rounded-full transition-all duration-300 ${
+                                  task.isOverdue ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                                }`}
                                 style={{
                                   clipPath: `polygon(50% 50%, 50% 0%, ${50 + Math.cos((task.progressPercentage / 100) * 2 * Math.PI - Math.PI/2) * 50}% ${50 + Math.sin((task.progressPercentage / 100) * 2 * Math.PI - Math.PI/2) * 50}%, 50% 50%)`
                                 }}
@@ -509,9 +582,19 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Clock className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm">No tasks created yet</p>
+                <div className="text-center py-8">
+                  <CheckSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium text-gray-700 mb-2">No tasks yet</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    {recentTasksData?.message || "Complete your onboarding to generate compliance tasks"}
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.location.href = '/tasks'}
+                  >
+                    <Target className="h-4 w-4 mr-2" />
+                    View All Tasks
+                  </Button>
                 </div>
               )}
             </CardContent>

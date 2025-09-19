@@ -10,26 +10,46 @@ export function useSummary() {
         const res = await apiRequest("GET", "/api/summary");
         if (!res.ok) {
           console.warn("Summary API failed:", res.status, res.statusText);
-          throw new Error(`Failed to fetch summary: ${res.status}`);
+          
+          // Handle specific error codes
+          if (res.status === 401) {
+            throw new Error("Authentication required");
+          } else if (res.status === 403) {
+            throw new Error("Access denied");
+          } else if (res.status >= 500) {
+            throw new Error("Server error - please try again");
+          } else {
+            throw new Error(`Failed to fetch summary: ${res.status}`);
+          }
         }
+        
         const data = await res.json();
         
-        // Ensure data structure consistency
-        return {
-          compliancePercent: data.compliancePercent || 0,
-          gaps: Array.isArray(data.gaps) ? data.gaps : [],
+        // Validate and sanitize data structure
+        const sanitizedData = {
+          compliancePercent: Math.max(0, Math.min(100, data.compliancePercent || 0)),
+          gaps: Array.isArray(data.gaps) ? data.gaps.filter(gap => gap && gap.id && gap.title) : [],
           stats: {
-            uploads: data.stats?.uploads || 0,
-            conversations: data.stats?.conversations || 0,
-            tasksOpenHigh: data.stats?.tasksOpenHigh || 0,
-            risksHigh: data.stats?.risksHigh || 0,
+            uploads: Math.max(0, data.stats?.uploads || 0),
+            conversations: Math.max(0, data.stats?.conversations || 0),
+            tasksOpenHigh: Math.max(0, data.stats?.tasksOpenHigh || 0),
+            risksHigh: Math.max(0, data.stats?.risksHigh || 0),
           },
-          recentActivity: Array.isArray(data.recentActivity) ? data.recentActivity : [],
+          recentActivity: Array.isArray(data.recentActivity) ? 
+            data.recentActivity.filter(activity => activity && activity.id && activity.action) : [],
+          hasData: data.compliancePercent > 0 || (data.gaps && data.gaps.length > 0) || 
+                   (data.stats && Object.values(data.stats).some(val => val > 0)),
+          error: data.error,
+          lastUpdated: new Date().toISOString()
         };
+        
+        console.log("Summary data loaded:", sanitizedData);
+        return sanitizedData;
       } catch (error) {
         console.error("Error fetching summary:", error);
-        // Return safe fallback data
-        return {
+        
+        // Return detailed error information for debugging
+        const fallbackData = {
           compliancePercent: 0,
           gaps: [],
           stats: {
@@ -39,12 +59,30 @@ export function useSummary() {
             risksHigh: 0,
           },
           recentActivity: [],
+          hasData: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+          lastUpdated: new Date().toISOString()
         };
+        
+        // Don't throw in fallback mode - return error data instead
+        if (error instanceof Error && error.message.includes("Authentication")) {
+          throw error; // Re-throw auth errors
+        }
+        
+        return fallbackData;
       }
     },
     refetchOnWindowFocus: false,
-    retry: 2,
-    retryDelay: 1000,
+    retry: (failureCount, error) => {
+      // Don't retry auth errors
+      if (error instanceof Error && error.message.includes("Authentication")) {
+        return false;
+      }
+      // Retry up to 3 times for other errors
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     staleTime: 30000,
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 }
