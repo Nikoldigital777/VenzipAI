@@ -86,7 +86,7 @@ interface AIChecklist {
 }
 
 // Use dynamic frameworks from API with fallback
-  const frameworks = frameworksFromAPI?.map((fw: any) => ({
+  const frameworks = frameworksData?.map((fw: any) => ({
     id: fw.id,
     name: fw.displayName,
     description: fw.description,
@@ -338,7 +338,7 @@ export default function Onboarding() {
   }, [existingCompany, navigate, toast]);
 
   // Load frameworks properly from API
-  const { data: frameworksFromAPI, isLoading: frameworksLoading } = useQuery({
+  const { data: frameworksData, isLoading: frameworksLoading } = useQuery({
     queryKey: ["/api/frameworks"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/frameworks");
