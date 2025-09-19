@@ -2967,7 +2967,7 @@ export async function registerRoutes(app: Express) {
       for (const fwId of frameworks) {
         try {
           // Get controls for this framework
-          const fwControls = await storage.getComplianceControls(fwId);
+          const fwControls = await storage.getComplianceRequirements(fwId);
           
           // Take first 3-5 controls as preview
           const previewControls = fwControls.slice(0, 4);
