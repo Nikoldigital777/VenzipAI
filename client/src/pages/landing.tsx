@@ -35,14 +35,37 @@ import {
   Twitter,
   Facebook,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Search,
+  FileText,
+  Eye,
+  Map,
+  Monitor,
+  BookOpen,
+  Upload,
+  Download,
+  Package,
+  HelpCircle,
+  Lock,
+  User,
+  Briefcase
 } from "lucide-react";
 import venzipLogo from "@assets/venzip-logo.png";
 import { useAuth } from "@/hooks/useAuth";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function Landing() {
   const { isAuthenticated, user } = useAuth();
   const [openFramework, setOpenFramework] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    company: '',
+    jobTitle: ''
+  });
 
   const handleLogin = () => {
     window.location.href = "/api/login";
@@ -58,6 +81,17 @@ export default function Landing() {
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement demo request submission
+    console.log('Demo request:', formData);
+    alert('Thank you for your interest! We\'ll be in touch soon.');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const toggleFramework = (framework: string) => {
@@ -212,10 +246,10 @@ export default function Landing() {
             />
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Platform</button>
-            <button onClick={() => scrollToSection('frameworks')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Compliance</button>
-            <button onClick={() => scrollToSection('enterprise')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Enterprise</button>
-            <button onClick={() => scrollToSection('roi-metrics')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">ROI</button>
+            <button onClick={() => scrollToSection('benefits')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Benefits</button>
+            <button onClick={() => scrollToSection('how-it-works')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">How It Works</button>
+            <button onClick={() => scrollToSection('demo-form')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Demo</button>
+            <button onClick={() => scrollToSection('faqs')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">FAQs</button>
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">Welcome back, {(user as any)?.firstName || user?.email || 'User'}!</span>
@@ -244,172 +278,250 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero Section - Enhanced with better spacing */}
+      {/* Hero Section */}
       <section className="pt-32 pb-20 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-5xl mx-auto">
-            <div className="inline-flex items-center px-8 py-4 rounded-full glass-card text-venzip-primary text-sm font-semibold mb-8 border border-venzip-primary/30 shadow-xl hover-glow animate-scale-in group cursor-pointer">
-              <Star className="h-4 w-4 mr-2 animate-spin group-hover:animate-pulse" />
-              <span className="text-gradient-primary font-bold">Enterprise-Grade AI Compliance Platform</span>
-              <Badge className="ml-3 bg-success-green/10 text-success-green border-success-green/30 text-xs">
-                Fortune 500 Trusted
-              </Badge>
-            </div>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="max-w-2xl">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight">
+                Get Audit-Ready in <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero">Days — Not Months</span>
+              </h1>
 
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-gray-900 mb-8 leading-tight tracking-tight animate-fadeInUp">
-              <span className="block mb-4">Simplify Your</span>
-              <span className="block text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">
-                Compliance Journey
-              </span>
-            </h1>
+              <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
+                Venzip makes compliance simple. Our AI-powered platform automates ISO 27001, SOC 2, HIPAA, and more — with dashboards, evidence mapping, and expert guidance built-in.
+              </p>
 
-            <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed max-w-4xl mx-auto font-light">
-              The <span className="font-semibold text-venzip-primary">compliance platform of choice for Fortune 500 companies</span> seeking to reduce audit costs by 65% and achieve certification 87% faster. Transform SOC 2, ISO 27001, HIPAA, and GDPR compliance from reactive overhead into strategic competitive advantage.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
-                onClick={handleGetStarted}
+                onClick={() => scrollToSection('demo-form')}
+                data-testid="button-access-demo"
                 className="bg-gradient-to-r from-venzip-primary to-venzip-secondary hover:from-venzip-primary/90 hover:to-venzip-secondary/90 text-white font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-2xl hover:shadow-venzip-primary/30 hover:-translate-y-1 transform transition-all duration-300 flex items-center justify-center"
               >
-                <Rocket className="mr-2 h-5 w-5" />
-                {isAuthenticated ? "Continue Setup" : "Start Onboarding"}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => scrollToSection('frameworks')}
-                className="glass-card border-2 border-white/30 text-gray-700 hover:text-venzip-primary font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-lg hover:border-venzip-primary/50 hover:-translate-y-1 transform transition-all duration-300 flex items-center justify-center"
-              >
                 <Play className="mr-2 h-5 w-5" />
-                Learn More
+                Access My Free Demo
               </Button>
+            </div>
+
+            <div className="hidden lg:block">
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-white/30">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Audit Readiness Dashboard</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
+                      <div className="text-2xl font-bold text-green-600">89%</div>
+                      <div className="text-sm text-green-600">Compliance Score</div>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                      <div className="text-2xl font-bold text-blue-600">156</div>
+                      <div className="text-sm text-blue-600">Evidence Collected</div>
+                    </div>
+                    <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                      <div className="text-2xl font-bold text-yellow-600">12</div>
+                      <div className="text-sm text-yellow-600">Risks Detected</div>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
+                      <div className="text-2xl font-bold text-purple-600">3</div>
+                      <div className="text-sm text-purple-600">Frameworks</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Framework Support Section with Enhanced Dropdowns */}
-      <section id="frameworks" className="py-24 px-6 bg-gradient-to-br from-white/95 to-gray-50/80 relative overflow-hidden">
+      {/* Trust Strip */}
+      <section className="py-12 px-6 bg-white/50 backdrop-blur-sm border-y border-gray-200/50">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-center text-gray-600 mb-8 font-medium">Trusted by industry leaders worldwide:</p>
+          <div className="flex items-center justify-center space-x-12 opacity-70">
+            <div className="text-2xl font-bold text-gray-400">Deloitte</div>
+            <div className="text-2xl font-bold text-gray-400">Canada Life</div>
+            <div className="text-2xl font-bold text-gray-400">HSBC</div>
+            <div className="text-2xl font-bold text-gray-400">TELUS</div>
+            <div className="text-2xl font-bold text-gray-400">CWB</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Problem Section */}
+      <section className="py-20 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12">Tired of:</h2>
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="flex items-start space-x-4">
+              <AlertTriangle className="h-8 w-8 text-red-500 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Juggling spreadsheets</h3>
+                <p className="text-gray-600">emails, and last-minute audit prep?</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-4">
+              <Clock className="h-8 w-8 text-red-500 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Losing weeks</h3>
+                <p className="text-gray-600">collecting policies and logs manually?</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-4">
+              <HelpCircle className="h-8 w-8 text-red-500 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Not knowing</h3>
+                <p className="text-gray-600">if your business is actually audit-ready?</p>
+              </div>
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-gray-900 mb-4">There's a smarter way.</div>
+          <div className="text-3xl font-extrabold text-venzip-primary">Meet Venzip.</div>
+        </div>
+      </section>
+
+      {/* Core Benefits Section */}
+      <section id="benefits" className="py-24 px-6 bg-white relative overflow-hidden">
         <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
-              Supported <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">Compliance Frameworks</span>
+              Venzip automates the <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero animate-gradient-x">hardest parts</span> of compliance:
             </h2>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-light">
-              Comprehensive coverage with AI-powered automation for the compliance standards that matter most to your business
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {Object.entries(frameworkDetails).map(([key, framework]) => {
-              const IconComponent = framework.icon;
-              const isOpen = openFramework === key;
+          <div className="grid lg:grid-cols-2 gap-12">
+            <div className="space-y-12">
+              <div className="flex items-start space-x-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-blue-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <Search className="h-8 w-8 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Automated Evidence Collection</h3>
+                  <p className="text-gray-600 text-lg leading-relaxed">
+                    Connect your tech stack. Venzip gathers, organizes, and tags documents for audits automatically.
+                  </p>
+                </div>
+              </div>
 
-              return (
-                <Card key={key} className="glass-card hover-lift group relative overflow-hidden border-0 shadow-lg">
-                  <div className="absolute inset-0 bg-gradient-to-br from-venzip-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <CardContent className="p-8 relative z-10">
-                    <div
-                      className="flex items-center justify-between cursor-pointer"
-                      onClick={() => toggleFramework(key)}
-                    >
-                      <div className="flex items-center space-x-6">
-                        <div className="w-16 h-16 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 shadow-lg">
-                          <IconComponent className="h-8 w-8 text-venzip-primary group-hover:animate-bounce" />
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-venzip-primary transition-colors duration-300">
-                            {framework.name}
-                          </h3>
-                          <p className="text-gray-600 text-sm mb-2">{framework.description}</p>
-                          <div className="flex items-center space-x-4 text-xs text-gray-500">
-                            <span className="flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
-                              {framework.timeToCompliance}
-                            </span>
-                            <span className="flex items-center">
-                              <CheckSquare className="h-3 w-3 mr-1" />
-                              {framework.controls}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-                        <ChevronDown className="h-6 w-6 text-gray-400" />
-                      </div>
-                    </div>
+              <div className="flex items-start space-x-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-red-500/20 to-red-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <Brain className="h-8 w-8 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">AI Risk Engine</h3>
+                  <p className="text-gray-600 text-lg leading-relaxed">
+                    Detect risks before auditors do. Continuous monitoring reduces blind spots.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-                    {isOpen && (
-                      <div className="mt-8 space-y-8 animate-fadeInUp">
-                        <div className="grid md:grid-cols-2 gap-8">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900 mb-3">Overview</h4>
-                            <p className="text-gray-600 text-sm leading-relaxed">{framework.details.overview}</p>
-                          </div>
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900 mb-3">Key Benefits</h4>
-                            <ul className="space-y-2">
-                              {framework.details.benefits.map((benefit, index) => (
-                                <li key={index} className="flex items-start text-sm text-gray-600">
-                                  <CheckCircle className="h-4 w-4 text-success-green mr-2 mt-0.5 flex-shrink-0" />
-                                  {benefit}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
+            <div className="space-y-12">
+              <div className="flex items-start space-x-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <Map className="h-8 w-8 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Framework Mapper</h3>
+                  <p className="text-gray-600 text-lg leading-relaxed">
+                    Map policies and controls across multiple standards at once — ISO, SOC 2, HIPAA, GDPR. No duplicate work.
+                  </p>
+                </div>
+              </div>
 
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900 mb-3">Core Requirements</h4>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            {framework.details.requirements.map((requirement, index) => (
-                              <div key={index} className="flex items-start text-sm text-gray-600">
-                                <Target className="h-4 w-4 text-venzip-primary mr-2 mt-0.5 flex-shrink-0" />
-                                {requirement}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+              <div className="flex items-start space-x-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <Monitor className="h-8 w-8 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Real-Time Dashboards</h3>
+                  <p className="text-gray-600 text-lg leading-relaxed">
+                    Track progress, pending tasks, and evidence in one place. Always know your audit readiness score.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900 mb-3">Implementation Timeline</h4>
-                          <div className="space-y-3">
-                            {framework.details.timeline.map((phase, index) => (
-                              <div key={index} className="flex items-center text-sm text-gray-600">
-                                <div className="w-6 h-6 bg-venzip-primary/20 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                  <span className="text-xs font-bold text-venzip-primary">{index + 1}</span>
-                                </div>
-                                {phase}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100">
-                          <Button
-                            onClick={handleLogin}
-                            className="bg-gradient-primary text-white hover:shadow-lg transition-all duration-300 flex-1"
-                          >
-                            Start {framework.name} Compliance
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="border-venzip-primary/30 text-venzip-primary hover:bg-venzip-primary/10 flex-1"
-                          >
-                            Download {framework.name} Guide
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+          <div className="text-center mt-16">
+            <Button
+              onClick={() => scrollToSection('how-it-works')}
+              data-testid="button-see-how-it-works"
+              className="bg-gradient-to-r from-venzip-primary to-venzip-secondary hover:from-venzip-primary/90 hover:to-venzip-secondary/90 text-white font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-2xl hover:shadow-venzip-primary/30 hover:-translate-y-1 transform transition-all duration-300 flex items-center justify-center"
+            >
+              <ArrowRight className="mr-2 h-5 w-5" />
+              See How It Works
+            </Button>
           </div>
         </div>
       </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-24 px-6 bg-gray-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-8 tracking-tight">
+              <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero">How It Works</span>
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-venzip-primary/20 to-venzip-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <User className="h-10 w-10 text-venzip-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">1. Onboard</h3>
+              <p className="text-gray-600">Add company details & select frameworks.</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-venzip-secondary/20 to-venzip-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Map className="h-10 w-10 text-venzip-secondary" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">2. Map Controls</h3>
+              <p className="text-gray-600">AI generates a tailored compliance task list.</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-venzip-accent/20 to-venzip-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Upload className="h-10 w-10 text-venzip-accent" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">3. Collect Evidence</h3>
+              <p className="text-gray-600">Auto-sync or upload documentation.</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-success-green/20 to-success-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Package className="h-10 w-10 text-success-green" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">4. Get Audit-Ready</h3>
+              <p className="text-gray-600">Export an auditor-friendly package instantly.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="py-24 px-6 bg-venzip-primary/5 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="bg-white rounded-2xl p-12 shadow-2xl border border-venzip-primary/10">
+            <div className="mb-8">
+              <div className="flex justify-center space-x-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-6 w-6 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <blockquote className="text-xl md:text-2xl text-gray-700 leading-relaxed italic">
+                "Our compliance process was scattered across spreadsheets and departments, making audits a nightmare. Venzip centralized everything and gave us real-time visibility into our risk posture."
+              </blockquote>
+            </div>
+            <div className="flex items-center justify-center">
+              <div className="text-right">
+                <div className="font-semibold text-gray-900">— Compliance Director</div>
+                <div className="text-gray-600">Global Tech Company</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Features Section */}
       <section id="features" className="py-24 px-6 bg-gradient-to-b from-white/80 to-gray-50/30 relative overflow-hidden">
