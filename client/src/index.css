@@ -754,7 +754,7 @@ html {
   color: hsl(210, 25%, 7.8431%) !important;
 }
 
-/* Mobile-specific light mode enforcement */
+/* Mobile-specific light mode enforcement - more aggressive */
 @media (max-width: 768px) {
   .light {
     background-color: hsl(0, 0%, 100%) !important;
@@ -769,6 +769,69 @@ html {
   .light * {
     color-scheme: light !important;
   }
+  
+  /* Force light mode on all possible mobile elements */
+  .light header,
+  .light nav,
+  .light main,
+  .light section,
+  .light div,
+  .light article,
+  .light aside {
+    background-color: hsl(0, 0%, 100%) !important;
+    color: hsl(210, 25%, 7.8431%) !important;
+  }
+  
+  /* Override any glassmorphism on mobile */
+  .light .glass-morphism,
+  .light .glass-morphism-enhanced,
+  .light .glass-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: hsl(210, 25%, 7.8431%) !important;
+  }
+  
+  /* Force all text to be dark on mobile */
+  .light h1, .light h2, .light h3, .light h4, .light h5, .light h6,
+  .light p, .light span, .light div, .light a, .light button {
+    color: hsl(210, 25%, 7.8431%) !important;
+  }
+  
+  /* Override any gradient text on mobile */
+  .light .text-gradient-primary {
+    background: linear-gradient(135deg, hsl(177, 54%, 45%) 0%, hsl(187, 78%, 45%) 50%, hsl(148, 75%, 45%) 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+}
+
+/* Additional component-specific overrides for light mode */
+.light .card {
+  background-color: hsl(180, 6.6667%, 97.0588%) !important;
+  color: hsl(210, 25%, 7.8431%) !important;
+  border-color: hsl(201.4286, 30.4348%, 90.9804%) !important;
+}
+
+.light .button {
+  color: hsl(210, 25%, 7.8431%) !important;
+}
+
+.light .badge {
+  background-color: hsl(211.5789, 51.3514%, 92.7451%) !important;
+  color: hsl(203.8863, 88.2845%, 53.1373%) !important;
+}
+
+/* Force navigation to be light */
+.light nav {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ensure mobile menu is light */
+.light .mobile-menu {
+  background-color: hsl(0, 0%, 100%) !important;
+  color: hsl(210, 25%, 7.8431%) !important;
 }
 
 /* Custom animations */
