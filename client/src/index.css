@@ -69,13 +69,13 @@
   --surface-primary: hsl(0, 0%, 7%); /* Cards, panels - primary surfaces */
   --surface-secondary: hsl(0, 0%, 11%); /* Elevated elements - secondary surfaces */
   --surface-tertiary: hsl(0, 0%, 15%); /* Modals, tooltips - highest elevation */
-  
+
   /* 4-Tier Text Hierarchy for SaaS Data Legibility */
   --text-primary: hsl(0, 0%, 96%); /* Primary content - highest contrast */
   --text-secondary: hsl(0, 0%, 78%); /* Secondary content - medium contrast */
   --text-tertiary: hsl(0, 0%, 65%); /* Tertiary content - lower contrast */
   --text-subdued: hsl(0, 0%, 52%); /* Captions, metadata - lowest contrast */
-  
+
   /* Updated Semantic Colors */
   --foreground: var(--text-primary);
   --card: var(--surface-primary);
@@ -95,14 +95,14 @@
   --border: hsl(0, 0%, 14.9%); /* Subtle borders for separation */
   --input: var(--surface-secondary); /* Input backgrounds use secondary surface */
   --ring: hsl(177, 54%, 65%); /* Focus rings with brand color */
-  
+
   /* Chart colors optimized for dark mode */
   --chart-1: hsl(177, 54%, 65%); /* Brighter venzip primary */
   --chart-2: hsl(148, 75%, 65%); /* Brighter venzip accent */
   --chart-3: hsl(42, 92%, 70%); /* Brighter warning */
   --chart-4: hsl(147, 78%, 50%); /* Success green */
   --chart-5: hsl(341, 75%, 60%); /* Pink/coral */
-  
+
   /* Sidebar dark mode - using surface elevation system */
   --sidebar: var(--surface-primary);
   --sidebar-foreground: var(--text-primary);
@@ -112,7 +112,7 @@
   --sidebar-accent-foreground: hsl(177, 54%, 65%);
   --sidebar-border: hsl(0, 0%, 14.9%);
   --sidebar-ring: hsl(177, 54%, 65%);
-  
+
   /* Enhanced Venzip Brand Colors - Dark Mode */
   --venzip-primary: hsl(177, 54%, 65%); /* Brighter for dark bg */
   --venzip-primary-dark: hsl(177, 54%, 55%);
@@ -123,13 +123,13 @@
   --warning-orange: hsl(21, 100%, 68%); /* Brighter warning */
   --danger-coral: hsl(0, 85%, 65%); /* Adjusted danger */
   --info-blue: hsl(207, 88%, 70%); /* Brighter info */
-  
+
   /* SaaS Interaction States - optimized for work environments */
   --hover-overlay: rgba(255, 255, 255, 0.05); /* Subtle hover feedback */
   --selection-overlay: rgba(78, 205, 196, 0.15); /* Selection states */
   --focus-overlay: rgba(78, 205, 196, 0.25); /* Focus states */
   --active-overlay: rgba(78, 205, 196, 0.1); /* Active states */
-  
+
   /* Shadows for dark mode */
   --shadow-2xs: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
   --shadow-xs: 0px 1px 3px 0px rgba(0, 0, 0, 0.8);
@@ -150,12 +150,12 @@
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', sans-serif;
   }
-  
+
   /* Opt-in theme transitions for smooth theme switching */
   .theme-transitioning * {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
   }
-  
+
   /* Smooth transitions for commonly themed elements */
   body, 
   [class*="bg-"], 
@@ -165,37 +165,37 @@
   .glass-morphism {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   }
-  
+
   /* SaaS-optimized interaction states */
   .saas-hover {
     transition: all 0.2s ease;
   }
-  
+
   .saas-hover:hover {
     background-color: var(--hover-overlay);
   }
-  
+
   .saas-selected {
     background-color: var(--selection-overlay);
     border-color: var(--venzip-primary);
   }
-  
+
   .saas-focus:focus {
     outline: 2px solid var(--venzip-primary);
     outline-offset: 2px;
     background-color: var(--focus-overlay);
   }
-  
+
   .saas-interactive {
     transition: all 0.2s ease;
     cursor: pointer;
   }
-  
+
   .saas-interactive:hover {
     background-color: var(--hover-overlay);
     transform: translateY(-1px);
   }
-  
+
   .saas-interactive:active {
     background-color: var(--active-overlay);
     transform: translateY(0);
@@ -290,7 +290,7 @@
     hsl(161, 100%, 43%) 100%);
 }
 
-/* Text Gradients */
+/* Gradient Text Effects */
 .text-gradient-primary {
   background: linear-gradient(135deg, hsl(177, 54%, 59%) 0%, hsl(187, 78%, 59%) 50%, hsl(148, 75%, 60%) 100%);
   -webkit-background-clip: text;
@@ -326,11 +326,13 @@
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 .animate-gradient-x {
   background-size: 400% 400%;
   animation: gradient-x 4s ease infinite;
+  will-change: background-position;
 }
 
 .animate-shimmer {
@@ -355,6 +357,7 @@
 .hover-lift:hover {
   transform: translateY(-10px) scale(1.02);
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  will-change: transform;
 }
 
 .hover-glow:hover {
@@ -586,6 +589,7 @@
 /* Animation Classes */
 .animate-float {
   animation: float 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 .animate-slide-up {
@@ -742,17 +746,16 @@ html {
 /* Custom animations */
 @keyframes gradient-x {
   0%, 100% {
-    background-size: 200% 200%;
-    background-position: left center;
+    background-position: 0% 50%;
   }
   50% {
-    background-size: 200% 200%;
-    background-position: right center;
+    background-position: 100% 50%;
   }
 }
 
 .animate-gradient-x {
-  animation: gradient-x 3s ease infinite;
+  animation: gradient-x 8s ease-in-out infinite;
+  will-change: background-position;
 }
 
 @keyframes float {
@@ -766,6 +769,7 @@ html {
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 .delay-1000 {
@@ -864,17 +868,16 @@ html {
 /* Custom animations */
 @keyframes gradient-x {
   0%, 100% {
-    background-size: 200% 200%;
-    background-position: left center;
+    background-position: 0% 50%;
   }
   50% {
-    background-size: 200% 200%;
-    background-position: right center;
+    background-position: 100% 50%;
   }
 }
 
 .animate-gradient-x {
-  animation: gradient-x 3s ease infinite;
+  animation: gradient-x 8s ease-in-out infinite;
+  will-change: background-position;
 }
 
 @keyframes float {
@@ -888,6 +891,7 @@ html {
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 .delay-1000 {
@@ -974,6 +978,7 @@ html {
 .hover-lift:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.05);
+  will-change: transform;
 }
 
 /* Advanced gradient animations */
@@ -1013,4 +1018,16 @@ html {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Performance optimizations */
+.glass-card,
+.glass-morphism,
+.glass-morphism-enhanced {
+  will-change: transform, box-shadow;
+  contain: layout style paint;
+}
+
+.hover-lift:hover {
+  will-change: transform;
 }

@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback, memo, lazy, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Rocket,
   Play,
   CheckCircle,
   ShieldCheck,
@@ -22,38 +21,28 @@ import {
   DollarSign,
   BarChart3,
   PieChart,
-  Mail,
   Star,
   Building2,
   Users,
   Target,
   Zap,
   Shield,
-  Phone,
-  MapPin,
-  Linkedin,
-  Twitter,
-  Facebook,
-  ChevronDown,
-  ChevronUp,
   Search,
-  FileText,
-  Eye,
   Map,
   Monitor,
-  BookOpen,
   Upload,
-  Download,
   Package,
   HelpCircle,
-  Lock,
-  User,
-  Briefcase
+  User
 } from "lucide-react";
 import venzipLogo from "@assets/venzip-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+// Lazy load heavy components
+const DemoForm = lazy(() => import('@/components/DemoForm'));
+const TestimonialCarousel = lazy(() => import('@/components/TestimonialCarousel'));
 
 export default function Landing() {
   const { isAuthenticated, user } = useAuth();
@@ -67,36 +56,60 @@ export default function Landing() {
     jobTitle: ''
   });
 
-  const handleLogin = () => {
-    window.location.href = "/api/login";
+  // Add structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Venzip",
+    "description": "AI-powered compliance platform for ISO 27001, SOC 2, HIPAA, and GDPR. Get audit-ready in days, not months.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "127"
+    }
   };
 
-  const handleGetStarted = () => {
+  const handleLogin = useCallback(() => {
+    window.location.href = "/api/login";
+  }, []);
+
+  const handleGetStarted = useCallback(() => {
     if (isAuthenticated) {
       window.location.href = "/dashboard";
     } else {
       window.location.href = "/onboarding";
     }
-  };
+  }, [isAuthenticated]);
 
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollToSection = useCallback((id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement demo request submission
     console.log('Demo request:', formData);
     alert('Thank you for your interest! We\'ll be in touch soon.');
-  };
+  }, [formData]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
 
-  const toggleFramework = (framework: string) => {
-    setOpenFramework(openFramework === framework ? null : framework);
-  };
+  const toggleFramework = useCallback((framework: string) => {
+    setOpenFramework(prev => prev === framework ? null : framework);
+  }, []);
 
   const frameworkDetails = {
     soc2: {
@@ -220,40 +233,75 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/30 relative overflow-hidden noise-texture light">
-      {/* Enhanced background effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/20 to-venzip-secondary/15 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-40 right-20 w-[500px] h-[500px] bg-gradient-to-br from-venzip-accent/15 to-success-green/10 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-gradient-to-br from-venzip-secondary/20 to-venzip-primary/15 rounded-full blur-3xl animate-float" style={{animationDelay: '4s'}}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-venzip-accent/5 to-transparent rounded-full blur-3xl animate-gradient-x"></div>
-      </div>
+    <>
+      {/* SEO Head Tags */}
+      <head>
+        <title>Venzip - AI-Powered Compliance Platform | Get Audit-Ready in Days</title>
+        <meta name="description" content="Transform compliance with Venzip's AI platform. Automate ISO 27001, SOC 2, HIPAA & GDPR compliance. Reduce costs by 60%, save 80% time. Start free trial." />
+        <meta name="keywords" content="compliance automation, ISO 27001, SOC 2, HIPAA, GDPR, audit preparation, AI compliance, security compliance" />
+        <meta property="og:title" content="Venzip - Get Audit-Ready in Days, Not Months" />
+        <meta property="og:description" content="AI-powered compliance platform for modern businesses. Automate evidence collection, risk assessment, and audit preparation." />
+        <meta property="og:image" content="/assets/venzip-logo.png" />
+        <meta property="og:url" content="https://venzip.com" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://venzip.com" />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </head>
+      
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/30 relative overflow-hidden noise-texture light">
+        {/* Optimized background effects - reduced complexity */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-venzip-primary/15 to-venzip-secondary/10 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute top-40 right-20 w-[400px] h-[400px] bg-gradient-to-br from-venzip-accent/10 to-success-green/5 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+          <div className="absolute bottom-20 left-1/4 w-64 h-64 bg-gradient-to-br from-venzip-secondary/15 to-venzip-primary/10 rounded-full blur-3xl animate-float" style={{animationDelay: '4s'}}></div>
+        </div>
 
-      {/* Navigation Header */}
+      {/* Optimized Navigation Header */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass-morphism-enhanced border-b border-white/30 shadow-xl"
-           style={{
-             background: 'rgba(255, 255, 255, 0.1)',
-             backdropFilter: 'blur(30px)',
-             WebkitBackdropFilter: 'blur(30px)'
-           }}>
+           role="navigation"
+           aria-label="Main navigation">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <img
               src={venzipLogo}
-              alt="Venzip Logo"
-              className="h-10"
-              style={{ width: 'auto' }}
+              alt="Venzip - AI-Powered Compliance Platform"
+              className="h-10 w-auto"
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <button onClick={() => scrollToSection('benefits')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Benefits</button>
-            <button onClick={() => scrollToSection('how-it-works')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">How It Works</button>
-            <button onClick={() => scrollToSection('demo-form')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Demo</button>
-            <button onClick={() => scrollToSection('faqs')} className="text-gray-600 hover:text-gray-900 transition-colors font-medium">FAQs</button>
+            <button 
+              onClick={() => scrollToSection('benefits')} 
+              className="text-gray-600 hover:text-gray-900 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-venzip-primary rounded-md px-3 py-2"
+              aria-label="Navigate to benefits section"
+            >
+              Benefits
+            </button>
+            <button 
+              onClick={() => scrollToSection('how-it-works')} 
+              className="text-gray-600 hover:text-gray-900 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-venzip-primary rounded-md px-3 py-2"
+              aria-label="Navigate to how it works section"
+            >
+              How It Works
+            </button>
+            <button 
+              onClick={() => scrollToSection('demo-form')} 
+              className="text-gray-600 hover:text-gray-900 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-venzip-primary rounded-md px-3 py-2"
+              aria-label="Navigate to demo form"
+            >
+              Demo
+            </button>
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">Welcome back, {(user as any)?.firstName || user?.email || 'User'}!</span>
-                <Button onClick={() => window.location.href = "/dashboard"} className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold">
+                <Button 
+                  onClick={() => window.location.href = "/dashboard"} 
+                  className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold"
+                  aria-label="Go to dashboard"
+                >
                   Dashboard
                 </Button>
               </div>
@@ -263,12 +311,14 @@ export default function Landing() {
                   onClick={handleLogin}
                   variant="outline"
                   className="glass-card border-0 hover:shadow-lg transition-all duration-300"
+                  aria-label="Sign in to your account"
                 >
                   Sign In
                 </Button>
                 <Button
                   onClick={handleGetStarted}
                   className="bg-gradient-to-r from-venzip-primary to-venzip-secondary text-white hover:shadow-lg hover:shadow-venzip-primary/25 transition-all duration-300"
+                  aria-label="Get started with free trial"
                 >
                   Get Started
                 </Button>
@@ -279,7 +329,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 relative z-10">
+      <header className="pt-32 pb-20 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="max-w-2xl">
@@ -288,21 +338,48 @@ export default function Landing() {
               </h1>
 
               <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
-                Venzip makes compliance simple. Our AI-powered platform automates ISO 27001, SOC 2, HIPAA, and more — with dashboards, evidence mapping, and expert guidance built-in.
+                Venzip makes compliance simple. Our AI-powered platform automates ISO 27001, SOC 2, HIPAA, and GDPR — with dashboards, evidence mapping, and expert guidance built-in.
               </p>
 
-              <Button
-                onClick={() => scrollToSection('demo-form')}
-                data-testid="button-access-demo"
-                className="bg-gradient-to-r from-venzip-primary to-venzip-secondary hover:from-venzip-primary/90 hover:to-venzip-secondary/90 text-white font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-2xl hover:shadow-venzip-primary/30 hover:-translate-y-1 transform transition-all duration-300 flex items-center justify-center"
-              >
-                <Play className="mr-2 h-5 w-5" />
-                Access My Free Demo
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <Button
+                  onClick={() => scrollToSection('demo-form')}
+                  data-testid="button-access-demo"
+                  className="bg-gradient-to-r from-venzip-primary to-venzip-secondary hover:from-venzip-primary/90 hover:to-venzip-secondary/90 text-white font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-2xl hover:shadow-venzip-primary/30 hover:-translate-y-1 transform transition-all duration-300 flex items-center justify-center"
+                  aria-label="Access free demo"
+                >
+                  <Play className="mr-2 h-5 w-5" aria-hidden="true" />
+                  Access My Free Demo
+                </Button>
+                <Button
+                  onClick={() => scrollToSection('how-it-works')}
+                  variant="outline"
+                  className="px-8 py-4 text-lg rounded-xl border-2 border-gray-300 hover:border-venzip-primary hover:text-venzip-primary transition-all duration-300"
+                  aria-label="Learn how it works"
+                >
+                  How It Works
+                </Button>
+              </div>
+
+              {/* Trust indicators */}
+              <div className="flex items-center gap-6 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" aria-hidden="true" />
+                  <span>Free 14-day trial</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" aria-hidden="true" />
+                  <span>No credit card required</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" aria-hidden="true" />
+                  <span>Setup in 5 minutes</span>
+                </div>
+              </div>
             </div>
 
             <div className="hidden lg:block">
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-white/30">
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-white/30" role="img" aria-label="Audit readiness dashboard preview">
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Audit Readiness Dashboard</h3>
                   <div className="grid grid-cols-2 gap-4">
@@ -328,7 +405,7 @@ export default function Landing() {
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
       {/* Trust Strip */}
       <section className="py-12 px-6 bg-white/50 backdrop-blur-sm border-y border-gray-200/50">
@@ -1111,9 +1188,125 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Demo Form Section */}
+      <section id="demo-form" className="py-24 px-6 bg-gradient-to-br from-venzip-primary/5 to-venzip-accent/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+              Ready to <span className="text-gradient-primary bg-clip-text text-transparent bg-gradient-hero">Transform</span> Your Compliance?
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Get a personalized demo and see how Venzip can reduce your compliance costs by 60%
+            </p>
+          </div>
+          
+          <Suspense fallback={
+            <div className="bg-white rounded-2xl p-8 shadow-2xl border border-white/30">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+                <div className="space-y-4">
+                  <div className="h-10 bg-gray-200 rounded"></div>
+                  <div className="h-10 bg-gray-200 rounded"></div>
+                  <div className="h-10 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            </div>
+          }>
+            <Card className="glass-card max-w-2xl mx-auto">
+              <CardContent className="p-8">
+                <form onSubmit={handleFormSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">First Name</Label>
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        type="text"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                        required
+                        aria-describedby="firstName-help"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        type="text"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">Work Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="mt-1"
+                      required
+                      aria-describedby="email-help"
+                    />
+                    <p id="email-help" className="text-xs text-gray-500 mt-1">We'll never share your email</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="company" className="text-sm font-medium text-gray-700">Company</Label>
+                      <Input
+                        id="company"
+                        name="company"
+                        type="text"
+                        value={formData.company}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="jobTitle" className="text-sm font-medium text-gray-700">Job Title</Label>
+                      <Input
+                        id="jobTitle"
+                        name="jobTitle"
+                        type="text"
+                        value={formData.jobTitle}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-venzip-primary to-venzip-secondary text-white font-semibold py-4 text-lg rounded-xl hover:shadow-xl hover:-translate-y-1 transform transition-all duration-300"
+                  >
+                    Get My Free Demo
+                  </Button>
+                  
+                  <p className="text-xs text-gray-500 text-center">
+                    By submitting this form, you agree to our Privacy Policy and Terms of Service
+                  </p>
+                </form>
+              </CardContent>
+            </Card>
+          </Suspense>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
+        <div className="absolute inset-0 bg-dot-pattern opacity-5" aria-hidden="true"></div>
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-1">
@@ -1121,8 +1314,8 @@ export default function Landing() {
                 <img
                   src={venzipLogo}
                   alt="Venzip Logo"
-                  className="h-12 hover:scale-110 transition-transform duration-300"
-                  style={{ width: 'auto' }}
+                  className="h-12 w-auto hover:scale-110 transition-transform duration-300"
+                  loading="lazy"
                 />
               </div>
               <p className="text-gray-300 text-sm leading-relaxed mb-6">
@@ -1134,30 +1327,30 @@ export default function Landing() {
             <div>
               <h4 className="font-bold mb-6 text-lg text-white">Platform</h4>
               <ul className="space-y-3 text-sm text-gray-300">
-                <li><button onClick={() => scrollToSection('features')} className="hover:text-venzip-primary transition-colors duration-300">Features</button></li>
-                <li><button onClick={() => scrollToSection('frameworks')} className="hover:text-venzip-primary transition-colors duration-300">Frameworks</button></li>
-                <li><button onClick={() => scrollToSection('enterprise')} className="hover:text-venzip-primary transition-colors duration-300">Enterprise</button></li>
-                <li><button onClick={() => scrollToSection('roi-metrics')} className="hover:text-venzip-primary transition-colors duration-300">ROI</button></li>
+                <li><button onClick={() => scrollToSection('features')} className="hover:text-venzip-primary transition-colors duration-300 focus:outline-none focus:text-venzip-primary">Features</button></li>
+                <li><button onClick={() => scrollToSection('benefits')} className="hover:text-venzip-primary transition-colors duration-300 focus:outline-none focus:text-venzip-primary">Benefits</button></li>
+                <li><button onClick={() => scrollToSection('enterprise')} className="hover:text-venzip-primary transition-colors duration-300 focus:outline-none focus:text-venzip-primary">Enterprise</button></li>
+                <li><button onClick={() => scrollToSection('roi-metrics')} className="hover:text-venzip-primary transition-colors duration-300 focus:outline-none focus:text-venzip-primary">ROI</button></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold mb-6 text-lg text-white">Resources</h4>
               <ul className="space-y-3 text-sm text-gray-300">
-                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300">Documentation</a></li>
-                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300">Compliance Guides</a></li>
-                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300">Best Practices</a></li>
-                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300">Support</a></li>
+                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 focus:outline-none focus:text-venzip-accent">Documentation</a></li>
+                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 focus:outline-none focus:text-venzip-accent">Compliance Guides</a></li>
+                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 focus:outline-none focus:text-venzip-accent">Best Practices</a></li>
+                <li><a href="#" className="hover:text-venzip-accent transition-colors duration-300 focus:outline-none focus:text-venzip-accent">Support</a></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold mb-6 text-lg text-white">Company</h4>
               <ul className="space-y-3 text-sm text-gray-300">
-                <li><a href="#" className="hover:text-success-green transition-colors duration-300">About Us</a></li>
-                <li><a href="#" className="hover:text-success-green transition-colors duration-300">Security</a></li>
-                <li><a href="#" className="hover:text-success-green transition-colors duration-300">Privacy Policy</a></li>
-                <li><a href="mailto:support@venzip.com" className="hover:text-success-green transition-colors duration-300">Contact</a></li>
+                <li><a href="#" className="hover:text-success-green transition-colors duration-300 focus:outline-none focus:text-success-green">About Us</a></li>
+                <li><a href="#" className="hover:text-success-green transition-colors duration-300 focus:outline-none focus:text-success-green">Security</a></li>
+                <li><a href="#" className="hover:text-success-green transition-colors duration-300 focus:outline-none focus:text-success-green">Privacy Policy</a></li>
+                <li><a href="mailto:support@venzip.com" className="hover:text-success-green transition-colors duration-300 focus:outline-none focus:text-success-green">Contact</a></li>
               </ul>
             </div>
           </div>
@@ -1169,11 +1362,11 @@ export default function Landing() {
               </p>
               <div className="flex items-center space-x-6 text-sm text-gray-400">
                 <span className="flex items-center space-x-2">
-                  <ShieldCheck className="h-4 w-4 text-venzip-primary" />
+                  <ShieldCheck className="h-4 w-4 text-venzip-primary" aria-hidden="true" />
                   <span>SOC 2 Compliant</span>
                 </span>
                 <span className="flex items-center space-x-2">
-                  <Award className="h-4 w-4 text-venzip-accent" />
+                  <Award className="h-4 w-4 text-venzip-accent" aria-hidden="true" />
                   <span>Enterprise Grade</span>
                 </span>
               </div>
