@@ -109,6 +109,7 @@ export function TourStep({
     let retryCount = 0;
     const maxRetries = 10;
     const retryDelay = 500;
+    let autoAdvanceTimeout: NodeJS.Timeout | null = null;
 
     const findTargetElement = (): HTMLElement | null => {
       let targetElement = document.querySelector(target) as HTMLElement;
@@ -138,43 +139,52 @@ export function TourStep({
         
         console.warn(`Tour target not found after ${maxRetries} attempts: ${target}${fallbackTarget ? ` (fallback: ${fallbackTarget})` : ''}`);
         // Auto-advance tour after exhausting retries
-        const timeout = setTimeout(() => {
+        autoAdvanceTimeout = setTimeout(() => {
           console.log(`Auto-advancing tour due to missing target: ${target}`);
           nextStep();
         }, 1000);
-        return () => clearTimeout(timeout);
+        return;
       }
 
-    const updatePosition = () => {
-      const rect = targetElement.getBoundingClientRect();
-      // Use viewport coordinates for fixed positioning (no scroll offset needed)
-      setTargetPosition({
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
+      const updatePosition = () => {
+        const rect = targetElement.getBoundingClientRect();
+        // Use viewport coordinates for fixed positioning (no scroll offset needed)
+        setTargetPosition({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        });
+      };
+
+      updatePosition();
+      
+      // Scroll target into view if it's not visible
+      targetElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'center' 
       });
+
+      // Update position on scroll and resize
+      const handleUpdate = () => requestAnimationFrame(updatePosition);
+      window.addEventListener('scroll', handleUpdate);
+      window.addEventListener('resize', handleUpdate);
     };
 
-    updatePosition();
-    
-    // Scroll target into view if it's not visible
-    targetElement.scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'center',
-      inline: 'center' 
-    });
-
-    // Update position on scroll and resize
-    const handleUpdate = () => requestAnimationFrame(updatePosition);
-    window.addEventListener('scroll', handleUpdate);
-    window.addEventListener('resize', handleUpdate);
+    // Start the targeting process
+    attemptTargeting();
 
     return () => {
-      window.removeEventListener('scroll', handleUpdate);
-      window.removeEventListener('resize', handleUpdate);
+      // Clean up auto-advance timeout if it exists
+      if (autoAdvanceTimeout) {
+        clearTimeout(autoAdvanceTimeout);
+      }
+      // Clean up event listeners
+      window.removeEventListener('scroll', () => {});
+      window.removeEventListener('resize', () => {});
     };
-  }, [target]);
+  }, [target, nextStep]);
 
   // Calculate popover position based on target position and placement
   useEffect(() => {
