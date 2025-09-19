@@ -239,9 +239,9 @@ export function TourStep({
 
   return createPortal(
     <div className="fixed inset-0 z-[9999]">
-      {/* Overlay with spotlight effect */}
+      {/* Overlay with crisp spotlight cutout effect */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80"
         style={{
           background: `
             radial-gradient(
@@ -249,9 +249,9 @@ export function TourStep({
               ${targetPosition.left + targetPosition.width / 2}px 
               ${targetPosition.top + targetPosition.height / 2}px,
               transparent 0%,
-              transparent 20%,
-              rgba(0, 0, 0, 0.2) 30%,
-              rgba(0, 0, 0, 0.8) 60%,
+              transparent 35%,
+              rgba(0, 0, 0, 0.1) 40%,
+              rgba(0, 0, 0, 0.8) 65%,
               rgba(0, 0, 0, 0.9) 100%
             )
           `
@@ -290,14 +290,14 @@ export function TourStep({
       >
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between gap-4">
-            <CardTitle className="text-lg font-semibold text-gray-900 leading-tight">
+            <CardTitle className="text-lg font-semibold text-foreground leading-tight">
               {title}
             </CardTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => showSkip ? setShowSkipConfirm(true) : endTour()}
-              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent"
               data-testid="tour-close-button"
             >
               <X className="h-4 w-4" />
@@ -306,7 +306,7 @@ export function TourStep({
           
           {/* Progress indicator */}
           <div className="space-y-2">
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>Step {state.currentStep + 1} of {state.totalSteps}</span>
               <span>{Math.round(progress)}% complete</span>
             </div>
@@ -315,7 +315,7 @@ export function TourStep({
         </CardHeader>
 
         <CardContent className="pt-0">
-          <p className="text-gray-700 leading-relaxed mb-6 text-sm">
+          <p className="text-foreground/80 leading-relaxed mb-6 text-sm">
             {content}
           </p>
 
@@ -342,7 +342,7 @@ export function TourStep({
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowSkipConfirm(true)}
-                  className="flex items-center gap-2 text-gray-500 hover:text-gray-700"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
                   data-testid="tour-skip-button"
                 >
                   <SkipForward className="h-4 w-4" />
@@ -364,9 +364,12 @@ export function TourStep({
         </CardContent>
       </Card>
 
-      {/* Skip Confirmation Dialog */}
+      {/* Skip Confirmation Dialog - Elevated above tour overlay */}
       <AlertDialog open={showSkipConfirm} onOpenChange={setShowSkipConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent 
+          className="z-[10000] fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]" 
+          style={{ zIndex: 10000 }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
