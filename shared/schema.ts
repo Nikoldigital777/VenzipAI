@@ -54,6 +54,7 @@ export const companies = pgTable("companies", {
   contactName: varchar("contact_name", { length: 255 }),
   contactEmail: varchar("contact_email", { length: 255 }),
   contactRole: varchar("contact_role", { length: 100 }),
+  selectedFrameworks: text("selected_frameworks").array().default(sql`'{}'::text[]`),
   userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

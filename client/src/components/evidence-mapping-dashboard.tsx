@@ -46,6 +46,9 @@ type EvidenceMapping = {
   documentName?: string;
   requirementTitle?: string;
   frameworkId?: string;
+  isPolicyDocument?: boolean;
+  documentType?: string;
+  suggestedEvidence?: string[];
 };
 
 type EvidenceGap = {

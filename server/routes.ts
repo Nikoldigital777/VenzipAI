@@ -2108,8 +2108,9 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-    }
-  });
+    // The following closing brace was removed as it was causing a syntax error.
+    // } // Removed this extra closing brace
+  // }); // Removed this extra closing brace and semicolon
 
   app.get('/api/risks/latest-score', isAuthenticated, async (req: any, res) => {
     try {
