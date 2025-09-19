@@ -1,4 +1,3 @@
-
 import { db } from "./db";
 import { frameworks, complianceRequirements } from "@shared/schema";
 
@@ -8,87 +7,6 @@ interface Framework {
   displayName: string;
   description: string;
   complexity: string;
-  estimatedTimeMonths: number;
-  totalControls: number;
-  icon: string;
-  color: string;
-}
-
-const frameworksData: Framework[] = [
-  {
-    id: 'soc2',
-    name: 'soc2',
-    displayName: 'SOC 2',
-    description: 'System and Organization Controls for service organizations, focusing on security, availability, processing integrity, confidentiality, and privacy.',
-    complexity: 'medium',
-    estimatedTimeMonths: 6,
-    totalControls: 64,
-    icon: '🛡️',
-    color: '#4ECDC4'
-  },
-  {
-    id: 'iso27001',
-    name: 'iso27001',
-    displayName: 'ISO 27001',
-    description: 'International standard for information security management systems (ISMS), providing a systematic approach to managing sensitive information.',
-    complexity: 'high',
-    estimatedTimeMonths: 12,
-    totalControls: 114,
-    icon: '📜',
-    color: '#44D9E8'
-  },
-  {
-    id: 'hipaa',
-    name: 'hipaa',
-    displayName: 'HIPAA',
-    description: 'Health Insurance Portability and Accountability Act, ensuring the protection of sensitive patient health information.',
-    complexity: 'medium',
-    estimatedTimeMonths: 4,
-    totalControls: 18,
-    icon: '🏥',
-    color: '#52E5A3'
-  },
-  {
-    id: 'scf',
-    name: 'scf',
-    displayName: 'SCF (Secure Controls Framework)',
-    description: 'Comprehensive cybersecurity control framework covering multiple domains of security controls.',
-    complexity: 'high',
-    estimatedTimeMonths: 10,
-    totalControls: 200,
-    icon: '🔐',
-    color: '#FF8C42'
-  }
-];
-
-export async function seedFrameworks() {
-  try {
-    console.log('🌱 Seeding frameworks...');
-    
-    // Check if frameworks already exist
-    const existingFrameworks = await db.select().from(frameworks);
-    if (existingFrameworks.length > 0) {
-      console.log('📊 Frameworks already seeded, skipping...');
-      return existingFrameworks;
-    }
-
-    // Insert frameworks
-    const insertedFrameworks = await db.insert(frameworks).values(frameworksData).returning();
-    console.log(`✅ Successfully seeded ${insertedFrameworks.length} frameworks`);
-    
-    return insertedFrameworks;
-  } catch (error) {
-    console.error('❌ Error seeding frameworks:', error);
-    throw error;
-  }
-}
-
-interface Framework {
-  id: string;
-  name: string;
-  displayName: string;
-  description: string;
-  complexity: 'low' | 'medium' | 'high';
   estimatedTimeMonths: number;
   totalControls: number;
   icon: string;
@@ -172,7 +90,7 @@ const sampleRequirements = [
     category: 'risk_assessment',
     priority: 'high'
   },
-  
+
   // ISO 27001 Requirements
   {
     id: 'iso27001-a5-1-1',
@@ -192,7 +110,7 @@ const sampleRequirements = [
     category: 'asset_management',
     priority: 'high'
   },
-  
+
   // HIPAA Requirements
   {
     id: 'hipaa-164-308a1',
@@ -212,7 +130,7 @@ const sampleRequirements = [
     category: 'technical_safeguard',
     priority: 'critical'
   },
-  
+
   // SCF Requirements
   {
     id: 'scf-iac-01',
@@ -236,20 +154,21 @@ const sampleRequirements = [
 
 export async function seedFrameworks() {
   console.log('🌱 Seeding frameworks...');
-  
+
   try {
     // Check if frameworks already exist
     const existingFrameworks = await db.select().from(frameworks);
-    
+
     if (existingFrameworks.length > 0) {
       console.log('📊 Frameworks already exist, skipping seed');
-      return;
+      return existingFrameworks;
     }
 
     // Insert all frameworks
-    await db.insert(frameworks).values(frameworksData);
-    
-    console.log(`✅ Successfully seeded ${frameworksData.length} frameworks`);
+    const insertedFrameworks = await db.insert(frameworks).values(frameworksData).returning();
+
+    console.log(`✅ Successfully seeded ${insertedFrameworks.length} frameworks`);
+    return insertedFrameworks;
   } catch (error) {
     console.error('❌ Error seeding frameworks:', error);
     throw error;
@@ -258,11 +177,11 @@ export async function seedFrameworks() {
 
 export async function seedComplianceRequirements() {
   console.log('🌱 Seeding compliance requirements...');
-  
+
   try {
     // Check if requirements already exist
     const existingRequirements = await db.select().from(complianceRequirements);
-    
+
     if (existingRequirements.length > 0) {
       console.log('📋 Compliance requirements already exist, skipping seed');
       return;
@@ -270,7 +189,7 @@ export async function seedComplianceRequirements() {
 
     // Insert all requirements
     await db.insert(complianceRequirements).values(sampleRequirements);
-    
+
     console.log(`✅ Successfully seeded ${sampleRequirements.length} compliance requirements`);
   } catch (error) {
     console.error('❌ Error seeding compliance requirements:', error);
@@ -281,10 +200,10 @@ export async function seedComplianceRequirements() {
 // Main seed function
 export async function runSeeds() {
   console.log('🚀 Starting database seeding...');
-  
+
   await seedFrameworks();
   await seedComplianceRequirements();
-  
+
   console.log('🎉 Database seeding completed');
 }
 
