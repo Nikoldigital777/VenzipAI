@@ -43,7 +43,7 @@ interface Task {
     email: string;
   };
   tags: string[];
-  
+
   // AI-powered insights
   aiPriorityScore?: number;
   aiReasoning?: string;
@@ -72,7 +72,7 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
     limit: 20,
     offset: 0
   });
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -112,7 +112,7 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
           params.append(key, value.toString());
         }
       });
-      
+
       const response = await fetch(`/api/tasks?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch tasks');
@@ -212,8 +212,8 @@ export default function TaskList({ onCreateTask, onEditTask, onViewTask }: TaskL
             </Button>
             <Button 
               onClick={onCreateTask} 
-              className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 font-medium px-6 py-3 text-lg group"
-              data-testid="button-create-task"
+              className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 flex items-center gap-2 px-6 py-3 rounded-xl font-medium group"
+              data-testid="create-task-button"
             >
               <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
               Create Task

@@ -14,7 +14,7 @@ export const mainTourSteps: TourStep[] = [
     title: '🧭 Your Navigation Hub',
     content: 'This sidebar is your command center. You can access all main sections, track framework progress, and see completion percentages at a glance. Notice how each section is organized for optimal workflow.',
     placement: 'right',
-    fallbackTarget: '[data-sidebar="sidebar"]',
+    fallbackTarget: 'aside',
   },
   {
     target: '[data-testid="nav-dashboard"]',
@@ -31,7 +31,7 @@ export const mainTourSteps: TourStep[] = [
     title: '📈 Compliance Overview',
     content: 'Here you can see your overall compliance status across all frameworks. The visual indicators show your progress and highlight areas that need attention. This real-time view helps you prioritize your work.',
     placement: 'bottom',
-    fallbackTarget: '.grid',
+    fallbackTarget: '[data-testid="key-metrics-card"]',
   },
   
   // Task Management (Steps 5-6)
@@ -48,7 +48,7 @@ export const mainTourSteps: TourStep[] = [
     title: '➕ Creating Tasks',
     content: 'Use this button to create new compliance tasks. You can assign tasks to team members, set deadlines, link them to specific frameworks, and track progress. Tasks are the building blocks of your compliance program.',
     placement: 'bottom',
-    fallbackTarget: 'button',
+    fallbackTarget: 'button[type="button"]',
   },
   
   // Evidence Management (Steps 7-8)
@@ -58,6 +58,7 @@ export const mainTourSteps: TourStep[] = [
     content: 'Evidence management is crucial for compliance. This section handles all your compliance documents. Our AI will analyze and automatically map documents to relevant requirements.',
     placement: 'right',
     navigateTo: '/evidence',
+    fallbackTarget: '[href="/evidence"]',
   },
   {
     target: '[data-testid="file-upload-area"]',
@@ -74,13 +75,14 @@ export const mainTourSteps: TourStep[] = [
     content: 'Risk management is key to proactive compliance. Here you\'ll monitor compliance risks with our AI-driven scoring system and track mitigation progress.',
     placement: 'right',
     navigateTo: '/risks',
+    fallbackTarget: '[href="/risks"]',
   },
   {
-    target: '[data-testid="risk-dashboard"]',
+    target: '[data-testid="tab-dashboard"]',
     title: '🎯 Risk Scoring & Monitoring',
     content: 'Our AI continuously evaluates your compliance risks, considering factors like overdue tasks, missing evidence, and regulatory changes. This dashboard helps you focus on the highest-priority issues first.',
     placement: 'bottom',
-    fallbackTarget: '.container',
+    fallbackTarget: '[data-testid="summary-high-risk"]',
   },
   
   // Compliance Frameworks (Steps 11-12)
@@ -90,9 +92,10 @@ export const mainTourSteps: TourStep[] = [
     content: 'This is where you\'ll find detailed analytics for each compliance framework. View progress, identify gaps, and get AI-powered recommendations for improvement.',
     placement: 'right',
     navigateTo: '/compliance-insights',
+    fallbackTarget: '[href="/compliance-insights"]',
   },
   {
-    target: '[data-testid="framework-analytics"]',
+    target: '.glass-card',
     title: '📊 Framework Analytics & Gap Analysis',
     content: 'Get deep insights into your compliance posture. See completion percentages, identify gaps, track trends over time, and receive AI recommendations tailored to each framework\'s requirements.',
     placement: 'bottom',
@@ -104,7 +107,7 @@ export const mainTourSteps: TourStep[] = [
     target: '[data-testid="ai-chat-button"]',
     title: '🤖 Meet Claude - Your AI Compliance Expert',
     content: 'This is Claude, your AI assistant! Claude can answer compliance questions, analyze documents, provide regulatory guidance, and help with policy writing. Think of Claude as your 24/7 compliance consultant.',
-    placement: 'top',
+    placement: 'left',
   },
   
   // Advanced Features (Steps 14-16)

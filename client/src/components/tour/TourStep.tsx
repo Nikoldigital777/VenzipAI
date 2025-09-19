@@ -124,12 +124,27 @@ export function TourStep({
       
       // Try even more generic fallbacks for common cases
       if (!targetElement) {
-        if (target.includes('sidebar')) {
-          targetElement = document.querySelector('aside') || document.querySelector('[role="navigation"]') as HTMLElement;
-        } else if (target.includes('button')) {
-          targetElement = document.querySelector('button:last-of-type') as HTMLElement;
+        if (target.includes('sidebar') || target.includes('nav-')) {
+          targetElement = document.querySelector('aside') || 
+                         document.querySelector('[data-sidebar="sidebar"]') ||
+                         document.querySelector('nav') as HTMLElement;
+        } else if (target.includes('button') || target.includes('create')) {
+          targetElement = document.querySelector('button[data-testid*="create"]') || 
+                         document.querySelector('button:contains("Create")') ||
+                         document.querySelector('button:last-of-type') as HTMLElement;
         } else if (target.includes('dashboard') || target.includes('overview')) {
-          targetElement = document.querySelector('main') || document.querySelector('.container') as HTMLElement;
+          targetElement = document.querySelector('main') || 
+                         document.querySelector('.max-w-7xl') ||
+                         document.querySelector('.container') as HTMLElement;
+        } else if (target.includes('upload')) {
+          targetElement = document.querySelector('[class*="border-dashed"]') ||
+                         document.querySelector('input[type="file"]') as HTMLElement;
+        } else if (target.includes('risk')) {
+          targetElement = document.querySelector('[data-testid*="risk"]') ||
+                         document.querySelector('[class*="risk"]') as HTMLElement;
+        } else if (target.includes('chat')) {
+          targetElement = document.querySelector('[data-testid*="chat"]') ||
+                         document.querySelector('button[class*="gradient"]') as HTMLElement;
         }
         
         if (targetElement) {

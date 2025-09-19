@@ -39,7 +39,7 @@ export function TourInitializer() {
       } else {
         console.log('🎯 Tour start conditions no longer met, skipping');
       }
-    }, 3000); // 3 second delay to ensure page elements are fully rendered
+    }, 5000); // 5 second delay to ensure page elements are fully rendered and data loaded
 
     return () => clearTimeout(timer);
   }, [user, location, state.isActive, state.userPreferences.autoStart, state.userPreferences.hasSeenWelcome, state.userPreferences.skipTutorials, startTour, isTourCompleted]);
