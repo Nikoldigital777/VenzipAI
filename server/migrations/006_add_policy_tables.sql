@@ -36,18 +36,5 @@ CREATE TABLE IF NOT EXISTS "generated_policies" (
   "updated_at" timestamp DEFAULT now()
 );
 
--- Add foreign key constraints
-ALTER TABLE "policy_templates" ADD CONSTRAINT "policy_templates_framework_id_frameworks_id_fk" 
-  FOREIGN KEY ("framework_id") REFERENCES "frameworks"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
-ALTER TABLE "generated_policies" ADD CONSTRAINT "generated_policies_company_id_companies_id_fk" 
-  FOREIGN KEY ("company_id") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
-
-ALTER TABLE "generated_policies" ADD CONSTRAINT "generated_policies_template_id_policy_templates_id_fk" 
-  FOREIGN KEY ("template_id") REFERENCES "policy_templates"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
-ALTER TABLE "generated_policies" ADD CONSTRAINT "generated_policies_user_id_users_id_fk" 
-  FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
-
-ALTER TABLE "generated_policies" ADD CONSTRAINT "generated_policies_approved_by_users_id_fk" 
-  FOREIGN KEY ("approved_by") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+-- Foreign key constraints will be added by migration 008_fix_policy_templates.sql
+-- which recreates the tables with the correct structure and constraints

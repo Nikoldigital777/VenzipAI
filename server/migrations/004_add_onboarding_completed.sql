@@ -1,6 +1,6 @@
 
 -- Add onboarding completion tracking
-ALTER TABLE companies ADD COLUMN onboarding_completed BOOLEAN DEFAULT false;
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT false;
 
 -- Update existing companies that have frameworks selected as completed
 UPDATE companies 
