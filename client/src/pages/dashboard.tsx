@@ -54,27 +54,35 @@ export default function Dashboard() {
   const { data, isLoading, isError, error, refetch } = useSummary();
   
   // Dashboard progress data
-  const { data: progressData } = useQuery({
+  const { data: progressData, isLoading: progressLoading, error: progressError } = useQuery({
     queryKey: ['/api/dashboard/progress'],
     queryFn: async () => {
       const response = await fetch('/api/dashboard/progress');
-      if (!response.ok) throw new Error('Failed to fetch progress');
+      if (!response.ok) {
+        console.warn('Progress API failed:', response.status);
+        return { percentComplete: 0, totalTasks: 0, completedTasks: 0 };
+      }
       return response.json();
     },
     refetchOnWindowFocus: false,
-    staleTime: 30000
+    staleTime: 30000,
+    retry: 1
   });
 
   // Recent tasks data
-  const { data: recentTasks } = useQuery({
+  const { data: recentTasks, isLoading: tasksLoading, error: tasksError } = useQuery({
     queryKey: ['/api/dashboard/recent-tasks'],
     queryFn: async () => {
       const response = await fetch('/api/dashboard/recent-tasks');
-      if (!response.ok) throw new Error('Failed to fetch recent tasks');
+      if (!response.ok) {
+        console.warn('Recent tasks API failed:', response.status);
+        return [];
+      }
       return response.json();
     },
     refetchOnWindowFocus: false,
-    staleTime: 30000
+    staleTime: 30000,
+    retry: 1
   });
 
   if (isLoading && !data) {

@@ -6,9 +6,29 @@ export function useSummary() {
   return useQuery({
     queryKey: ["/api/summary"],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/summary");
-      if (!res.ok) {
-        // Return default data structure if API fails
+      try {
+        const res = await apiRequest("GET", "/api/summary");
+        if (!res.ok) {
+          console.warn("Summary API failed:", res.status, res.statusText);
+          throw new Error(`Failed to fetch summary: ${res.status}`);
+        }
+        const data = await res.json();
+        
+        // Ensure data structure consistency
+        return {
+          compliancePercent: data.compliancePercent || 0,
+          gaps: Array.isArray(data.gaps) ? data.gaps : [],
+          stats: {
+            uploads: data.stats?.uploads || 0,
+            conversations: data.stats?.conversations || 0,
+            tasksOpenHigh: data.stats?.tasksOpenHigh || 0,
+            risksHigh: data.stats?.risksHigh || 0,
+          },
+          recentActivity: Array.isArray(data.recentActivity) ? data.recentActivity : [],
+        };
+      } catch (error) {
+        console.error("Error fetching summary:", error);
+        // Return safe fallback data
         return {
           compliancePercent: 0,
           gaps: [],
@@ -21,10 +41,10 @@ export function useSummary() {
           recentActivity: [],
         };
       }
-      return res.json();
     },
     refetchOnWindowFocus: false,
-    retry: 1,
-    staleTime: 30000, // Consider data stale after 30 seconds
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 30000,
   });
 }
