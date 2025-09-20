@@ -1,4 +1,5 @@
 import { useState, useCallback, memo, lazy, Suspense } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ const DemoForm = lazy(() => import('@/components/DemoForm'));
 
 export default function Landing() {
   const { isAuthenticated, user } = useAuth();
+  const [location, navigate] = useLocation();
   const [openFramework, setOpenFramework] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -81,11 +83,11 @@ export default function Landing() {
 
   const handleGetStarted = useCallback(() => {
     if (isAuthenticated) {
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
     } else {
-      window.location.href = "/onboarding";
+      navigate("/onboarding");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   const scrollToSection = useCallback((id: string) => {
     const element = document.getElementById(id);
@@ -253,7 +255,7 @@ export default function Landing() {
               alt="Venzip - AI-Powered Compliance Platform"
               className="h-10 w-auto"
               loading="eager"
-              fetchpriority="high"
+              fetchPriority="high"
             />
           </div>
           <div className="hidden md:flex items-center space-x-8">
@@ -282,7 +284,7 @@ export default function Landing() {
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">Welcome back, {(user as any)?.firstName || user?.email || 'User'}!</span>
                 <Button 
-                  onClick={() => window.location.href = "/dashboard"} 
+                  onClick={() => navigate("/dashboard")} 
                   className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold"
                   aria-label="Go to dashboard"
                 >
