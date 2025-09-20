@@ -1,0 +1,1487 @@
+// server/middleware/validation.ts
+import { Request, Response, NextFunction } from 'express';
+import { z, ZodError, ZodSchema } from 'zod';
+
+export interface ValidationError {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export interface ValidatedRequest<
+  TBody = any,
+  TQuery = any,
+  TParams = any
+> extends Request {
+  validatedBody: TBody;
+  validatedQuery: TQuery;
+  validatedParams: TParams;
+}
+
+/**
+ * Generic validation middleware that validates request body, query, and params
+ */
+export function validateRequest<
+  TBody = any,
+  TQuery = any,
+  TParams = any
+>(schemas: {
+  body?: ZodSchema<TBody>;
+  query?: ZodSchema<TQuery>;
+  params?: ZodSchema<TParams>;
+}) {
+  return (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const validatedReq = req as ValidatedRequest<TBody, TQuery, TParams>;
+
+      // Validate body if schema provided
+      if (schemas.body) {
+        const bodyResult = schemas.body.safeParse(req.body);
+        if (!bodyResult.success) {
+          return res.status(400).json({
+            error: 'Validation failed',
+            details: formatZodErrors(bodyResult.error),
+            field: 'body'
+          });
+        }
+        validatedReq.validatedBody = bodyResult.data;
+      }
+
+      // Validate query parameters if schema provided
+      if (schemas.query) {
+        const queryResult = schemas.query.safeParse(req.query);
+        if (!queryResult.success) {
+          return res.status(400).json({
+            error: 'Validation failed',
+            details: formatZodErrors(queryResult.error),
+            field: 'query'
+          });
+        }
+        validatedReq.validatedQuery = queryResult.data;
+      }
+
+      // Validate route parameters if schema provided
+      if (schemas.params) {
+        const paramsResult = schemas.params.safeParse(req.params);
+        if (!paramsResult.success) {
+          return res.status(400).json({
+            error: 'Validation failed',
+            details: formatZodErrors(paramsResult.error),
+            field: 'params'
+          });
+        }
+        validatedReq.validatedParams = paramsResult.data;
+      }
+
+      next();
+    } catch (error) {
+      console.error('Validation middleware error:', error);
+      res.status(500).json({
+        error: 'Internal validation error'
+      });
+    }
+  };
+}
+
+/**
+ * Simplified validation for body only (most common case)
+ */
+export function validateBody<T>(schema: ZodSchema<T>) {
+  return validateRequest({ body: schema });
+}
+
+/**
+ * Simplified validation for query only
+ */
+export function validateQuery<T>(schema: ZodSchema<T>) {
+  return validateRequest({ query: schema });
+}
+
+/**
+ * Simplified validation for params only
+ */
+export function validateParams<T>(schema: ZodSchema<T>) {
+  return validateRequest({ params: schema });
+}
+
+/**
+ * Format Zod validation errors into a more user-friendly format
+ */
+function formatZodErrors(error: ZodError): ValidationError[] {
+  return error.errors.map(err => ({
+    field: err.path.join('.'),
+    message: err.message,
+    code: err.code
+  }));
+}
+
+// server/schemas/validation.ts
+import { z } from 'zod';
+
+// Common validation schemas
+export const idParamSchema = z.object({
+  id: z.string().uuid('Invalid ID format')
+});
+
+export const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).optional()
+});
+
+export const searchQuerySchema = paginationQuerySchema.extend({
+  search: z.string().min(1).max(255).optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).default('desc')
+});
+
+// User validation schemas
+export const createUserSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  firstName: z.string().min(1, 'First name is required').max(50),
+  lastName: z.string().min(1, 'Last name is required').max(50),
+  role: z.enum(['admin', 'user', 'viewer']).default('user')
+});
+
+export const updateUserSchema = createUserSchema.partial();
+
+// Company validation schemas
+export const createCompanySchema = z.object({
+  name: z.string().min(1, 'Company name is required').max(255),
+  industry: z.string().min(1, 'Industry is required').max(100),
+  size: z.enum(['startup', 'small', 'medium', 'large', 'enterprise']),
+  contactEmail: z.string().email('Invalid email format'),
+  contactPhone: z.string().optional(),
+  address: z.string().optional(),
+  website: z.string().url('Invalid website URL').optional(),
+  selectedFrameworks: z.array(z.string()).min(1, 'At least one framework must be selected')
+});
+
+export const updateCompanySchema = createCompanySchema.partial();
+
+// Task validation schemas
+export const createTaskSchema = z.object({
+  title: z.string().min(1, 'Task title is required').max(255),
+  description: z.string().max(2000).optional(),
+  category: z.string().min(1, 'Category is required').max(100),
+  priority: z.enum(['low', 'medium', 'high', 'critical']),
+  status: z.enum(['not_started', 'in_progress', 'under_review', 'completed', 'blocked']).default('not_started'),
+  frameworkId: z.string().uuid('Invalid framework ID'),
+  dueDate: z.string().datetime().optional(),
+  assignedTo: z.string().email().optional(),
+  estimatedHours: z.number().int().min(1).max(1000).optional(),
+  tags: z.array(z.string()).default([]),
+  dependencies: z.array(z.string().uuid()).default([]),
+  complianceRequirement: z.string().optional(),
+  evidenceRequired: z.boolean().default(false)
+});
+
+export const updateTaskSchema = createTaskSchema.partial();
+
+export const taskFilterSchema = searchQuerySchema.extend({
+  status: z.enum(['not_started', 'in_progress', 'under_review', 'completed', 'blocked']).optional(),
+  priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  frameworkId: z.string().uuid().optional(),
+  assignedTo: z.string().email().optional(),
+  category: z.string().optional(),
+  dueDateFrom: z.string().datetime().optional(),
+  dueDateTo: z.string().datetime().optional()
+});
+
+// Document validation schemas
+export const documentUploadSchema = z.object({
+  fileName: z.string().min(1, 'File name is required').max(255),
+  fileType: z.string().min(1, 'File type is required'),
+  fileSize: z.number().int().min(1).max(50 * 1024 * 1024), // 50MB max
+  frameworkId: z.string().uuid('Invalid framework ID').optional(),
+  description: z.string().max(1000).optional(),
+  tags: z.array(z.string()).default([])
+});
+
+export const documentFilterSchema = searchQuerySchema.extend({
+  frameworkId: z.string().uuid().optional(),
+  fileType: z.string().optional(),
+  status: z.enum(['pending', 'verified', 'rejected']).optional(),
+  uploadedFrom: z.string().datetime().optional(),
+  uploadedTo: z.string().datetime().optional()
+});
+
+// Risk validation schemas
+export const createRiskSchema = z.object({
+  title: z.string().min(1, 'Risk title is required').max(255),
+  description: z.string().min(1, 'Risk description is required').max(2000),
+  category: z.string().min(1, 'Category is required').max(100),
+  impact: z.enum(['low', 'medium', 'high']),
+  likelihood: z.enum(['low', 'medium', 'high']),
+  status: z.enum(['identified', 'assessing', 'mitigating', 'monitoring', 'closed']).default('identified'),
+  frameworkId: z.string().uuid('Invalid framework ID').optional(),
+  mitigation: z.string().max(2000).optional(),
+  owner: z.string().email().optional(),
+  dueDate: z.string().datetime().optional()
+});
+
+export const updateRiskSchema = createRiskSchema.partial();
+
+export const riskFilterSchema = searchQuerySchema.extend({
+  category: z.string().optional(),
+  impact: z.enum(['low', 'medium', 'high']).optional(),
+  likelihood: z.enum(['low', 'medium', 'high']).optional(),
+  status: z.enum(['identified', 'assessing', 'mitigating', 'monitoring', 'closed']).optional(),
+  frameworkId: z.string().uuid().optional(),
+  owner: z.string().email().optional()
+});
+
+// Chat validation schemas
+export const chatMessageSchema = z.object({
+  message: z.string().min(1, 'Message cannot be empty').max(4000),
+  context: z.object({
+    currentPage: z.string().optional(),
+    frameworkId: z.string().uuid().optional(),
+    taskId: z.string().uuid().optional(),
+    documentId: z.string().uuid().optional()
+  }).optional()
+});
+
+// Onboarding validation schemas
+export const onboardingCompleteSchema = z.object({
+  company: createCompanySchema,
+  frameworks: z.array(z.string().uuid()).min(1, 'At least one framework must be selected'),
+  aiEnabled: z.boolean().default(true)
+});
+
+export const frameworkPreviewSchema = z.object({
+  frameworks: z.array(z.string().uuid()).min(1, 'At least one framework must be selected')
+});
+
+// Policy validation schemas
+export const generatePolicySchema = z.object({
+  templateId: z.string().uuid('Invalid template ID'),
+  customVariables: z.record(z.string(), z.any()).optional()
+});
+
+export const updatePolicyStatusSchema = z.object({
+  status: z.enum(['draft', 'review', 'approved', 'rejected'])
+});
+
+// Evidence mapping validation schemas
+export const createEvidenceMappingSchema = z.object({
+  documentId: z.string().uuid('Invalid document ID'),
+  requirementId: z.string().uuid('Invalid requirement ID'),
+  mappingType: z.enum(['direct', 'indirect', 'partial']).default('direct'),
+  mappingConfidence: z.string().regex(/^0\.\d{2}$/, 'Confidence must be a decimal like 0.85'),
+  qualityScore: z.string().regex(/^0\.\d{2}$/, 'Quality score must be a decimal like 0.90'),
+  evidenceSnippets: z.object({
+    snippets: z.array(z.string()).min(1, 'At least one evidence snippet required')
+  }),
+  aiAnalysis: z.object({
+    summary: z.string().min(1, 'Analysis summary is required'),
+    relevantSections: z.array(z.string()),
+    gaps: z.array(z.string()),
+    recommendations: z.array(z.string()),
+    qualityFactors: z.object({
+      completeness: z.number().min(0).max(1),
+      clarity: z.number().min(0).max(1),
+      relevance: z.number().min(0).max(1),
+      specificity: z.number().min(0).max(1)
+    })
+  }).optional(),
+  validationStatus: z.enum(['pending', 'validated', 'rejected']).default('pending')
+});
+
+// Learning resource validation schemas
+export const learningResourceFilterSchema = searchQuerySchema.extend({
+  frameworkId: z.string().uuid().optional(),
+  resourceType: z.enum(['pdf', 'video', 'article', 'course']).optional(),
+  category: z.string().optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional()
+});
+
+// Notification validation schemas
+export const notificationFilterSchema = paginationQuerySchema.extend({
+  filter: z.enum(['all', 'unread', 'high', 'urgent']).default('all'),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
+  type: z.string().optional()
+});
+
+export const markNotificationSchema = z.object({
+  notificationIds: z.array(z.string().uuid()).min(1, 'At least one notification ID required'),
+  action: z.enum(['read', 'unread', 'archive'])
+});
+
+// Type exports for use in route handlers
+export type IdParams = z.infer<typeof idParamSchema>;
+export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
+export type SearchQuery = z.infer<typeof searchQuerySchema>;
+export type CreateUserBody = z.infer<typeof createUserSchema>;
+export type UpdateUserBody = z.infer<typeof updateUserSchema>;
+export type CreateCompanyBody = z.infer<typeof createCompanySchema>;
+export type UpdateCompanyBody = z.infer<typeof updateCompanySchema>;
+export type CreateTaskBody = z.infer<typeof createTaskSchema>;
+export type UpdateTaskBody = z.infer<typeof updateTaskSchema>;
+export type TaskFilterQuery = z.infer<typeof taskFilterSchema>;
+export type DocumentUploadBody = z.infer<typeof documentUploadSchema>;
+export type DocumentFilterQuery = z.infer<typeof documentFilterSchema>;
+export type CreateRiskBody = z.infer<typeof createRiskSchema>;
+export type UpdateRiskBody = z.infer<typeof updateRiskSchema>;
+export type RiskFilterQuery = z.infer<typeof riskFilterSchema>;
+export type ChatMessageBody = z.infer<typeof chatMessageSchema>;
+export type OnboardingCompleteBody = z.infer<typeof onboardingCompleteSchema>;
+export type FrameworkPreviewBody = z.infer<typeof frameworkPreviewSchema>;
+export type GeneratePolicyBody = z.infer<typeof generatePolicySchema>;
+export type UpdatePolicyStatusBody = z.infer<typeof updatePolicyStatusSchema>;
+export type CreateEvidenceMappingBody = z.infer<typeof createEvidenceMappingSchema>;
+export type LearningResourceFilterQuery = z.infer<typeof learningResourceFilterSchema>;
+export type NotificationFilterQuery = z.infer<typeof notificationFilterSchema>;
+export type MarkNotificationBody = z.infer<typeof markNotificationSchema>;
+
+// server/routes/tasks.ts (Updated with validation)
+import express from "express";
+import { db } from "../db";
+import { tasks, frameworks } from "@shared/schema";
+import { eq, and, like, inArray, desc, asc } from "drizzle-orm";
+import { validateRequest, validateBody, validateQuery, validateParams } from "../middleware/validation";
+import { 
+  createTaskSchema, 
+  updateTaskSchema, 
+  taskFilterSchema, 
+  idParamSchema,
+  type ValidatedRequest,
+  type CreateTaskBody,
+  type UpdateTaskBody,
+  type TaskFilterQuery,
+  type IdParams
+} from "../schemas/validation";
+import { isAuthenticated } from "../replitAuth";
+
+const router = express.Router();
+
+// Apply authentication to all routes
+router.use(isAuthenticated);
+
+// GET /api/tasks - List tasks with filtering and pagination
+router.get(
+  "/",
+  validateQuery(taskFilterSchema),
+  async (req: ValidatedRequest<any, TaskFilterQuery>, res) => {
+    try {
+      const userId = req.user?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const {
+        page = 1,
+        limit = 20,
+        search,
+        status,
+        priority,
+        frameworkId,
+        assignedTo,
+        category,
+        dueDateFrom,
+        dueDateTo,
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
+      } = req.validatedQuery;
+
+      const offset = (page - 1) * limit;
+
+      // Build where conditions
+      const conditions = [eq(tasks.userId, userId)];
+
+      if (search) {
+        conditions.push(like(tasks.title, `%${search}%`));
+      }
+
+      if (status) {
+        conditions.push(eq(tasks.status, status));
+      }
+
+      if (priority) {
+        conditions.push(eq(tasks.priority, priority));
+      }
+
+      if (frameworkId) {
+        conditions.push(eq(tasks.frameworkId, frameworkId));
+      }
+
+      if (category) {
+        conditions.push(eq(tasks.category, category));
+      }
+
+      if (dueDateFrom) {
+        conditions.push(gte(tasks.dueDate, new Date(dueDateFrom)));
+      }
+
+      if (dueDateTo) {
+        conditions.push(lte(tasks.dueDate, new Date(dueDateTo)));
+      }
+
+      // Execute query with joins
+      const tasksWithFrameworks = await db
+        .select({
+          task: tasks,
+          framework: frameworks
+        })
+        .from(tasks)
+        .leftJoin(frameworks, eq(tasks.frameworkId, frameworks.id))
+        .where(and(...conditions))
+        .orderBy(
+          sortOrder === 'asc' 
+            ? asc(tasks[sortBy as keyof typeof tasks] || tasks.createdAt)
+            : desc(tasks[sortBy as keyof typeof tasks] || tasks.createdAt)
+        )
+        .limit(limit)
+        .offset(offset);
+
+      // Get total count for pagination
+      const totalCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(tasks)
+        .where(and(...conditions));
+
+      const total = totalCount[0]?.count || 0;
+      const totalPages = Math.ceil(total / limit);
+
+      // Format response
+      const formattedTasks = tasksWithFrameworks.map(({ task, framework }) => ({
+        ...task,
+        framework: framework ? {
+          id: framework.id,
+          name: framework.name,
+          displayName: framework.displayName
+        } : null
+      }));
+
+      res.json({
+        tasks: formattedTasks,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasMore: page < totalPages
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ error: "Failed to fetch tasks" });
+    }
+  }
+);
+
+// POST /api/tasks - Create new task
+router.post(
+  "/",
+  validateBody(createTaskSchema),
+  async (req: ValidatedRequest<CreateTaskBody>, res) => {
+    try {
+      const userId = req.user?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const taskData = {
+        ...req.validatedBody,
+        userId,
+        companyId: req.user?.companyId, // Assume company ID is available in user context
+        dueDate: req.validatedBody.dueDate ? new Date(req.validatedBody.dueDate) : null
+      };
+
+      const [newTask] = await db.insert(tasks).values(taskData).returning();
+
+      res.status(201).json(newTask);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ error: "Failed to create task" });
+    }
+  }
+);
+
+// GET /api/tasks/:id - Get specific task
+router.get(
+  "/:id",
+  validateParams(idParamSchema),
+  async (req: ValidatedRequest<any, any, IdParams>, res) => {
+    try {
+      const userId = req.user?.sub;
+      const { id } = req.validatedParams;
+
+      const [taskWithFramework] = await db
+        .select({
+          task: tasks,
+          framework: frameworks
+        })
+        .from(tasks)
+        .leftJoin(frameworks, eq(tasks.frameworkId, frameworks.id))
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .limit(1);
+
+      if (!taskWithFramework) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      const formattedTask = {
+        ...taskWithFramework.task,
+        framework: taskWithFramework.framework ? {
+          id: taskWithFramework.framework.id,
+          name: taskWithFramework.framework.name,
+          displayName: taskWithFramework.framework.displayName
+        } : null
+      };
+
+      res.json(formattedTask);
+    } catch (error) {
+      console.error("Error fetching task:", error);
+      res.status(500).json({ error: "Failed to fetch task" });
+    }
+  }
+);
+
+// PUT /api/tasks/:id - Update task
+router.put(
+  "/:id",
+  validateRequest({
+    params: idParamSchema,
+    body: updateTaskSchema
+  }),
+  async (req: ValidatedRequest<UpdateTaskBody, any, IdParams>, res) => {
+    try {
+      const userId = req.user?.sub;
+      const { id } = req.validatedParams;
+
+      // Check if task exists and belongs to user
+      const existingTask = await db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .limit(1);
+
+      if (existingTask.length === 0) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      const updateData = {
+        ...req.validatedBody,
+        dueDate: req.validatedBody.dueDate ? new Date(req.validatedBody.dueDate) : undefined,
+        updatedAt: new Date()
+      };
+
+      const [updatedTask] = await db
+        .update(tasks)
+        .set(updateData)
+        .where(eq(tasks.id, id))
+        .returning();
+
+      res.json(updatedTask);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ error: "Failed to update task" });
+    }
+  }
+);
+
+// DELETE /api/tasks/:id - Delete task
+router.delete(
+  "/:id",
+  validateParams(idParamSchema),
+  async (req: ValidatedRequest<any, any, IdParams>, res) => {
+    try {
+      const userId = req.user?.sub;
+      const { id } = req.validatedParams;
+
+      const deleteResult = await db
+        .delete(tasks)
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .returning();
+
+      if (deleteResult.length === 0) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      res.json({ message: "Task deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ error: "Failed to delete task" });
+    }
+  }
+);
+
+export default router;
+
+// server/middleware/validation.ts
+import { Request, Response, NextFunction } from 'express';
+import { z, ZodError, ZodSchema } from 'zod';
+
+export interface ValidationError {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export interface ValidatedRequest<
+  TBody = any,
+  TQuery = any,
+  TParams = any
+> extends Request {
+  validatedBody: TBody;
+  validatedQuery: TQuery;
+  validatedParams: TParams;
+}
+
+/**
+ * Generic validation middleware that validates request body, query, and params
+ */
+export function validateRequest<
+  TBody = any,
+  TQuery = any,
+  TParams = any
+>(schemas: {
+  body?: ZodSchema<TBody>;
+  query?: ZodSchema<TQuery>;
+  params?: ZodSchema<TParams>;
+}) {
+  return (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const validatedReq = req as ValidatedRequest<TBody, TQuery, TParams>;
+
+      // Validate body if schema provided
+      if (schemas.body) {
+        const bodyResult = schemas.body.safeParse(req.body);
+        if (!bodyResult.success) {
+          return res.status(400).json({
+            error: 'Validation failed',
+            details: formatZodErrors(bodyResult.error),
+            field: 'body'
+          });
+        }
+        validatedReq.validatedBody = bodyResult.data;
+      }
+
+      // Validate query parameters if schema provided
+      if (schemas.query) {
+        const queryResult = schemas.query.safeParse(req.query);
+        if (!queryResult.success) {
+          return res.status(400).json({
+            error: 'Validation failed',
+            details: formatZodErrors(queryResult.error),
+            field: 'query'
+          });
+        }
+        validatedReq.validatedQuery = queryResult.data;
+      }
+
+      // Validate route parameters if schema provided
+      if (schemas.params) {
+        const paramsResult = schemas.params.safeParse(req.params);
+        if (!paramsResult.success) {
+          return res.status(400).json({
+            error: 'Validation failed',
+            details: formatZodErrors(paramsResult.error),
+            field: 'params'
+          });
+        }
+        validatedReq.validatedParams = paramsResult.data;
+      }
+
+      next();
+    } catch (error) {
+      console.error('Validation middleware error:', error);
+      res.status(500).json({
+        error: 'Internal validation error'
+      });
+    }
+  };
+}
+
+/**
+ * Simplified validation for body only (most common case)
+ */
+export function validateBody<T>(schema: ZodSchema<T>) {
+  return validateRequest({ body: schema });
+}
+
+/**
+ * Simplified validation for query only
+ */
+export function validateQuery<T>(schema: ZodSchema<T>) {
+  return validateRequest({ query: schema });
+}
+
+/**
+ * Simplified validation for params only
+ */
+export function validateParams<T>(schema: ZodSchema<T>) {
+  return validateRequest({ params: schema });
+}
+
+/**
+ * Format Zod validation errors into a more user-friendly format
+ */
+function formatZodErrors(error: ZodError): ValidationError[] {
+  return error.errors.map(err => ({
+    field: err.path.join('.'),
+    message: err.message,
+    code: err.code
+  }));
+}
+
+// server/schemas/validation.ts
+import { z } from 'zod';
+
+// Common validation schemas
+export const idParamSchema = z.object({
+  id: z.string().uuid('Invalid ID format')
+});
+
+export const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).optional()
+});
+
+export const searchQuerySchema = paginationQuerySchema.extend({
+  search: z.string().min(1).max(255).optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).default('desc')
+});
+
+// User validation schemas
+export const createUserSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  firstName: z.string().min(1, 'First name is required').max(50),
+  lastName: z.string().min(1, 'Last name is required').max(50),
+  role: z.enum(['admin', 'user', 'viewer']).default('user')
+});
+
+export const updateUserSchema = createUserSchema.partial();
+
+// Company validation schemas
+export const createCompanySchema = z.object({
+  name: z.string().min(1, 'Company name is required').max(255),
+  industry: z.string().min(1, 'Industry is required').max(100),
+  size: z.enum(['startup', 'small', 'medium', 'large', 'enterprise']),
+  contactEmail: z.string().email('Invalid email format'),
+  contactPhone: z.string().optional(),
+  address: z.string().optional(),
+  website: z.string().url('Invalid website URL').optional(),
+  selectedFrameworks: z.array(z.string()).min(1, 'At least one framework must be selected')
+});
+
+export const updateCompanySchema = createCompanySchema.partial();
+
+// Task validation schemas
+export const createTaskSchema = z.object({
+  title: z.string().min(1, 'Task title is required').max(255),
+  description: z.string().max(2000).optional(),
+  category: z.string().min(1, 'Category is required').max(100),
+  priority: z.enum(['low', 'medium', 'high', 'critical']),
+  status: z.enum(['not_started', 'in_progress', 'under_review', 'completed', 'blocked']).default('not_started'),
+  frameworkId: z.string().uuid('Invalid framework ID'),
+  dueDate: z.string().datetime().optional(),
+  assignedTo: z.string().email().optional(),
+  estimatedHours: z.number().int().min(1).max(1000).optional(),
+  tags: z.array(z.string()).default([]),
+  dependencies: z.array(z.string().uuid()).default([]),
+  complianceRequirement: z.string().optional(),
+  evidenceRequired: z.boolean().default(false)
+});
+
+export const updateTaskSchema = createTaskSchema.partial();
+
+export const taskFilterSchema = searchQuerySchema.extend({
+  status: z.enum(['not_started', 'in_progress', 'under_review', 'completed', 'blocked']).optional(),
+  priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  frameworkId: z.string().uuid().optional(),
+  assignedTo: z.string().email().optional(),
+  category: z.string().optional(),
+  dueDateFrom: z.string().datetime().optional(),
+  dueDateTo: z.string().datetime().optional()
+});
+
+// Document validation schemas
+export const documentUploadSchema = z.object({
+  fileName: z.string().min(1, 'File name is required').max(255),
+  fileType: z.string().min(1, 'File type is required'),
+  fileSize: z.number().int().min(1).max(50 * 1024 * 1024), // 50MB max
+  frameworkId: z.string().uuid('Invalid framework ID').optional(),
+  description: z.string().max(1000).optional(),
+  tags: z.array(z.string()).default([])
+});
+
+export const documentFilterSchema = searchQuerySchema.extend({
+  frameworkId: z.string().uuid().optional(),
+  fileType: z.string().optional(),
+  status: z.enum(['pending', 'verified', 'rejected']).optional(),
+  uploadedFrom: z.string().datetime().optional(),
+  uploadedTo: z.string().datetime().optional()
+});
+
+// Risk validation schemas
+export const createRiskSchema = z.object({
+  title: z.string().min(1, 'Risk title is required').max(255),
+  description: z.string().min(1, 'Risk description is required').max(2000),
+  category: z.string().min(1, 'Category is required').max(100),
+  impact: z.enum(['low', 'medium', 'high']),
+  likelihood: z.enum(['low', 'medium', 'high']),
+  status: z.enum(['identified', 'assessing', 'mitigating', 'monitoring', 'closed']).default('identified'),
+  frameworkId: z.string().uuid('Invalid framework ID').optional(),
+  mitigation: z.string().max(2000).optional(),
+  owner: z.string().email().optional(),
+  dueDate: z.string().datetime().optional()
+});
+
+export const updateRiskSchema = createRiskSchema.partial();
+
+export const riskFilterSchema = searchQuerySchema.extend({
+  category: z.string().optional(),
+  impact: z.enum(['low', 'medium', 'high']).optional(),
+  likelihood: z.enum(['low', 'medium', 'high']).optional(),
+  status: z.enum(['identified', 'assessing', 'mitigating', 'monitoring', 'closed']).optional(),
+  frameworkId: z.string().uuid().optional(),
+  owner: z.string().email().optional()
+});
+
+// Chat validation schemas
+export const chatMessageSchema = z.object({
+  message: z.string().min(1, 'Message cannot be empty').max(4000),
+  context: z.object({
+    currentPage: z.string().optional(),
+    frameworkId: z.string().uuid().optional(),
+    taskId: z.string().uuid().optional(),
+    documentId: z.string().uuid().optional()
+  }).optional()
+});
+
+// Onboarding validation schemas
+export const onboardingCompleteSchema = z.object({
+  company: createCompanySchema,
+  frameworks: z.array(z.string().uuid()).min(1, 'At least one framework must be selected'),
+  aiEnabled: z.boolean().default(true)
+});
+
+export const frameworkPreviewSchema = z.object({
+  frameworks: z.array(z.string().uuid()).min(1, 'At least one framework must be selected')
+});
+
+// Policy validation schemas
+export const generatePolicySchema = z.object({
+  templateId: z.string().uuid('Invalid template ID'),
+  customVariables: z.record(z.string(), z.any()).optional()
+});
+
+export const updatePolicyStatusSchema = z.object({
+  status: z.enum(['draft', 'review', 'approved', 'rejected'])
+});
+
+// Evidence mapping validation schemas
+export const createEvidenceMappingSchema = z.object({
+  documentId: z.string().uuid('Invalid document ID'),
+  requirementId: z.string().uuid('Invalid requirement ID'),
+  mappingType: z.enum(['direct', 'indirect', 'partial']).default('direct'),
+  mappingConfidence: z.string().regex(/^0\.\d{2}$/, 'Confidence must be a decimal like 0.85'),
+  qualityScore: z.string().regex(/^0\.\d{2}$/, 'Quality score must be a decimal like 0.90'),
+  evidenceSnippets: z.object({
+    snippets: z.array(z.string()).min(1, 'At least one evidence snippet required')
+  }),
+  aiAnalysis: z.object({
+    summary: z.string().min(1, 'Analysis summary is required'),
+    relevantSections: z.array(z.string()),
+    gaps: z.array(z.string()),
+    recommendations: z.array(z.string()),
+    qualityFactors: z.object({
+      completeness: z.number().min(0).max(1),
+      clarity: z.number().min(0).max(1),
+      relevance: z.number().min(0).max(1),
+      specificity: z.number().min(0).max(1)
+    })
+  }).optional(),
+  validationStatus: z.enum(['pending', 'validated', 'rejected']).default('pending')
+});
+
+// Learning resource validation schemas
+export const learningResourceFilterSchema = searchQuerySchema.extend({
+  frameworkId: z.string().uuid().optional(),
+  resourceType: z.enum(['pdf', 'video', 'article', 'course']).optional(),
+  category: z.string().optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional()
+});
+
+// Notification validation schemas
+export const notificationFilterSchema = paginationQuerySchema.extend({
+  filter: z.enum(['all', 'unread', 'high', 'urgent']).default('all'),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
+  type: z.string().optional()
+});
+
+export const markNotificationSchema = z.object({
+  notificationIds: z.array(z.string().uuid()).min(1, 'At least one notification ID required'),
+  action: z.enum(['read', 'unread', 'archive'])
+});
+
+// Type exports for use in route handlers
+export type IdParams = z.infer<typeof idParamSchema>;
+export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
+export type SearchQuery = z.infer<typeof searchQuerySchema>;
+export type CreateUserBody = z.infer<typeof createUserSchema>;
+export type UpdateUserBody = z.infer<typeof updateUserSchema>;
+export type CreateCompanyBody = z.infer<typeof createCompanySchema>;
+export type UpdateCompanyBody = z.infer<typeof updateCompanySchema>;
+export type CreateTaskBody = z.infer<typeof createTaskSchema>;
+export type UpdateTaskBody = z.infer<typeof updateTaskSchema>;
+export type TaskFilterQuery = z.infer<typeof taskFilterSchema>;
+export type DocumentUploadBody = z.infer<typeof documentUploadSchema>;
+export type DocumentFilterQuery = z.infer<typeof documentFilterSchema>;
+export type CreateRiskBody = z.infer<typeof createRiskSchema>;
+export type UpdateRiskBody = z.infer<typeof updateRiskSchema>;
+export type RiskFilterQuery = z.infer<typeof riskFilterSchema>;
+export type ChatMessageBody = z.infer<typeof chatMessageSchema>;
+export type OnboardingCompleteBody = z.infer<typeof onboardingCompleteSchema>;
+export type FrameworkPreviewBody = z.infer<typeof frameworkPreviewSchema>;
+export type GeneratePolicyBody = z.infer<typeof generatePolicySchema>;
+export type UpdatePolicyStatusBody = z.infer<typeof updatePolicyStatusSchema>;
+export type CreateEvidenceMappingBody = z.infer<typeof createEvidenceMappingSchema>;
+export type LearningResourceFilterQuery = z.infer<typeof learningResourceFilterSchema>;
+export type NotificationFilterQuery = z.infer<typeof notificationFilterSchema>;
+export type MarkNotificationBody = z.infer<typeof markNotificationSchema>;
+
+// server/routes/tasks.ts (Updated with validation)
+import express from "express";
+import { db } from "../db";
+import { tasks, frameworks } from "@shared/schema";
+import { eq, and, like, inArray, desc, asc } from "drizzle-orm";
+import { validateRequest, validateBody, validateQuery, validateParams } from "../middleware/validation";
+import { 
+  createTaskSchema, 
+  updateTaskSchema, 
+  taskFilterSchema, 
+  idParamSchema,
+  type ValidatedRequest,
+  type CreateTaskBody,
+  type UpdateTaskBody,
+  type TaskFilterQuery,
+  type IdParams
+} from "../schemas/validation";
+import { isAuthenticated } from "../replitAuth";
+
+const router = express.Router();
+
+// Apply authentication to all routes
+router.use(isAuthenticated);
+
+// GET /api/tasks - List tasks with filtering and pagination
+router.get(
+  "/",
+  validateQuery(taskFilterSchema),
+  async (req: ValidatedRequest<any, TaskFilterQuery>, res) => {
+    try {
+      const userId = req.user?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const {
+        page = 1,
+        limit = 20,
+        search,
+        status,
+        priority,
+        frameworkId,
+        assignedTo,
+        category,
+        dueDateFrom,
+        dueDateTo,
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
+      } = req.validatedQuery;
+
+      const offset = (page - 1) * limit;
+
+      // Build where conditions
+      const conditions = [eq(tasks.userId, userId)];
+
+      if (search) {
+        conditions.push(like(tasks.title, `%${search}%`));
+      }
+
+      if (status) {
+        conditions.push(eq(tasks.status, status));
+      }
+
+      if (priority) {
+        conditions.push(eq(tasks.priority, priority));
+      }
+
+      if (frameworkId) {
+        conditions.push(eq(tasks.frameworkId, frameworkId));
+      }
+
+      if (category) {
+        conditions.push(eq(tasks.category, category));
+      }
+
+      if (dueDateFrom) {
+        conditions.push(gte(tasks.dueDate, new Date(dueDateFrom)));
+      }
+
+      if (dueDateTo) {
+        conditions.push(lte(tasks.dueDate, new Date(dueDateTo)));
+      }
+
+      // Execute query with joins
+      const tasksWithFrameworks = await db
+        .select({
+          task: tasks,
+          framework: frameworks
+        })
+        .from(tasks)
+        .leftJoin(frameworks, eq(tasks.frameworkId, frameworks.id))
+        .where(and(...conditions))
+        .orderBy(
+          sortOrder === 'asc' 
+            ? asc(tasks[sortBy as keyof typeof tasks] || tasks.createdAt)
+            : desc(tasks[sortBy as keyof typeof tasks] || tasks.createdAt)
+        )
+        .limit(limit)
+        .offset(offset);
+
+      // Get total count for pagination
+      const totalCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(tasks)
+        .where(and(...conditions));
+
+      const total = totalCount[0]?.count || 0;
+      const totalPages = Math.ceil(total / limit);
+
+      // Format response
+      const formattedTasks = tasksWithFrameworks.map(({ task, framework }) => ({
+        ...task,
+        framework: framework ? {
+          id: framework.id,
+          name: framework.name,
+          displayName: framework.displayName
+        } : null
+      }));
+
+      res.json({
+        tasks: formattedTasks,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasMore: page < totalPages
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ error: "Failed to fetch tasks" });
+    }
+  }
+);
+
+// POST /api/tasks - Create new task
+router.post(
+  "/",
+  validateBody(createTaskSchema),
+  async (req: ValidatedRequest<CreateTaskBody>, res) => {
+    try {
+      const userId = req.user?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const taskData = {
+        ...req.validatedBody,
+        userId,
+        companyId: req.user?.companyId, // Assume company ID is available in user context
+        dueDate: req.validatedBody.dueDate ? new Date(req.validatedBody.dueDate) : null
+      };
+
+      const [newTask] = await db.insert(tasks).values(taskData).returning();
+
+      res.status(201).json(newTask);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ error: "Failed to create task" });
+    }
+  }
+);
+
+// GET /api/tasks/:id - Get specific task
+router.get(
+  "/:id",
+  validateParams(idParamSchema),
+  async (req: ValidatedRequest<any, any, IdParams>, res) => {
+    try {
+      const userId = req.user?.sub;
+      const { id } = req.validatedParams;
+
+      const [taskWithFramework] = await db
+        .select({
+          task: tasks,
+          framework: frameworks
+        })
+        .from(tasks)
+        .leftJoin(frameworks, eq(tasks.frameworkId, frameworks.id))
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .limit(1);
+
+      if (!taskWithFramework) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      const formattedTask = {
+        ...taskWithFramework.task,
+        framework: taskWithFramework.framework ? {
+          id: taskWithFramework.framework.id,
+          name: taskWithFramework.framework.name,
+          displayName: taskWithFramework.framework.displayName
+        } : null
+      };
+
+      res.json(formattedTask);
+    } catch (error) {
+      console.error("Error fetching task:", error);
+      res.status(500).json({ error: "Failed to fetch task" });
+    }
+  }
+);
+
+// PUT /api/tasks/:id - Update task
+router.put(
+  "/:id",
+  validateRequest({
+    params: idParamSchema,
+    body: updateTaskSchema
+  }),
+  async (req: ValidatedRequest<UpdateTaskBody, any, IdParams>, res) => {
+    try {
+      const userId = req.user?.sub;
+      const { id } = req.validatedParams;
+
+      // Check if task exists and belongs to user
+      const existingTask = await db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .limit(1);
+
+      if (existingTask.length === 0) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      const updateData = {
+        ...req.validatedBody,
+        dueDate: req.validatedBody.dueDate ? new Date(req.validatedBody.dueDate) : undefined,
+        updatedAt: new Date()
+      };
+
+      const [updatedTask] = await db
+        .update(tasks)
+        .set(updateData)
+        .where(eq(tasks.id, id))
+        .returning();
+
+      res.json(updatedTask);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ error: "Failed to update task" });
+    }
+  }
+);
+
+// DELETE /api/tasks/:id - Delete task
+router.delete(
+  "/:id",
+  validateParams(idParamSchema),
+  async (req: ValidatedRequest<any, any, IdParams>, res) => {
+    try {
+      const userId = req.user?.sub;
+      const { id } = req.validatedParams;
+
+      const deleteResult = await db
+        .delete(tasks)
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .returning();
+
+      if (deleteResult.length === 0) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+
+      res.json({ message: "Task deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ error: "Failed to delete task" });
+    }
+  }
+);
+
+export default router;
+
+// server/middleware/errorHandler.ts
+import { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
+
+export interface ApiError extends Error {
+  statusCode?: number;
+  code?: string;
+  details?: any;
+}
+
+/**
+ * Global error handling middleware
+ */
+export function errorHandler(
+  err: ApiError,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  // Log error for debugging
+  console.error('API Error:', {
+    message: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    body: req.body,
+    user: req.user?.sub
+  });
+
+  // Handle Zod validation errors
+  if (err instanceof ZodError) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      details: err.errors.map(e => ({
+        field: e.path.join('.'),
+        message: e.message,
+        code: e.code
+      }))
+    });
+  }
+
+  // Handle known API errors
+  if (err.statusCode) {
+    return res.status(err.statusCode).json({
+      error: err.message,
+      code: err.code,
+      details: err.details
+    });
+  }
+
+  // Handle database constraint errors
+  if (err.message.includes('duplicate key') || err.message.includes('unique constraint')) {
+    return res.status(409).json({
+      error: 'Resource already exists',
+      details: 'A resource with these details already exists'
+    });
+  }
+
+  // Handle foreign key constraint errors
+  if (err.message.includes('foreign key constraint')) {
+    return res.status(400).json({
+      error: 'Invalid reference',
+      details: 'Referenced resource does not exist'
+    });
+  }
+
+  // Default server error
+  res.status(500).json({
+    error: 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { details: err.message })
+  });
+}
+
+/**
+ * Async error wrapper to catch promise rejections
+ */
+export function asyncHandler<T extends any[]>(
+  fn: (...args: T) => Promise<any>
+) {
+  return (...args: T) => {
+    const [req, res, next] = args as [Request, Response, NextFunction];
+    Promise.resolve(fn(...args)).catch(next);
+  };
+}
+
+/**
+ * Create API error with status code
+ */
+export function createApiError(
+  message: string,
+  statusCode: number = 500,
+  code?: string,
+  details?: any
+): ApiError {
+  const error = new Error(message) as ApiError;
+  error.statusCode = statusCode;
+  error.code = code;
+  error.details = details;
+  return error;
+}
+
+// server/routes/companies.ts (Updated with validation)
+import express from "express";
+import { db } from "../db";
+import { companies } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { validateRequest, validateBody, validateParams } from "../middleware/validation";
+import { 
+  createCompanySchema, 
+  updateCompanySchema, 
+  idParamSchema,
+  type ValidatedRequest,
+  type CreateCompanyBody,
+  type UpdateCompanyBody,
+  type IdParams
+} from "../schemas/validation";
+import { isAuthenticated } from "../replitAuth";
+import { asyncHandler, createApiError } from "../middleware/errorHandler";
+
+const router = express.Router();
+
+router.use(isAuthenticated);
+
+// GET /api/companies - Get user's company
+router.get(
+  "/",
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.sub;
+    if (!userId) {
+      throw createApiError("User not authenticated", 401);
+    }
+
+    const [company] = await db
+      .select()
+      .from(companies)
+      .where(eq(companies.userId, userId))
+      .limit(1);
+
+    if (!company) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+
+    res.json(company);
+  })
+);
+
+// POST /api/companies - Create company
+router.post(
+  "/",
+  validateBody(createCompanySchema),
+  asyncHandler(async (req: ValidatedRequest<CreateCompanyBody>, res: Response) => {
+    const userId = req.user?.sub;
+    if (!userId) {
+      throw createApiError("User not authenticated", 401);
+    }
+
+    // Check if user already has a company
+    const existingCompany = await db
+      .select()
+      .from(companies)
+      .where(eq(companies.userId, userId))
+      .limit(1);
+
+    if (existingCompany.length > 0) {
+      throw createApiError("User already has a company", 409, "COMPANY_EXISTS");
+    }
+
+    const companyData = {
+      ...req.validatedBody,
+      userId,
+      onboardingCompleted: true
+    };
+
+    const [newCompany] = await db
+      .insert(companies)
+      .values(companyData)
+      .returning();
+
+    res.status(201).json(newCompany);
+  })
+);
+
+// PUT /api/companies/:id - Update company
+router.put(
+  "/:id",
+  validateRequest({
+    params: idParamSchema,
+    body: updateCompanySchema
+  }),
+  asyncHandler(async (req: ValidatedRequest<UpdateCompanyBody, any, IdParams>, res: Response) => {
+    const userId = req.user?.sub;
+    const { id } = req.validatedParams;
+
+    if (!userId) {
+      throw createApiError("User not authenticated", 401);
+    }
+
+    // Verify company belongs to user
+    const existingCompany = await db
+      .select()
+      .from(companies)
+      .where(eq(companies.id, id))
+      .limit(1);
+
+    if (existingCompany.length === 0) {
+      throw createApiError("Company not found", 404);
+    }
+
+    if (existingCompany[0].userId !== userId) {
+      throw createApiError("Unauthorized", 403);
+    }
+
+    const updateData = {
+      ...req.validatedBody,
+      updatedAt: new Date()
+    };
+
+    const [updatedCompany] = await db
+      .update(companies)
+      .set(updateData)
+      .where(eq(companies.id, id))
+      .returning();
+
+    res.json(updatedCompany);
+  })
+);
+
+export default router;
+
+// server/routes/documents.ts (Updated with validation)
+import express from "express";
+import { db } from "../db";
+import { documents, frameworks } from "@shared/schema";
+import { eq, and, like, desc } from "drizzle-orm";
+import { validateRequest, validateBody, validateQuery, validateParams } from "../middleware/validation";
+import { 
+  documentUploadSchema, 
+  documentFilterSchema, 
+  idParamSchema,
+  type ValidatedRequest,
+  type DocumentUploadBody,
+  type DocumentFilterQuery,
+  type IdParams
+} from "../schemas/validation";
+import { isAuthenticated } from "../replitAuth";
+import { asyncHandler, createApiError } from "../middleware/errorHandler";
+import multer from "multer";
+
+const router = express.Router();
+
+// Configure multer for file uploads
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB
+  },
+  fileFilter: (req, file, cb)
