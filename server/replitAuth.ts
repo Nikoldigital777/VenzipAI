@@ -8,8 +8,13 @@ import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import { createModuleLogger, logAuthEvent, logError } from "./logger";
+
+// Create module logger for authentication
+const authLogger = createModuleLogger('auth');
 
 if (!process.env.REPLIT_DOMAINS) {
+  authLogger.fatal("Environment variable REPLIT_DOMAINS not provided");
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
 }
 
@@ -133,12 +138,20 @@ export async function setupAuth(app: Express) {
 
         return done(null, user);
       } catch (error) {
-        console.error("Error in Google OAuth:", error);
+        logError(authLogger, error, {
+          category: 'authentication',
+          method: 'google_oauth',
+          operation: 'user_creation'
+        });
         return done(error, false);
       }
     }));
   } else {
-    console.warn("Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Secrets.");
+    authLogger.warn("Google OAuth not configured", {
+      category: 'configuration',
+      service: 'google_oauth',
+      message: 'Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Secrets'
+    });
   }
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
@@ -151,7 +164,10 @@ export async function setupAuth(app: Express) {
       }
       cb(null, userObj);
     } catch (error) {
-      console.error("Error deserializing user:", error);
+      logError(authLogger, error, {
+        category: 'session',
+        operation: 'deserialize_user'
+      });
       cb(error, null);
     }
   });
@@ -166,29 +182,56 @@ export async function setupAuth(app: Express) {
   app.get("/api/callback", (req, res, next) => {
     passport.authenticate(`replitauth:${req.hostname}`, (err: any, user: any) => {
       if (err) {
-        console.error("Authentication error:", err);
+        logError(authLogger, err, {
+          category: 'authentication',
+          method: 'replit_oauth',
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        });
+        logAuthEvent(authLogger, 'replit_auth_error', undefined, {
+          method: 'replit_oauth',
+          error: err.message
+        });
         return res.redirect("/api/login");
       }
       if (!user) {
+        logAuthEvent(authLogger, 'replit_auth_failed', undefined, {
+          method: 'replit_oauth',
+          reason: 'no_user_returned'
+        });
         return res.redirect("/api/login");
       }
       
       // Regenerate session ID to prevent session fixation attacks
       req.session.regenerate((err) => {
         if (err) {
-          console.error("Session regeneration error:", err);
+          logError(authLogger, err, {
+            category: 'session',
+            operation: 'regenerate',
+            userId: user.claims?.sub
+          });
           return res.redirect("/api/login");
         }
         
         // Log in the user after session regeneration
         req.logIn(user, (err) => {
           if (err) {
-            console.error("Login error:", err);
+            logError(authLogger, err, {
+              category: 'session',
+              operation: 'login',
+              userId: user.claims?.sub
+            });
             return res.redirect("/api/login");
           }
           
           // Log successful authentication
-          console.log(`User authenticated successfully: ${user.claims?.email || user.claims?.sub}`);
+          logAuthEvent(authLogger, 'replit_auth_success', user.claims?.sub, {
+            method: 'replit_oauth',
+            email: user.claims?.email,
+            sessionId: req.sessionID,
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent')
+          });
           return res.redirect("/onboarding");
         });
       });
@@ -196,16 +239,34 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
+    const user = req.user as any;
+    const userId = user?.sub || user?.claims?.sub;
+    
     req.logout((err) => {
       if (err) {
-        console.error("Error during logout:", err);
+        logError(authLogger, err, {
+          category: 'session',
+          operation: 'logout',
+          userId
+        });
       }
       
       // Destroy the session completely
       req.session.destroy((err) => {
         if (err) {
-          console.error("Error destroying session:", err);
+          logError(authLogger, err, {
+            category: 'session',
+            operation: 'destroy_session',
+            userId
+          });
         }
+        
+        // Log successful logout
+        logAuthEvent(authLogger, 'user_logout', userId, {
+          sessionId: req.sessionID,
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        });
         
         // Clear the session cookie
         res.clearCookie('connect.sid');
@@ -234,29 +295,56 @@ export async function setupAuth(app: Express) {
   app.get("/api/auth/google/callback", (req, res, next) => {
     passport.authenticate("google", (err: any, user: any) => {
       if (err) {
-        console.error("Google authentication error:", err);
+        logError(authLogger, err, {
+          category: 'authentication',
+          method: 'google_oauth',
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        });
+        logAuthEvent(authLogger, 'google_auth_error', undefined, {
+          method: 'google_oauth',
+          error: err.message
+        });
         return res.redirect("/api/login");
       }
       if (!user) {
+        logAuthEvent(authLogger, 'google_auth_failed', undefined, {
+          method: 'google_oauth',
+          reason: 'no_user_returned'
+        });
         return res.redirect("/api/login");
       }
       
       // Regenerate session ID to prevent session fixation attacks
       req.session.regenerate((err) => {
         if (err) {
-          console.error("Session regeneration error:", err);
+          logError(authLogger, err, {
+            category: 'session',
+            operation: 'regenerate',
+            userId: user.claims?.sub
+          });
           return res.redirect("/api/login");
         }
         
         // Log in the user after session regeneration
         req.logIn(user, (err) => {
           if (err) {
-            console.error("Google login error:", err);
+            logError(authLogger, err, {
+              category: 'session',
+              operation: 'login',
+              userId: user.claims?.sub
+            });
             return res.redirect("/api/login");
           }
           
           // Log successful authentication
-          console.log(`User authenticated via Google: ${user.claims?.email}`);
+          logAuthEvent(authLogger, 'google_auth_success', user.claims?.sub, {
+            method: 'google_oauth',
+            email: user.claims?.email,
+            sessionId: req.sessionID,
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent')
+          });
           return res.redirect("/onboarding");
         });
       });
@@ -288,6 +376,11 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     updateUserSession(user, tokenResponse);
     return next();
   } catch (error) {
+    logError(authLogger, error, {
+      category: 'authentication',
+      operation: 'token_refresh',
+      userId: user?.sub
+    });
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
