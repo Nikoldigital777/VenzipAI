@@ -85,9 +85,9 @@ export default function Landing() {
     if (isAuthenticated) {
       navigate("/dashboard");
     } else {
-      navigate("/onboarding");
+      handleLogin(); // Redirect to login instead of onboarding for unauthenticated users
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, handleLogin]);
 
   const scrollToSection = useCallback((id: string) => {
     const element = document.getElementById(id);
@@ -329,13 +329,13 @@ export default function Landing() {
 
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <Button
-                  onClick={() => scrollToSection('demo-form')}
+                  onClick={isAuthenticated ? () => navigate("/dashboard") : handleLogin}
                   data-testid="button-access-demo"
                   className="bg-gradient-to-r from-venzip-primary to-venzip-secondary hover:from-venzip-primary/90 hover:to-venzip-secondary/90 text-white font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-2xl hover:shadow-venzip-primary/30 hover:-translate-y-1 transform transition-all duration-300 flex items-center justify-center"
                   aria-label="Access free demo"
                 >
                   <Play className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Access My Free Demo
+                  {isAuthenticated ? "Go to Dashboard" : "Access My Free Demo"}
                 </Button>
                 <Button
                   onClick={() => scrollToSection('how-it-works')}
@@ -1166,10 +1166,10 @@ export default function Landing() {
             {isAuthenticated ? "Complete your setup and start achieving compliance excellence" : "Join hundreds of companies who trust Venzip for their compliance needs"}
           </p>
           <Button
-            onClick={handleGetStarted}
+            onClick={isAuthenticated ? () => navigate("/dashboard") : handleLogin}
             className="bg-white text-venzip-primary hover:bg-gray-100 font-semibold px-12 py-4 text-lg rounded-xl hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300"
           >
-            {isAuthenticated ? "Complete Setup" : "Start Your Free Trial Today"}
+            {isAuthenticated ? "Go to Dashboard" : "Start Your Free Trial Today"}
           </Button>
         </div>
       </section>
