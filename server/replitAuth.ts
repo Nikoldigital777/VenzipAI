@@ -164,9 +164,34 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/onboarding",
-      failureRedirect: "/api/login",
+    passport.authenticate(`replitauth:${req.hostname}`, (err: any, user: any) => {
+      if (err) {
+        console.error("Authentication error:", err);
+        return res.redirect("/api/login");
+      }
+      if (!user) {
+        return res.redirect("/api/login");
+      }
+      
+      // Regenerate session ID to prevent session fixation attacks
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Session regeneration error:", err);
+          return res.redirect("/api/login");
+        }
+        
+        // Log in the user after session regeneration
+        req.logIn(user, (err) => {
+          if (err) {
+            console.error("Login error:", err);
+            return res.redirect("/api/login");
+          }
+          
+          // Log successful authentication
+          console.log(`User authenticated successfully: ${user.claims?.email || user.claims?.sub}`);
+          return res.redirect("/onboarding");
+        });
+      });
     })(req, res, next);
   });
 
@@ -206,12 +231,37 @@ export async function setupAuth(app: Express) {
     passport.authenticate("google", { scope: ["profile", "email"] })
   );
 
-  app.get("/api/auth/google/callback",
-    passport.authenticate("google", { 
-      successRedirect: "/onboarding",
-      failureRedirect: "/api/login" 
-    })
-  );
+  app.get("/api/auth/google/callback", (req, res, next) => {
+    passport.authenticate("google", (err: any, user: any) => {
+      if (err) {
+        console.error("Google authentication error:", err);
+        return res.redirect("/api/login");
+      }
+      if (!user) {
+        return res.redirect("/api/login");
+      }
+      
+      // Regenerate session ID to prevent session fixation attacks
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Session regeneration error:", err);
+          return res.redirect("/api/login");
+        }
+        
+        // Log in the user after session regeneration
+        req.logIn(user, (err) => {
+          if (err) {
+            console.error("Google login error:", err);
+            return res.redirect("/api/login");
+          }
+          
+          // Log successful authentication
+          console.log(`User authenticated via Google: ${user.claims?.email}`);
+          return res.redirect("/onboarding");
+        });
+      });
+    })(req, res, next);
+  });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
