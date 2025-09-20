@@ -37,11 +37,14 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).unique().notNull(),
   fullName: varchar("full_name", { length: 255 }),
   profilePicture: text("profile_picture"),
-  onboardingCompleted: boolean("onboarding_completed").default(false),
-  aiEnabled: boolean("ai_enabled").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
+  aiEnabled: boolean("ai_enabled").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Email format validation
+  emailFormatCheck: sql`CHECK (${table.email} ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')`
+}));
 
 // Company profile table
 export const companies = pgTable("companies", {
@@ -54,12 +57,19 @@ export const companies = pgTable("companies", {
   contactName: varchar("contact_name", { length: 255 }),
   contactEmail: varchar("contact_email", { length: 255 }),
   contactRole: varchar("contact_role", { length: 100 }),
-  selectedFrameworks: text("selected_frameworks").array().default(sql`'{}'::text[]`),
-  onboardingCompleted: boolean("onboarding_completed").default(false),
-  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  selectedFrameworks: text("selected_frameworks").array().default(sql`'{}'::text[]`).notNull(),
+  onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Email format validation for contact email when provided
+  contactEmailFormatCheck: sql`CHECK (${table.contactEmail} IS NULL OR ${table.contactEmail} ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')`,
+  // Size validation
+  sizeCheck: sql`CHECK (${table.size} IS NULL OR ${table.size} IN ('1-10', '11-50', '51-200', '201-1000', '1000+'))`,
+  // One company per user
+  userIdUnique: unique("company_user_id_unique").on(table.userId)
+}));
 
 // Frameworks linked to companies
 export const frameworksCompanies = pgTable("frameworks_companies", {
@@ -72,7 +82,7 @@ export const frameworksCompanies = pgTable("frameworks_companies", {
 // Compliance frameworks table
 export const frameworks = pgTable("frameworks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull(),
+  name: varchar("name").notNull().unique(),
   displayName: varchar("display_name").notNull(),
   description: text("description").notNull(),
   complexity: varchar("complexity").notNull(), // 'low', 'medium', 'high'
@@ -80,8 +90,14 @@ export const frameworks = pgTable("frameworks", {
   totalControls: integer("total_controls").notNull(),
   icon: varchar("icon").notNull(),
   color: varchar("color").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  // Complexity validation
+  complexityCheck: sql`CHECK (${table.complexity} IN ('low', 'medium', 'high'))`,
+  // Positive values validation
+  estimatedTimeMonthsCheck: sql`CHECK (${table.estimatedTimeMonths} > 0)`,
+  totalControlsCheck: sql`CHECK (${table.totalControls} > 0)`
+}));
 
 // User framework progress table
 export const frameworkProgress = pgTable(
@@ -90,15 +106,20 @@ export const frameworkProgress = pgTable(
     id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
     userId: varchar("user_id").notNull().references(() => users.id),
     frameworkId: varchar("framework_id").notNull().references(() => frameworks.id),
-    completedControls: integer("completed_controls").default(0),
-    totalControls: integer("total_controls").default(0),
-    progressPercentage: decimal("progress_percentage", { precision: 5, scale: 2 }).default("0.00"),
-    lastUpdated: timestamp("last_updated").defaultNow(),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
+    completedControls: integer("completed_controls").default(0).notNull(),
+    totalControls: integer("total_controls").default(0).notNull(),
+    progressPercentage: decimal("progress_percentage", { precision: 5, scale: 2 }).default("0.00").notNull(),
+    lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
     userFrameworkUnique: unique("user_framework_unique").on(table.userId, table.frameworkId),
+    // Progress validation
+    completedControlsCheck: sql`CHECK (${table.completedControls} >= 0)`,
+    totalControlsCheck: sql`CHECK (${table.totalControls} >= 0)`,
+    progressPercentageCheck: sql`CHECK (${table.progressPercentage} >= 0.00 AND ${table.progressPercentage} <= 100.00)`,
+    logicalProgressCheck: sql`CHECK (${table.completedControls} <= ${table.totalControls})`
   })
 );
 
@@ -113,18 +134,18 @@ export const tasks = pgTable("tasks", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   category: varchar("category", { length: 100 }),
-  priority: varchar("priority", { length: 20 }).default("medium"),
-  status: varchar("status", { length: 50 }).default("not_started"),
+  priority: varchar("priority", { length: 20 }).default("medium").notNull(),
+  status: varchar("status", { length: 50 }).default("not_started").notNull(),
   frameworkId: varchar("framework_id", { length: 100 }),
   dueDate: timestamp("due_date"),
   completedAt: timestamp("completed_at"),
-  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   companyId: varchar("company_id").references(() => companies.id, { onDelete: "cascade" }),
   assignedTo: varchar("assigned_to"),
   createdById: varchar("created_by_id").references(() => users.id),
 
   // Progress tracking
-  progressPercentage: integer("progress_percentage").default(0),
+  progressPercentage: integer("progress_percentage").default(0).notNull(),
   estimatedHours: integer("estimated_hours"),
   actualHours: integer("actual_hours"),
 
@@ -138,11 +159,22 @@ export const tasks = pgTable("tasks", {
   tags: jsonb("tags"), // Store as JSON array
   dependencies: jsonb("dependencies"), // Store as JSON array
   complianceRequirement: text("compliance_requirement"),
-  evidenceRequired: boolean("evidence_required").default(false),
+  evidenceRequired: boolean("evidence_required").default(false).notNull(),
 
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Task field validation
+  priorityCheck: sql`CHECK (${table.priority} IN ('low', 'medium', 'high', 'critical'))`,
+  statusCheck: sql`CHECK (${table.status} IN ('not_started', 'in_progress', 'under_review', 'completed', 'blocked'))`,
+  categoryCheck: sql`CHECK (${table.category} IS NULL OR ${table.category} IN ('policy', 'procedure', 'training', 'audit', 'risk_assessment', 'documentation', 'technical', 'other'))`,
+  progressPercentageCheck: sql`CHECK (${table.progressPercentage} >= 0 AND ${table.progressPercentage} <= 100)`,
+  estimatedHoursCheck: sql`CHECK (${table.estimatedHours} IS NULL OR ${table.estimatedHours} > 0)`,
+  actualHoursCheck: sql`CHECK (${table.actualHours} IS NULL OR ${table.actualHours} >= 0)`,
+  aiPriorityScoreCheck: sql`CHECK (${table.aiPriorityScore} IS NULL OR (${table.aiPriorityScore} >= 0 AND ${table.aiPriorityScore} <= 100))`,
+  // Logical checks
+  completedAtLogicCheck: sql`CHECK (${table.status} = 'completed' OR ${table.completedAt} IS NULL)`
+}));
 
 // Task comments for collaboration
 export const taskComments = pgTable("task_comments", {
@@ -177,10 +209,18 @@ export const documents = pgTable("documents", {
   uploaderUserId: varchar("uploader_user_id").notNull().references(() => users.id),
   status: varchar("status").notNull().default('pending'), // 'pending', 'verified', 'rejected'
   analysisResult: jsonb("analysis_result"),
-  uploadedAt: timestamp("uploaded_at").defaultNow(),
+  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
   verifiedAt: timestamp("verified_at"),
   extractedText: text("extracted_text"),
-});
+}, (table) => ({
+  // Document validation
+  statusCheck: sql`CHECK (${table.status} IN ('pending', 'verified', 'rejected'))`,
+  fileSizeCheck: sql`CHECK (${table.fileSize} > 0)`,
+  versionCheck: sql`CHECK (${table.version} > 0)`,
+  sha256HashFormatCheck: sql`CHECK (LENGTH(${table.sha256Hash}) = 64)`,
+  // Logical checks
+  verifiedAtLogicCheck: sql`CHECK (${table.status} != 'verified' OR ${table.verifiedAt} IS NOT NULL)`
+}));
 
 // Risks table
 export const risks = pgTable("risks", {
@@ -197,9 +237,16 @@ export const risks = pgTable("risks", {
   owner: varchar("owner"),
   dueDate: timestamp("due_date"),
   status: varchar("status").notNull().default('open'), // 'open', 'mitigated', 'closed'
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Risk validation
+  impactCheck: sql`CHECK (${table.impact} IN ('low', 'medium', 'high', 'critical'))`,
+  likelihoodCheck: sql`CHECK (${table.likelihood} IN ('low', 'medium', 'high'))`,
+  statusCheck: sql`CHECK (${table.status} IN ('open', 'mitigated', 'closed'))`,
+  riskScoreCheck: sql`CHECK (${table.riskScore} >= 0.0 AND ${table.riskScore} <= 10.0)`,
+  categoryCheck: sql`CHECK (${table.category} IN ('operational', 'financial', 'strategic', 'compliance', 'technical', 'reputational', 'security', 'legal', 'other'))`
+}));
 
 // Chat messages table for Claude interactions
 export const chatMessages = pgTable("chat_messages", {
@@ -208,8 +255,11 @@ export const chatMessages = pgTable("chat_messages", {
   message: text("message").notNull(),
   response: text("response"),
   messageType: varchar("message_type").notNull(), // 'user', 'assistant'
-  createdAt: timestamp("created_at").defaultNow(),
-});
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  // Chat message validation
+  messageTypeCheck: sql`CHECK (${table.messageType} IN ('user', 'assistant'))`
+}));
 
 // Vendor assessments table
 export const vendorAssessments = pgTable("vendor_assessments", {
@@ -227,12 +277,19 @@ export const vendorAssessments = pgTable("vendor_assessments", {
   lastReviewDate: timestamp("last_review_date"),
   nextReviewDate: timestamp("next_review_date"),
   assessmentNotes: text("assessment_notes"),
-  complianceRequirements: text("compliance_requirements").array().default(sql`'{}'::text[]`),
-  documentationStatus: varchar("documentation_status").default('incomplete'), // 'incomplete', 'pending_review', 'complete'
+  complianceRequirements: text("compliance_requirements").array().default(sql`'{}'::text[]`).notNull(),
+  documentationStatus: varchar("documentation_status").default('incomplete').notNull(), // 'incomplete', 'pending_review', 'complete'
   assignedTo: varchar("assigned_to"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Vendor assessment validation
+  riskLevelCheck: sql`CHECK (${table.riskLevel} IN ('low', 'medium', 'high', 'critical'))`,
+  assessmentStatusCheck: sql`CHECK (${table.assessmentStatus} IN ('pending', 'in_progress', 'completed', 'approved', 'rejected'))`,
+  documentationStatusCheck: sql`CHECK (${table.documentationStatus} IN ('incomplete', 'pending_review', 'complete'))`,
+  // Logical checks
+  contractDateCheck: sql`CHECK (${table.contractStartDate} IS NULL OR ${table.contractEndDate} IS NULL OR ${table.contractStartDate} <= ${table.contractEndDate})`
+}));
 
 // Notifications table
 export const notifications = pgTable("notifications", {
@@ -241,11 +298,17 @@ export const notifications = pgTable("notifications", {
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
   type: varchar("type", { length: 50 }).notNull(), // 'task_due', 'risk_alert', 'audit_reminder', etc.
-  priority: varchar("priority", { length: 20 }).default("medium"),
-  isRead: boolean("is_read").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  priority: varchar("priority", { length: 20 }).default("medium").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
   readAt: timestamp("read_at"),
-});
+}, (table) => ({
+  // Notification validation
+  priorityCheck: sql`CHECK (${table.priority} IN ('low', 'medium', 'high', 'critical'))`,
+  typeCheck: sql`CHECK (${table.type} IN ('task_due', 'risk_alert', 'audit_reminder', 'compliance_gap', 'document_uploaded', 'policy_generated', 'assessment_completed', 'system_alert'))`,
+  // Logical checks
+  readAtLogicCheck: sql`CHECK (${table.isRead} = false OR ${table.readAt} IS NOT NULL)`
+}));
 
 // Risk score history table for trend analysis
 export const riskScoreHistory = pgTable("risk_score_history", {
@@ -297,9 +360,18 @@ export const evidenceMappings = pgTable("evidence_mappings", {
   validationStatus: varchar("validation_status").notNull().default('pending'), // 'pending', 'validated', 'rejected', 'needs_review'
   validatedBy: varchar("validated_by").references(() => users.id),
   validatedAt: timestamp("validated_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  // Evidence mapping validation
+  mappingConfidenceCheck: sql`CHECK (${table.mappingConfidence} >= 0.00 AND ${table.mappingConfidence} <= 1.00)`,
+  qualityScoreCheck: sql`CHECK (${table.qualityScore} >= 0.00 AND ${table.qualityScore} <= 1.00)`,
+  mappingTypeCheck: sql`CHECK (${table.mappingType} IN ('direct', 'partial', 'supporting', 'cross_reference'))`,
+  validationStatusCheck: sql`CHECK (${table.validationStatus} IN ('pending', 'validated', 'rejected', 'needs_review'))`,
+  // Logical checks
+  validatedAtLogicCheck: sql`CHECK (${table.validationStatus} != 'validated' OR ${table.validatedAt} IS NOT NULL)`,
+  validatedByLogicCheck: sql`CHECK (${table.validationStatus} != 'validated' OR ${table.validatedBy} IS NOT NULL)`
+}));
 
 // Evidence gaps table for tracking compliance gaps
 export const evidenceGaps = pgTable("evidence_gaps", {
