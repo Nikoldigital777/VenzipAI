@@ -552,11 +552,11 @@ export default function Onboarding() {
 
   const getSelectedFrameworksData = () => {
     // Filter the merged frameworks list based on selected IDs
-    return frameworks.filter(f => selectedFrameworks.includes(f.id));
+    return frameworks.filter((f: Framework) => selectedFrameworks.includes(f.id));
   };
 
   const getTotalTasks = () => {
-    return getSelectedFrameworksData().reduce((sum, f) => sum + f.tasksCount, 0);
+    return getSelectedFrameworksData().reduce((sum: number, f: Framework) => sum + f.tasksCount, 0);
   };
 
   const handleGenerateChecklist = () => {
@@ -634,8 +634,8 @@ export default function Onboarding() {
     });
   };
 
-  const estimatedTime = selectedFrameworks.reduce((total, frameworkName) => {
-    const framework = frameworks.find((f: any) => f.id === frameworkName); // Use id for lookup
+  const estimatedTime = selectedFrameworks.reduce((total: number, frameworkName: string) => {
+    const framework = frameworks.find((f: Framework) => f.id === frameworkName); // Use id for lookup
     return total + (framework?.estimatedTimeMonths || 0);
   }, 0);
 
