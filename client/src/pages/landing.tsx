@@ -255,7 +255,6 @@ export default function Landing() {
               alt="Venzip - AI-Powered Compliance Platform"
               className="h-10 w-auto"
               loading="eager"
-              fetchpriority="high"
             />
           </div>
           <div className="hidden md:flex items-center space-x-8">
