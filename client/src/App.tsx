@@ -31,6 +31,8 @@ import { TourInitializer } from '@/components/tour/TourInitializer';
 
 // Import the new TestDocuments component
 import TestDocuments from "@/pages/test-documents";
+// Import ErrorBoundary component
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // Component to wrap authenticated routes with sidebar
 function AuthenticatedLayout({ children, title }: { children: React.ReactNode; title: string }) {
@@ -67,8 +69,8 @@ function Router() {
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-700">Authentication Error</h2>
           <p className="text-gray-600 mt-2">Please try refreshing the page</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
           >
             Refresh
@@ -103,7 +105,7 @@ function Router() {
       navigate('/dashboard');
       return null;
     }
-    
+
     // If user hasn't completed onboarding and is trying to access protected routes, redirect to onboarding
     if (!hasCompletedOnboarding && !['/onboarding', '/landing', '/'].includes(location)) {
       navigate('/onboarding');
@@ -186,7 +188,7 @@ function Router() {
           </Route>
 
           <Route path="/test-notifications" component={TestNotifications} />
-            <Route path="/test-documents" component={TestDocuments} />
+          <Route path="/test-documents" component={TestDocuments} />
         </>
       ) : (
         /* Redirect unauthenticated users to landing */
@@ -210,7 +212,9 @@ function App() {
         <TourProvider>
           <TooltipProvider>
             <Toaster />
-            <Router />
+            <ErrorBoundary>
+              <Router />
+            </ErrorBoundary>
             <TourGuide />
             <TourInitializer />
           </TooltipProvider>
