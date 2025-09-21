@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { z } from 'zod';
 import venzipLogo from "@assets/venzip-logo.png";
 import FrameworkCard from "@/components/framework-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -114,6 +115,32 @@ interface TaskPreviewProps {
   setCurrentStep: (step: number) => void;
   handleFinish: () => void;
 }
+
+// Validation schema for company data
+const companyValidationSchema = z.object({
+  name: z.string().min(2, 'Company name must be at least 2 characters'),
+  contactEmail: z.string().email('Please enter a valid email address'),
+  industry: z.string().min(1, 'Please select an industry'),
+  size: z.string().min(1, 'Please select company size'),
+  selectedFrameworks: z.array(z.string()).min(1, 'Please select at least one framework')
+});
+
+// Validation function
+const validateCompanyData = (data: CompanyData & { selectedFrameworks: string[] }) => {
+  try {
+    companyValidationSchema.parse(data);
+    return { isValid: true, errors: {} };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errors = error.errors.reduce((acc, err) => {
+        acc[err.path[0] as string] = err.message;
+        return acc;
+      }, {} as Record<string, string>);
+      return { isValid: false, errors };
+    }
+    return { isValid: false, errors: { general: 'Validation failed' } };
+  }
+};
 
 const TaskPreview = ({ selectedFrameworks, currentStep, setCurrentStep, handleFinish }: TaskPreviewProps) => {
     const [sampleTasks, setSampleTasks] = useState<ComplianceRequirement[]>([]);
@@ -433,54 +460,31 @@ export default function Onboarding() {
   };
 
   const handleFinish = async () => {
-    // Validate required data
-    if (!companyData.name?.trim()) {
-      toast({
-        title: "❌ Missing Company Name",
-        description: "Please enter your company name.",
-        variant: "destructive",
-      });
-      setCurrentStep(2);
-      return;
-    }
+    // Validate company data using Zod schema
+    const { isValid, errors } = validateCompanyData({
+      name: companyData.name,
+      contactEmail: companyData.contactEmail,
+      industry: companyData.industry,
+      size: companyData.size,
+      selectedFrameworks
+    });
 
-    if (!companyData.contactEmail?.trim()) {
-      toast({
-        title: "❌ Missing Contact Email",
-        description: "Please enter a contact email address.",
-        variant: "destructive",
-      });
-      setCurrentStep(2);
-      return;
-    }
+    if (!isValid) {
+      // Show specific validation errors with proper navigation
+      if (errors.name || errors.contactEmail || errors.industry || errors.size) {
+        setCurrentStep(2);
+      } else if (errors.selectedFrameworks) {
+        setCurrentStep(3);
+      }
 
-    if (!companyData.industry?.trim()) {
-      toast({
-        title: "❌ Missing Industry",
-        description: "Please select your company's industry.",
-        variant: "destructive",
+      // Display all validation errors
+      Object.entries(errors).forEach(([field, message]) => {
+        toast({
+          title: "Validation Error",
+          description: message,
+          variant: "destructive"
+        });
       });
-      setCurrentStep(2);
-      return;
-    }
-
-    if (!companyData.size?.trim()) {
-      toast({
-        title: "❌ Missing Company Size",
-        description: "Please select your company size.",
-        variant: "destructive",
-      });
-      setCurrentStep(2);
-      return;
-    }
-
-    if (selectedFrameworks.length === 0) {
-      toast({
-        title: "❌ No Frameworks Selected", 
-        description: "Please select at least one compliance framework.",
-        variant: "destructive",
-      });
-      setCurrentStep(3);
       return;
     }
 
@@ -757,12 +761,16 @@ export default function Onboarding() {
                           value={companyData.name}
                           onChange={(e) => setCompanyData({...companyData, name: e.target.value})}
                           placeholder="Acme Corporation"
+                          className={companyData.name && companyData.name.length < 2 ? "border-red-500" : ""}
                         />
+                        {companyData.name && companyData.name.length < 2 && (
+                          <p className="text-red-500 text-sm mt-1">Company name must be at least 2 characters</p>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="industry">Industry</Label>
+                        <Label htmlFor="industry">Industry *</Label>
                         <Select value={companyData.industry} onValueChange={(value) => setCompanyData({...companyData, industry: value})}>
-                          <SelectTrigger>
+                          <SelectTrigger className={!companyData.industry ? "border-red-500" : ""}>
                             <SelectValue placeholder="Select industry" />
                           </SelectTrigger>
                           <SelectContent>
@@ -772,11 +780,14 @@ export default function Onboarding() {
                             <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>
+                        {!companyData.industry && (
+                          <p className="text-red-500 text-sm mt-1">Please select an industry</p>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="size">Company Size</Label>
+                        <Label htmlFor="size">Company Size *</Label>
                         <Select value={companyData.size} onValueChange={(value) => setCompanyData({...companyData, size: value})}>
-                          <SelectTrigger>
+                          <SelectTrigger className={!companyData.size ? "border-red-500" : ""}>
                             <SelectValue placeholder="Select company size" />
                           </SelectTrigger>
                           <SelectContent>
@@ -786,6 +797,9 @@ export default function Onboarding() {
                             <SelectItem value="1000+">1000+ employees</SelectItem>
                           </SelectContent>
                         </Select>
+                        {!companyData.size && (
+                          <p className="text-red-500 text-sm mt-1">Please select company size</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="contactEmail">Primary Contact Email *</Label>
@@ -795,7 +809,11 @@ export default function Onboarding() {
                           value={companyData.contactEmail}
                           onChange={(e) => setCompanyData({...companyData, contactEmail: e.target.value})}
                           placeholder="john@company.com"
+                          className={companyData.contactEmail && !z.string().email().safeParse(companyData.contactEmail).success ? "border-red-500" : ""}
                         />
+                        {companyData.contactEmail && !z.string().email().safeParse(companyData.contactEmail).success && (
+                          <p className="text-red-500 text-sm mt-1">Please enter a valid email address</p>
+                        )}
                       </div>
                       {/* Fields from original code that might be relevant but not in edited step 2 */}
                       {/* E.g., legalEntity, region, contactName, contactRole */}
@@ -1142,10 +1160,15 @@ export default function Onboarding() {
                   onClick={handleNext}
                   className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300"
                   disabled={
-                    // Validation logic for enabling Next button
-                    (currentStep === 2 && (!companyData.name || !companyData.contactEmail)) || 
+                    // Enhanced validation logic for enabling Next button
+                    (currentStep === 2 && !validateCompanyData({
+                      name: companyData.name,
+                      contactEmail: companyData.contactEmail,
+                      industry: companyData.industry,
+                      size: companyData.size,
+                      selectedFrameworks: [] // Not required for step 2
+                    }).isValid) || 
                     (currentStep === 3 && selectedFrameworks.length === 0)
-                    // Add more conditions if other steps have mandatory fields
                   }
                 >
                   Next {currentStep === 3 ? "→ Tasks" : currentStep === 4 ? "→ AI Assistant" : currentStep === 5 ? "→ Summary" : "→"} <ArrowRight className="ml-2 h-4 w-4" />
