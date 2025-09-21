@@ -3,7 +3,7 @@ import { evidenceVersioningService } from './evidenceVersioning';
 import { storage } from '../storage';
 import { logger } from '../logger';
 import { db } from '../db';
-import { evidenceFreshnessStatus, documents, notifications } from '@shared/schema';
+import { documents, notifications } from '@shared/schema';
 import { eq, lt, and, or, gt } from 'drizzle-orm';
 
 export class EvidenceBackgroundService {
@@ -65,26 +65,33 @@ export class EvidenceBackgroundService {
   private async sendFreshnessNotifications(): Promise<void> {
     const now = new Date();
     
-    // Find documents expiring in the next 7 days
-    const upcomingExpirations = await db.select({
-      status: evidenceFreshnessStatus,
-      document: documents
-    })
-    .from(evidenceFreshnessStatus)
-    .innerJoin(documents, eq(documents.id, evidenceFreshnessStatus.documentId))
-    .where(and(
-      eq(evidenceFreshnessStatus.status, 'warning'),
-      lt(evidenceFreshnessStatus.validUntil, new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000))
-    ));
+    // Get all verified documents
+    const allDocuments = await db.select()
+      .from(documents)
+      .where(eq(documents.status, 'verified'));
 
-    // Find overdue documents
-    const overdueDocuments = await db.select({
-      status: evidenceFreshnessStatus,
-      document: documents
-    })
-    .from(evidenceFreshnessStatus)
-    .innerJoin(documents, eq(documents.id, evidenceFreshnessStatus.documentId))
-    .where(eq(evidenceFreshnessStatus.status, 'overdue'));
+    const upcomingExpirations = [];
+    const overdueDocuments = [];
+
+    // Process documents to find expiring/overdue ones
+    for (const doc of allDocuments) {
+      let validUntil = doc.validUntil ? new Date(doc.validUntil) : null;
+      
+      if (!validUntil && doc.freshnessMonths) {
+        const uploadDate = new Date(doc.uploadedAt);
+        validUntil = new Date(uploadDate.setMonth(uploadDate.getMonth() + doc.freshnessMonths));
+      }
+      
+      if (validUntil) {
+        const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilExpiry < 0) {
+          overdueDocuments.push({ document: doc, status: { validUntil } });
+        } else if (daysUntilExpiry <= 7) {
+          upcomingExpirations.push({ document: doc, status: { validUntil } });
+        }
+      }
+    }
 
     // Send notifications for upcoming expirations
     for (const { status, document } of upcomingExpirations) {
