@@ -1,0 +1,616 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { 
+  Package, 
+  Shield, 
+  Download, 
+  FileCheck, 
+  Hash, 
+  Calendar,
+  Users,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  FileText,
+  Folder,
+  Eye,
+  Lock
+} from 'lucide-react';
+
+interface Framework {
+  id: string;
+  name: string;
+  displayName: string;
+}
+
+interface AuditPackageConfig {
+  bundleName: string;
+  frameworkIds: string[];
+  includeAllEvidence: boolean;
+  includeOnlyVerified: boolean;
+  includePolicyDocuments: boolean;
+  includeProvenanceChain: boolean;
+  retentionPeriodYears: number;
+  customCriteria?: {
+    dateRange?: { start: string; end: string };
+    requirementIds?: string[];
+    categories?: string[];
+  };
+}
+
+interface GeneratedPackage {
+  packageId: string;
+  packageName: string;
+  generationTimestamp: string;
+  totalDocuments: number;
+  bundleHash: string;
+  status: 'draft' | 'sealed' | 'submitted';
+  frameworksIncluded: string[];
+  generatedBy: string;
+  size: number;
+}
+
+interface ProvenanceManifest {
+  packageId: string;
+  packageName: string;
+  generationTimestamp: string;
+  generatedBy: string;
+  frameworksIncluded: string[];
+  totalDocuments: number;
+  packageHash: string;
+  retentionUntil: string;
+  documents: DocumentManifestEntry[];
+  verificationChain: ChainVerification[];
+  legalAttestation: LegalAttestation;
+}
+
+interface DocumentManifestEntry {
+  documentId: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  versionNumber: number;
+  originalHash: string;
+  packagePath: string;
+  uploadTimestamp: string;
+  verificationStatus: string;
+  mappedRequirements: string[];
+  provenanceChainValid: boolean;
+  evidenceType: string;
+  freshnessStatus?: string;
+}
+
+interface ChainVerification {
+  documentId: string;
+  chainValid: boolean;
+  eventsVerified: number;
+  verificationTimestamp: string;
+  errors?: string[];
+}
+
+interface LegalAttestation {
+  attestationId: string;
+  attestedBy: string;
+  attestationTimestamp: string;
+  statement: string;
+  digitalSignature: string;
+  witnessHash: string;
+}
+
+export default function AuditPackageGenerator() {
+  const [frameworks, setFrameworks] = useState<Framework[]>([]);
+  const [packages, setPackages] = useState<GeneratedPackage[]>([]);
+  const [selectedManifest, setSelectedManifest] = useState<ProvenanceManifest | null>(null);
+  const [showManifestDialog, setShowManifestDialog] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [activeTab, setActiveTab] = useState('create');
+  
+  const [config, setConfig] = useState<AuditPackageConfig>({
+    bundleName: '',
+    frameworkIds: [],
+    includeAllEvidence: true,
+    includeOnlyVerified: true,
+    includePolicyDocuments: true,
+    includeProvenanceChain: true,
+    retentionPeriodYears: 7,
+    customCriteria: {}
+  });
+
+  useEffect(() => {
+    loadFrameworks();
+    loadExistingPackages();
+  }, []);
+
+  const loadFrameworks = async () => {
+    try {
+      const response = await fetch('/api/frameworks');
+      const data = await response.json();
+      setFrameworks(data);
+    } catch (error) {
+      console.error('Failed to load frameworks:', error);
+    }
+  };
+
+  const loadExistingPackages = async () => {
+    try {
+      const response = await fetch('/api/audit-packages');
+      const data = await response.json();
+      setPackages(data);
+    } catch (error) {
+      console.error('Failed to load audit packages:', error);
+    }
+  };
+
+  const generateAuditPackage = async () => {
+    if (!config.bundleName || config.frameworkIds.length === 0) {
+      alert('Please provide a package name and select at least one framework');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/audit-packages/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate audit package');
+      }
+
+      const result = await response.json();
+      alert(`Audit package generated successfully! Package ID: ${result.packageId}`);
+      
+      // Reset form and reload packages
+      setConfig({
+        bundleName: '',
+        frameworkIds: [],
+        includeAllEvidence: true,
+        includeOnlyVerified: true,
+        includePolicyDocuments: true,
+        includeProvenanceChain: true,
+        retentionPeriodYears: 7,
+        customCriteria: {}
+      });
+      
+      loadExistingPackages();
+      setActiveTab('packages');
+      
+    } catch (error) {
+      console.error('Failed to generate package:', error);
+      alert('Failed to generate audit package. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const viewManifest = async (packageId: string) => {
+    try {
+      const response = await fetch(`/api/audit-packages/${packageId}/manifest`);
+      const manifest = await response.json();
+      setSelectedManifest(manifest);
+      setShowManifestDialog(true);
+    } catch (error) {
+      console.error('Failed to load manifest:', error);
+    }
+  };
+
+  const downloadPackage = async (packageId: string) => {
+    try {
+      const response = await fetch(`/api/audit-packages/${packageId}/download`);
+      const blob = await response.blob();
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit-package-${packageId}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Failed to download package:', error);
+    }
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unitIndex = 0;
+    
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    
+    return `${size.toFixed(1)} ${units[unitIndex]}`;
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'sealed':
+        return <Badge className="bg-green-100 text-green-800"><Lock className="h-3 w-3 mr-1" />Sealed</Badge>;
+      case 'draft':
+        return <Badge className="bg-yellow-100 text-yellow-800"><FileText className="h-3 w-3 mr-1" />Draft</Badge>;
+      case 'submitted':
+        return <Badge className="bg-blue-100 text-blue-800"><CheckCircle className="h-3 w-3 mr-1" />Submitted</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Audit Package Generator
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="create">Create Package</TabsTrigger>
+              <TabsTrigger value="packages">Existing Packages</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="create" className="space-y-6 mt-6">
+              {/* Package Configuration */}
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="bundleName">Package Name</Label>
+                  <Input
+                    id="bundleName"
+                    value={config.bundleName}
+                    onChange={(e) => setConfig({ ...config, bundleName: e.target.value })}
+                    placeholder="e.g., Q4 2024 SOC 2 Audit Package"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label>Compliance Frameworks</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {frameworks.map((framework) => (
+                      <div key={framework.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={framework.id}
+                          checked={config.frameworkIds.includes(framework.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setConfig({
+                                ...config,
+                                frameworkIds: [...config.frameworkIds, framework.id]
+                              });
+                            } else {
+                              setConfig({
+                                ...config,
+                                frameworkIds: config.frameworkIds.filter(id => id !== framework.id)
+                              });
+                            }
+                          }}
+                        />
+                        <Label htmlFor={framework.id}>{framework.displayName}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="retentionPeriod">Retention Period (Years)</Label>
+                    <Select
+                      value={config.retentionPeriodYears.toString()}
+                      onValueChange={(value) => setConfig({ ...config, retentionPeriodYears: parseInt(value) })}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">3 Years</SelectItem>
+                        <SelectItem value="5">5 Years</SelectItem>
+                        <SelectItem value="7">7 Years</SelectItem>
+                        <SelectItem value="10">10 Years</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Package Options */}
+                <div className="space-y-3">
+                  <Label>Package Options</Label>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="includeAllEvidence"
+                        checked={config.includeAllEvidence}
+                        onCheckedChange={(checked) => setConfig({ ...config, includeAllEvidence: checked as boolean })}
+                      />
+                      <Label htmlFor="includeAllEvidence">Include all evidence documents</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="includeOnlyVerified"
+                        checked={config.includeOnlyVerified}
+                        onCheckedChange={(checked) => setConfig({ ...config, includeOnlyVerified: checked as boolean })}
+                      />
+                      <Label htmlFor="includeOnlyVerified">Include only verified documents</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="includePolicyDocuments"
+                        checked={config.includePolicyDocuments}
+                        onCheckedChange={(checked) => setConfig({ ...config, includePolicyDocuments: checked as boolean })}
+                      />
+                      <Label htmlFor="includePolicyDocuments">Include generated policy documents</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="includeProvenanceChain"
+                        checked={config.includeProvenanceChain}
+                        onCheckedChange={(checked) => setConfig({ ...config, includeProvenanceChain: checked as boolean })}
+                      />
+                      <Label htmlFor="includeProvenanceChain">Include complete provenance chains</Label>
+                    </div>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={generateAuditPackage}
+                  disabled={isGenerating || !config.bundleName || config.frameworkIds.length === 0}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Generating Package...
+                    </>
+                  ) : (
+                    <>
+                      <Package className="h-4 w-4 mr-2" />
+                      Generate Audit Package
+                    </>
+                  )}
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="packages" className="space-y-4 mt-6">
+              {packages.length === 0 ? (
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">No audit packages generated yet</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setActiveTab('create')}
+                    className="mt-4"
+                  >
+                    Create Your First Package
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {packages.map((pkg) => (
+                    <Card key={pkg.packageId} className="border">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-semibold text-lg">{pkg.packageName}</h3>
+                              {getStatusBadge(pkg.status)}
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                              <div className="flex items-center gap-1">
+                                <FileCheck className="h-4 w-4" />
+                                <span>{pkg.totalDocuments} documents</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Folder className="h-4 w-4" />
+                                <span>{formatFileSize(pkg.size)}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4" />
+                                <span>{new Date(pkg.generationTimestamp).toLocaleDateString()}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                <span>{pkg.generatedBy}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {pkg.frameworksIncluded.map((framework) => (
+                                <Badge key={framework} variant="outline" className="text-xs">
+                                  {framework}
+                                </Badge>
+                              ))}
+                            </div>
+                            
+                            <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
+                              <Hash className="h-3 w-3" />
+                              <span className="font-mono">{pkg.bundleHash.substring(0, 16)}...</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => viewManifest(pkg.packageId)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => downloadPackage(pkg.packageId)}
+                              disabled={pkg.status === 'draft'}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Provenance Manifest Dialog */}
+      <Dialog open={showManifestDialog} onOpenChange={setShowManifestDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Provenance Manifest</DialogTitle>
+          </DialogHeader>
+          
+          {selectedManifest && (
+            <div className="space-y-6">
+              {/* Package Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Package Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div><strong>Package ID:</strong> {selectedManifest.packageId}</div>
+                    <div><strong>Generated:</strong> {new Date(selectedManifest.generationTimestamp).toLocaleString()}</div>
+                    <div><strong>Total Documents:</strong> {selectedManifest.totalDocuments}</div>
+                    <div><strong>Generated By:</strong> {selectedManifest.generatedBy}</div>
+                    <div className="col-span-2">
+                      <strong>Package Hash:</strong> 
+                      <code className="ml-2 text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                        {selectedManifest.packageHash}
+                      </code>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Legal Attestation */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Legal Attestation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="text-sm space-y-2">
+                    <div><strong>Attestation ID:</strong> {selectedManifest.legalAttestation.attestationId}</div>
+                    <div><strong>Attested By:</strong> {selectedManifest.legalAttestation.attestedBy}</div>
+                    <div><strong>Timestamp:</strong> {new Date(selectedManifest.legalAttestation.attestationTimestamp).toLocaleString()}</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded text-sm">
+                    {selectedManifest.legalAttestation.statement}
+                  </div>
+                  <div className="text-xs space-y-1">
+                    <div>
+                      <strong>Digital Signature:</strong> 
+                      <code className="ml-2 font-mono bg-gray-100 px-1 rounded">
+                        {selectedManifest.legalAttestation.digitalSignature}
+                      </code>
+                    </div>
+                    <div>
+                      <strong>Witness Hash:</strong> 
+                      <code className="ml-2 font-mono bg-gray-100 px-1 rounded">
+                        {selectedManifest.legalAttestation.witnessHash}
+                      </code>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Documents List */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Included Documents</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {selectedManifest.documents.map((doc, index) => (
+                      <div key={doc.documentId} className="border rounded p-3 text-sm">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium">{doc.fileName}</div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              Version {doc.versionNumber} • {formatFileSize(doc.fileSize)} • {doc.evidenceType}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {doc.provenanceChainValid ? (
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <AlertCircle className="h-4 w-4 text-red-500" />
+                            )}
+                            <Badge 
+                              className={doc.freshnessStatus === 'fresh' ? 'bg-green-100 text-green-800' : 
+                                        doc.freshnessStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : 
+                                        'bg-red-100 text-red-800'}
+                            >
+                              {doc.freshnessStatus || 'current'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-2 font-mono">
+                          {doc.originalHash}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Chain Verification Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Chain Verification Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {selectedManifest.verificationChain.map((verification) => (
+                      <div key={verification.documentId} className="flex items-center justify-between p-2 border rounded">
+                        <div className="text-sm">
+                          Document {verification.documentId.substring(0, 8)}...
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-600">
+                            {verification.eventsVerified} events verified
+                          </span>
+                          {verification.chainValid ? (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <AlertCircle className="h-4 w-4 text-red-500" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
