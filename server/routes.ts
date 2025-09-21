@@ -389,37 +389,64 @@ export async function registerRoutes(app: Express) {
       // Validate user ID
       if (!userId) {
         console.warn('No user ID provided for progress calculation');
-        return res.json({ percentComplete: 0, totalTasks: 0, completedTasks: 0, error: 'User not authenticated' });
+        return res.status(200).json({ 
+          percentComplete: 0, 
+          totalTasks: 0, 
+          completedTasks: 0, 
+          hasData: false,
+          error: 'User not authenticated',
+          message: 'Please sign in to view progress'
+        });
       }
 
       // Get all user tasks with timeout protection
-      const tasks = await Promise.race([
-        storage.getTasksByUserId(userId),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-      ]) as any[];
-
-      console.log(`Found ${tasks?.length || 0} tasks for progress calculation`);
-
-      if (!Array.isArray(tasks) || tasks.length === 0) {
-        console.log('No tasks found, returning zero progress');
-        return res.json({ 
+      let tasks;
+      try {
+        tasks = await Promise.race([
+          storage.getTasksByUserId(userId),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 8000))
+        ]) as any[];
+      } catch (dbError) {
+        console.error('Database error fetching tasks:', dbError);
+        return res.status(200).json({ 
           percentComplete: 0, 
           totalTasks: 0, 
           completedTasks: 0,
           hasData: false,
-          message: 'No tasks created yet'
+          error: 'Database error',
+          message: 'Unable to fetch task data'
+        });
+      }
+
+      console.log(`Found ${tasks?.length || 0} tasks for progress calculation`);
+
+      // Ensure tasks is an array
+      if (!Array.isArray(tasks)) {
+        console.warn('Tasks data is not an array:', typeof tasks);
+        tasks = [];
+      }
+
+      if (tasks.length === 0) {
+        console.log('No tasks found, returning zero progress');
+        return res.status(200).json({ 
+          percentComplete: 0, 
+          totalTasks: 0, 
+          completedTasks: 0,
+          hasData: false,
+          message: 'No tasks created yet. Complete onboarding to generate tasks.'
         });
       }
 
       // Calculate completion percentage with validation
-      const completedTasks = tasks.filter(task => 
-        task && task.status === 'completed'
+      const validTasks = tasks.filter(task => task && typeof task === 'object');
+      const completedTasks = validTasks.filter(task => 
+        task.status === 'completed'
       ).length;
-      const totalTasks = tasks.length;
+      const totalTasks = validTasks.length;
       const percentComplete = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
       const progressData = {
-        percentComplete,
+        percentComplete: Math.max(0, Math.min(100, percentComplete)),
         totalTasks,
         completedTasks,
         hasData: true,
@@ -427,11 +454,11 @@ export async function registerRoutes(app: Express) {
       };
 
       console.log('Progress data:', progressData);
-      res.json(progressData);
+      res.status(200).json(progressData);
     } catch (error) {
       console.error("Error fetching dashboard progress:", error);
-      // Return comprehensive fallback data
-      res.json({ 
+      // Return comprehensive fallback data with proper status
+      res.status(200).json({ 
         percentComplete: 0, 
         totalTasks: 0, 
         completedTasks: 0,
@@ -451,52 +478,88 @@ export async function registerRoutes(app: Express) {
       // Validate user ID
       if (!userId) {
         console.warn('No user ID provided for recent tasks');
-        return res.json({ tasks: [], hasData: false, error: 'User not authenticated' });
+        return res.status(200).json({ 
+          tasks: [], 
+          hasData: false, 
+          error: 'User not authenticated',
+          message: 'Please sign in to view tasks',
+          totalTasks: 0
+        });
       }
 
       // Get all user tasks with timeout protection
-      const allTasks = await Promise.race([
-        storage.getTasksByUserId(userId),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-      ]) as any[];
+      let allTasks;
+      try {
+        allTasks = await Promise.race([
+          storage.getTasksByUserId(userId),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 8000))
+        ]) as any[];
+      } catch (dbError) {
+        console.error('Database error fetching tasks:', dbError);
+        return res.status(200).json({ 
+          tasks: [], 
+          hasData: false, 
+          error: 'Database error',
+          message: 'Unable to fetch task data',
+          totalTasks: 0
+        });
+      }
 
       console.log(`Found ${allTasks?.length || 0} total tasks`);
 
-      if (!Array.isArray(allTasks) || allTasks.length === 0) {
+      // Ensure allTasks is an array
+      if (!Array.isArray(allTasks)) {
+        console.warn('Tasks data is not an array:', typeof allTasks);
+        allTasks = [];
+      }
+
+      if (allTasks.length === 0) {
         console.log('No tasks found, returning empty state');
-        return res.json({ 
+        return res.status(200).json({ 
           tasks: [], 
           hasData: false, 
-          message: 'No tasks created yet',
+          message: 'No tasks created yet. Complete onboarding to generate tasks.',
           totalTasks: 0
         });
       }
 
       // Sort by creation date and take the 5 most recent with validation
-      const recentTasks = allTasks
-        .filter(task => task && task.id && task.title) // Filter out invalid tasks
+      const validTasks = allTasks.filter(task => 
+        task && 
+        typeof task === 'object' && 
+        task.id && 
+        task.title
+      );
+
+      const recentTasks = validTasks
         .sort((a, b) => {
-          const dateA = new Date(a.createdAt || new Date()).getTime();
-          const dateB = new Date(b.createdAt || new Date()).getTime();
+          const dateA = new Date(a.createdAt || a.updatedAt || new Date()).getTime();
+          const dateB = new Date(b.createdAt || b.updatedAt || new Date()).getTime();
           return dateB - dateA;
         })
         .slice(0, 5)
-        .map(task => ({
-          id: task.id,
-          title: task.title || 'Untitled Task',
-          status: task.status || 'not_started',
-          priority: task.priority || 'medium',
-          frameworkId: task.frameworkId || null,
-          dueDate: task.dueDate,
-          createdAt: task.createdAt,
-          progressPercentage: task.status === 'completed' ? 100 : 
-                              task.status === 'in_progress' ? 50 :
-                              task.status === 'under_review' ? 75 : 0,
-          isOverdue: task.dueDate ? new Date(task.dueDate) < new Date() && task.status !== 'completed' : false
-        }));
+        .map(task => {
+          const now = new Date();
+          const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+          const isOverdue = dueDate && dueDate < now && task.status !== 'completed';
+          
+          return {
+            id: task.id,
+            title: task.title || 'Untitled Task',
+            status: task.status || 'not_started',
+            priority: task.priority || 'medium',
+            frameworkId: task.frameworkId || null,
+            dueDate: task.dueDate || null,
+            createdAt: task.createdAt || task.updatedAt || new Date().toISOString(),
+            progressPercentage: task.status === 'completed' ? 100 : 
+                                task.status === 'in_progress' ? 50 :
+                                task.status === 'under_review' ? 75 : 0,
+            isOverdue: isOverdue || false
+          };
+        });
 
       console.log(`Returning ${recentTasks.length} recent tasks`);
-      res.json({ 
+      res.status(200).json({ 
         tasks: recentTasks, 
         hasData: true, 
         totalTasks: allTasks.length,
@@ -505,7 +568,7 @@ export async function registerRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching recent tasks:", error);
       // Return structured error response
-      res.json({ 
+      res.status(200).json({ 
         tasks: [], 
         hasData: false, 
         error: 'Failed to load recent tasks',
@@ -2021,6 +2084,27 @@ export async function registerRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching risk score history:", error);
       res.status(500).json({ message: "Failed to fetch risk score history" });
+    }
+  });
+
+  // Simple dashboard health check (no auth required for debugging)
+  app.get('/api/dashboard/health-simple', async (req, res) => {
+    try {
+      res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        endpoints: {
+          progress: '/api/dashboard/progress',
+          recentTasks: '/api/dashboard/recent-tasks'
+        },
+        message: 'Dashboard API endpoints are available'
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
     }
   });
 
