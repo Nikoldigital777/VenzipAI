@@ -212,6 +212,11 @@ export const documents = pgTable("documents", {
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
   verifiedAt: timestamp("verified_at"),
   extractedText: text("extracted_text"),
+  // Freshness tracking
+  validUntil: timestamp("valid_until"),
+  freshnessMonths: integer("freshness_months").default(12), // Evidence valid for X months
+  isExpired: boolean("is_expired").default(false),
+  lastFreshnessCheck: timestamp("last_freshness_check").defaultNow(),
 }, (table) => ({
   // Document validation
   statusCheck: sql`CHECK (${table.status} IN ('pending', 'verified', 'rejected'))`,
