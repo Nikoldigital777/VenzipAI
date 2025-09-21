@@ -93,6 +93,48 @@ export class EvidenceVersioningService {
   /**
    * Get freshness dashboard data
    */
+  /**
+   * Check and update evidence freshness for all documents
+   */
+  async checkEvidenceFreshness(): Promise<void> {
+    const now = new Date();
+    
+    // Get all documents that might need freshness updates
+    const allDocuments = await db.select()
+      .from(documents)
+      .where(eq(documents.status, 'verified'));
+    
+    for (const doc of allDocuments) {
+      let validUntil = doc.validUntil ? new Date(doc.validUntil) : null;
+      
+      // Calculate expiration if not set
+      if (!validUntil && doc.freshnessMonths) {
+        const uploadDate = new Date(doc.uploadedAt);
+        validUntil = new Date(uploadDate.setMonth(uploadDate.getMonth() + doc.freshnessMonths));
+      }
+      
+      if (validUntil) {
+        const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        let status = 'fresh';
+        
+        if (daysUntilExpiry < 0) {
+          const daysOverdue = Math.abs(daysUntilExpiry);
+          status = daysOverdue > 30 ? 'overdue' : 'expired';
+        } else if (daysUntilExpiry <= 30) {
+          status = 'warning';
+        }
+        
+        // Update document freshness status
+        await db.update(documents)
+          .set({
+            isExpired: daysUntilExpiry < 0,
+            lastFreshnessCheck: now.toISOString()
+          })
+          .where(eq(documents.id, doc.id));
+      }
+    }
+  }
+
   async getFreshnessDashboard(userId: string): Promise<{
     summary: {
       fresh: number;

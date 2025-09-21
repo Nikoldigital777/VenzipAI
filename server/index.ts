@@ -6,6 +6,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import "./background-scheduler.js"; // Auto-start background scheduler
 import { createModuleLogger, withTiming, logError, logDatabaseOperation } from "./logger";
 import { requestLoggerMiddleware, errorLoggerMiddleware, performanceLoggerMiddleware } from "./middleware/requestLogger";
+import { evidenceBackgroundService } from './services/evidenceBackgroundService';
 
 // Create module logger for server initialization
 const serverLogger = createModuleLogger('server');
@@ -20,7 +21,7 @@ app.use(performanceLoggerMiddleware(2000)); // Log slow requests over 2 seconds
 
 (async () => {
   serverLogger.info("Starting Venzip API server...");
-  
+
   const { db } = await import("./db");
 
   // Test database connection
@@ -106,7 +107,7 @@ app.use(performanceLoggerMiddleware(2000)); // Log slow requests over 2 seconds
 
   // Add structured error logging middleware
   app.use(errorLoggerMiddleware);
-  
+
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -140,12 +141,15 @@ app.use(performanceLoggerMiddleware(2000)); // Log slow requests over 2 seconds
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  
+
   server.listen(port, "0.0.0.0", () => {
     serverLogger.info({ 
       port, 
       environment: process.env.NODE_ENV || 'development',
       category: 'server_startup' 
     }, `Venzip API server listening on port ${port}`);
+
+    // Start evidence background service
+    evidenceBackgroundService.start();
   });
 })();
