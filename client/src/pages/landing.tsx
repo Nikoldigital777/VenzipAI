@@ -299,7 +299,7 @@ export default function Landing() {
                   className="glass-card border-0 hover:shadow-lg transition-all duration-300"
                   aria-label="Sign in to your account"
                 >
-                  Sign In
+                  {window.location.hostname.includes('replit.dev') ? 'Sign In' : 'Demo Login'}
                 </Button>
                 <Button
                   onClick={handleGetStarted}

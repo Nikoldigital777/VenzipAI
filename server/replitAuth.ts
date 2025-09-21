@@ -13,32 +13,96 @@ import { createModuleLogger, logAuthEvent, logError } from "./logger";
 // Create module logger for authentication
 const authLogger = createModuleLogger('auth');
 
-if (!process.env.REPLIT_DOMAINS) {
-  authLogger.fatal("Environment variable REPLIT_DOMAINS not provided");
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+// Check if we're in development mode
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+// Check for required environment variables
+const hasReplitAuth = !!(process.env.REPLIT_DOMAINS && process.env.REPL_ID);
+const hasGoogleAuth = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
+if (!hasReplitAuth && !hasGoogleAuth && !isDevelopment) {
+  authLogger.fatal("No authentication method configured - please set up Replit Auth or Google OAuth");
+  throw new Error("No authentication method configured");
+}
+
+if (!hasReplitAuth) {
+  authLogger.warn("Replit authentication not configured", {
+    category: 'configuration',
+    service: 'replit_auth',
+    message: 'REPLIT_DOMAINS and REPL_ID required for Replit authentication'
+  });
 }
 
 const getOidcConfig = memoize(
   async () => {
+    if (!process.env.REPL_ID) {
+      throw new Error("REPL_ID required for OIDC configuration");
+    }
     return await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
+      process.env.REPL_ID
     );
   },
   { maxAge: 3600 * 1000 }
 );
 
+// Development user for testing
+const createDevelopmentUser = async () => {
+  const devUser = {
+    sub: 'dev-user-1',
+    claims: {
+      sub: 'dev-user-1',
+      email: 'dev@venzip.local',
+      first_name: 'Dev',
+      last_name: 'User',
+      profile_image_url: '',
+    },
+    access_token: 'dev-token',
+    refresh_token: 'dev-refresh',
+    expires_at: Math.floor(Date.now() / 1000) + 86400, // 24 hours from now
+  };
+
+  // Upsert development user to database
+  await storage.upsertUser({
+    id: 'dev-user-1',
+    email: 'dev@venzip.local',
+    fullName: 'Dev User',
+    profilePicture: '',
+  });
+
+  return devUser;
+};
+
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+  
+  // Use memory store in development if no DATABASE_URL
+  let sessionStore;
+  if (process.env.DATABASE_URL) {
+    const pgStore = connectPg(session);
+    sessionStore = new pgStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: false,
+      ttl: sessionTtl,
+      tableName: "sessions",
+    });
+  } else {
+    authLogger.warn("Using memory store for sessions - sessions will not persist across restarts", {
+      category: 'configuration',
+      service: 'session_store'
+    });
+  }
+
+  // Use default secret in development if not provided
+  const sessionSecret = process.env.SESSION_SECRET || (isDevelopment ? 'dev-secret-change-in-production' : undefined);
+  
+  if (!sessionSecret) {
+    authLogger.fatal("SESSION_SECRET environment variable required");
+    throw new Error("SESSION_SECRET environment variable required");
+  }
+
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: sessionSecret,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -78,30 +142,40 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  const config = await getOidcConfig();
+  // Setup Replit authentication if configured
+  if (hasReplitAuth) {
+    try {
+      const config = await getOidcConfig();
 
-  const verify: VerifyFunction = async (
-    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
-  ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
-  };
+      const verify: VerifyFunction = async (
+        tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
+        verified: passport.AuthenticateCallback
+      ) => {
+        const user = {};
+        updateUserSession(user, tokens);
+        await upsertUser(tokens.claims());
+        verified(null, user);
+      };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify,
-    );
-    passport.use(strategy);
+      for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
+        const strategy = new Strategy(
+          {
+            name: `replitauth:${domain}`,
+            config,
+            scope: "openid email profile offline_access",
+            callbackURL: `https://${domain}/api/callback`,
+          },
+          verify,
+        );
+        passport.use(strategy);
+      }
+    } catch (error) {
+      authLogger.error("Failed to setup Replit authentication", {
+        category: 'configuration',
+        service: 'replit_auth',
+        error: error
+      });
+    }
   }
 
   // Setup Google OAuth Strategy
@@ -173,13 +247,74 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    // In development without proper auth, auto-login as dev user
+    if (isDevelopment && !hasReplitAuth && !hasGoogleAuth) {
+      createDevelopmentUser().then(user => {
+        req.logIn(user, (err) => {
+          if (err) {
+            authLogger.error("Development login failed", {
+              category: 'authentication',
+              method: 'development',
+              error: err
+            });
+            return res.redirect("/landing?error=dev-login-failed");
+          }
+          
+          logAuthEvent(authLogger, 'dev_auth_success', user.claims?.sub, {
+            method: 'development',
+            email: user.claims?.email,
+            sessionId: req.sessionID,
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent')
+          });
+          return res.redirect("/onboarding");
+        });
+      }).catch(err => {
+        authLogger.error("Development user creation failed", {
+          category: 'authentication',
+          method: 'development',
+          error: err
+        });
+        return res.redirect("/landing?error=dev-setup-failed");
+      });
+      return;
+    }
+
+    // Try Replit auth if available
+    if (hasReplitAuth) {
+      return passport.authenticate(`replitauth:${req.hostname}`, {
+        prompt: "login consent",
+        scope: ["openid", "email", "profile", "offline_access"],
+      })(req, res, next);
+    }
+    
+    // Try Google auth if available
+    if (hasGoogleAuth) {
+      return res.redirect('/api/auth/google');
+    }
+
+    // No auth method available
+    authLogger.warn("Login attempted but no authentication method available", {
+      category: 'authentication',
+      method: 'none',
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    return res.redirect("/landing?error=no-auth-method");
   });
 
   app.get("/api/callback", (req, res, next) => {
+    // Only handle Replit callback if Replit auth is configured
+    if (!hasReplitAuth) {
+      authLogger.warn("Callback attempted but Replit auth not configured", {
+        category: 'authentication',
+        method: 'replit_oauth',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      return res.redirect("/api/login");
+    }
+
     passport.authenticate(`replitauth:${req.hostname}`, (err: Error | null, user: Express.User | false) => {
       if (err) {
         logError(authLogger, err, {
@@ -271,28 +406,61 @@ export async function setupAuth(app: Express) {
         // Clear the session cookie
         res.clearCookie('connect.sid');
         
-        // For development, just redirect to landing page
-        if (process.env.NODE_ENV === 'development') {
+        // For development or when Replit auth is not configured, just redirect to landing page
+        if (isDevelopment || !hasReplitAuth) {
           res.redirect('/landing');
         } else {
-          // In production, use the OAuth end session URL
-          res.redirect(
-            client.buildEndSessionUrl(config, {
-              client_id: process.env.REPL_ID!,
-              post_logout_redirect_uri: `${req.protocol}://${req.hostname}/landing`,
-            }).href
-          );
+          try {
+            // In production with Replit auth, use the OAuth end session URL
+            const config = await getOidcConfig();
+            res.redirect(
+              client.buildEndSessionUrl(config, {
+                client_id: process.env.REPL_ID!,
+                post_logout_redirect_uri: `${req.protocol}://${req.hostname}/landing`,
+              }).href
+            );
+          } catch (error) {
+            authLogger.error("Failed to get OIDC config for logout", {
+              category: 'authentication',
+              operation: 'logout',
+              error: error
+            });
+            res.redirect('/landing');
+          }
         }
       });
     });
   });
 
-  // Google OAuth routes
-  app.get("/api/auth/google", 
-    passport.authenticate("google", { scope: ["profile", "email"] })
-  );
+  // Google OAuth routes (only if configured)
+  if (hasGoogleAuth) {
+    app.get("/api/auth/google", 
+      passport.authenticate("google", { scope: ["profile", "email"] })
+    );
+  } else {
+    app.get("/api/auth/google", (req, res) => {
+      authLogger.warn("Google auth attempted but not configured", {
+        category: 'authentication',
+        method: 'google_oauth',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      res.redirect("/api/login");
+    });
+  }
 
   app.get("/api/auth/google/callback", (req, res, next) => {
+    // Only handle Google callback if Google auth is configured
+    if (!hasGoogleAuth) {
+      authLogger.warn("Google callback attempted but Google auth not configured", {
+        category: 'authentication',
+        method: 'google_oauth',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      return res.redirect("/api/login");
+    }
+
     passport.authenticate("google", (err: Error | null, user: Express.User | false) => {
       if (err) {
         logError(authLogger, err, {
@@ -355,7 +523,16 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // In development mode or for development users, skip token validation
+  if (isDevelopment && user?.sub === 'dev-user-1') {
+    return next();
+  }
+
+  if (!user?.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -366,6 +543,12 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
 
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+
+  // Only try to refresh if we have Replit auth configured
+  if (!hasReplitAuth) {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
