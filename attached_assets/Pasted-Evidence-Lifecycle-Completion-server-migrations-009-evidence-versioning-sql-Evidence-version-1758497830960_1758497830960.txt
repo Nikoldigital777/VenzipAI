@@ -1,0 +1,571 @@
+Evidence Lifecycle Completion
+
+// server/migrations/009_evidence_versioning.sql
+
+-- Evidence versioning and provenance tracking
+CREATE TABLE IF NOT EXISTS "evidence_versions" (
+  "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+  "document_id" varchar NOT NULL,
+  "version_number" integer NOT NULL,
+  "previous_version_id" varchar,
+  "change_type" varchar NOT NULL, -- 'create', 'update', 'replace', 'supersede'
+  "change_reason" text,
+  "changed_by" varchar NOT NULL,
+  "change_timestamp" timestamp DEFAULT now(),
+  "file_path" varchar NOT NULL,
+  "file_hash" varchar NOT NULL,
+  "file_size" bigint NOT NULL,
+  "metadata_changes" jsonb,
+  "is_current" boolean DEFAULT true,
+  "retention_until" timestamp,
+  "legal_hold" boolean DEFAULT false,
+  FOREIGN KEY ("document_id") REFERENCES "documents"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("previous_version_id") REFERENCES "evidence_versions"("id"),
+  FOREIGN KEY ("changed_by") REFERENCES "users"("id")
+);
+
+-- Evidence provenance chain
+CREATE TABLE IF NOT EXISTS "evidence_provenance" (
+  "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+  "document_id" varchar NOT NULL,
+  "event_type" varchar NOT NULL, -- 'created', 'uploaded', 'analyzed', 'verified', 'superseded', 'expired'
+  "event_timestamp" timestamp DEFAULT now(),
+  "actor_id" varchar NOT NULL, -- user or system
+  "actor_type" varchar NOT NULL DEFAULT 'user', -- 'user', 'system', 'ai'
+  "event_data" jsonb NOT NULL,
+  "source_system" varchar,
+  "chain_hash" varchar NOT NULL, -- Hash of this event + previous chain hash
+  "previous_chain_hash" varchar,
+  FOREIGN KEY ("document_id") REFERENCES "documents"("id") ON DELETE CASCADE
+);
+
+-- Evidence freshness monitoring
+CREATE TABLE IF NOT EXISTS "evidence_freshness_policies" (
+  "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+  "framework_id" varchar NOT NULL,
+  "requirement_category" varchar NOT NULL,
+  "evidence_type" varchar NOT NULL,
+  "freshness_period_months" integer NOT NULL,
+  "warning_period_days" integer NOT NULL DEFAULT 30,
+  "auto_expire" boolean DEFAULT false,
+  "created_at" timestamp DEFAULT now(),
+  "updated_at" timestamp DEFAULT now(),
+  FOREIGN KEY ("framework_id") REFERENCES "frameworks"("id")
+);
+
+-- Evidence freshness status tracking
+CREATE TABLE IF NOT EXISTS "evidence_freshness_status" (
+  "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+  "document_id" varchar NOT NULL,
+  "policy_id" varchar NOT NULL,
+  "status" varchar NOT NULL, -- 'fresh', 'warning', 'expired', 'overdue'
+  "valid_until" timestamp NOT NULL,
+  "warning_issued_at" timestamp,
+  "last_check_at" timestamp DEFAULT now(),
+  "next_check_at" timestamp NOT NULL,
+  "auto_notifications_enabled" boolean DEFAULT true,
+  FOREIGN KEY ("document_id") REFERENCES "documents"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("policy_id") REFERENCES "evidence_freshness_policies"("id")
+);
+
+-- Evidence bundles for audit packages
+CREATE TABLE IF NOT EXISTS "evidence_bundles" (
+  "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+  "bundle_name" varchar NOT NULL,
+  "bundle_type" varchar NOT NULL, -- 'audit_package', 'compliance_report', 'incident_response'
+  "framework_ids" jsonb NOT NULL,
+  "created_by" varchar NOT NULL,
+  "created_at" timestamp DEFAULT now(),
+  "bundle_hash" varchar NOT NULL,
+  "status" varchar DEFAULT 'draft', -- 'draft', 'sealed', 'submitted'
+  "sealed_at" timestamp,
+  "sealed_by" varchar,
+  "retention_period_years" integer DEFAULT 7,
+  "metadata" jsonb,
+  FOREIGN KEY ("created_by") REFERENCES "users"("id"),
+  FOREIGN KEY ("sealed_by") REFERENCES "users"("id")
+);
+
+-- Evidence bundle contents
+CREATE TABLE IF NOT EXISTS "evidence_bundle_items" (
+  "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+  "bundle_id" varchar NOT NULL,
+  "document_id" varchar NOT NULL,
+  "version_id" varchar NOT NULL,
+  "inclusion_reason" varchar NOT NULL,
+  "added_at" timestamp DEFAULT now(),
+  "added_by" varchar NOT NULL,
+  "item_hash" varchar NOT NULL,
+  "file_path_in_bundle" varchar NOT NULL,
+  FOREIGN KEY ("bundle_id") REFERENCES "evidence_bundles"("id") ON DELETE CASCADE,
+  FOREIGN KEY ("document_id") REFERENCES "documents"("id"),
+  FOREIGN KEY ("version_id") REFERENCES "evidence_versions"("id"),
+  FOREIGN KEY ("added_by") REFERENCES "users"("id")
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS "idx_evidence_versions_document" ON "evidence_versions" ("document_id", "version_number");
+CREATE INDEX IF NOT EXISTS "idx_evidence_versions_current" ON "evidence_versions" ("document_id") WHERE "is_current" = true;
+CREATE INDEX IF NOT EXISTS "idx_evidence_provenance_document" ON "evidence_provenance" ("document_id", "event_timestamp");
+CREATE INDEX IF NOT EXISTS "idx_evidence_freshness_status_check" ON "evidence_freshness_status" ("next_check_at") WHERE "status" IN ('fresh', 'warning');
+CREATE INDEX IF NOT EXISTS "idx_evidence_bundles_status" ON "evidence_bundles" ("status", "created_at");
+
+// server/services/evidenceVersioning.ts
+
+import { db } from '../db';
+import { 
+  evidenceVersions, 
+  evidenceProvenance, 
+  evidenceFreshnessStatus,
+  evidenceFreshnessPolicies,
+  documents 
+} from '@shared/schema';
+import { eq, desc, and, lt, lte, isNull, or } from 'drizzle-orm';
+import { createHash } from 'crypto';
+import { storage } from '../storage';
+import { logger } from '../logger';
+
+export interface EvidenceVersion {
+  id: string;
+  documentId: string;
+  versionNumber: number;
+  previousVersionId?: string;
+  changeType: 'create' | 'update' | 'replace' | 'supersede';
+  changeReason?: string;
+  changedBy: string;
+  changeTimestamp: Date;
+  filePath: string;
+  fileHash: string;
+  fileSize: number;
+  metadataChanges?: any;
+  isCurrent: boolean;
+  retentionUntil?: Date;
+  legalHold: boolean;
+}
+
+export interface ProvenanceEvent {
+  id: string;
+  documentId: string;
+  eventType: 'created' | 'uploaded' | 'analyzed' | 'verified' | 'superseded' | 'expired' | 'accessed' | 'modified';
+  eventTimestamp: Date;
+  actorId: string;
+  actorType: 'user' | 'system' | 'ai';
+  eventData: any;
+  sourceSystem?: string;
+  chainHash: string;
+  previousChainHash?: string;
+}
+
+export class EvidenceVersioningService {
+  
+  /**
+   * Create a new version of evidence document
+   */
+  async createVersion(
+    documentId: string,
+    changeType: EvidenceVersion['changeType'],
+    changedBy: string,
+    filePath: string,
+    fileBuffer: Buffer,
+    changeReason?: string,
+    metadataChanges?: any
+  ): Promise<EvidenceVersion> {
+    const log = logger.child({ service: 'EvidenceVersioning', operation: 'createVersion' });
+    
+    try {
+      // Get current version
+      const currentVersion = await this.getCurrentVersion(documentId);
+      const nextVersionNumber = currentVersion ? currentVersion.versionNumber + 1 : 1;
+      
+      // Calculate file hash
+      const fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+      
+      // Mark previous version as not current
+      if (currentVersion) {
+        await db.update(evidenceVersions)
+          .set({ isCurrent: false })
+          .where(eq(evidenceVersions.id, currentVersion.id));
+      }
+      
+      // Create new version
+      const [newVersion] = await db.insert(evidenceVersions).values({
+        documentId,
+        versionNumber: nextVersionNumber,
+        previousVersionId: currentVersion?.id,
+        changeType,
+        changeReason,
+        changedBy,
+        filePath,
+        fileHash,
+        fileSize: fileBuffer.length,
+        metadataChanges,
+        isCurrent: true,
+        legalHold: false
+      }).returning();
+      
+      // Record provenance event
+      await this.recordProvenanceEvent(documentId, 'modified', changedBy, 'user', {
+        versionId: newVersion.id,
+        changeType,
+        changeReason,
+        fileHash,
+        fileSize: fileBuffer.length
+      });
+      
+      log.info({ documentId, versionNumber: nextVersionNumber }, 'Created new evidence version');
+      return newVersion as EvidenceVersion;
+      
+    } catch (error) {
+      log.error({ documentId, error }, 'Failed to create evidence version');
+      throw error;
+    }
+  }
+  
+  /**
+   * Get current version of document
+   */
+  async getCurrentVersion(documentId: string): Promise<EvidenceVersion | null> {
+    const [version] = await db.select()
+      .from(evidenceVersions)
+      .where(and(
+        eq(evidenceVersions.documentId, documentId),
+        eq(evidenceVersions.isCurrent, true)
+      ))
+      .limit(1);
+    
+    return version as EvidenceVersion || null;
+  }
+  
+  /**
+   * Get all versions of a document
+   */
+  async getVersionHistory(documentId: string): Promise<EvidenceVersion[]> {
+    const versions = await db.select()
+      .from(evidenceVersions)
+      .where(eq(evidenceVersions.documentId, documentId))
+      .orderBy(desc(evidenceVersions.versionNumber));
+    
+    return versions as EvidenceVersion[];
+  }
+  
+  /**
+   * Record provenance event in chain
+   */
+  async recordProvenanceEvent(
+    documentId: string,
+    eventType: ProvenanceEvent['eventType'],
+    actorId: string,
+    actorType: ProvenanceEvent['actorType'],
+    eventData: any,
+    sourceSystem?: string
+  ): Promise<ProvenanceEvent> {
+    const log = logger.child({ service: 'EvidenceVersioning', operation: 'recordProvenanceEvent' });
+    
+    try {
+      // Get previous chain hash
+      const [lastEvent] = await db.select()
+        .from(evidenceProvenance)
+        .where(eq(evidenceProvenance.documentId, documentId))
+        .orderBy(desc(evidenceProvenance.eventTimestamp))
+        .limit(1);
+      
+      const previousChainHash = lastEvent?.chainHash;
+      
+      // Calculate chain hash
+      const chainData = {
+        documentId,
+        eventType,
+        eventTimestamp: new Date(),
+        actorId,
+        actorType,
+        eventData,
+        previousChainHash
+      };
+      
+      const chainHash = createHash('sha256')
+        .update(JSON.stringify(chainData))
+        .digest('hex');
+      
+      // Insert provenance event
+      const [event] = await db.insert(evidenceProvenance).values({
+        documentId,
+        eventType,
+        actorId,
+        actorType,
+        eventData,
+        sourceSystem,
+        chainHash,
+        previousChainHash
+      }).returning();
+      
+      log.debug({ documentId, eventType, chainHash }, 'Recorded provenance event');
+      return event as ProvenanceEvent;
+      
+    } catch (error) {
+      log.error({ documentId, eventType, error }, 'Failed to record provenance event');
+      throw error;
+    }
+  }
+  
+  /**
+   * Get complete provenance chain for document
+   */
+  async getProvenanceChain(documentId: string): Promise<ProvenanceEvent[]> {
+    const events = await db.select()
+      .from(evidenceProvenance)
+      .where(eq(evidenceProvenance.documentId, documentId))
+      .orderBy(evidenceProvenance.eventTimestamp);
+    
+    return events as ProvenanceEvent[];
+  }
+  
+  /**
+   * Verify provenance chain integrity
+   */
+  async verifyProvenanceChain(documentId: string): Promise<{
+    isValid: boolean;
+    errors: string[];
+    lastValidEvent?: string;
+  }> {
+    const events = await this.getProvenanceChain(documentId);
+    const errors: string[] = [];
+    let lastValidEvent: string | undefined;
+    
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+      const previousEvent = i > 0 ? events[i - 1] : null;
+      
+      // Verify chain hash
+      const chainData = {
+        documentId: event.documentId,
+        eventType: event.eventType,
+        eventTimestamp: event.eventTimestamp,
+        actorId: event.actorId,
+        actorType: event.actorType,
+        eventData: event.eventData,
+        previousChainHash: event.previousChainHash
+      };
+      
+      const expectedHash = createHash('sha256')
+        .update(JSON.stringify(chainData))
+        .digest('hex');
+      
+      if (expectedHash !== event.chainHash) {
+        errors.push(`Invalid hash at event ${event.id}: expected ${expectedHash}, got ${event.chainHash}`);
+        break;
+      }
+      
+      // Verify chain linkage
+      if (previousEvent && event.previousChainHash !== previousEvent.chainHash) {
+        errors.push(`Broken chain at event ${event.id}: previous hash mismatch`);
+        break;
+      }
+      
+      lastValidEvent = event.id;
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors,
+      lastValidEvent
+    };
+  }
+  
+  /**
+   * Check and update evidence freshness status
+   */
+  async checkEvidenceFreshness(documentId?: string): Promise<void> {
+    const log = logger.child({ service: 'EvidenceVersioning', operation: 'checkEvidenceFreshness' });
+    
+    try {
+      let documentsToCheck;
+      
+      if (documentId) {
+        documentsToCheck = await db.select()
+          .from(documents)
+          .where(eq(documents.id, documentId));
+      } else {
+        // Check all documents that need freshness monitoring
+        documentsToCheck = await db.select()
+          .from(documents)
+          .where(eq(documents.status, 'verified'));
+      }
+      
+      for (const doc of documentsToCheck) {
+        await this.updateDocumentFreshnessStatus(doc);
+      }
+      
+    } catch (error) {
+      log.error({ documentId, error }, 'Failed to check evidence freshness');
+      throw error;
+    }
+  }
+  
+  /**
+   * Update freshness status for a specific document
+   */
+  private async updateDocumentFreshnessStatus(doc: any): Promise<void> {
+    const log = logger.child({ documentId: doc.id });
+    
+    // Get freshness policies for this document
+    const policies = await db.select()
+      .from(evidenceFreshnessPolicies)
+      .where(eq(evidenceFreshnessPolicies.frameworkId, doc.frameworkId || 'default'));
+    
+    if (policies.length === 0) {
+      log.debug('No freshness policies found for document');
+      return;
+    }
+    
+    const now = new Date();
+    const uploadDate = new Date(doc.uploadedAt);
+    
+    for (const policy of policies) {
+      const validUntil = new Date(uploadDate);
+      validUntil.setMonth(validUntil.getMonth() + policy.freshnessMonths);
+      
+      const warningDate = new Date(validUntil);
+      warningDate.setDate(warningDate.getDate() - policy.warningPeriodDays);
+      
+      let status: 'fresh' | 'warning' | 'expired' | 'overdue';
+      
+      if (now < warningDate) {
+        status = 'fresh';
+      } else if (now < validUntil) {
+        status = 'warning';
+      } else {
+        status = 'expired';
+        
+        // Check if overdue (30 days past expiration)
+        const overdueDate = new Date(validUntil);
+        overdueDate.setDate(overdueDate.getDate() + 30);
+        if (now > overdueDate) {
+          status = 'overdue';
+        }
+      }
+      
+      // Update or create freshness status
+      await db.insert(evidenceFreshnessStatus).values({
+        documentId: doc.id,
+        policyId: policy.id,
+        status,
+        validUntil,
+        lastCheckAt: now,
+        nextCheckAt: new Date(now.getTime() + 24 * 60 * 60 * 1000), // Next day
+        autoNotificationsEnabled: true
+      }).onConflictDoUpdate({
+        target: [evidenceFreshnessStatus.documentId, evidenceFreshnessStatus.policyId],
+        set: {
+          status,
+          validUntil,
+          lastCheckAt: now,
+          nextCheckAt: new Date(now.getTime() + 24 * 60 * 60 * 1000)
+        }
+      });
+      
+      // Create notifications for status changes
+      if (status === 'warning' || status === 'expired' || status === 'overdue') {
+        await this.createFreshnessNotification(doc, status, validUntil);
+      }
+    }
+  }
+  
+  /**
+   * Create notification for freshness status change
+   */
+  private async createFreshnessNotification(
+    doc: any, 
+    status: string, 
+    validUntil: Date
+  ): Promise<void> {
+    const severity = status === 'overdue' ? 'urgent' : 
+                    status === 'expired' ? 'high' : 'medium';
+    
+    const messages = {
+      warning: `Evidence "${doc.fileName}" will expire soon and needs renewal`,
+      expired: `Evidence "${doc.fileName}" has expired and must be updated`,
+      overdue: `Evidence "${doc.fileName}" is overdue and may affect compliance status`
+    };
+    
+    await storage.createNotification({
+      userId: doc.userId,
+      type: 'evidence_freshness',
+      title: `Evidence Freshness Alert`,
+      message: messages[status as keyof typeof messages],
+      severity,
+      metadata: {
+        documentId: doc.id,
+        fileName: doc.fileName,
+        status,
+        validUntil: validUntil.toISOString()
+      }
+    });
+  }
+  
+  /**
+   * Get freshness dashboard data
+   */
+  async getFreshnessDashboard(userId: string): Promise<{
+    summary: {
+      fresh: number;
+      warning: number;
+      expired: number;
+      overdue: number;
+    };
+    expiringNext30Days: any[];
+    expiredDocuments: any[];
+  }> {
+    const statusCounts = await db.select({
+      status: evidenceFreshnessStatus.status,
+      count: sql<number>`count(*)`
+    })
+    .from(evidenceFreshnessStatus)
+    .innerJoin(documents, eq(documents.id, evidenceFreshnessStatus.documentId))
+    .where(eq(documents.userId, userId))
+    .groupBy(evidenceFreshnessStatus.status);
+    
+    const summary = {
+      fresh: 0,
+      warning: 0,
+      expired: 0,
+      overdue: 0
+    };
+    
+    statusCounts.forEach(({ status, count }) => {
+      summary[status as keyof typeof summary] = count;
+    });
+    
+    // Get documents expiring in next 30 days
+    const next30Days = new Date();
+    next30Days.setDate(next30Days.getDate() + 30);
+    
+    const expiringNext30Days = await db.select()
+      .from(documents)
+      .innerJoin(evidenceFreshnessStatus, eq(documents.id, evidenceFreshnessStatus.documentId))
+      .where(and(
+        eq(documents.userId, userId),
+        eq(evidenceFreshnessStatus.status, 'warning'),
+        lte(evidenceFreshnessStatus.validUntil, next30Days)
+      ));
+    
+    // Get expired documents
+    const expiredDocuments = await db.select()
+      .from(documents)
+      .innerJoin(evidenceFreshnessStatus, eq(documents.id, evidenceFreshnessStatus.documentId))
+      .where(and(
+        eq(documents.userId, userId),
+        or(
+          eq(evidenceFreshnessStatus.status, 'expired'),
+          eq(evidenceFreshnessStatus.status, 'overdue')
+        )
+      ));
+    
+    return {
+      summary,
+      expiringNext30Days,
+      expiredDocuments
+    };
+  }
+}
+
+export const evidenceVersioningService = new EvidenceVersioningService();
