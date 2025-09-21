@@ -779,7 +779,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createComplianceRequirement(requirement: InsertComplianceRequirement): Promise<ComplianceRequirement> {
-    const [result] = await db.insert(complianceRequirements).values(requirement).returning();
+    const [result] = await db.insert(complianceRequirements).values([requirement]).returning();
     return result;
   }
 

@@ -266,6 +266,46 @@ export const chatMessages = pgTable("chat_messages", {
   messageTypeCheck: sql`CHECK (${table.messageType} IN ('user', 'assistant'))`
 }));
 
+// Audit Packages for MVP - generates downloadable compliance packages
+export const auditPackageStatusEnum = pgEnum('audit_package_status', ['draft', 'generating', 'sealed', 'archived']);
+
+export const auditPackages = pgTable("audit_packages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  companyId: varchar("company_id").references(() => companies.id),
+  title: varchar("title").notNull(),
+  frameworkIds: text("framework_ids").array().notNull(),
+  status: auditPackageStatusEnum("status").default('draft').notNull(),
+  docCount: integer("doc_count").default(0).notNull(),
+  sizeBytes: integer("size_bytes").default(0).notNull(),
+  zipPath: varchar("zip_path"),
+  manifestPath: varchar("manifest_path"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  docCountCheck: sql`CHECK (${table.docCount} >= 0)`,
+  sizeBytesCheck: sql`CHECK (${table.sizeBytes} >= 0)`
+}));
+
+// Audit Package Items - documents included in packages
+export const auditPackageItems = pgTable("audit_package_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  packageId: varchar("package_id").references(() => auditPackages.id, { onDelete: "cascade" }).notNull(),
+  documentId: varchar("document_id").references(() => documents.id, { onDelete: "cascade" }).notNull(),
+  requirementId: varchar("requirement_id").references(() => complianceRequirements.id),
+  versionId: varchar("version_id"), // For future document versioning
+  fileName: varchar("file_name").notNull(),
+  filePath: varchar("file_path").notNull(),
+  sha256: varchar("sha256", { length: 64 }).notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  includedAs: varchar("included_as").notNull(), // 'evidence', 'policy', 'other'
+  addedAt: timestamp("added_at").defaultNow().notNull(),
+}, (table) => ({
+  packageDocumentUnique: unique("package_document_unique").on(table.packageId, table.documentId),
+  sha256FormatCheck: sql`CHECK (LENGTH(${table.sha256}) = 64)`,
+  sizeBytesCheck: sql`CHECK (${table.sizeBytes} > 0)`,
+  includedAsCheck: sql`CHECK (${table.includedAs} IN ('evidence', 'policy', 'other'))`
+}));
+
 // Vendor assessments table
 export const vendorAssessments = pgTable("vendor_assessments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -745,3 +785,24 @@ export type PolicyTemplate = typeof policyTemplates.$inferSelect;
 export type InsertPolicyTemplate = z.infer<typeof insertPolicyTemplateSchema>;
 export type GeneratedPolicy = typeof generatedPolicies.$inferSelect;
 export type InsertGeneratedPolicy = z.infer<typeof insertGeneratedPolicySchema>;
+
+// Insert schemas for audit packages
+export const insertAuditPackageSchema = createInsertSchema(auditPackages).omit({
+  id: true,
+  docCount: true,
+  sizeBytes: true,
+  zipPath: true,
+  manifestPath: true,
+  createdAt: true,
+});
+
+export const insertAuditPackageItemSchema = createInsertSchema(auditPackageItems).omit({
+  id: true,
+  addedAt: true,
+});
+
+// Types for audit packages
+export type AuditPackage = typeof auditPackages.$inferSelect;
+export type InsertAuditPackage = z.infer<typeof insertAuditPackageSchema>;
+export type AuditPackageItem = typeof auditPackageItems.$inferSelect;
+export type InsertAuditPackageItem = z.infer<typeof insertAuditPackageItemSchema>;
