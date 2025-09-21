@@ -536,14 +536,14 @@ export default function Onboarding() {
       } else {
         throw new Error(result.details || result.error || "Setup failed unexpectedly");
       }
-    } catch (error) {
-      console.error("Onboarding completion failed:", error);
-      toast({
-        title: "❌ Setup Failed",
-        description: error instanceof Error ? error.message : "An error occurred while completing setup. Please try again.",
-        variant: "destructive",
-      });
-    }
+    } catch (error: unknown) {
+        console.error("Onboarding completion failed:", error);
+        toast({
+          title: "❌ Setup Failed",
+          description: error instanceof Error ? error.message : "An error occurred while completing setup. Please try again.",
+          variant: "destructive",
+        });
+      }
   };
 
   const toggleFramework = (frameworkId: string) => {

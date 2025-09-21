@@ -180,7 +180,7 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, (err: any, user: any) => {
+    passport.authenticate(`replitauth:${req.hostname}`, (err: Error | null, user: Express.User | false) => {
       if (err) {
         logError(authLogger, err, {
           category: 'authentication',
@@ -240,7 +240,7 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/logout", (req, res) => {
     const user = req.user as any;
-    const userId = user?.sub || user?.claims?.sub;
+    const userId: string | undefined = user?.sub || user?.claims?.sub;
     
     req.logout((err) => {
       if (err) {
@@ -293,7 +293,7 @@ export async function setupAuth(app: Express) {
   );
 
   app.get("/api/auth/google/callback", (req, res, next) => {
-    passport.authenticate("google", (err: any, user: any) => {
+    passport.authenticate("google", (err: Error | null, user: Express.User | false) => {
       if (err) {
         logError(authLogger, err, {
           category: 'authentication',
