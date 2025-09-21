@@ -4,7 +4,7 @@ import type { User } from "@shared/schema";
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  const { data: user, isLoading, error } = useQuery<User | null>({
+  const { data: user, isLoading, error, isFetching } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     retry: false,
     refetchOnMount: true, // Always check on mount for onboarding status
@@ -30,12 +30,17 @@ export function useAuth() {
     }
   };
 
+  // Add more specific loading states
+  const isInitialLoading = isLoading && !user;
+  const isRefreshing = isFetching && !!user;
+
   // Check if user has completed onboarding
   const hasCompletedOnboarding = user ? user.onboardingCompleted : false;
 
   return {
     user,
-    isLoading,
+    isLoading: isInitialLoading, // Only true for initial load
+    isRefreshing, // True when refreshing user data
     isAuthenticated: !!user,
     hasCompletedOnboarding,
     error,
