@@ -1,9 +1,9 @@
-
 import { Router } from "express";
 import { isAuthenticated } from "../replitAuth";
 import { storage } from "../storage";
 import { ReportGenerator } from "../reportGenerator";
 import { evidenceVersioningService } from "../services/evidenceVersioning";
+import { evidenceFreshnessService } from '../services/evidenceFreshness';
 import archiver from 'archiver';
 import { Response } from 'express';
 
@@ -32,13 +32,13 @@ router.post("/generate", isAuthenticated, async (req: any, res) => {
       for (const frameworkId of frameworkIds || ['all']) {
         const reportData = await prepareReportData(userId, frameworkId);
         const reportGenerator = new ReportGenerator();
-        
+
         const complianceReport = await reportGenerator.generateReport({
           type: 'compliance_summary',
           data: reportData,
           generatedBy: userId
         });
-        
+
         const gapReport = await reportGenerator.generateReport({
           type: 'gap_analysis', 
           data: reportData,
@@ -72,11 +72,11 @@ router.post("/generate", isAuthenticated, async (req: any, res) => {
               lastFreshnessCheck: doc.lastFreshnessCheck
             }
           };
-          
+
           archive.append(JSON.stringify(docMetadata, null, 2), { 
             name: `evidence/metadata/${doc.id}.json` 
           });
-          
+
           // Include actual file if it exists
           try {
             const fs = require('fs');
@@ -149,5 +149,17 @@ async function prepareReportData(userId: string, frameworkId: string) {
     velocityData: null // This would be populated by your velocity calculation
   };
 }
+
+// Evidence freshness status endpoint
+router.get('/freshness', isAuthenticated, async (req: any, res) => {
+  try {
+    const userId = req.user.sub;
+    const freshnessStatus = await evidenceFreshnessService.getEvidenceFreshnessStatus(userId);
+    res.json(freshnessStatus);
+  } catch (error) {
+    console.error('Error getting evidence freshness status:', error);
+    res.status(500).json({ error: 'Failed to get evidence freshness status' });
+  }
+});
 
 export default router;
