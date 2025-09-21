@@ -223,10 +223,10 @@ export default function Dashboard() {
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-                  Compliance Overview
+                  Compliance Dashboard
                 </h1>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  Enterprise compliance monitoring and risk management dashboard
+                  Your comprehensive compliance monitoring center
                 </p>
               </div>
               <div className="flex items-center space-x-4">
@@ -238,6 +238,48 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
+          {/* Welcome Guidance for New Users */}
+          {progressData && progressData.percentComplete < 10 && (
+            <Card className="glass-card mb-8 bg-gradient-to-r from-venzip-primary/5 to-venzip-accent/5 border-venzip-primary/20 animate-fadeInUp">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gradient-primary rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <Rocket className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Welcome to Your Compliance Journey! 🚀</h3>
+                    <p className="text-gray-600 mb-4">
+                      You're all set up! Here are your next steps to get the most out of Venzip:
+                    </p>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="bg-white/50 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Upload className="h-4 w-4 text-venzip-primary" />
+                          <span className="font-medium text-sm">1. Upload Documents</span>
+                        </div>
+                        <p className="text-xs text-gray-600">Upload your policies and procedures for AI analysis</p>
+                      </div>
+                      <div className="bg-white/50 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckSquare className="h-4 w-4 text-venzip-accent" />
+                          <span className="font-medium text-sm">2. Complete Tasks</span>
+                        </div>
+                        <p className="text-xs text-gray-600">Start with high-priority compliance tasks</p>
+                      </div>
+                      <div className="bg-white/50 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <MessageSquare className="h-4 w-4 text-venzip-secondary" />
+                          <span className="font-medium text-sm">3. Ask Claude</span>
+                        </div>
+                        <p className="text-xs text-gray-600">Get instant compliance guidance from our AI assistant</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Enhanced Compliance Score Card */}
@@ -514,6 +556,29 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+
+      {/* Floating Quick Actions */}
+      {progressData && progressData.percentComplete < 50 && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <div className="flex flex-col gap-3">
+            <Button
+              onClick={() => window.location.href = '/evidence'}
+              className="w-14 h-14 rounded-full bg-gradient-to-r from-info-blue to-venzip-primary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center"
+              title="Upload Evidence"
+            >
+              <Upload className="h-6 w-6" />
+            </Button>
+            <Button
+              onClick={() => window.location.href = '/tasks'}
+              className="w-14 h-14 rounded-full bg-gradient-to-r from-venzip-accent to-venzip-secondary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center"
+              title="View Tasks"
+            >
+              <CheckSquare className="h-6 w-6" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       <LazyAIChat />
     </>
   );

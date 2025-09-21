@@ -724,20 +724,47 @@ export default function Onboarding() {
                     <Shield className="h-10 w-10 text-white" />
                   </div>
                   <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                    Welcome to VenzipAI
+                    Welcome to Venzip! 🎉
                   </h1>
-                  <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                    Let's set up your compliance workspace in just a few steps.
+                  <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                    We'll help you achieve compliance excellence in minutes, not months.
                   </p>
-                  <div className="w-64 h-32 bg-gradient-to-br from-venzip-primary/20 to-venzip-accent/20 rounded-2xl mx-auto mb-8 flex items-center justify-center">
-                    <Lock className="h-16 w-16 text-venzip-primary opacity-60" />
+                  <div className="bg-gradient-to-br from-venzip-primary/10 to-venzip-accent/10 rounded-2xl p-6 mx-auto mb-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Here's what we'll set up together:</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-venzip-primary rounded-full flex items-center justify-center flex-shrink-0">
+                          <Building className="h-3 w-3 text-white" />
+                        </div>
+                        <span className="text-sm">Your company profile</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-venzip-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                          <Shield className="h-3 w-3 text-white" />
+                        </div>
+                        <span className="text-sm">Compliance frameworks</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-venzip-accent rounded-full flex items-center justify-center flex-shrink-0">
+                          <CheckSquare className="h-3 w-3 text-white" />
+                        </div>
+                        <span className="text-sm">Task generation</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-success-green rounded-full flex items-center justify-center flex-shrink-0">
+                          <Bot className="h-3 w-3 text-white" />
+                        </div>
+                        <span className="text-sm">AI assistant setup</span>
+                      </div>
+                    </div>
                   </div>
                   <Button 
                     onClick={handleNext}
                     className="bg-gradient-primary text-white hover:shadow-lg hover:shadow-venzip-primary/25 hover:-translate-y-1 transform transition-all duration-300 px-8 py-3"
                   >
-                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                    Let's Get Started <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
+                  <p className="text-xs text-gray-500 mt-4">Takes about 3-5 minutes to complete</p>
                 </CardContent>
               </Card>
             )}
