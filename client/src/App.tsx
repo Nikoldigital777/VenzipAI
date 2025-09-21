@@ -57,8 +57,26 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
 }
 
 function Router() {
-  const { isAuthenticated, isLoading, hasCompletedOnboarding } = useAuth();
+  const { isAuthenticated, isLoading, hasCompletedOnboarding, error } = useAuth();
   const [location, navigate] = useLocation();
+
+  // Show error state if auth check failed
+  if (error && !isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-700">Authentication Error</h2>
+          <p className="text-gray-600 mt-2">Please try refreshing the page</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while checking authentication
   if (isLoading) {
