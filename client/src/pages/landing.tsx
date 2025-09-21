@@ -235,7 +235,7 @@ export default function Landing() {
 
   return (
     <>
-      
+
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/30 relative overflow-hidden noise-texture light" style={{colorScheme: 'light'}}>
         {/* Optimized background effects - reduced complexity */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -255,26 +255,26 @@ export default function Landing() {
               alt="Venzip - AI-Powered Compliance Platform"
               className="h-10 w-auto"
               loading="eager"
-              fetchPriority="high"
+              fetchpriority="high"
             />
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <button 
-              onClick={() => scrollToSection('benefits')} 
+            <button
+              onClick={() => scrollToSection('benefits')}
               className="text-gray-600 hover:text-gray-900 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-venzip-primary rounded-md px-3 py-2"
               aria-label="Navigate to benefits section"
             >
               Benefits
             </button>
-            <button 
-              onClick={() => scrollToSection('how-it-works')} 
+            <button
+              onClick={() => scrollToSection('how-it-works')}
               className="text-gray-600 hover:text-gray-900 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-venzip-primary rounded-md px-3 py-2"
               aria-label="Navigate to how it works section"
             >
               How It Works
             </button>
-            <button 
-              onClick={() => scrollToSection('demo-form')} 
+            <button
+              onClick={() => scrollToSection('demo-form')}
               className="text-gray-600 hover:text-gray-900 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-venzip-primary rounded-md px-3 py-2"
               aria-label="Navigate to demo form"
             >
@@ -283,8 +283,8 @@ export default function Landing() {
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">Welcome back, {(user as any)?.firstName || user?.email || 'User'}!</span>
-                <Button 
-                  onClick={() => navigate("/dashboard")} 
+                <Button
+                  onClick={() => navigate("/dashboard")}
                   className="bg-gradient-primary hover:shadow-lg transition-all duration-300 font-semibold"
                   aria-label="Go to dashboard"
                 >
@@ -303,7 +303,7 @@ export default function Landing() {
                   <Globe className="h-4 w-4" />
                   <span>Google</span>
                 </Button>
-                
+
                 {/* Replit Auth Button (only in development) */}
                 {window.location.hostname.includes('replit.dev') && (
                   <Button
@@ -316,7 +316,7 @@ export default function Landing() {
                     <span>Replit</span>
                   </Button>
                 )}
-                
+
                 <Button
                   onClick={handleGetStarted}
                   className="bg-gradient-to-r from-venzip-primary to-venzip-secondary text-white hover:shadow-lg hover:shadow-venzip-primary/25 transition-all duration-300"
@@ -355,7 +355,7 @@ export default function Landing() {
                       <Globe className="mr-2 h-5 w-5" />
                       Continue with Google
                     </Button>
-                    
+
                     {window.location.hostname.includes('replit.dev') && (
                       <Button
                         onClick={handleLogin}
@@ -402,7 +402,7 @@ export default function Landing() {
                 </Button>
               </div>
 
-              
+
 
               {/* Trust indicators */}
               <div className="flex items-center gap-6 text-sm text-gray-600">
@@ -1222,7 +1222,7 @@ export default function Landing() {
           <p className="text-xl mb-8 text-white/90">
             {isAuthenticated ? "Complete your setup and start achieving compliance excellence" : "Join hundreds of companies who trust Venzip for their compliance needs"}
           </p>
-          
+
           {!isAuthenticated ? (
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
@@ -1232,7 +1232,7 @@ export default function Landing() {
                 <Globe className="h-5 w-5" />
                 <span>Sign in with Google</span>
               </Button>
-              
+
               {window.location.hostname.includes('replit.dev') && (
                 <Button
                   onClick={handleLogin}
@@ -1252,7 +1252,7 @@ export default function Landing() {
               Go to Dashboard
             </Button>
           )}
-          
+
           {!isAuthenticated && (
             <p className="text-sm text-white/70 mt-4">
               No credit card required • 14-day free trial • Setup in minutes
@@ -1273,7 +1273,7 @@ export default function Landing() {
               Get a personalized demo and see how Venzip can reduce your compliance costs by 60%
             </p>
           </div>
-          
+
           <Suspense fallback={
             <div className="bg-white rounded-2xl p-8 shadow-2xl border border-white/30">
               <div className="animate-pulse">
@@ -1317,7 +1317,7 @@ export default function Landing() {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email" className="text-sm font-medium text-gray-700">Work Email</Label>
                     <Input
@@ -1332,7 +1332,7 @@ export default function Landing() {
                     />
                     <p id="email-help" className="text-xs text-gray-500 mt-1">We'll never share your email</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <Label htmlFor="company" className="text-sm font-medium text-gray-700">Company</Label>
@@ -1359,14 +1359,14 @@ export default function Landing() {
                       />
                     </div>
                   </div>
-                  
+
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-venzip-primary to-venzip-secondary text-white font-semibold py-4 text-lg rounded-xl hover:shadow-xl hover:-translate-y-1 transform transition-all duration-300"
                   >
                     Get My Free Demo
                   </Button>
-                  
+
                   <p className="text-xs text-gray-500 text-center">
                     By submitting this form, you agree to our Privacy Policy and Terms of Service
                   </p>

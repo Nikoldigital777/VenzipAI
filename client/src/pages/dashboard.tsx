@@ -29,7 +29,8 @@ import {
   ShieldAlert,
   FileText,
   CheckSquare, // Import CheckSquare
-  Eye // Import Eye
+  Eye, // Import Eye
+  Rocket // Import Rocket
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FrameworkProgressTable } from "@/components/FrameworkProgressTable";
