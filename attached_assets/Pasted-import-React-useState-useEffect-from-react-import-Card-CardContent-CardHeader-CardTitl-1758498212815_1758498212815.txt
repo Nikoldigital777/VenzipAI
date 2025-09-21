@@ -1,0 +1,358 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Clock, 
+  Shield, 
+  AlertTriangle, 
+  CheckCircle, 
+  History, 
+  GitBranch,
+  FileText,
+  Calendar,
+  User,
+  Hash,
+  Eye
+} from 'lucide-react';
+
+interface EvidenceVersion {
+  id: string;
+  versionNumber: number;
+  changeType: string;
+  changeReason?: string;
+  changedBy: string;
+  changeTimestamp: string;
+  fileHash: string;
+  fileSize: number;
+  isCurrent: boolean;
+}
+
+interface ProvenanceEvent {
+  id: string;
+  eventType: string;
+  eventTimestamp: string;
+  actorId: string;
+  actorType: string;
+  eventData: any;
+  chainHash: string;
+}
+
+interface FreshnessStatus {
+  status: 'fresh' | 'warning' | 'expired' | 'overdue';
+  validUntil: string;
+  daysUntilExpiry?: number;
+  daysOverdue?: number;
+}
+
+interface EvidenceDocument {
+  id: string;
+  fileName: string;
+  uploadedAt: string;
+  status: string;
+  currentVersion: EvidenceVersion;
+  freshnessStatus: FreshnessStatus;
+  provenanceValid: boolean;
+}
+
+export default function EvidenceVersioningDashboard() {
+  const [documents, setDocuments] = useState<EvidenceDocument[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
+  const [versionHistory, setVersionHistory] = useState<EvidenceVersion[]>([]);
+  const [provenanceChain, setProvenanceChain] = useState<ProvenanceEvent[]>([]);
+  const [freshnessSummary, setFreshnessSummary] = useState({
+    fresh: 0,
+    warning: 0,
+    expired: 0,
+    overdue: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadEvidenceData();
+  }, []);
+
+  const loadEvidenceData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load documents with versioning and freshness data
+      const response = await fetch('/api/evidence/versioning/dashboard');
+      const data = await response.json();
+      
+      setDocuments(data.documents);
+      setFreshnessSummary(data.freshnessSummary);
+    } catch (error) {
+      console.error('Failed to load evidence data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadDocumentDetails = async (documentId: string) => {
+    try {
+      const [versionsResponse, provenanceResponse] = await Promise.all([
+        fetch(`/api/evidence/versioning/${documentId}/history`),
+        fetch(`/api/evidence/versioning/${documentId}/provenance`)
+      ]);
+      
+      const versions = await versionsResponse.json();
+      const provenance = await provenanceResponse.json();
+      
+      setVersionHistory(versions);
+      setProvenanceChain(provenance);
+      setSelectedDocument(documentId);
+    } catch (error) {
+      console.error('Failed to load document details:', error);
+    }
+  };
+
+  const getFreshnessStatusColor = (status: string) => {
+    switch (status) {
+      case 'fresh': return 'bg-green-100 text-green-800';
+      case 'warning': return 'bg-yellow-100 text-yellow-800';
+      case 'expired': return 'bg-red-100 text-red-800';
+      case 'overdue': return 'bg-red-200 text-red-900';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getChangeTypeIcon = (changeType: string) => {
+    switch (changeType) {
+      case 'create': return <FileText className="h-4 w-4" />;
+      case 'update': return <GitBranch className="h-4 w-4" />;
+      case 'replace': return <History className="h-4 w-4" />;
+      case 'supersede': return <Shield className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-venzip-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Freshness Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Fresh Evidence</p>
+                <p className="text-2xl font-bold text-green-600">{freshnessSummary.fresh}</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Expiring Soon</p>
+                <p className="text-2xl font-bold text-yellow-600">{freshnessSummary.warning}</p>
+              </div>
+              <Clock className="h-8 w-8 text-yellow-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Expired</p>
+                <p className="text-2xl font-bold text-red-600">{freshnessSummary.expired}</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-red-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Overdue</p>
+                <p className="text-2xl font-bold text-red-800">{freshnessSummary.overdue}</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-red-700" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Evidence Documents List */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Evidence Documents
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {documents.map((doc) => (
+              <div
+                key={doc.id}
+                className="border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => loadDocumentDetails(doc.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-medium text-gray-900">{doc.fileName}</h3>
+                      <Badge className={getFreshnessStatusColor(doc.freshnessStatus.status)}>
+                        {doc.freshnessStatus.status}
+                      </Badge>
+                      {doc.provenanceValid ? (
+                        <Badge className="bg-green-100 text-green-800">
+                          <Shield className="h-3 w-3 mr-1" />
+                          Verified
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-red-100 text-red-800">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Chain Broken
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <History className="h-4 w-4" />
+                        Version {doc.currentVersion.versionNumber}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {new Date(doc.uploadedAt).toLocaleDateString()}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        {doc.currentVersion.changedBy}
+                      </span>
+                    </div>
+                    
+                    {doc.freshnessStatus.status === 'warning' && doc.freshnessStatus.daysUntilExpiry && (
+                      <p className="text-sm text-yellow-600 mt-1">
+                        Expires in {doc.freshnessStatus.daysUntilExpiry} days
+                      </p>
+                    )}
+                    {doc.freshnessStatus.status === 'expired' && doc.freshnessStatus.daysOverdue && (
+                      <p className="text-sm text-red-600 mt-1">
+                        Expired {doc.freshnessStatus.daysOverdue} days ago
+                      </p>
+                    )}
+                  </div>
+                  
+                  <Button variant="outline" size="sm">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Document Details Modal/Panel */}
+      {selectedDocument && (
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle>Document Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="versions">
+              <TabsList>
+                <TabsTrigger value="versions">Version History</TabsTrigger>
+                <TabsTrigger value="provenance">Provenance Chain</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="versions" className="space-y-4">
+                {versionHistory.map((version) => (
+                  <div key={version.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {getChangeTypeIcon(version.changeType)}
+                        <span className="font-medium">Version {version.versionNumber}</span>
+                        {version.isCurrent && (
+                          <Badge className="bg-blue-100 text-blue-800">Current</Badge>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-600">
+                        {new Date(version.changeTimestamp).toLocaleString()}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-400" />
+                        <span>Changed by: {version.changedBy}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Hash className="h-4 w-4 text-gray-400" />
+                        <span className="font-mono text-xs">{version.fileHash}</span>
+                      </div>
+                      
+                      {version.changeReason && (
+                        <div className="flex items-start gap-2">
+                          <FileText className="h-4 w-4 text-gray-400 mt-0.5" />
+                          <span>{version.changeReason}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </TabsContent>
+              
+              <TabsContent value="provenance" className="space-y-4">
+                {provenanceChain.map((event, index) => (
+                  <div key={event.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-venzip-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
+                          {index + 1}
+                        </div>
+                        <span className="font-medium capitalize">{event.eventType}</span>
+                        <Badge variant="outline">{event.actorType}</Badge>
+                      </div>
+                      <span className="text-sm text-gray-600">
+                        {new Date(event.eventTimestamp).toLocaleString()}
+                      </span>
+                    </div>
+                    
+                    <div className="ml-10 space-y-1 text-sm">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-400" />
+                        <span>Actor: {event.actorId}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Hash className="h-4 w-4 text-gray-400" />
+                        <span className="font-mono text-xs">{event.chainHash}</span>
+                      </div>
+                      
+                      {event.eventData && Object.keys(event.eventData).length > 0 && (
+                        <details className="mt-2">
+                          <summary className="cursor-pointer text-venzip-primary">
+                            View Event Data
+                          </summary>
+                          <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
+                            {JSON.stringify(event.eventData, null, 2)}
+                          </pre>
+                        </details>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
