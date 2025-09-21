@@ -1,0 +1,395 @@
+// server/routes/evidenceVersioning.ts
+
+import { Router } from 'express';
+import { isAuthenticated } from '../replitAuth';
+import { evidenceVersioningService } from '../services/evidenceVersioning';
+import { auditPackageGenerator } from '../services/auditPackageGenerator';
+import { db } from '../db';
+import { documents, evidenceVersions, evidenceProvenance } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import multer from 'multer';
+import { storage } from '../storage';
+
+const router = Router();
+const upload = multer({ dest: 'uploads/versions/' });
+
+// Get evidence versioning dashboard data
+router.get('/dashboard', isAuthenticated, async (req: any, res) => {
+  try {
+    const userId = req.user.sub;
+    
+    // Get user's documents with versioning info
+    const userDocuments = await db.select({
+      document: documents,
+      currentVersion: evidenceVersions
+    })
+    .from(documents)
+    .leftJoin(evidenceVersions, 
+      and(
+        eq(evidenceVersions.documentId, documents.id),
+        eq(evidenceVersions.isCurrent, true)
+      )
+    )
+    .where(eq(documents.userId, userId));
+    
+    // Get freshness dashboard
+    const freshnessDashboard = await evidenceVersioningService.getFreshnessDashboard(userId);
+    
+    // Verify provenance chains for each document
+    const documentsWithProvenance = await Promise.all(
+      userDocuments.map(async ({ document, currentVersion }) => {
+        const provenanceVerification = await evidenceVersioningService.verifyProvenanceChain(document.id);
+        
+        return {
+          id: document.id,
+          fileName: document.fileName,
+          uploadedAt: document.uploadedAt,
+          status: document.status,
+          currentVersion: currentVersion || {
+            versionNumber: 1,
+            changedBy: document.uploaderUserId,
+            fileHash: document.sha256Hash
+          },
+          freshnessStatus: freshnessDashboard.expiringNext30Days.find(d => d.document.id === document.id) ? 
+            { status: 'warning' } : { status: 'fresh' },
+          provenanceValid: provenanceVerification.isValid
+        };
+      })
+    );
+    
+    res.json({
+      documents: documentsWithProvenance,
+      freshnessSummary: freshnessDashboard.summary
+    });
+    
+  } catch (error) {
+    console.error('Failed to load versioning dashboard:', error);
+    res.status(500).json({ error: 'Failed to load dashboard data' });
+  }
+});
+
+// Get version history for a document
+router.get('/:documentId/history', isAuthenticated, async (req: any, res) => {
+  try {
+    const { documentId } = req.params;
+    const userId = req.user.sub;
+    
+    // Verify user owns the document
+    const document = await db.select()
+      .from(documents)
+      .where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
+      .limit(1);
+    
+    if (document.length === 0) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    const versionHistory = await evidenceVersioningService.getVersionHistory(documentId);
+    res.json(versionHistory);
+    
+  } catch (error) {
+    console.error('Failed to load version history:', error);
+    res.status(500).json({ error: 'Failed to load version history' });
+  }
+});
+
+// Get provenance chain for a document
+router.get('/:documentId/provenance', isAuthenticated, async (req: any, res) => {
+  try {
+    const { documentId } = req.params;
+    const userId = req.user.sub;
+    
+    // Verify user owns the document
+    const document = await db.select()
+      .from(documents)
+      .where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
+      .limit(1);
+    
+    if (document.length === 0) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    const provenanceChain = await evidenceVersioningService.getProvenanceChain(documentId);
+    res.json(provenanceChain);
+    
+  } catch (error) {
+    console.error('Failed to load provenance chain:', error);
+    res.status(500).json({ error: 'Failed to load provenance chain' });
+  }
+});
+
+// Create new version of a document
+router.post('/:documentId/versions', isAuthenticated, upload.single('file'), async (req: any, res) => {
+  try {
+    const { documentId } = req.params;
+    const { changeType, changeReason } = req.body;
+    const userId = req.user.sub;
+    const file = req.file;
+    
+    if (!file) {
+      return res.status(400).json({ error: 'No file provided' });
+    }
+    
+    // Verify user owns the document
+    const document = await db.select()
+      .from(documents)
+      .where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
+      .limit(1);
+    
+    if (document.length === 0) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    // Read file buffer
+    const fileBuffer = await fs.readFile(file.path);
+    
+    // Create new version
+    const newVersion = await evidenceVersioningService.createVersion(
+      documentId,
+      changeType,
+      userId,
+      file.path,
+      fileBuffer,
+      changeReason
+    );
+    
+    res.json(newVersion);
+    
+    // Clean up uploaded file
+    await fs.unlink(file.path);
+    
+  } catch (error) {
+    console.error('Failed to create version:', error);
+    res.status(500).json({ error: 'Failed to create document version' });
+  }
+});
+
+// Verify provenance chain integrity
+router.post('/:documentId/verify', isAuthenticated, async (req: any, res) => {
+  try {
+    const { documentId } = req.params;
+    const userId = req.user.sub;
+    
+    // Verify user owns the document
+    const document = await db.select()
+      .from(documents)
+      .where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
+      .limit(1);
+    
+    if (document.length === 0) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    const verification = await evidenceVersioningService.verifyProvenanceChain(documentId);
+    res.json(verification);
+    
+  } catch (error) {
+    console.error('Failed to verify provenance chain:', error);
+    res.status(500).json({ error: 'Failed to verify provenance chain' });
+  }
+});
+
+// Check evidence freshness
+router.post('/freshness/check', isAuthenticated, async (req: any, res) => {
+  try {
+    const { documentId } = req.body;
+    await evidenceVersioningService.checkEvidenceFreshness(documentId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Failed to check evidence freshness:', error);
+    res.status(500).json({ error: 'Failed to check evidence freshness' });
+  }
+});
+
+export default router;
+
+// server/routes/auditPackages.ts
+
+import { Router } from 'express';
+import { isAuthenticated } from '../replitAuth';
+import { auditPackageGenerator } from '../services/auditPackageGenerator';
+import { db } from '../db';
+import { evidenceBundles } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import { storage } from '../storage';
+import path from 'path';
+import { promises as fs } from 'fs';
+import archiver from 'archiver';
+
+const auditRouter = Router();
+
+// Generate new audit package
+auditRouter.post('/generate', isAuthenticated, async (req: any, res) => {
+  try {
+    const userId = req.user.sub;
+    const config = req.body;
+    
+    // Get user's company
+    const company = await storage.getCompanyByUserId(userId);
+    if (!company) {
+      return res.status(400).json({ error: 'Company profile required' });
+    }
+    
+    const result = await auditPackageGenerator.generateAuditPackage(
+      config,
+      userId,
+      company.id
+    );
+    
+    res.json(result);
+    
+  } catch (error) {
+    console.error('Failed to generate audit package:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate audit package',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Get existing audit packages for user
+auditRouter.get('/', isAuthenticated, async (req: any, res) => {
+  try {
+    const userId = req.user.sub;
+    
+    // Get user's company
+    const company = await storage.getCompanyByUserId(userId);
+    if (!company) {
+      return res.json([]);
+    }
+    
+    const packages = await db.select()
+      .from(evidenceBundles)
+      .where(eq(evidenceBundles.createdBy, userId))
+      .orderBy(desc(evidenceBundles.createdAt));
+    
+    // Add size information (simplified)
+    const packagesWithSize = packages.map(pkg => ({
+      packageId: pkg.id,
+      packageName: pkg.bundleName,
+      generationTimestamp: pkg.createdAt,
+      totalDocuments: pkg.metadata?.totalDocuments || 0,
+      bundleHash: pkg.bundleHash,
+      status: pkg.status,
+      frameworksIncluded: Array.isArray(pkg.frameworkIds) ? pkg.frameworkIds : [],
+      generatedBy: pkg.createdBy,
+      size: 1024 * 1024 * 10 // Placeholder - would calculate actual size
+    }));
+    
+    res.json(packagesWithSize);
+    
+  } catch (error) {
+    console.error('Failed to load audit packages:', error);
+    res.status(500).json({ error: 'Failed to load audit packages' });
+  }
+});
+
+// Get audit package manifest
+auditRouter.get('/:packageId/manifest', isAuthenticated, async (req: any, res) => {
+  try {
+    const { packageId } = req.params;
+    const userId = req.user.sub;
+    
+    // Verify user owns the package
+    const [package] = await db.select()
+      .from(evidenceBundles)
+      .where(and(eq(evidenceBundles.id, packageId), eq(evidenceBundles.createdBy, userId)))
+      .limit(1);
+    
+    if (!package) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+    
+    // Read manifest file
+    const packagePath = path.join('./audit-packages', packageId);
+    const manifestPath = path.join(packagePath, 'PROVENANCE_MANIFEST.json');
+    
+    try {
+      const manifestContent = await fs.readFile(manifestPath, 'utf-8');
+      const manifest = JSON.parse(manifestContent);
+      res.json(manifest);
+    } catch (error) {
+      res.status(404).json({ error: 'Manifest not found' });
+    }
+    
+  } catch (error) {
+    console.error('Failed to load manifest:', error);
+    res.status(500).json({ error: 'Failed to load manifest' });
+  }
+});
+
+// Download audit package
+auditRouter.get('/:packageId/download', isAuthenticated, async (req: any, res) => {
+  try {
+    const { packageId } = req.params;
+    const userId = req.user.sub;
+    
+    // Verify user owns the package
+    const [package] = await db.select()
+      .from(evidenceBundles)
+      .where(and(eq(evidenceBundles.id, packageId), eq(evidenceBundles.createdBy, userId)))
+      .limit(1);
+    
+    if (!package) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+    
+    if (package.status !== 'sealed') {
+      return res.status(400).json({ error: 'Package not sealed yet' });
+    }
+    
+    const packagePath = path.join('./audit-packages', packageId);
+    
+    // Create ZIP archive
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="audit-package-${packageId}.zip"`);
+    
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(res);
+    
+    // Add package directory to archive
+    archive.directory(packagePath, false);
+    
+    await archive.finalize();
+    
+  } catch (error) {
+    console.error('Failed to download package:', error);
+    res.status(500).json({ error: 'Failed to download package' });
+  }
+});
+
+// Verify package integrity
+auditRouter.post('/:packageId/verify', isAuthenticated, async (req: any, res) => {
+  try {
+    const { packageId } = req.params;
+    const userId = req.user.sub;
+    
+    // Verify user owns the package
+    const [package] = await db.select()
+      .from(evidenceBundles)
+      .where(and(eq(evidenceBundles.id, packageId), eq(evidenceBundles.createdBy, userId)))
+      .limit(1);
+    
+    if (!package) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+    
+    const verification = await auditPackageGenerator.verifyPackageIntegrity(packageId);
+    res.json(verification);
+    
+  } catch (error) {
+    console.error('Failed to verify package integrity:', error);
+    res.status(500).json({ error: 'Failed to verify package integrity' });
+  }
+});
+
+export { auditRouter };
+
+// server/routes/index.ts - Add to main routes file
+
+import evidenceVersioningRoutes from './evidenceVersioning';
+import { auditRouter } from './auditPackages';
+
+// Add these to your main router setup:
+app.use('/api/evidence/versioning', evidenceVersioningRoutes);
+app.use('/api/audit-packages', auditRouter);
