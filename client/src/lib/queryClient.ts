@@ -49,16 +49,31 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: 30 * 1000, // 30 seconds
       retry: (failureCount, error) => {
-        // Don't retry on auth errors
+        // Don't retry on auth errors - redirect to landing instead
         if (error && error.message.includes('401')) {
+          // Only redirect if not already on landing/login page
+          if (!window.location.pathname.includes('/landing') && 
+              !window.location.pathname.includes('/login')) {
+            window.location.href = '/landing';
+          }
           return false;
         }
-        return failureCount < 1;
+        return failureCount < 2; // Increased retry count for network issues
       },
       networkMode: 'online',
     },
     mutations: {
-      retry: false,
+      retry: (failureCount, error) => {
+        // Don't retry auth errors
+        if (error && error.message.includes('401')) {
+          if (!window.location.pathname.includes('/landing') && 
+              !window.location.pathname.includes('/login')) {
+            window.location.href = '/landing';
+          }
+          return false;
+        }
+        return failureCount < 1;
+      },
     },
   },
 });
