@@ -107,32 +107,30 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
 
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const xhr = new XMLHttpRequest();
-
-      return new Promise<UploadResult>((resolve, reject) => {
-        xhr.upload.addEventListener('progress', (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded * 100) / event.total);
-            setUploadProgress(progress);
-          }
-        });
-
-        xhr.addEventListener('load', () => {
-          if (xhr.status === 200) {
-            const result = JSON.parse(xhr.responseText);
-            resolve(result);
-          } else {
-            reject(new Error('Upload failed'));
-          }
-        });
-
-        xhr.addEventListener('error', () => {
-          reject(new Error('Upload failed'));
-        });
-
-        xhr.open('POST', '/api/documents/upload');
-        xhr.send(formData);
+      const response = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Upload failed';
+        
+        if (response.status === 413) {
+          errorMessage = 'File too large. Maximum size is 50MB.';
+        } else if (response.status === 415) {
+          errorMessage = 'Unsupported file type. Please upload PDF, DOC, DOCX, XLS, XLSX, or image files.';
+        } else if (response.status === 401) {
+          errorMessage = 'Please log in to upload files.';
+        } else if (errorText.includes('storage')) {
+          errorMessage = 'Storage service unavailable. Please try again later.';
+        }
+        
+        throw new Error(errorMessage);
+      }
+      
+      return response.json();
     },
     onSuccess: (data) => {
       setUploadProgress(0);
@@ -149,8 +147,13 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
       onUploadComplete?.(data);
     },
-    onError: () => {
+    onError: (error) => {
       setUploadProgress(0);
+      toast({
+        title: "Upload Failed",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   });
 
@@ -482,11 +485,7 @@ export default function FileUpload({ frameworkId, onUploadComplete }: FileUpload
             </div>
           )}
 
-          {mutation.isError && (
-            <div className="mt-4 text-sm text-red-600">
-              {(mutation.error as Error).message || "Upload failed"}
-            </div>
-          )}
+          
         </CardContent>
       </Card>
 
