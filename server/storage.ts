@@ -435,7 +435,7 @@ export class DatabaseStorage implements IStorage {
       // Evidence mapping fields
       mappingId: evidenceMappings.id,
       mappingType: evidenceMappings.mappingType,
-      confidence: evidenceMappings.confidence,
+      confidence: evidenceMappings.mappingConfidence,
       mappingStatus: evidenceMappings.validationStatus,
       // Compliance requirement fields
       controlId: complianceRequirements.id,
@@ -779,7 +779,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createComplianceRequirement(requirement: InsertComplianceRequirement): Promise<ComplianceRequirement> {
-    const [result] = await db.insert(complianceRequirements).values([requirement]).returning();
+    const [result] = await db.insert(complianceRequirements).values(requirement).returning();
     return result;
   }
 
