@@ -109,6 +109,28 @@ interface ComplianceRequirement {
   priority: string;
 }
 
+interface PolicyTemplate {
+  id: string;
+  frameworkId: string;
+  templateName: string;
+  templateType: string;
+  category: string;
+  title: string;
+  description: string;
+  priority: string;
+  version: string;
+  isActive: boolean;
+}
+
+interface UploadedDocument {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  status: 'uploading' | 'analyzing' | 'completed' | 'error';
+  analysisResult?: any;
+}
+
 interface TaskPreviewProps {
   selectedFrameworks: string[];
   currentStep: number;
@@ -300,8 +322,14 @@ export default function Onboarding() {
   // --- State for the new step-by-step flow ---
   const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
   const [aiEnabled, setAiEnabled] = useState(true); // From edited code for AI assistant setup
+  
+  // Baseline Docs state
+  const [selectedPolicyTemplates, setSelectedPolicyTemplates] = useState<string[]>([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
+  const [availableTemplates, setAvailableTemplates] = useState<PolicyTemplate[]>([]);
+  const [documentsAnalyzing, setDocumentsAnalyzing] = useState(false);
 
-  const totalSteps = 6; // Defined in edited code
+  const totalSteps = 7; // Updated to include Baseline Docs step
   const progress = (currentStep / totalSteps) * 100;
 
   // --- Hooks from original code ---
@@ -377,6 +405,26 @@ export default function Onboarding() {
     color: fw.color || "from-blue-500 to-blue-600",
     estimatedTimeMonths: fw.estimatedTimeMonths
   })) || [];
+
+  // Fetch available policy templates when frameworks are selected
+  const { data: templatesData } = useQuery({
+    queryKey: ["/api/policies/templates", selectedFrameworks],
+    queryFn: async () => {
+      if (selectedFrameworks.length === 0) return [];
+      const response = await apiRequest("GET", "/api/policies/templates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch templates");
+      }
+      const templates = await response.json();
+      // Filter templates for selected frameworks
+      return templates.filter((template: PolicyTemplate) => 
+        selectedFrameworks.includes(template.frameworkId)
+      );
+    },
+    enabled: selectedFrameworks.length > 0
+  });
+
+  const availableTemplatesFromQuery = templatesData || [];
 
   // --- Mutations from original code ---
   const generateChecklistMutation = useMutation({
@@ -883,7 +931,7 @@ export default function Onboarding() {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
-                  {frameworks.map((framework) => {
+                  {frameworks.map((framework: Framework) => {
                     const Icon = framework.icon;
                     const isSelected = selectedFrameworks.includes(framework.id);
 
@@ -943,7 +991,7 @@ export default function Onboarding() {
                       <h3 className="font-semibold text-lg">Selected Frameworks</h3>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {getSelectedFrameworksData().map(framework => (
+                      {getSelectedFrameworksData().map((framework: Framework) => (
                         <div key={framework.id} className="flex items-center gap-2 text-sm">
                           <div className={`w-4 h-4 bg-gradient-to-br ${framework.color} rounded`}></div>
                           <span className="font-medium">{framework.name}</span>
@@ -959,8 +1007,159 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* Step 4: Task Preview */}
+            {/* Step 4: Baseline Docs */}
             {currentStep === 4 && (
+              <div>
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Seed your workspace with existing policies</h2>
+                  <p className="text-lg text-gray-600">Upload your current policies or start with our templates. We'll analyze and map them to compliance requirements.</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Policy Templates Section */}
+                  <Card className="glass-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <FileText className="h-6 w-6 text-venzip-primary" />
+                        Start with Policy Templates
+                      </CardTitle>
+                      <p className="text-sm text-gray-600">
+                        Quick-start with pre-built policies for your selected frameworks
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      {availableTemplatesFromQuery.length > 0 ? (
+                        <div className="grid md:grid-cols-2 gap-4">
+                          {availableTemplatesFromQuery.map((template: PolicyTemplate) => (
+                            <div
+                              key={template.id}
+                              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                selectedPolicyTemplates.includes(template.id)
+                                  ? 'border-venzip-primary bg-venzip-primary/5'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                              onClick={() => {
+                                setSelectedPolicyTemplates(prev => 
+                                  prev.includes(template.id)
+                                    ? prev.filter(id => id !== template.id)
+                                    : [...prev, template.id]
+                                );
+                              }}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-gray-900">{template.title}</h3>
+                                  <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge variant="outline" className="text-xs">
+                                      {template.category}
+                                    </Badge>
+                                    <Badge variant="secondary" className="text-xs">
+                                      {template.priority}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                {selectedPolicyTemplates.includes(template.id) && (
+                                  <CheckCircle className="h-5 w-5 text-venzip-primary" />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-gray-500">
+                          <FileText className="h-12 w-12 mx-auto text-gray-300 mb-2" />
+                          <p>No policy templates found for selected frameworks</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Document Upload Section */}
+                  <Card className="glass-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <FolderOpen className="h-6 w-6 text-venzip-primary" />
+                        Upload Existing Documents
+                      </CardTitle>
+                      <p className="text-sm text-gray-600">
+                        Upload your current policies and documents. We'll analyze them with AI and map to compliance requirements.
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                        <FolderOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                        <p className="text-lg font-semibold text-gray-600 mb-2">Drop files here or click to browse</p>
+                        <p className="text-sm text-gray-500 mb-4">
+                          Support: PDF, DOCX, MD, TXT, CSV (Max: 50MB each)
+                        </p>
+                        <Button variant="outline" className="mt-2">
+                          <FolderOpen className="h-4 w-4 mr-2" />
+                          Choose Files
+                        </Button>
+                      </div>
+
+                      {uploadedDocuments.length > 0 && (
+                        <div className="mt-6 space-y-3">
+                          <h4 className="font-semibold text-gray-900">Uploaded Documents</h4>
+                          {uploadedDocuments.map((doc) => (
+                            <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                              <FileText className="h-5 w-5 text-gray-500" />
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-900">{doc.fileName}</p>
+                                <p className="text-sm text-gray-500">
+                                  {(doc.fileSize / (1024 * 1024)).toFixed(1)} MB
+                                </p>
+                              </div>
+                              <Badge variant={
+                                doc.status === 'completed' ? 'default' :
+                                doc.status === 'analyzing' ? 'secondary' :
+                                doc.status === 'error' ? 'destructive' : 'outline'
+                              }>
+                                {doc.status}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* AI Analysis Summary */}
+                  {(selectedPolicyTemplates.length > 0 || uploadedDocuments.length > 0) && (
+                    <Card className="glass-card bg-gradient-to-r from-venzip-primary/5 to-venzip-accent/5">
+                      <CardContent className="p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Bot className="h-6 w-6 text-venzip-primary" />
+                          <h3 className="font-semibold text-lg">AI Analysis Preview</h3>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-600">Selected Templates:</p>
+                            <p className="font-medium">{selectedPolicyTemplates.length}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Uploaded Documents:</p>
+                            <p className="font-medium">{uploadedDocuments.length}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Expected Mappings:</p>
+                            <p className="font-medium">~{(selectedPolicyTemplates.length + uploadedDocuments.length) * 3} controls</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-600">Analysis Status:</p>
+                            <p className="font-medium text-venzip-primary">Ready to analyze</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 5: Task Preview */}
+            {currentStep === 5 && (
               <TaskPreview 
                 selectedFrameworks={selectedFrameworks}
                 currentStep={currentStep}
@@ -969,8 +1168,8 @@ export default function Onboarding() {
               />
             )}
 
-            {/* Step 5: AI Assistant Setup */}
-            {currentStep === 5 && (
+            {/* Step 6: AI Assistant Setup */}
+            {currentStep === 6 && (
               <Card className="glass-card max-w-3xl mx-auto">
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-3 text-2xl">
@@ -1028,8 +1227,8 @@ export default function Onboarding() {
               </Card>
             )}
 
-            {/* Step 6: Summary & Finish */}
-            {currentStep === 6 && (
+            {/* Step 7: Summary & Finish */}
+            {currentStep === 7 && (
               <Card className="glass-card max-w-4xl mx-auto">
                 <CardHeader className="text-center">
                   <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
@@ -1078,7 +1277,7 @@ export default function Onboarding() {
                   <div>
                     <h3 className="font-semibold text-lg mb-4 text-center">Framework Progress Dashboard Preview</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {getSelectedFrameworksData().map((framework) => {
+                      {getSelectedFrameworksData().map((framework: Framework) => {
                         const Icon = framework.icon;
                         return (
                           <div
