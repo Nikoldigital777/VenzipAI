@@ -410,23 +410,21 @@ export async function setupAuth(app: Express) {
         if (isDevelopment || !hasReplitAuth) {
           res.redirect('/landing');
         } else {
-          try {
-            // In production with Replit auth, use the OAuth end session URL
-            const config = await getOidcConfig();
+          getOidcConfig().then(config => {
             res.redirect(
               client.buildEndSessionUrl(config, {
                 client_id: process.env.REPL_ID!,
                 post_logout_redirect_uri: `${req.protocol}://${req.hostname}/landing`,
               }).href
             );
-          } catch (error) {
+          }).catch(error => {
             authLogger.error("Failed to get OIDC config for logout", {
               category: 'authentication',
               operation: 'logout',
               error: error
             });
             res.redirect('/landing');
-          }
+          });
         }
       });
     });

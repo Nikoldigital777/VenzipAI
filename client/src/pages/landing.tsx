@@ -255,7 +255,7 @@ export default function Landing() {
               alt="Venzip - AI-Powered Compliance Platform"
               className="h-10 w-auto"
               loading="eager"
-              fetchPriority="high"
+              fetchpriority="high"
             />
           </div>
           <div className="hidden md:flex items-center space-x-8">
@@ -292,23 +292,39 @@ export default function Landing() {
                 </Button>
               </div>
             ) : (
-              <>
+              <div className="flex items-center space-x-4">
+                {/* Google Auth Button */}
                 <Button
-                  onClick={handleLogin}
+                  onClick={() => window.location.href = '/api/auth/google'}
                   variant="outline"
-                  className="glass-card border-0 hover:shadow-lg transition-all duration-300"
-                  aria-label="Sign in to your account"
+                  className="glass-card border-0 hover:shadow-lg transition-all duration-300 flex items-center space-x-2"
+                  aria-label="Sign in with Google"
                 >
-                  {window.location.hostname.includes('replit.dev') ? 'Sign In' : 'Demo Login'}
+                  <Globe className="h-4 w-4" />
+                  <span>Google</span>
                 </Button>
+                
+                {/* Replit Auth Button (only in development) */}
+                {window.location.hostname.includes('replit.dev') && (
+                  <Button
+                    onClick={handleLogin}
+                    variant="outline"
+                    className="glass-card border-0 hover:shadow-lg transition-all duration-300 flex items-center space-x-2"
+                    aria-label="Sign in with Replit"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Replit</span>
+                  </Button>
+                )}
+                
                 <Button
                   onClick={handleGetStarted}
                   className="bg-gradient-to-r from-venzip-primary to-venzip-secondary text-white hover:shadow-lg hover:shadow-venzip-primary/25 transition-all duration-300"
-                  aria-label="Get started with free trial"
+                  aria-label="Start free trial"
                 >
-                  Get Started
+                  Start Free Trial
                 </Button>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -335,7 +351,7 @@ export default function Landing() {
                   aria-label="Access free demo"
                 >
                   <Play className="mr-2 h-5 w-5" aria-hidden="true" />
-                  {isAuthenticated ? "Go to Dashboard" : "Access My Free Demo"}
+                  {isAuthenticated ? "Go to Dashboard" : "Start Free Trial"}
                 </Button>
                 <Button
                   onClick={() => scrollToSection('how-it-works')}
@@ -346,6 +362,73 @@ export default function Landing() {
                   How It Works
                 </Button>
               </div>
+
+              {/* Authentication Options Section */}
+              {!isAuthenticated && (
+                <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/30 mb-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Choose Your Sign-In Method</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Replit Auth Option */}
+                    {window.location.hostname.includes('replit.dev') && (
+                      <div className="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-3">
+                          <User className="h-6 w-6 text-white" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 mb-2">Replit Account</h4>
+                        <p className="text-sm text-gray-600 text-center mb-3">Use your existing Replit account for seamless integration</p>
+                        <Button
+                          onClick={handleLogin}
+                          className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          Sign in with Replit
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {/* Google OAuth Option */}
+                    <div className="flex flex-col items-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200">
+                      <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mb-3">
+                        <Globe className="h-6 w-6 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 mb-2">Google Account</h4>
+                      <p className="text-sm text-gray-600 text-center mb-3">Sign in with your work or personal Google account</p>
+                      <Button
+                        onClick={() => window.location.href = '/api/auth/google'}
+                        className="w-full bg-red-500 hover:bg-red-600 text-white"
+                      >
+                        Sign in with Google
+                      </Button>
+                    </div>
+
+                    {/* Development Mode Option */}
+                    {window.location.hostname.includes('replit.dev') && (
+                      <div className="md:col-span-2 flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+                        <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-3">
+                          <Play className="h-6 w-6 text-white" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 mb-2">Demo Mode</h4>
+                        <p className="text-sm text-gray-600 text-center mb-3">Try the platform instantly without creating an account</p>
+                        <Button
+                          onClick={handleLogin}
+                          variant="outline"
+                          className="border-purple-300 text-purple-700 hover:border-purple-500 hover:text-purple-800"
+                        >
+                          Try Demo Now
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-4 text-center">
+                    <p className="text-xs text-gray-500">
+                      By signing in, you agree to our{" "}
+                      <a href="#" className="text-venzip-primary hover:underline">Terms of Service</a>{" "}
+                      and{" "}
+                      <a href="#" className="text-venzip-primary hover:underline">Privacy Policy</a>
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Trust indicators */}
               <div className="flex items-center gap-6 text-sm text-gray-600">
@@ -1165,12 +1248,42 @@ export default function Landing() {
           <p className="text-xl mb-8 text-white/90">
             {isAuthenticated ? "Complete your setup and start achieving compliance excellence" : "Join hundreds of companies who trust Venzip for their compliance needs"}
           </p>
-          <Button
-            onClick={isAuthenticated ? () => navigate("/dashboard") : handleLogin}
-            className="bg-white text-venzip-primary hover:bg-gray-100 font-semibold px-12 py-4 text-lg rounded-xl hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300"
-          >
-            {isAuthenticated ? "Go to Dashboard" : "Start Your Free Trial Today"}
-          </Button>
+          
+          {!isAuthenticated ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                onClick={() => window.location.href = '/api/auth/google'}
+                className="bg-white text-venzip-primary hover:bg-gray-100 font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 flex items-center space-x-2"
+              >
+                <Globe className="h-5 w-5" />
+                <span>Sign in with Google</span>
+              </Button>
+              
+              {window.location.hostname.includes('replit.dev') && (
+                <Button
+                  onClick={handleLogin}
+                  variant="outline"
+                  className="border-2 border-white text-white hover:bg-white hover:text-venzip-primary font-semibold px-8 py-4 text-lg rounded-xl hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 flex items-center space-x-2"
+                >
+                  <User className="h-5 w-5" />
+                  <span>Try with Replit</span>
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Button
+              onClick={() => navigate("/dashboard")}
+              className="bg-white text-venzip-primary hover:bg-gray-100 font-semibold px-12 py-4 text-lg rounded-xl hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300"
+            >
+              Go to Dashboard
+            </Button>
+          )}
+          
+          {!isAuthenticated && (
+            <p className="text-sm text-white/70 mt-4">
+              No credit card required • 14-day free trial • Setup in minutes
+            </p>
+          )}
         </div>
       </section>
 
