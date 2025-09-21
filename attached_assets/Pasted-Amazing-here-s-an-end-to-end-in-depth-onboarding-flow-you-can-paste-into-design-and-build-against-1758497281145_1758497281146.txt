@@ -1,0 +1,474 @@
+Amazing — here’s an end-to-end, in-depth onboarding flow you can paste into design and build against right now. It’s written to your product’s Features + Workflow doc, keeps AI Chat/Insights, and uses your left sidebar stepper. I’ve included exact copy, field specs, validations, conditional logic, telemetry, and backend payloads.
+
+⸻
+
+🎯 Onboarding goals (what this flow must achieve)
+	1.	Select frameworks and target date → generate a personalized compliance plan.
+	2.	Discover data types + systems → preconfigure evidence collectors.
+	3.	Capture scope/roles → seed controls, tasks, and ownership.
+	4.	Upload/import existing policies → create first evidence baseline.
+	5.	Enable AI Assistant with scoped knowledge.
+	6.	Confirm + create workspace → land in Dashboard with actionable “Next 7 days.”
+
+⸻
+
+🧭 Left Sidebar (fixed stepper)
+
+Use a compact vertical stepper (icons + labels). Persist progress; steps can be revisited.
+	1.	Company
+	2.	Frameworks
+	3.	Data & Systems
+	4.	Scope & Roles
+	5.	Baseline Docs
+	6.	AI Assistant
+	7.	Review & Create
+
+CTA language avoids “Get Started.” We’ll use Continue, Build My Plan, Create My Workspace, etc.
+
+⸻
+
+1) Company (Profile & Context)
+
+Screen title:
+“Tell us about your company”
+
+Subtitle:
+Help us tailor controls, policies, and evidence requirements to your environment.
+
+Fields
+	•	Company name (text, required)
+Placeholder: E.g., Northwind Health Systems
+Validation: 2–120 chars.
+	•	Industry (select, required)
+Options: Technology (SaaS), Healthcare, Fintech, E-commerce, Insurance, Other
+Helper: We’ll prioritize relevant frameworks and templates.
+	•	Company size (select, required)
+Options: 1–50, 51–200, 201–1000, 1000+
+Helper: Impacts policy complexity and RBAC defaults.
+	•	Primary region (select, required)
+Options: US, EU/EEA, Canada, UK, Global
+Helper: Determines GDPR treatment and data-transfer tasks.
+
+Actions
+	•	Primary: Continue
+	•	Secondary: Save & exit (persists draft; returns to landing)
+
+Microcopy / Tooltips
+	•	“You can change these later in Settings → Organization.”
+
+Telemetry
+	•	onboarding_company_submitted { industry, size_band, region }
+
+Backend payload (partial)
+
+{
+  "company": {
+    "name": "Northwind Health Systems",
+    "industry": "Healthcare",
+    "size_band": "201-1000",
+    "region": "US"
+  }
+}
+
+
+⸻
+
+2) Frameworks (Targets & Timeline)
+
+Screen title:
+“Choose your compliance targets”
+
+Subtitle:
+Pick one or more frameworks. We’ll map overlapping controls automatically.
+
+Framework cards (multi-select; show effort ribbons)
+	•	SOC 2 (Security baseline; optional: Availability, Confidentiality, PI, Privacy)
+Toggle group: Security (required), + Availability, + Confidentiality, + PI, + Privacy
+	•	ISO 27001 (ISMS)
+Tip: We’ll generate a scope statement and SoA tasks.
+	•	HIPAA (if Industry = Healthcare, preselected)
+Radio: Covered Entity / Business Associate (required if checked)
+	•	GDPR
+Radio: Controller / Processor (required if checked)
+
+Additional fields
+	•	Target: audit-ready by (select, required)
+Options: 1–3 months, 3–6 months, 6–12 months, Exploring
+Helper: We’ll pace your roadmap accordingly.
+	•	Audit type (SOC 2) (conditional)
+Radio: Type I / Type II
+Helper: We’ll reflect operating effectiveness period.
+
+Actions
+	•	Primary: Build My Compliance Plan
+	•	Secondary: Back
+
+Validation
+	•	Require ≥1 framework; require role where applicable (HIPAA, GDPR).
+
+Telemetry
+	•	onboarding_frameworks_selected { soc2:{tsp: ["security","availability"]}, iso27001:true, hipaa:"BA", gdpr:"controller", timeline:"3-6m", soc2_type:"Type II" }
+
+Backend payload (partial)
+
+{
+  "frameworks": [
+    { "code": "SOC2", "tsp": ["SECURITY","AVAILABILITY"], "type": "TYPE_II" },
+    { "code": "ISO27001" },
+    { "code": "HIPAA", "role": "BUSINESS_ASSOCIATE" }
+  ],
+  "timeline": "P6M"
+}
+
+
+⸻
+
+3) Data & Systems (Evidence automation)
+
+Screen title:
+“What data do you handle and which systems do you use?”
+
+Subtitle:
+This unlocks automated evidence collection and risk detection.
+
+Section A — Data types (checkboxes, at least one)
+	•	Customer PII
+	•	PHI (HIPAA) → if checked and HIPAA not selected, suggest adding HIPAA framework.
+	•	Payment data (PCI) → (MVP: show info alert “PCI coming soon”)
+	•	Internal business data
+	•	Other (free text)
+
+Section B — Systems (multi-select grid; search)
+	•	Cloud: AWS, GCP, Azure
+	•	Identity: Okta, Azure AD, Google Workspace
+	•	Dev: GitHub, GitLab, Bitbucket
+	•	Productivity: Slack, Atlassian, Notion, M365, GWS
+	•	Infra/Sec: Cloudflare, Datadog, Snowflake, Prisma, Snyk
+
+When selected, show “What we’ll collect” tooltip: e.g., IAM policies, access logs, repo branch protection, audit logs, config baselines.
+
+Optional quick connects (OAuth stubs)
+	•	“Connect GitHub now” (button)
+	•	“Connect AWS now” (opens least-privilege policy modal with copy-to-clipboard)
+
+Actions
+	•	Primary: Continue
+	•	Tertiary (inline small under systems): Skip for now (We’ll create manual upload tasks.)
+
+Validation
+	•	Require ≥1 data category OR ≥1 system; otherwise nudge: “Select at least one to personalize evidence collection.”
+
+Telemetry
+	•	onboarding_systems_selected { data:["PII","PHI"], systems:["AWS","GitHub","Okta"], quick_connects:["GitHub"] }
+
+Backend payload (partial)
+
+{
+  "data_profile": { "pii": true, "phi": true, "pci": false },
+  "systems": ["AWS","GITHUB","OKTA"],
+  "connections": { "github": { "status": "PENDING" } }
+}
+
+
+⸻
+
+4) Scope & Roles (Ownership + boundaries)
+
+Screen title:
+“Define scope and assign owners”
+
+Subtitle:
+We’ll pre-fill your Statement of Applicability and task assignments.
+
+Fields
+	•	Primary compliance lead (email, required)
+Helper: We’ll grant Admin and assign critical tasks.
+	•	Invite teammates (chips; optional)
+Helper: You can edit roles later in Settings → Team.
+	•	ISMS / audit scope (textarea, optional but recommended)
+Placeholder: Products, locations, systems included/excluded
+Helper: Short now is fine; you can refine later.
+	•	Business units in scope (multi-select; optional)
+	•	Operating period (SOC 2 Type II) (conditional)
+Start + End dates picker
+
+Actions
+	•	Primary: Assign & Continue
+	•	Secondary: Back
+
+Validation
+	•	Require valid email for lead; if SOC 2 Type II selected → require period dates.
+
+Telemetry
+	•	onboarding_scope_roles_submitted { lead:"ade@venzip.com", invited:2, soc2_period_days:180 }
+
+Backend payload (partial)
+
+{
+  "roles": {
+    "lead": "ade@venzip.com",
+    "invited": ["ciso@acme.com","itops@acme.com"]
+  },
+  "scope": {
+    "text": "Prod API, EU region, US HQ; excludes internal R&D sandbox.",
+    "soc2_period": { "start":"2025-01-01","end":"2025-06-30" }
+  }
+}
+
+
+⸻
+
+5) Baseline Docs (Policies & existing evidence)
+
+Screen title:
+“Seed your workspace with what you already have”
+
+Subtitle:
+Upload policies or link folders. We’ll analyze, version, and map them to controls.
+
+Tabs
+	•	Upload: drag-and-drop (PDF, DOCX, MD, TXT, CSV)
+Helper: We’ll hash, version, and store securely.
+	•	Link a folder: Google Drive / OneDrive / S3 path (MVP: show placeholder with “Connect” soon)
+	•	Start with templates:
+Pills for: Access Control Policy, Asset Management, Change Management, Incident Response, Business Continuity
+Action: Add to my library → creates tasks “Review & customize”
+
+Optional toggles
+	•	Enable redaction helper (on)
+Tooltip: Redact secrets and PII from screenshots/config dumps prior to storage.
+
+Actions
+	•	Primary: Analyze & Map (runs AI doc analysis pipeline)
+	•	Secondary: Skip (I’ll do this later)
+
+Post-action state
+	•	Show quick results panel: “Mapped 7 policies → 23 controls (SOC 2 CC1.x, CC6.x; ISO A.5, A.8). Created 12 follow-up tasks.”
+
+Validation
+	•	None required (allow skip) but nudge if nothing provided.
+
+Telemetry
+	•	onboarding_docs_ingested { files:5, templates_added:["access_control","incident_response"] }
+
+Backend payload (partial)
+
+{
+  "docs": {
+    "uploads": [
+      { "name":"Access Control Policy.pdf", "sha256":"...", "uri":"s3://..." }
+    ],
+    "templates_added": ["ACCESS_CONTROL","INCIDENT_RESPONSE"],
+    "redaction": true
+  }
+}
+
+
+⸻
+
+6) AI Assistant (Chat & Insights)
+
+Screen title:
+“Turn on your AI Compliance Assistant”
+
+Subtitle:
+Ask questions, get step-by-step guidance, and generate auditor-ready narratives with sources.
+
+Toggles
+	•	Enable AI Assistant (default ON)
+Helper: We’ll scope it to your frameworks and uploaded docs only.
+	•	Allow suggestions on dashboards (default ON)
+Helper: Shows “next best action” in context.
+	•	Include vendor docs (optional, OFF)
+Helper: Use vetted vendor docs for best practices (GDPR, SOC 2).
+
+Example prompts (read-only)
+	•	“What do I need for SOC 2 CC6.1?”
+	•	“Draft a DPIA outline using our data map.”
+	•	“Explain our change management control in one paragraph for auditors.”
+
+Actions
+	•	Primary: Enable & Continue
+	•	Secondary: Back
+
+Telemetry
+	•	onboarding_ai_enabled { assistant:true, suggestions:true, vendor_knowledge:false }
+
+Backend payload (partial)
+
+{
+  "ai": {
+    "assistant_enabled": true,
+    "suggestions_enabled": true,
+    "vendor_knowledge_enabled": false
+  }
+}
+
+
+⸻
+
+7) Review & Create (Summary + commit)
+
+Screen title:
+“Review your plan”
+
+Summary blocks
+	•	Frameworks & target
+Badges: SOC 2 (Security, Availability), ISO 27001 • Target: 3–6 months
+	•	Data & systems
+PII, PHI • AWS, GitHub, Okta
+	•	Scope & roles
+Lead + invited • SOC 2 Type II period (if set)
+	•	Policies & evidence
+7 policies mapped, 12 tasks created
+	•	AI Assistant
+Enabled: Yes
+
+Disclosure (small)
+	•	By creating your workspace, we’ll generate your first control set, tasks, and an initial dashboard. You can edit anything later.
+
+Actions
+	•	Primary (emphasized): Create My Workspace
+	•	Secondary: Back
+	•	Tertiary: Download plan as PDF (optional, queued)
+
+Success screen toast
+	•	“Workspace created. Your dashboard is ready.”
+Then route: /dashboard?welcome=1
+
+Telemetry
+	•	onboarding_completed { time_seconds, steps_completed, frameworks_count }
+
+Final backend call
+POST /api/onboarding/complete
+
+{
+  "company": {...},
+  "frameworks": [...],
+  "data_profile": {...},
+  "systems": [...],
+  "roles": {...},
+  "scope": {...},
+  "docs": {...},
+  "ai": {...}
+}
+
+
+⸻
+
+🧩 Dynamic logic (smart defaults)
+	•	If Industry = Healthcare → preselect HIPAA and show Covered Entity / BA radio.
+	•	If Data = PHI and HIPAA not selected → nudge to add HIPAA.
+	•	If SOC 2 selected and timeline = 1–3 months → default Type I; else suggest Type II.
+	•	If EU/EEA region or GDPR selected → ask Controller/Processor and show DPO optional field.
+	•	If ISO 27001 selected → expose compact Scope statement box with example (“ISMS covers production API, US-East, corp endpoints; excludes R&D.”).
+
+⸻
+
+📋 Validation & error copy (per field)
+	•	Company name: “Company name must be between 2 and 120 characters.”
+	•	Frameworks: “Pick at least one framework to continue.”
+	•	HIPAA role: “Select Covered Entity or Business Associate.”
+	•	SOC 2 Type II period: “Provide a start and end date for the operating period.”
+	•	Data & Systems: “Select at least one data type or one system.”
+	•	Compliance lead: “Enter a valid email for the compliance lead.”
+
+Global:
+	•	Network: “We couldn’t save your progress. Your entries are kept locally — please try again.”
+	•	Doc upload: “The file type isn’t supported. Upload PDF, DOCX, MD, TXT, or CSV.”
+
+⸻
+
+✅ Tasks auto-created after completion (examples)
+	•	Connect AWS IAM (collector) • Owner: IT Ops • Due: +3d
+	•	Enable GitHub branch protections • Owner: Eng • Due: +7d
+	•	Upload Access Control Policy (if missing) • Owner: Compliance • Due: +3d
+	•	Create ISMS scope statement (ISO 27001) • Owner: Compliance • Due: +5d
+	•	Assign incident response roles • Owner: Sec • Due: +7d
+	•	Review vendor risk list • Owner: Procurement • Due: +10d
+
+⸻
+
+🧠 AI Chat / Insights seeding
+
+When AI Assistant is ON, preload:
+	•	Context pack: chosen frameworks, roles, scope, data profile, systems.
+	•	Doc pack: hashes + snippets of uploaded policies; mark as private.
+	•	Prompt guardrails: “Cite mapped controls and evidence IDs; show source links.”
+
+⸻
+
+📊 Analytics (events & properties)
+	•	onboarding_view_step { step_name }
+	•	onboarding_company_submitted { industry, size_band, region }
+	•	onboarding_frameworks_selected { frameworks, timeline, soc2_type, hipaa_role, gdpr_role }
+	•	onboarding_systems_selected { data:[...], systems:[...] }
+	•	onboarding_scope_roles_submitted { lead_set:true, invites:n }
+	•	onboarding_docs_ingested { files:n, templates_added:[...] }
+	•	onboarding_ai_enabled { assistant:true/false }
+	•	onboarding_completed { duration_seconds, frameworks_count }
+
+⸻
+
+🗂️ TypeScript models (frontend)
+
+export type FrameworkCode = "SOC2" | "ISO27001" | "HIPAA" | "GDPR";
+
+export interface OnboardingPayload {
+  company: {
+    name: string;
+    industry: "Technology" | "Healthcare" | "Fintech" | "E-commerce" | "Insurance" | "Other";
+    size_band: "1-50" | "51-200" | "201-1000" | "1000+";
+    region: "US" | "EU/EEA" | "Canada" | "UK" | "Global";
+  };
+  frameworks: Array<
+    | { code: "SOC2"; tsp: Array<"SECURITY"|"AVAILABILITY"|"CONFIDENTIALITY"|"PI"|"PRIVACY">; type?: "TYPE_I"|"TYPE_II" }
+    | { code: "ISO27001" }
+    | { code: "HIPAA"; role: "COVERED_ENTITY" | "BUSINESS_ASSOCIATE" }
+    | { code: "GDPR"; role: "CONTROLLER" | "PROCESSOR" }
+  >;
+  timeline: "P3M" | "P6M" | "P12M" | "EXPLORING";
+  data_profile: { pii: boolean; phi: boolean; pci: boolean; other?: string };
+  systems: string[];
+  connections?: Record<string, { status: "PENDING" | "CONNECTED" }>;
+  roles: { lead: string; invited?: string[] };
+  scope?: { text?: string; soc2_period?: { start: string; end: string } };
+  docs?: {
+    uploads?: Array<{ name: string; sha256: string; uri: string }>;
+    templates_added?: string[];
+    redaction?: boolean;
+  };
+  ai?: { assistant_enabled: boolean; suggestions_enabled: boolean; vendor_knowledge_enabled?: boolean };
+}
+
+
+⸻
+
+🔐 Least-privilege hints for connectors (inline helper text)
+	•	AWS: Attach the provided IAM policy to a new role; never reuse admin roles.
+	•	GitHub: We request read-only on repos and org policies; you can restrict to selected repos.
+	•	Okta: Directory read + group membership only; no write scopes.
+
+⸻
+
+🧾 Copy blocks you can paste (short)
+	•	Nudge when no frameworks selected:
+“Pick at least one framework to generate your plan. You can add more later.”
+	•	Skip docs modal:
+“No worries. We’ve created upload tasks so you can add documents anytime.”
+	•	AI Assistant tooltip:
+“Your data never trains external models. Responses cite mapped controls and evidence IDs.”
+
+⸻
+
+🖼️ Dashboard landing after onboarding
+
+Top strip (3 meters):
+	•	Evidence Freshness (0% → target)
+	•	Control Coverage (e.g., 12% from templates)
+	•	Connector Health (pending connections)
+
+Right rail: Next 7 days (the tasks above).
+Center: “What to do next” (3 cards): Connect AWS, Upload Access Control Policy, Assign Incident Roles.
+
+⸻
