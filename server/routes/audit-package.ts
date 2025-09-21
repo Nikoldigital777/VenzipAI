@@ -3,6 +3,7 @@ import { Router } from "express";
 import { isAuthenticated } from "../replitAuth";
 import { storage } from "../storage";
 import { ReportGenerator } from "../reportGenerator";
+import { evidenceVersioningService } from "../services/evidenceVersioning";
 import archiver from 'archiver';
 import { Response } from 'express';
 
@@ -56,13 +57,20 @@ router.post("/generate", isAuthenticated, async (req: any, res) => {
 
       for (const doc of documents) {
         if (doc.status === 'verified') {
-          // Add document with metadata
+          // Add document with metadata and provenance
           const docMetadata = {
             fileName: doc.fileName,
             uploadedAt: doc.uploadedAt,
             sha256Hash: doc.sha256Hash,
             verifiedAt: doc.verifiedAt,
-            mappings: mappings.filter(m => m.documentId === doc.id)
+            validUntil: doc.validUntil,
+            freshnessStatus: doc.isExpired ? 'expired' : 'current',
+            mappings: mappings.filter(m => m.documentId === doc.id),
+            provenance: {
+              created: doc.uploadedAt,
+              verified: doc.verifiedAt,
+              lastFreshnessCheck: doc.lastFreshnessCheck
+            }
           };
           
           archive.append(JSON.stringify(docMetadata, null, 2), { 
