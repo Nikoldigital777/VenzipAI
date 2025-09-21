@@ -17,6 +17,7 @@ import {
   TestTube,
   BookOpen,
   Building2,
+  Package,
 } from "lucide-react"
 import { useLocation } from "wouter"
 import { useQuery } from "@tanstack/react-query"
@@ -96,6 +97,16 @@ const data = {
           title: "Documents",
           url: "/documents",
           icon: FolderOpen,
+        },
+        {
+          title: "Reports",
+          url: "/reports",
+          icon: FileText,
+        },
+        {
+          title: "Audit Package",
+          url: "/audit-package",
+          icon: Package,
         },
       ],
     },
