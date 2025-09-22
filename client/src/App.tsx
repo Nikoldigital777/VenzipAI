@@ -62,9 +62,55 @@ function AuthenticatedLayout({ children, title }: { children: React.ReactNode; t
   );
 }
 
+// Protected route component to avoid conditional hook calls
+function ProtectedRoute({ children, title }: { children: React.ReactNode; title?: string }) {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return null;
+  }
+  
+  if (title) {
+    return (
+      <AuthenticatedLayout title={title}>
+        {children}
+      </AuthenticatedLayout>
+    );
+  }
+  
+  return children;
+}
+
 function Router() {
   const { isAuthenticated, isLoading, hasCompletedOnboarding, error } = useAuth();
   const [location, navigate] = useLocation();
+
+  // CRITICAL: useEffect MUST be called before any conditional returns to avoid hooks order violations
+  React.useEffect(() => {
+    // Only run navigation logic if not loading or error
+    if (isLoading || error) return;
+    
+    // Handle unauthenticated users - only redirect if not already on public pages
+    if (!isAuthenticated && !['/landing', '/', '/login'].includes(location)) {
+      navigate('/landing');
+      return;
+    }
+
+    // For authenticated users, handle onboarding flow
+    if (isAuthenticated) {
+      // If user has completed onboarding but is on onboarding page, redirect to dashboard
+      if (hasCompletedOnboarding && location === '/onboarding') {
+        navigate('/dashboard');
+        return;
+      }
+
+      // If user hasn't completed onboarding and is trying to access protected routes, redirect to onboarding
+      if (!hasCompletedOnboarding && !['/onboarding', '/landing', '/'].includes(location)) {
+        navigate('/onboarding');
+        return;
+      }
+    }
+  }, [isAuthenticated, hasCompletedOnboarding, location, navigate, isLoading, error]);
 
   // Show error state if auth check failed
   if (error && !isLoading) {
@@ -96,33 +142,6 @@ function Router() {
     );
   }
 
-  // Use useEffect to handle navigation side effects - always called at top level
-  React.useEffect(() => {
-    // Only run navigation logic if not loading
-    if (isLoading) return;
-    
-    // Handle unauthenticated users - only redirect if not already on public pages
-    if (!isAuthenticated && !['/landing', '/', '/login'].includes(location)) {
-      navigate('/landing');
-      return;
-    }
-
-    // For authenticated users, handle onboarding flow
-    if (isAuthenticated) {
-      // If user has completed onboarding but is on onboarding page, redirect to dashboard
-      if (hasCompletedOnboarding && location === '/onboarding') {
-        navigate('/dashboard');
-        return;
-      }
-
-      // If user hasn't completed onboarding and is trying to access protected routes, redirect to onboarding
-      if (!hasCompletedOnboarding && !['/onboarding', '/landing', '/'].includes(location)) {
-        navigate('/onboarding');
-        return;
-      }
-    }
-  }, [isAuthenticated, hasCompletedOnboarding, location, navigate, isLoading]);
-
   return (
     <Switch>
       {/* Public routes */}
@@ -134,104 +153,88 @@ function Router() {
 
       {/* Home route - simplified, no complex redirect logic */}
       <Route path="/home">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Home">
-            <Home />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Home">
+          <Home />
+        </ProtectedRoute>
       </Route>
 
       {/* Main app routes with sidebar */}
       <Route path="/dashboard">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Dashboard">
-            <Dashboard />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Dashboard">
+          <Dashboard />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/tasks">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Tasks">
-            <Tasks />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Tasks">
+          <Tasks />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/evidence">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Evidence">
-            <Evidence />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Evidence">
+          <Evidence />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/compliance-insights">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Frameworks">
-            <ComplianceInsights />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Frameworks">
+          <ComplianceInsights />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/risks">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Risks">
-            <Risks />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Risks">
+          <Risks />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/documents">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Documents">
-            <Documents />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Documents">
+          <Documents />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/audit-calendar">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Audit Calendar">
-            <AuditCalendar />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Audit Calendar">
+          <AuditCalendar />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/learning-hub">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Learning Hub">
-            <LearningHub />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Learning Hub">
+          <LearningHub />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/company-profile">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Company Profile">
-            <CompanyProfile />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Company Profile">
+          <CompanyProfile />
+        </ProtectedRoute>
       </Route>
 
       <Route path="/test-notifications">
-        {isAuthenticated ? <TestNotifications /> : null}
+        <ProtectedRoute>
+          <TestNotifications />
+        </ProtectedRoute>
       </Route>
       
       <Route path="/test-documents">
-        {isAuthenticated ? <TestDocuments /> : null}
+        <ProtectedRoute>
+          <TestDocuments />
+        </ProtectedRoute>
       </Route>
       
       <Route path="/audit-package">
-        {isAuthenticated ? <AuditPackage /> : null}
+        <ProtectedRoute>
+          <AuditPackage />
+        </ProtectedRoute>
       </Route>
       
       <Route path="/audit-packages">
-        {isAuthenticated ? (
-          <AuthenticatedLayout title="Audit Packages">
-            <AuditPackages />
-          </AuthenticatedLayout>
-        ) : null}
+        <ProtectedRoute title="Audit Packages">
+          <AuditPackages />
+        </ProtectedRoute>
       </Route>
 
       <Route component={NotFound} />
