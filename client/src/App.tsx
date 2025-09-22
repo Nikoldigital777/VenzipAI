@@ -128,94 +128,111 @@ function Router() {
       {/* Public routes */}
       <Route path="/" component={Landing} />
       <Route path="/landing" component={Landing} />
+      
+      {/* Onboarding - accessible during auth flow */}
+      <Route path="/onboarding" component={Onboarding} />
 
-      {/* Protected routes */}
-      {isAuthenticated ? (
-        <>
-          {/* Onboarding - accessible during auth flow */}
-          <Route path="/onboarding" component={Onboarding} />
+      {/* Home route - simplified, no complex redirect logic */}
+      <Route path="/home">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Home">
+            <Home />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          {/* Home route - simplified, no complex redirect logic */}
-          <Route path="/home">
-            <AuthenticatedLayout title="Home">
-              <Home />
-            </AuthenticatedLayout>
-          </Route>
+      {/* Main app routes with sidebar */}
+      <Route path="/dashboard">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Dashboard">
+            <Dashboard />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          {/* Main app routes with sidebar */}
-          <Route path="/dashboard">
-            <AuthenticatedLayout title="Dashboard">
-              <Dashboard />
-            </AuthenticatedLayout>
-          </Route>
+      <Route path="/tasks">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Tasks">
+            <Tasks />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          <Route path="/tasks">
-            <AuthenticatedLayout title="Tasks">
-              <Tasks />
-            </AuthenticatedLayout>
-          </Route>
+      <Route path="/evidence">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Evidence">
+            <Evidence />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          <Route path="/evidence">
-            <AuthenticatedLayout title="Evidence">
-              <Evidence />
-            </AuthenticatedLayout>
-          </Route>
+      <Route path="/compliance-insights">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Frameworks">
+            <ComplianceInsights />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          <Route path="/compliance-insights">
-            <AuthenticatedLayout title="Frameworks">
-              <ComplianceInsights />
-            </AuthenticatedLayout>
-          </Route>
+      <Route path="/risks">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Risks">
+            <Risks />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          <Route path="/risks">
-            <AuthenticatedLayout title="Risks">
-              <Risks />
-            </AuthenticatedLayout>
-          </Route>
+      <Route path="/documents">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Documents">
+            <Documents />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          <Route path="/documents">
-            <AuthenticatedLayout title="Documents">
-              <Documents />
-            </AuthenticatedLayout>
-          </Route>
+      <Route path="/audit-calendar">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Audit Calendar">
+            <AuditCalendar />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          <Route path="/audit-calendar">
-            <AuthenticatedLayout title="Audit Calendar">
-              <AuditCalendar />
-            </AuthenticatedLayout>
-          </Route>
+      <Route path="/learning-hub">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Learning Hub">
+            <LearningHub />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          <Route path="/learning-hub">
-            <AuthenticatedLayout title="Learning Hub">
-              <LearningHub />
-            </AuthenticatedLayout>
-          </Route>
+      <Route path="/company-profile">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Company Profile">
+            <CompanyProfile />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
-          <Route path="/company-profile">
-            <AuthenticatedLayout title="Company Profile">
-              <CompanyProfile />
-            </AuthenticatedLayout>
-          </Route>
-
-          <Route path="/test-notifications" component={TestNotifications} />
-          <Route path="/test-documents" component={TestDocuments} />
-          <Route path="/audit-package" component={AuditPackage} />
-          
-          <Route path="/audit-packages">
-            <AuthenticatedLayout title="Audit Packages">
-              <AuditPackages />
-            </AuthenticatedLayout>
-          </Route>
-        </>
-      ) : (
-        /* Redirect unauthenticated users to landing */
-        <Route path="*">
-          {() => {
-            navigate('/landing');
-            return null;
-          }}
-        </Route>
-      )}
+      <Route path="/test-notifications">
+        {isAuthenticated ? <TestNotifications /> : null}
+      </Route>
+      
+      <Route path="/test-documents">
+        {isAuthenticated ? <TestDocuments /> : null}
+      </Route>
+      
+      <Route path="/audit-package">
+        {isAuthenticated ? <AuditPackage /> : null}
+      </Route>
+      
+      <Route path="/audit-packages">
+        {isAuthenticated ? (
+          <AuthenticatedLayout title="Audit Packages">
+            <AuditPackages />
+          </AuthenticatedLayout>
+        ) : null}
+      </Route>
 
       <Route component={NotFound} />
     </Switch>
