@@ -50,6 +50,7 @@ import { format } from 'date-fns';
 import taskRoutes from './routes/tasks';
 import policyRoutes from './routes/policies'; // Corrected import based on usage
 import onboardingRoutes from "./routes/onboarding"; // Added onboarding routes import
+import auditPackageRoutes from "./routes/auditPackages"; // Added audit package routes import
 
 
 // Helper function to generate initial compliance tasks
@@ -379,6 +380,7 @@ export async function registerRoutes(app: Express) {
   app.use('/api/tasks', taskRoutes);
   app.use('/api/policies', policyRoutes);
   app.use("/api/onboarding", onboardingRoutes); // Register onboarding routes
+  app.use("/api/audit-packages", auditPackageRoutes); // Register audit package routes
 
   // Enhanced Dashboard progress endpoint with validation
   app.get('/api/dashboard/progress', isAuthenticated, async (req: any, res) => {
