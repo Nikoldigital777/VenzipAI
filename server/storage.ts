@@ -21,6 +21,8 @@ import {
   learningProgress,
   policyTemplates,
   generatedPolicies,
+  auditPackages,
+  auditPackageItems,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, like } from "drizzle-orm";
@@ -69,6 +71,10 @@ import type {
   InsertPolicyTemplate,
   GeneratedPolicy,
   InsertGeneratedPolicy,
+  AuditPackage,
+  InsertAuditPackage,
+  AuditPackageItem,
+  InsertAuditPackageItem,
 } from '@shared/schema';
 
 // Interface for storage operations
@@ -178,6 +184,16 @@ export interface IStorage {
   getGeneratedPolicyById(id: string): Promise<GeneratedPolicy | null>;
   getGeneratedPolicies(companyId: string): Promise<GeneratedPolicy[]>;
   updateGeneratedPolicy(id: string, data: Partial<GeneratedPolicy>): Promise<GeneratedPolicy>;
+
+  // Audit package operations
+  createAuditPackage(packageData: InsertAuditPackage): Promise<AuditPackage>;
+  getAuditPackagesByUserId(userId: string): Promise<AuditPackage[]>;
+  getAuditPackageById(id: string): Promise<AuditPackage | null>;
+  updateAuditPackage(id: string, updates: Partial<AuditPackage>): Promise<AuditPackage>;
+  
+  // Audit package item operations
+  addAuditPackageItems(items: InsertAuditPackageItem[]): Promise<AuditPackageItem[]>;
+  getAuditPackageItems(packageId: string): Promise<AuditPackageItem[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -989,6 +1005,44 @@ export class DatabaseStorage implements IStorage {
     });
 
     return await Promise.all(statusPromises);
+  }
+
+  // Audit package operations
+  async createAuditPackage(packageData: InsertAuditPackage): Promise<AuditPackage> {
+    const [result] = await db.insert(auditPackages).values([packageData]).returning();
+    return result;
+  }
+
+  async getAuditPackagesByUserId(userId: string): Promise<AuditPackage[]> {
+    return await db.select().from(auditPackages)
+      .where(eq(auditPackages.userId, userId))
+      .orderBy(desc(auditPackages.createdAt));
+  }
+
+  async getAuditPackageById(id: string): Promise<AuditPackage | null> {
+    const [result] = await db.select().from(auditPackages)
+      .where(eq(auditPackages.id, id));
+    return result || null;
+  }
+
+  async updateAuditPackage(id: string, updates: Partial<AuditPackage>): Promise<AuditPackage> {
+    const [result] = await db.update(auditPackages)
+      .set(updates)
+      .where(eq(auditPackages.id, id))
+      .returning();
+    return result;
+  }
+
+  // Audit package item operations
+  async addAuditPackageItems(items: InsertAuditPackageItem[]): Promise<AuditPackageItem[]> {
+    if (items.length === 0) return [];
+    return await db.insert(auditPackageItems).values(items).returning();
+  }
+
+  async getAuditPackageItems(packageId: string): Promise<AuditPackageItem[]> {
+    return await db.select().from(auditPackageItems)
+      .where(eq(auditPackageItems.packageId, packageId))
+      .orderBy(auditPackageItems.addedAt);
   }
 }
 
