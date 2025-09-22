@@ -96,28 +96,29 @@ function Router() {
     );
   }
 
-  // Use useEffect to handle navigation side effects
+  // Use useEffect to handle navigation side effects - always called at top level
   React.useEffect(() => {
-    if (!isLoading) {
-      // Handle unauthenticated users - only redirect if not already on public pages
-      if (!isAuthenticated && !['/landing', '/', '/login'].includes(location)) {
-        navigate('/landing');
+    // Only run navigation logic if not loading
+    if (isLoading) return;
+    
+    // Handle unauthenticated users - only redirect if not already on public pages
+    if (!isAuthenticated && !['/landing', '/', '/login'].includes(location)) {
+      navigate('/landing');
+      return;
+    }
+
+    // For authenticated users, handle onboarding flow
+    if (isAuthenticated) {
+      // If user has completed onboarding but is on onboarding page, redirect to dashboard
+      if (hasCompletedOnboarding && location === '/onboarding') {
+        navigate('/dashboard');
         return;
       }
 
-      // For authenticated users, handle onboarding flow
-      if (isAuthenticated) {
-        // If user has completed onboarding but is on onboarding page, redirect to dashboard
-        if (hasCompletedOnboarding && location === '/onboarding') {
-          navigate('/dashboard');
-          return;
-        }
-
-        // If user hasn't completed onboarding and is trying to access protected routes, redirect to onboarding
-        if (!hasCompletedOnboarding && !['/onboarding', '/landing', '/'].includes(location)) {
-          navigate('/onboarding');
-          return;
-        }
+      // If user hasn't completed onboarding and is trying to access protected routes, redirect to onboarding
+      if (!hasCompletedOnboarding && !['/onboarding', '/landing', '/'].includes(location)) {
+        navigate('/onboarding');
+        return;
       }
     }
   }, [isAuthenticated, hasCompletedOnboarding, location, navigate, isLoading]);
