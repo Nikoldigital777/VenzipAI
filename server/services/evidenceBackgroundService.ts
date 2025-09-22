@@ -1,4 +1,3 @@
-
 import { evidenceVersioningService } from './evidenceVersioning';
 import { storage } from '../storage';
 import { logger } from '../logger';
@@ -21,10 +20,10 @@ export class EvidenceBackgroundService {
     }
 
     this.log.info('Starting evidence freshness background service');
-    
+
     // Run immediately on start
     this.runFreshnessCheck();
-    
+
     // Schedule regular checks
     this.intervalId = setInterval(() => {
       this.runFreshnessCheck();
@@ -47,12 +46,12 @@ export class EvidenceBackgroundService {
    */
   private async runFreshnessCheck(): Promise<void> {
     this.log.info('Running evidence freshness check');
-    
+
     try {
       await evidenceVersioningService.checkEvidenceFreshness();
       await this.sendFreshnessNotifications();
       await this.cleanupOldNotifications();
-      
+
       this.log.info('Evidence freshness check completed successfully');
     } catch (error) {
       this.log.error({ error }, 'Evidence freshness check failed');
@@ -64,7 +63,7 @@ export class EvidenceBackgroundService {
    */
   private async sendFreshnessNotifications(): Promise<void> {
     const now = new Date();
-    
+
     // Get all verified documents
     const allDocuments = await db.select()
       .from(documents)
@@ -76,15 +75,15 @@ export class EvidenceBackgroundService {
     // Process documents to find expiring/overdue ones
     for (const doc of allDocuments) {
       let validUntil = doc.validUntil ? new Date(doc.validUntil) : null;
-      
+
       if (!validUntil && doc.freshnessMonths) {
         const uploadDate = new Date(doc.uploadedAt);
         validUntil = new Date(uploadDate.setMonth(uploadDate.getMonth() + doc.freshnessMonths));
       }
-      
+
       if (validUntil) {
         const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        
+
         if (daysUntilExpiry < 0) {
           overdueDocuments.push({ document: doc, status: { validUntil } });
         } else if (daysUntilExpiry <= 7) {
@@ -134,6 +133,13 @@ export class EvidenceBackgroundService {
         }
       );
     }
+
+    try {
+      logger.info('Freshness notifications sent successfully');
+    } catch (error) {
+      logger.error('Failed to send freshness notifications:', error);
+      // Don't throw - let the service continue running
+    }
   }
 
   /**
@@ -178,7 +184,7 @@ export class EvidenceBackgroundService {
    */
   private async cleanupOldNotifications(): Promise<void> {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    
+
     try {
       await db.delete(notifications)
         .where(and(
