@@ -33,6 +33,8 @@ import { TourInitializer } from '@/components/tour/TourInitializer';
 import TestDocuments from "@/pages/test-documents";
 // Import the new AuditPackage component
 import AuditPackage from "@/pages/audit-package";
+// Import the new AuditPackages component
+import AuditPackages from "@/pages/audit-packages";
 // Import ErrorBoundary component
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -191,7 +193,13 @@ function Router() {
 
           <Route path="/test-notifications" component={TestNotifications} />
           <Route path="/test-documents" component={TestDocuments} />
-          <Route path="/audit-package" element={<AuditPackage />} />
+          <Route path="/audit-package" component={AuditPackage} />
+          
+          <Route path="/audit-packages">
+            <AuthenticatedLayout title="Audit Packages">
+              <AuditPackages />
+            </AuthenticatedLayout>
+          </Route>
         </>
       ) : (
         /* Redirect unauthenticated users to landing */

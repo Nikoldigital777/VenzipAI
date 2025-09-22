@@ -108,6 +108,11 @@ const data = {
           url: "/audit-package",
           icon: Package,
         },
+        {
+          title: "Audit Packages",
+          url: "/audit-packages",
+          icon: Package,
+        },
       ],
     },
     {
